@@ -1,5 +1,5 @@
 import { computed, defineComponent, h, onMounted, ref, watch, type PropType, type CSSProperties } from 'vue'
-import { Icon as IconifyIcon } from '@iconify/vue'
+import { Icon as IconifyIcon, iconExists } from '@iconify/vue'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -122,6 +122,21 @@ export const Icon = defineComponent({
           spin: props.spin,
           rotate: props.rotate,
           ...a11y.value,
+        })
+      }
+
+      if (p.provider === 'custom' && !iconExists(p.id)) {
+        if (isDev()) {
+          console.warn(
+            `[GenVoice Icons] Custom icon "${props.name}" is not registered. ` +
+              'Call registerCustomIcons() from @genvoice/icons-custom/vue at app bootstrap.',
+          )
+        }
+        return h('span', {
+          class: props.class,
+          style: mergedStyle.value,
+          'data-icon-missing': props.name,
+          'aria-hidden': true,
         })
       }
 

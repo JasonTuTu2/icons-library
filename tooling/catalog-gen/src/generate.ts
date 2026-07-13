@@ -5,9 +5,15 @@ import * as AntIcons from '@ant-design/icons'
 import mdi from '@iconify-json/mdi/icons.json'
 import lucide from '@iconify-json/lucide/icons.json'
 import heroicons from '@iconify-json/heroicons/icons.json'
+import { collectCustomIconsFromDir } from './customSvg.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = join(__dirname, '../../../packages/catalog/src/data/icons.json')
+const customSvgDir = join(__dirname, '../../../packages/custom-icons/svg')
+const customCollectionPath = join(
+  __dirname,
+  '../../../packages/custom-icons/src/collection.json',
+)
 
 interface IconLicense {
   spdx: string
@@ -18,7 +24,7 @@ interface IconLicense {
 interface IconSetInfo {
   id: string
   name: string
-  source: 'ant' | 'iconify'
+  source: 'ant' | 'iconify' | 'custom'
   license: IconLicense
   prefix: string
   homepage?: string
@@ -29,7 +35,7 @@ interface IconMeta {
   title: string
   tags: string[]
   set: string
-  source: 'ant' | 'iconify'
+  source: 'ant' | 'iconify' | 'custom'
   license: IconLicense
   name: string
 }
@@ -38,6 +44,11 @@ const antLicense: IconLicense = {
   spdx: 'MIT',
   title: 'MIT License',
   url: 'https://github.com/ant-design/ant-design-icons/blob/master/LICENSE',
+}
+
+const customLicense: IconLicense = {
+  spdx: 'LicenseRef-GenVoice',
+  title: 'GenVoice proprietary / internal use',
 }
 
 const sets: IconSetInfo[] = [
@@ -84,6 +95,13 @@ const sets: IconSetInfo[] = [
     },
     prefix: 'heroicons',
     homepage: 'https://heroicons.com/',
+  },
+  {
+    id: 'genvoice',
+    name: 'GenVoice Custom',
+    source: 'custom',
+    license: customLicense,
+    prefix: 'gv',
   },
 ]
 
@@ -159,6 +177,45 @@ function collectIconify(
     })
 }
 
+function collectCustomIcons(): IconMeta[] {
+  const { icons, warnings } = collectCustomIconsFromDir(customSvgDir)
+  for (const warning of warnings) {
+    console.warn(`[catalog-gen] ${warning}`)
+  }
+
+  const collection = {
+    prefix: 'gv',
+    width: 24,
+    height: 24,
+    icons: Object.fromEntries(
+      icons.map((item) => [
+        item.name,
+        {
+          body: item.icon.body,
+          width: item.icon.width ?? 24,
+          height: item.icon.height ?? 24,
+        },
+      ]),
+    ),
+  }
+
+  mkdirSync(dirname(customCollectionPath), { recursive: true })
+  writeFileSync(customCollectionPath, `${JSON.stringify(collection, null, 2)}\n`)
+  console.log(
+    `Wrote ${icons.length} custom icons → ${customCollectionPath}`,
+  )
+
+  return icons.map((item) => ({
+    id: `gv:${item.name}`,
+    title: item.title,
+    tags: [item.name, 'gv', 'genvoice', 'custom'],
+    set: 'genvoice',
+    source: 'custom' as const,
+    license: customLicense,
+    name: item.name,
+  }))
+}
+
 function main() {
   const iconifySets = [
     { data: mdi as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[1]! },
@@ -169,6 +226,7 @@ function main() {
   const icons: IconMeta[] = [
     ...collectAntIcons(),
     ...iconifySets.flatMap(({ data, set }) => collectIconify(data, set)),
+    ...collectCustomIcons(),
   ]
 
   const catalog = {

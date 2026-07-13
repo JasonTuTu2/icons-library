@@ -24,7 +24,7 @@ export function getIconsBySet(setId: string): IconMeta[] {
 export interface SearchOptions {
   query?: string
   set?: string
-  source?: 'ant' | 'iconify'
+  source?: 'ant' | 'iconify' | 'custom'
   limit?: number
 }
 
@@ -56,9 +56,15 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
 }
 
 export function reactSnippet(id: string): string {
+  if (id.startsWith('gv:')) {
+    return `import { registerCustomIcons } from '@genvoice/icons-custom/react'\nimport { Icon } from '@genvoice/icons-react'\n\nregisterCustomIcons()\n\n<Icon name="${id}" size={24} label="…" />`
+  }
   return `import { Icon } from '@genvoice/icons-react'\n\n<Icon name="${id}" size={24} label="…" />`
 }
 
 export function vueSnippet(id: string): string {
+  if (id.startsWith('gv:')) {
+    return `<script setup>\nimport { registerCustomIcons } from '@genvoice/icons-custom/vue'\nimport { Icon } from '@genvoice/icons-vue'\n\nregisterCustomIcons()\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
+  }
   return `<script setup>\nimport { Icon } from '@genvoice/icons-vue'\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
 }

@@ -3,8 +3,9 @@ export function DocsPage() {
     <article className="docs">
       <h1>Documentation</h1>
       <p className="lede">
-        GenVoice Icons unifies Ant Design Icons and Iconify behind one API for
-        React and Vue, with a searchable browser for designers and developers.
+        GenVoice Icons unifies Ant Design Icons, Iconify, and GenVoice custom
+        SVGs behind one API for React and Vue, with a searchable browser for
+        designers and developers.
       </p>
 
       <section>
@@ -16,6 +17,9 @@ pnpm add @genvoice/icons-react @ant-design/icons @iconify/react
 # Vue
 pnpm add @genvoice/icons-vue @ant-design/icons-vue @iconify/vue
 
+# Custom GenVoice brand icons
+pnpm add @genvoice/icons-custom
+
 # Optional offline Iconify sets
 pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         </pre>
@@ -25,30 +29,64 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         <h2>Usage</h2>
         <h3>React</h3>
         <pre>
-          <code>{`import { Icon } from '@genvoice/icons-react'
+          <code>{`import { registerCustomIcons } from '@genvoice/icons-custom/react'
+import { Icon } from '@genvoice/icons-react'
+
+registerCustomIcons()
 
 <Icon name="ant:HomeOutlined" size={24} label="Home" />
-<Icon name="mdi:home" size="1.5em" decorative />`}</code>
+<Icon name="mdi:home" size="1.5em" decorative />
+<Icon name="gv:billing-alert" size={24} label="Billing" />`}</code>
         </pre>
         <h3>Vue</h3>
         <pre>
           <code>{`<script setup>
+import { registerCustomIcons } from '@genvoice/icons-custom/vue'
 import { Icon } from '@genvoice/icons-vue'
+
+registerCustomIcons()
 </script>
 
 <template>
   <Icon name="ant:HomeOutlined" :size="24" label="Home" />
   <Icon name="mdi:home" size="1.5em" decorative />
+  <Icon name="gv:star" :size="24" label="Favorite" />
 </template>`}</code>
         </pre>
+      </section>
+
+      <section>
+        <h2>Custom icons from Figma</h2>
+        <ol>
+          <li>Export SVG from Figma (prefer 24×24, simple paths).</li>
+          <li>
+            Either commit the file to <code>packages/custom-icons/svg/</code> as{' '}
+            <code>kebab-name.svg</code>, or use <strong>Upload SVG</strong> in
+            the browser while running <code>pnpm dev</code>.
+          </li>
+          <li>
+            Run <code>pnpm catalog:gen</code> if you added files via git (upload
+            does this automatically).
+          </li>
+          <li>
+            Use <code>gv:kebab-name</code> in designs and code. Call{' '}
+            <code>registerCustomIcons()</code> once at app bootstrap.
+          </li>
+        </ol>
+        <p>
+          Monochrome icons are normalized to <code>currentColor</code> so{' '}
+          <code>color</code> / CSS inheritance works. Multi-color SVGs are not
+          fully supported yet — reserve <code>svg/color/</code> for a future
+          release.
+        </p>
       </section>
 
       <section>
         <h2>Props</h2>
         <ul>
           <li>
-            <code>name</code> — canonical id (<code>ant:HomeOutlined</code> or
-            Iconify <code>prefix:name</code>)
+            <code>name</code> — canonical id (<code>ant:HomeOutlined</code>,{' '}
+            <code>gv:star</code>, or Iconify <code>prefix:name</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}
@@ -99,8 +137,9 @@ addCollection(mdi)`}</code>
         <h2>Licensing</h2>
         <p>
           GenVoice packages are MIT. Icon artwork remains under upstream
-          licenses (Ant Design Icons MIT; Iconify collections vary). Check each
-          icon&apos;s detail panel in the browser before shipping.
+          licenses (Ant Design Icons MIT; Iconify collections vary). Custom{' '}
+          <code>gv:</code> icons are GenVoice proprietary / internal unless
+          noted otherwise. Check each icon&apos;s detail panel before shipping.
         </p>
       </section>
 

@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "build": "echo \"catalog-gen has no build\"",
-    "test": "echo \"catalog-gen has no tests\"",
+    "test": "vitest run",
     "clean": "echo \"ok\""
   },
   "devDependencies": {
@@ -17,7 +17,9 @@
     "@iconify-json/lucide": "^1.2.25",
     "@iconify-json/mdi": "^1.2.3",
     "@types/node": "^22.10.2",
+    "svgo": "^3.3.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }

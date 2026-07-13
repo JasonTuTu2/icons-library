@@ -15,6 +15,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
     "@genvoice/icons-catalog": "workspace:*",
+    "@genvoice/icons-custom": "workspace:*",
     "@genvoice/icons-react": "workspace:*",
     "@iconify/react": "^5.1.0",
     "@tanstack/react-virtual": "^3.11.2",

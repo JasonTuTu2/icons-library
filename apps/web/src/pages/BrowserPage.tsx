@@ -1,5 +1,6 @@
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
+  getIconById,
   getSets,
   reactSnippet,
   searchIcons,
@@ -8,15 +9,34 @@ import {
 } from '@genvoice/icons-catalog'
 import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
+import { UploadPanel } from '../components/UploadPanel'
 
 export function BrowserPage() {
   const sets = useMemo(() => getSets(), [])
   const [query, setQuery] = useState('')
   const [setFilter, setSetFilter] = useState('')
-  const [sourceFilter, setSourceFilter] = useState<'' | 'ant' | 'iconify'>('')
+  const [sourceFilter, setSourceFilter] = useState<
+    '' | 'ant' | 'iconify' | 'custom'
+  >('')
   const [selected, setSelected] = useState<IconMeta | null>(null)
+  const [uploadEnabled, setUploadEnabled] = useState(false)
 
   const deferredQuery = useDeferredValue(query)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/__gv/icons/status')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { uploadEnabled?: boolean } | null) => {
+        if (!cancelled) setUploadEnabled(Boolean(data?.uploadEnabled))
+      })
+      .catch(() => {
+        if (!cancelled) setUploadEnabled(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const icons = useMemo(
     () =>
@@ -60,14 +80,26 @@ export function BrowserPage() {
           <select
             value={sourceFilter}
             onChange={(e) =>
-              setSourceFilter(e.target.value as '' | 'ant' | 'iconify')
+              setSourceFilter(
+                e.target.value as '' | 'ant' | 'iconify' | 'custom',
+              )
             }
           >
             <option value="">All sources</option>
             <option value="ant">Ant Design</option>
             <option value="iconify">Iconify</option>
+            <option value="custom">Custom (GenVoice)</option>
           </select>
         </label>
+        <UploadPanel
+          uploadEnabled={uploadEnabled}
+          onUploaded={(id) => {
+            const icon = getIconById(id)
+            if (icon) setSelected(icon)
+            setSourceFilter('custom')
+            setQuery(id.replace(/^gv:/, ''))
+          }}
+        />
         <p className="result-count">{icons.length.toLocaleString()} icons</p>
       </section>
 
@@ -89,7 +121,8 @@ export function BrowserPage() {
             <h2>Select an icon</h2>
             <p>
               Browse the grid to preview icons, copy React or Vue snippets, and
-              review license details.
+              review license details. Upload custom Figma SVGs with the Upload
+              button (local dev).
             </p>
           </aside>
         )}

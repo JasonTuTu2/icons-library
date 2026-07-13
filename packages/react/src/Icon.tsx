@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type ReactElement,
 } from 'react'
-import { Icon as IconifyIcon } from '@iconify/react'
+import { Icon as IconifyIcon, iconExists } from '@iconify/react'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -128,6 +128,16 @@ export function Icon({
         {...a11y}
       />
     )
+  }
+
+  if (parsed.provider === 'custom' && !iconExists(parsed.id)) {
+    if (isDev()) {
+      console.warn(
+        `[GenVoice Icons] Custom icon "${name}" is not registered. ` +
+          'Call registerCustomIcons() from @genvoice/icons-custom/react at app bootstrap.',
+      )
+    }
+    return <MissingIcon name={name} style={mergedStyle} className={className} />
   }
 
   return (

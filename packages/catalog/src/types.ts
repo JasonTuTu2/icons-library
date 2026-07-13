@@ -1,4 +1,4 @@
-export type IconSource = 'ant' | 'iconify'
+export type IconSource = 'ant' | 'iconify' | 'custom'
 
 export interface IconLicense {
   /** SPDX or short name */
@@ -17,7 +17,7 @@ export interface IconSetInfo {
 }
 
 export interface IconMeta {
-  /** Canonical name, e.g. ant:HomeOutlined or mdi:home */
+  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, or gv:star */
   id: string
   /** Display title */
   title: string
@@ -26,7 +26,7 @@ export interface IconMeta {
   set: string
   source: IconSource
   license: IconLicense
-  /** Iconify body icon name without prefix, or Ant export name */
+  /** Iconify/custom body name without prefix, or Ant export name */
   name: string
 }
 

@@ -20,6 +20,19 @@ describe('parseName', () => {
     })
   })
 
+  it('parses custom gv names', () => {
+    expect(parseName('gv:billing-alert')).toEqual({
+      provider: 'custom',
+      id: 'gv:billing-alert',
+      canonical: 'gv:billing-alert',
+    })
+  })
+
+  it('rejects invalid custom names', () => {
+    expect(() => parseName('gv:BillingAlert')).toThrow()
+    expect(() => parseName('gv:')).toThrow()
+  })
+
   it('rejects invalid names', () => {
     expect(() => parseName('HomeOutlined')).toThrow()
     expect(() => parseName('ant:')).toThrow()

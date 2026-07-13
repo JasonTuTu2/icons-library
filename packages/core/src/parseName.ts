@@ -1,8 +1,11 @@
-import { ANT_PREFIX, type ParsedIconName } from './types.js'
+import { ANT_PREFIX, CUSTOM_PREFIX, type ParsedIconName } from './types.js'
+
+const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
 /**
  * Parse a canonical icon name.
  * - Ant Design: `ant:HomeOutlined`
+ * - GenVoice custom: `gv:billing-alert`
  * - Iconify: `mdi:home`, `lucide:settings`, etc.
  */
 export function parseName(name: string): ParsedIconName {
@@ -14,7 +17,7 @@ export function parseName(name: string): ParsedIconName {
   const colon = trimmed.indexOf(':')
   if (colon <= 0 || colon === trimmed.length - 1) {
     throw new Error(
-      `Invalid icon name "${name}". Use "ant:HomeOutlined" or an Iconify id like "mdi:home".`,
+      `Invalid icon name "${name}". Use "ant:HomeOutlined", "gv:icon-name", or an Iconify id like "mdi:home".`,
     )
   }
 
@@ -34,6 +37,19 @@ export function parseName(name: string): ParsedIconName {
     }
   }
 
+  if (prefix === CUSTOM_PREFIX) {
+    if (!KEBAB.test(id)) {
+      throw new Error(
+        `Invalid custom icon "${name}". Expected kebab-case, e.g. "gv:billing-alert".`,
+      )
+    }
+    return {
+      provider: 'custom',
+      id: `${CUSTOM_PREFIX}:${id}`,
+      canonical: `${CUSTOM_PREFIX}:${id}`,
+    }
+  }
+
   // Iconify ids are prefix:name (prefix usually lowercase)
   return {
     provider: 'iconify',
@@ -45,6 +61,14 @@ export function parseName(name: string): ParsedIconName {
 export function isAntName(name: string): boolean {
   try {
     return parseName(name).provider === 'ant'
+  } catch {
+    return false
+  }
+}
+
+export function isCustomName(name: string): boolean {
+  try {
+    return parseName(name).provider === 'custom'
   } catch {
     return false
   }

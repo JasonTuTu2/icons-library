@@ -344,6 +344,91 @@ pre {
   font-weight: 600;
 }
 
+.upload-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  min-width: 11rem;
+}
+
+.upload-panel {
+  position: absolute;
+  right: 1.5rem;
+  top: 7.5rem;
+  z-index: 20;
+  width: min(420px, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+}
+
+.upload-panel p {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.upload-drop {
+  display: grid;
+  place-items: center;
+  min-height: 5rem;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 0.85rem;
+  cursor: pointer;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.upload-drop input {
+  display: none;
+}
+
+.upload-list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.upload-list li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.upload-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.upload-list input {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+}
+
+.ghost.accent {
+  background: var(--accent-soft);
+  border-color: rgba(15, 110, 86, 0.3);
+  color: var(--accent);
+}
+
+.ghost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .docs {
   max-width: 52rem;
   margin: 0 auto;
