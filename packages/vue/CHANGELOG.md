@@ -1,4 +1,4 @@
-# @genvoice/icons-vue
+# @JasonTuTu2/icons-vue
 
 ## 0.2.0
 
@@ -11,4 +11,4 @@
 - 535744a: Document initial 0.1.0 MVP packages (core, catalog, react, vue) and icon browser.
 - Updated dependencies [dbb61fc]
 - Updated dependencies [535744a]
-  - @genvoice/icons-core@0.2.0
+  - @JasonTuTu2/icons-core@0.2.0

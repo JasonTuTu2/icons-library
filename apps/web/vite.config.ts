@@ -11,11 +11,11 @@ export default defineConfig({
   resolve: {
     alias: {
       // Dev reads generated JSON from source so upload regen never races dist rebuilds.
-      '@genvoice/icons-catalog': resolve(
+      '@JasonTuTu2/icons-catalog': resolve(
         repoRoot,
         'packages/catalog/src/index.ts',
       ),
-      '@genvoice/icons-custom/react': resolve(
+      '@JasonTuTu2/icons-custom/react': resolve(
         repoRoot,
         'packages/custom-icons/src/react.ts',
       ),

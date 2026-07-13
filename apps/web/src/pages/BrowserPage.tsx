@@ -6,7 +6,7 @@ import {
   searchIcons,
   vueSnippet,
   type IconMeta,
-} from '@genvoice/icons-catalog'
+} from '@JasonTuTu2/icons-catalog'
 import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'

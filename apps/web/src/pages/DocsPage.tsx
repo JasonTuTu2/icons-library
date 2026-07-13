@@ -10,15 +10,24 @@ export function DocsPage() {
 
       <section>
         <h2>Install</h2>
+        <p>
+          Packages are on GitHub Packages. Add this to your app{' '}
+          <code>.npmrc</code> and set <code>NODE_AUTH_TOKEN</code> to a GitHub
+          PAT with <code>read:packages</code>:
+        </p>
+        <pre>
+          <code>{`@JasonTuTu2:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=\${NODE_AUTH_TOKEN}`}</code>
+        </pre>
         <pre>
           <code>{`# React
-pnpm add @genvoice/icons-react @ant-design/icons @iconify/react
+pnpm add @JasonTuTu2/icons-react @ant-design/icons @iconify/react
 
 # Vue
-pnpm add @genvoice/icons-vue @ant-design/icons-vue @iconify/vue
+pnpm add @JasonTuTu2/icons-vue @ant-design/icons-vue @iconify/vue
 
 # Custom GenVoice brand icons
-pnpm add @genvoice/icons-custom
+pnpm add @JasonTuTu2/icons-custom
 
 # Optional offline Iconify sets
 pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
@@ -29,8 +38,8 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         <h2>Usage</h2>
         <h3>React</h3>
         <pre>
-          <code>{`import { registerCustomIcons } from '@genvoice/icons-custom/react'
-import { Icon } from '@genvoice/icons-react'
+          <code>{`import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'
+import { Icon } from '@JasonTuTu2/icons-react'
 
 registerCustomIcons()
 
@@ -41,8 +50,8 @@ registerCustomIcons()
         <h3>Vue</h3>
         <pre>
           <code>{`<script setup>
-import { registerCustomIcons } from '@genvoice/icons-custom/vue'
-import { Icon } from '@genvoice/icons-vue'
+import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
+import { Icon } from '@JasonTuTu2/icons-vue'
 
 registerCustomIcons()
 </script>

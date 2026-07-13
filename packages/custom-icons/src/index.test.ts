@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { collection, getCustomIconNames } from '../src/index.js'
 
-describe('@genvoice/icons-custom', () => {
+describe('@JasonTuTu2/icons-custom', () => {
   it('exposes a gv collection', () => {
     expect(collection.prefix).toBe('gv')
   })

@@ -12,7 +12,7 @@ import {
   isDev,
   parseName,
   warnMissingA11y,
-} from '@genvoice/icons-core'
+} from '@JasonTuTu2/icons-core'
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
 import type { AntIconComponent, IconProps } from './types.js'
 
@@ -134,7 +134,7 @@ export function Icon({
     if (isDev()) {
       console.warn(
         `[GenVoice Icons] Custom icon "${name}" is not registered. ` +
-          'Call registerCustomIcons() from @genvoice/icons-custom/react at app bootstrap.',
+          'Call registerCustomIcons() from @JasonTuTu2/icons-custom/react at app bootstrap.',
       )
     }
     return <MissingIcon name={name} style={mergedStyle} className={className} />

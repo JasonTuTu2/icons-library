@@ -1,5 +1,5 @@
 {
-  "name": "@genvoice/icons-vue",
+  "name": "@JasonTuTu2/icons-vue",
   "version": "0.2.0",
   "description": "Vue 3 Icon component for GenVoice Icons (Ant Design + Iconify)",
   "license": "MIT",
@@ -19,14 +19,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @genvoice/icons-core --clean",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @JasonTuTu2/icons-core --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "tsc --noEmit",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@genvoice/icons-core": "workspace:*"
+    "@JasonTuTu2/icons-core": "workspace:*"
   },
   "peerDependencies": {
     "@ant-design/icons-vue": "^7.0.0",
@@ -52,7 +52,13 @@
     "vitest": "^2.1.8",
     "vue": "^3.5.13"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JasonTuTu2/icons-library.git",
+    "directory": "packages/vue"
+  },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

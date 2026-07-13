@@ -1,5 +1,5 @@
 {
-  "name": "@genvoice/icons-web",
+  "name": "@JasonTuTu2/icons-web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
-    "@genvoice/icons-catalog": "workspace:*",
-    "@genvoice/icons-custom": "workspace:*",
-    "@genvoice/icons-react": "workspace:*",
+    "@JasonTuTu2/icons-catalog": "workspace:*",
+    "@JasonTuTu2/icons-custom": "workspace:*",
+    "@JasonTuTu2/icons-react": "workspace:*",
     "@iconify/react": "^5.1.0",
     "@tanstack/react-virtual": "^3.11.2",
     "react": "^18.3.1",

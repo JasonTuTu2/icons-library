@@ -15,7 +15,7 @@ const entry = join(outdir, 'entry.tsx')
 writeFileSync(
   entry,
   `
-import { Icon } from '@genvoice/icons-react'
+import { Icon } from '@JasonTuTu2/icons-react'
 export function Demo() {
   return <Icon name="mdi:home" decorative size={24} />
 }
@@ -33,8 +33,8 @@ const result = await build({
   platform: 'browser',
   jsx: 'automatic',
   alias: {
-    '@genvoice/icons-react': reactPkg,
-    '@genvoice/icons-core': corePkg,
+    '@JasonTuTu2/icons-react': reactPkg,
+    '@JasonTuTu2/icons-core': corePkg,
   },
   external: [
     'react',

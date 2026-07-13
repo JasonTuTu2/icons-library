@@ -5,15 +5,15 @@
   "fixed": [],
   "linked": [
     [
-      "@genvoice/icons-core",
-      "@genvoice/icons-catalog",
-      "@genvoice/icons-react",
-      "@genvoice/icons-vue",
-      "@genvoice/icons-custom"
+      "@JasonTuTu2/icons-core",
+      "@JasonTuTu2/icons-catalog",
+      "@JasonTuTu2/icons-react",
+      "@JasonTuTu2/icons-vue",
+      "@JasonTuTu2/icons-custom"
     ]
   ],
-  "access": "public",
+  "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@genvoice/icons-web", "@genvoice/catalog-gen"]
+  "ignore": ["@JasonTuTu2/icons-web", "@JasonTuTu2/catalog-gen"]
 }

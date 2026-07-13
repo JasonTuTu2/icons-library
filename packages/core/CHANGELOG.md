@@ -1,4 +1,4 @@
-# @genvoice/icons-core
+# @JasonTuTu2/icons-core
 
 ## 0.2.0
 

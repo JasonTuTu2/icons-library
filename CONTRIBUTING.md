@@ -36,16 +36,28 @@ Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 
-This repo uses [Changesets](https://github.com/changesets/changesets):
+Packages are published to **GitHub Packages** (`https://npm.pkg.github.com`) under the `@JasonTuTu2` scope. This repo uses [Changesets](https://github.com/changesets/changesets):
 
-1. `pnpm changeset`
-2. `pnpm version-packages`
-3. `pnpm release`
+1. `pnpm changeset` (open a PR with the changeset file)
+2. On merge to `main`, the Release workflow opens a version PR (or publishes if one is ready)
+3. Merging the version PR runs `pnpm release` and publishes to GitHub Packages
+
+Manual publish (local):
+
+```bash
+export NODE_AUTH_TOKEN=ghp_...   # write:packages
+pnpm version-packages
+pnpm release
+```
+
+Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token with `read:packages` — see the README.
+
+`@JasonTuTu2/icons-web` and `@JasonTuTu2/catalog-gen` stay private and are not published.
 
 ## Guidelines
 
-- Keep React and Vue `<Icon>` prop semantics aligned via `@genvoice/icons-core`.
+- Keep React and Vue `<Icon>` prop semantics aligned via `@JasonTuTu2/icons-core`.
 - Do not vendor upstream Ant/Iconify SVG artwork into GenVoice packages.
-- Custom brand SVGs belong in `@genvoice/icons-custom` only.
+- Custom brand SVGs belong in `@JasonTuTu2/icons-custom` only.
 - Prefer ESM, `sideEffects: false` (except custom register entry points), and peer dependencies for Ant Design / Iconify.
 - Update the catalog generator when adding Iconify collections.

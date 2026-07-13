@@ -1,4 +1,4 @@
-# @genvoice/icons-catalog
+# @JasonTuTu2/icons-catalog
 
 ## 0.2.0
 

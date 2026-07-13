@@ -23,18 +23,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@JasonTuTu2/icons-catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@JasonTuTu2/icons-custom':
+        specifier: workspace:*
+        version: link:../../packages/custom-icons
+      '@JasonTuTu2/icons-react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@ant-design/icons':
         specifier: ^5.5.2
         version: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@genvoice/icons-catalog':
-        specifier: workspace:*
-        version: link:../../packages/catalog
-      '@genvoice/icons-custom':
-        specifier: workspace:*
-        version: link:../../packages/custom-icons
-      '@genvoice/icons-react':
-        specifier: workspace:*
-        version: link:../../packages/react
       '@iconify/react':
         specifier: ^5.1.0
         version: 5.2.1(react@18.3.1)
@@ -123,7 +123,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@genvoice/icons-core':
+      '@JasonTuTu2/icons-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -166,7 +166,7 @@ importers:
 
   packages/vue:
     dependencies:
-      '@genvoice/icons-core':
+      '@JasonTuTu2/icons-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

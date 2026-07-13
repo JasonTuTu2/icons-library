@@ -1,5 +1,5 @@
 {
-  "name": "@genvoice/icons-core",
+  "name": "@JasonTuTu2/icons-core",
   "version": "0.2.0",
   "description": "Shared types, naming, and a11y helpers for GenVoice Icons",
   "license": "MIT",
@@ -31,7 +31,13 @@
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JasonTuTu2/icons-library.git",
+    "directory": "packages/core"
+  },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

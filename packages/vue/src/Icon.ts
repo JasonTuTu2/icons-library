@@ -6,7 +6,7 @@ import {
   isDev,
   parseName,
   warnMissingA11y,
-} from '@genvoice/icons-core'
+} from '@JasonTuTu2/icons-core'
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
 import type { AntIconComponent } from './types.js'
 
@@ -129,7 +129,7 @@ export const Icon = defineComponent({
         if (isDev()) {
           console.warn(
             `[GenVoice Icons] Custom icon "${props.name}" is not registered. ` +
-              'Call registerCustomIcons() from @genvoice/icons-custom/vue at app bootstrap.',
+              'Call registerCustomIcons() from @JasonTuTu2/icons-custom/vue at app bootstrap.',
           )
         }
         return h('span', {

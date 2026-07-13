@@ -6,4 +6,4 @@ export {
   getA11yAttributes,
   normalizeSize,
   buildIconStyle,
-} from '@genvoice/icons-core'
+} from '@JasonTuTu2/icons-core'

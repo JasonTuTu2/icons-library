@@ -1,5 +1,5 @@
 {
-  "name": "@genvoice/icons-custom",
+  "name": "@JasonTuTu2/icons-custom",
   "version": "0.2.0",
   "description": "GenVoice custom brand icons (Figma SVG exports)",
   "license": "MIT",
@@ -63,7 +63,13 @@
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JasonTuTu2/icons-library.git",
+    "directory": "packages/custom-icons"
+  },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

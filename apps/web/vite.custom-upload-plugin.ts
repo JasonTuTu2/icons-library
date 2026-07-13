@@ -25,7 +25,7 @@ function runCatalogGen(repoRoot: string): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
       process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
-      ['--filter', '@genvoice/catalog-gen', 'start'],
+      ['--filter', '@JasonTuTu2/catalog-gen', 'start'],
       {
         cwd: repoRoot,
         stdio: 'inherit',

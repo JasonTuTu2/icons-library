@@ -1,4 +1,4 @@
-# @genvoice/icons-custom
+# @JasonTuTu2/icons-custom
 
 ## 0.2.0
 

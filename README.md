@@ -6,12 +6,12 @@ Unified icon library and browser for **Ant Design Icons**, **Iconify**, and **Ge
 
 | Package | Description |
 |---------|-------------|
-| `@genvoice/icons-core` | Shared types, name parsing, size & a11y helpers |
-| `@genvoice/icons-catalog` | Icon metadata + search helpers for the browser |
-| `@genvoice/icons-react` | React `<Icon>` component |
-| `@genvoice/icons-vue` | Vue 3 `<Icon>` component |
-| `@genvoice/icons-custom` | GenVoice brand SVGs + `registerCustomIcons()` |
-| `@genvoice/icons-web` | Icon browser + docs (private app) |
+| `@JasonTuTu2/icons-core` | Shared types, name parsing, size & a11y helpers |
+| `@JasonTuTu2/icons-catalog` | Icon metadata + search helpers for the browser |
+| `@JasonTuTu2/icons-react` | React `<Icon>` component |
+| `@JasonTuTu2/icons-vue` | Vue 3 `<Icon>` component |
+| `@JasonTuTu2/icons-custom` | GenVoice brand SVGs + `registerCustomIcons()` |
+| `@JasonTuTu2/icons-web` | Icon browser + docs (private app) |
 
 ## Quick start
 
@@ -22,15 +22,28 @@ pnpm build
 pnpm dev
 ```
 
+### Install from GitHub Packages
+
+Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=packages) (not the public npm registry). You need read access to this repo (or the packages), then authenticate with a GitHub token that has `read:packages`.
+
+In the consuming app, add `.npmrc`:
+
+```ini
+@JasonTuTu2:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+Set `NODE_AUTH_TOKEN` to a [personal access token](https://github.com/settings/tokens) with `read:packages` (and authorize SSO if your org requires it). In GitHub Actions, use `${{ secrets.GITHUB_TOKEN }}` with `packages: read`.
+
 ### React
 
 ```bash
-pnpm add @genvoice/icons-react @genvoice/icons-custom @ant-design/icons @iconify/react
+pnpm add @JasonTuTu2/icons-react @JasonTuTu2/icons-custom @ant-design/icons @iconify/react
 ```
 
 ```tsx
-import { registerCustomIcons } from '@genvoice/icons-custom/react'
-import { Icon } from '@genvoice/icons-react'
+import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'
+import { Icon } from '@JasonTuTu2/icons-react'
 
 registerCustomIcons()
 
@@ -42,13 +55,13 @@ registerCustomIcons()
 ### Vue
 
 ```bash
-pnpm add @genvoice/icons-vue @genvoice/icons-custom @ant-design/icons-vue @iconify/vue
+pnpm add @JasonTuTu2/icons-vue @JasonTuTu2/icons-custom @ant-design/icons-vue @iconify/vue
 ```
 
 ```vue
 <script setup>
-import { registerCustomIcons } from '@genvoice/icons-custom/vue'
-import { Icon } from '@genvoice/icons-vue'
+import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
+import { Icon } from '@JasonTuTu2/icons-vue'
 
 registerCustomIcons()
 </script>
@@ -107,7 +120,17 @@ pnpm changeset
 | Vue | `vue` 3.3+, `@ant-design/icons-vue` ^7, `@iconify/vue` ^4–5 |
 | Custom | `@iconify/react` and/or `@iconify/vue` |
 
-## Download
+## Publishing
 
-Download the latest release from:
-https://github.com/JasonTuTu2/icons-library/releases/latest
+Packages publish to GitHub Packages via Changesets when release PRs merge to `main` (see `.github/workflows/release.yml`).
+
+Local publish (requires a PAT with `write:packages`):
+
+```bash
+export NODE_AUTH_TOKEN=ghp_...
+pnpm changeset
+pnpm version-packages
+pnpm release
+```
+
+Browse published packages: https://github.com/JasonTuTu2?tab=packages

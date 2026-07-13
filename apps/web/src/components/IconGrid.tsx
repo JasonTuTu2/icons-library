@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import type { IconMeta } from '@genvoice/icons-catalog'
-import { Icon } from '@genvoice/icons-react'
+import type { IconMeta } from '@JasonTuTu2/icons-catalog'
+import { Icon } from '@JasonTuTu2/icons-react'
 
 const COLS = 8
 const ROW_HEIGHT = 96

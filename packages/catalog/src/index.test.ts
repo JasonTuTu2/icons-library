@@ -16,6 +16,6 @@ describe('catalog', () => {
     expect(reactSnippet('mdi:home')).toContain('mdi:home')
     expect(vueSnippet('ant:HomeOutlined')).toContain('ant:HomeOutlined')
     expect(reactSnippet('gv:star')).toContain('registerCustomIcons')
-    expect(vueSnippet('gv:star')).toContain('@genvoice/icons-custom/vue')
+    expect(vueSnippet('gv:star')).toContain('@JasonTuTu2/icons-custom/vue')
   })
 })

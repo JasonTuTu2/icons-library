@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { IconMeta } from '@genvoice/icons-catalog'
-import { Icon } from '@genvoice/icons-react'
+import type { IconMeta } from '@JasonTuTu2/icons-catalog'
+import { Icon } from '@JasonTuTu2/icons-react'
 
 interface IconDetailProps {
   icon: IconMeta

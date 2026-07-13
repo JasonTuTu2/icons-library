@@ -1,5 +1,5 @@
 {
-  "name": "@genvoice/icons-catalog",
+  "name": "@JasonTuTu2/icons-catalog",
   "version": "0.2.0",
   "description": "Icon metadata catalog for GenVoice Icons browser",
   "license": "MIT",
@@ -34,7 +34,13 @@
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JasonTuTu2/icons-library.git",
+    "directory": "packages/catalog"
+  },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }
