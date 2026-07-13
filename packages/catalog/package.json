@@ -1,6 +1,6 @@
 {
   "name": "@genvoice/icons-catalog",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Icon metadata catalog for GenVoice Icons browser",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,10 @@
     },
     "./data.json": "./src/data/icons.json"
   },
-  "files": ["dist", "src/data"],
+  "files": [
+    "dist",
+    "src/data"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean --loader .json=json",
     "typecheck": "tsc --noEmit",

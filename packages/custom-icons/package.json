@@ -1,6 +1,6 @@
 {
   "name": "@genvoice/icons-custom",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GenVoice custom brand icons (Figma SVG exports)",
   "license": "MIT",
   "type": "module",
@@ -48,8 +48,12 @@
     "@iconify/vue": "^4.0.0 || ^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@iconify/react": { "optional": true },
-    "@iconify/vue": { "optional": true }
+    "@iconify/react": {
+      "optional": true
+    },
+    "@iconify/vue": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@iconify/react": "^5.1.0",

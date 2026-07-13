@@ -1,6 +1,6 @@
 {
   "name": "@genvoice/icons-vue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vue 3 Icon component for GenVoice Icons (Ant Design + Iconify)",
   "license": "MIT",
   "type": "module",
@@ -15,7 +15,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @genvoice/icons-core --clean",
     "typecheck": "tsc --noEmit",
@@ -32,8 +34,12 @@
     "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
-    "@ant-design/icons-vue": { "optional": true },
-    "@iconify/vue": { "optional": true }
+    "@ant-design/icons-vue": {
+      "optional": true
+    },
+    "@iconify/vue": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@ant-design/icons-vue": "^7.0.1",
