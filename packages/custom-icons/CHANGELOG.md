@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-custom
 
+## 0.2.1
+
+### Patch Changes
+
+- 7b9d9e7: Publish packages to GitHub Packages under the `@JasonTuTu2` scope.
+
 ## 0.2.0
 
 ### Minor Changes

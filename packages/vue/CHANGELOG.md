@@ -1,5 +1,13 @@
 # @JasonTuTu2/icons-vue
 
+## 0.2.1
+
+### Patch Changes
+
+- 7b9d9e7: Publish packages to GitHub Packages under the `@JasonTuTu2` scope.
+- Updated dependencies [7b9d9e7]
+  - @JasonTuTu2/icons-core@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes
