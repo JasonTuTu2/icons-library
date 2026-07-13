@@ -4,6 +4,8 @@ import { optimize } from 'svgo'
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
+export type ColorMode = 'mono' | 'preserved'
+
 export interface IconifyIconBody {
   body: string
   width?: number
@@ -14,6 +16,7 @@ export interface ProcessedCustomIcon {
   name: string
   title: string
   icon: IconifyIconBody
+  colorMode: ColorMode
 }
 
 export function isValidKebabName(name: string): boolean {
@@ -133,22 +136,25 @@ export function processSvgContent(
   }
 }
 
-export function collectCustomIconsFromDir(
-  svgDir: string,
+function collectFromDir(
+  dir: string,
+  colorMode: ColorMode,
 ): { icons: ProcessedCustomIcon[]; warnings: string[] } {
   const warnings: string[] = []
   const icons: ProcessedCustomIcon[] = []
+  const monochrome = colorMode === 'mono'
 
   let entries: string[]
   try {
-    entries = readdirSync(svgDir)
+    entries = readdirSync(dir)
   } catch {
-    return { icons, warnings: [`Custom SVG directory missing: ${svgDir}`] }
+    return { icons, warnings: [] }
   }
 
   for (const entry of entries) {
     if (entry === 'color' || entry.startsWith('.')) continue
     if (entry.startsWith('_')) continue
+    if (entry.toLowerCase() === 'readme.md') continue
     if (extname(entry).toLowerCase() !== '.svg') continue
 
     const name = sanitizeIconName(entry)
@@ -157,14 +163,15 @@ export function collectCustomIconsFromDir(
       continue
     }
 
-    const filePath = join(svgDir, entry)
+    const filePath = join(dir, entry)
     try {
       const raw = readFileSync(filePath, 'utf8')
-      const icon = processSvgContent(raw, { monochrome: true })
+      const icon = processSvgContent(raw, { monochrome })
       icons.push({
         name,
         title: titleFromName(name),
         icon,
+        colorMode,
       })
     } catch (err) {
       warnings.push(
@@ -173,6 +180,45 @@ export function collectCustomIconsFromDir(
     }
   }
 
-  icons.sort((a, b) => a.name.localeCompare(b.name))
   return { icons, warnings }
+}
+
+/**
+ * Collect custom icons from `svg/*.svg` (mono) and `svg/color/*.svg` (preserved).
+ * Shared `gv:` namespace — first wins on name collision.
+ */
+export function collectAllCustomIcons(
+  svgRootDir: string,
+): { icons: ProcessedCustomIcon[]; warnings: string[] } {
+  const warnings: string[] = []
+  const byName = new Map<string, ProcessedCustomIcon>()
+
+  const mono = collectFromDir(svgRootDir, 'mono')
+  warnings.push(...mono.warnings)
+  for (const icon of mono.icons) {
+    byName.set(icon.name, icon)
+  }
+
+  const colorDir = join(svgRootDir, 'color')
+  const color = collectFromDir(colorDir, 'preserved')
+  warnings.push(...color.warnings)
+  for (const icon of color.icons) {
+    if (byName.has(icon.name)) {
+      warnings.push(
+        `Skipped color/${icon.name}.svg: name already used by mono icon "${icon.name}"`,
+      )
+      continue
+    }
+    byName.set(icon.name, icon)
+  }
+
+  const icons = [...byName.values()].sort((a, b) => a.name.localeCompare(b.name))
+  return { icons, warnings }
+}
+
+/** @deprecated Prefer collectAllCustomIcons */
+export function collectCustomIconsFromDir(
+  svgDir: string,
+): { icons: ProcessedCustomIcon[]; warnings: string[] } {
+  return collectAllCustomIcons(svgDir)
 }

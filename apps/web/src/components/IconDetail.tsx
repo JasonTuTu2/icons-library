@@ -65,6 +65,20 @@ export function IconDetail({
             {icon.set} · {icon.source}
           </dd>
         </div>
+        {icon.colorMode ? (
+          <div>
+            <dt>Color mode</dt>
+            <dd>
+              {icon.colorMode === 'preserved' ? 'Multi-color (preserved)' : 'Monochrome'}
+              {icon.colorMode === 'preserved' ? (
+                <span className="meta-note">
+                  {' '}
+                  The <code>color</code> prop may not recolor this icon.
+                </span>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
         <div>
           <dt>License</dt>
           <dd>

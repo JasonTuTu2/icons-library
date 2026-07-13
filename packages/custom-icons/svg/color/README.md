@@ -1,4 +1,10 @@
-# Place multi-color / illustrative SVGs here in a future release.
+# Multi-color custom icons
 
-Files in this folder will skip the monochrome `currentColor` rewrite.
-Do not add icons here yet — mono icons go in the parent `svg/` folder.
+Place multi-color / illustrative SVGs here.
+
+- Files are registered as `gv:<kebab-name>` (same namespace as mono icons).
+- Fills and strokes are **preserved** (no `currentColor` rewrite).
+- The `color` prop on `<Icon>` may not recolor these glyphs.
+- Do not reuse a name that already exists in the parent `svg/` folder.
+
+Monochrome UI icons belong in `../` (the parent `svg/` folder).

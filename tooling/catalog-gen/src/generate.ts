@@ -5,7 +5,7 @@ import * as AntIcons from '@ant-design/icons'
 import mdi from '@iconify-json/mdi/icons.json'
 import lucide from '@iconify-json/lucide/icons.json'
 import heroicons from '@iconify-json/heroicons/icons.json'
-import { collectCustomIconsFromDir } from './customSvg.js'
+import { collectAllCustomIcons } from './customSvg.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = join(__dirname, '../../../packages/catalog/src/data/icons.json')
@@ -38,6 +38,7 @@ interface IconMeta {
   source: 'ant' | 'iconify' | 'custom'
   license: IconLicense
   name: string
+  colorMode?: 'mono' | 'preserved'
 }
 
 const antLicense: IconLicense = {
@@ -178,7 +179,7 @@ function collectIconify(
 }
 
 function collectCustomIcons(): IconMeta[] {
-  const { icons, warnings } = collectCustomIconsFromDir(customSvgDir)
+  const { icons, warnings } = collectAllCustomIcons(customSvgDir)
   for (const warning of warnings) {
     console.warn(`[catalog-gen] ${warning}`)
   }
@@ -208,11 +209,19 @@ function collectCustomIcons(): IconMeta[] {
   return icons.map((item) => ({
     id: `gv:${item.name}`,
     title: item.title,
-    tags: [item.name, 'gv', 'genvoice', 'custom'],
+    tags: [
+      item.name,
+      'gv',
+      'genvoice',
+      'custom',
+      item.colorMode === 'preserved' ? 'multicolor' : 'mono',
+      item.colorMode,
+    ],
     set: 'genvoice',
     source: 'custom' as const,
     license: customLicense,
     name: item.name,
+    colorMode: item.colorMode,
   }))
 }
 

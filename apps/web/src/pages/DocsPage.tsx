@@ -60,13 +60,13 @@ registerCustomIcons()
         <ol>
           <li>Export SVG from Figma (prefer 24×24, simple paths).</li>
           <li>
-            Either commit the file to <code>packages/custom-icons/svg/</code> as{' '}
-            <code>kebab-name.svg</code>, or use <strong>Upload SVG</strong> in
-            the browser while running <code>pnpm dev</code>.
+            Commit to <code>packages/custom-icons/svg/</code> (monochrome) or{' '}
+            <code>svg/color/</code> (multi-color), or use <strong>Upload SVG</strong>{' '}
+            in the browser while running <code>pnpm dev</code> and pick a color mode.
           </li>
           <li>
             Run <code>pnpm catalog:gen</code> if you added files via git (upload
-            does this automatically).
+            regenerates and rebuilds packages automatically).
           </li>
           <li>
             Use <code>gv:kebab-name</code> in designs and code. Call{' '}
@@ -75,9 +75,9 @@ registerCustomIcons()
         </ol>
         <p>
           Monochrome icons are normalized to <code>currentColor</code> so{' '}
-          <code>color</code> / CSS inheritance works. Multi-color SVGs are not
-          fully supported yet — reserve <code>svg/color/</code> for a future
-          release.
+          <code>color</code> / CSS inheritance works. Multi-color icons preserve
+          their fills; the <code>color</code> prop may not recolor them. Filter by
+          color mode in the browser to separate the two.
         </p>
       </section>
 

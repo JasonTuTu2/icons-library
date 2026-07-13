@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface UploadItem {
   fileName: string
@@ -42,11 +42,25 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
   const [items, setItems] = useState<UploadItem[]>([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [colorMode, setColorMode] = useState<'mono' | 'preserved'>('mono')
 
   const canSubmit = useMemo(
     () => items.length > 0 && items.every((item) => item.name.length > 0),
     [items],
   )
+
+  function close() {
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open])
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
@@ -69,9 +83,17 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
         const res = await fetch('/__gv/icons/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: item.name, content: item.content }),
+          body: JSON.stringify({
+            name: item.name,
+            content: item.content,
+            colorMode,
+          }),
         })
-        const data = (await res.json()) as { ok?: boolean; id?: string; error?: string }
+        const data = (await res.json()) as {
+          ok?: boolean
+          id?: string
+          error?: string
+        }
         if (!res.ok || !data.ok || !data.id) {
           throw new Error(data.error || `Upload failed for ${item.name}`)
         }
@@ -89,25 +111,49 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
 
   return (
     <div className="upload-wrap">
-      <button type="button" className="ghost" onClick={() => setOpen((v) => !v)}>
-        {open ? 'Close upload' : 'Upload SVG'}
+      <button type="button" className="ghost" onClick={() => setOpen(true)}>
+        Upload SVG
       </button>
 
       {open ? (
         <div className="upload-panel">
+          <div className="upload-panel-header">
+            <strong>Upload SVG</strong>
+            <button
+              type="button"
+              className="ghost upload-close"
+              onClick={close}
+              aria-label="Close upload"
+            >
+              ×
+            </button>
+          </div>
           {!uploadEnabled ? (
             <p>
               Upload writes to disk only during local <code>pnpm dev</code>. To
               add icons in production builds, commit SVGs under{' '}
-              <code>packages/custom-icons/svg/</code> and run{' '}
+              <code>packages/custom-icons/svg/</code> (mono) or{' '}
+              <code>svg/color/</code> (multi-color) and run{' '}
               <code>pnpm catalog:gen</code>.
             </p>
           ) : (
             <>
               <p>
-                Drop Figma-exported monochrome SVGs. Names become{' '}
-                <code>gv:kebab-name</code>.
+                Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
+                Choose monochrome (recolorable) or multi-color (preserved fills).
               </p>
+              <label className="field">
+                <span>Color mode</span>
+                <select
+                  value={colorMode}
+                  onChange={(e) =>
+                    setColorMode(e.target.value as 'mono' | 'preserved')
+                  }
+                >
+                  <option value="mono">Monochrome (currentColor)</option>
+                  <option value="preserved">Multi-color (preserved)</option>
+                </select>
+              </label>
               <label className="upload-drop">
                 <input
                   type="file"

@@ -18,6 +18,9 @@ export function BrowserPage() {
   const [sourceFilter, setSourceFilter] = useState<
     '' | 'ant' | 'iconify' | 'custom'
   >('')
+  const [colorModeFilter, setColorModeFilter] = useState<
+    '' | 'mono' | 'preserved'
+  >('')
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [uploadEnabled, setUploadEnabled] = useState(false)
 
@@ -44,8 +47,9 @@ export function BrowserPage() {
         query: deferredQuery,
         set: setFilter || undefined,
         source: sourceFilter || undefined,
+        colorMode: colorModeFilter || undefined,
       }),
-    [deferredQuery, setFilter, sourceFilter],
+    [deferredQuery, setFilter, sourceFilter, colorModeFilter],
   )
 
   return (
@@ -89,6 +93,19 @@ export function BrowserPage() {
             <option value="ant">Ant Design</option>
             <option value="iconify">Iconify</option>
             <option value="custom">Custom (GenVoice)</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Color mode</span>
+          <select
+            value={colorModeFilter}
+            onChange={(e) =>
+              setColorModeFilter(e.target.value as '' | 'mono' | 'preserved')
+            }
+          >
+            <option value="">All modes</option>
+            <option value="mono">Monochrome</option>
+            <option value="preserved">Multi-color</option>
           </select>
         </label>
         <UploadPanel

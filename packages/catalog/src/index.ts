@@ -25,11 +25,12 @@ export interface SearchOptions {
   query?: string
   set?: string
   source?: 'ant' | 'iconify' | 'custom'
+  colorMode?: 'mono' | 'preserved'
   limit?: number
 }
 
 export function searchIcons(options: SearchOptions = {}): IconMeta[] {
-  const { query = '', set, source, limit } = options
+  const { query = '', set, source, colorMode, limit } = options
   const q = query.trim().toLowerCase()
 
   let results = catalog.icons
@@ -39,6 +40,9 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
   }
   if (source) {
     results = results.filter((icon) => icon.source === source)
+  }
+  if (colorMode) {
+    results = results.filter((icon) => icon.colorMode === colorMode)
   }
   if (q) {
     results = results.filter((icon) => {

@@ -28,6 +28,8 @@ export interface IconMeta {
   license: IconLicense
   /** Iconify/custom body name without prefix, or Ant export name */
   name: string
+  /** Custom icons only: mono (currentColor) or preserved multi-color */
+  colorMode?: 'mono' | 'preserved'
 }
 
 export interface IconCatalog {

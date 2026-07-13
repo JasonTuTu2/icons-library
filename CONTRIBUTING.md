@@ -5,7 +5,7 @@
 1. Node 18+
 2. Enable pnpm (`npm i -g pnpm@9` or Corepack)
 3. `pnpm install`
-4. `pnpm catalog:gen` — regenerate icon metadata + custom `gv` collection
+4. `pnpm catalog:gen` — regenerate icon metadata + custom `gv` collection and rebuild packages
 5. `pnpm build`
 
 ## Scripts
@@ -13,17 +13,26 @@
 - `pnpm dev` — icon browser (supports custom SVG upload locally)
 - `pnpm test` — unit tests
 - `pnpm typecheck` — TypeScript across packages
-- `pnpm catalog:gen` — rebuild catalog + `@genvoice/icons-custom` collection
+- `pnpm catalog:gen` — rebuild catalog JSON, custom collection, and package `dist/` outputs
 
 ## Adding a custom icon (PR)
 
+### Monochrome (recolorable)
+
 1. Export a monochrome SVG from Figma.
-2. Save as `packages/custom-icons/svg/kebab-name.svg` (or upload in `pnpm dev`).
+2. Save as `packages/custom-icons/svg/kebab-name.svg` (or upload with Monochrome mode in `pnpm dev`).
 3. Run `pnpm catalog:gen`.
-4. Commit the SVG, updated `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json`.
+4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json`.
 5. Open a PR.
 
-Do not put multi-color artwork in `svg/` yet — use `svg/color/` only when that pipeline lands.
+### Multi-color (preserved fills)
+
+1. Export a multi-color SVG from Figma.
+2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or upload with Multi-color mode).
+3. Run `pnpm catalog:gen`.
+4. Commit as above.
+
+Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 

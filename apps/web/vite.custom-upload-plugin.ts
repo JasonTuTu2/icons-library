@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite'
+import type { Plugin, ViteDevServer } from 'vite'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -25,7 +25,7 @@ function runCatalogGen(repoRoot: string): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
       process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
-      ['catalog:gen'],
+      ['--filter', '@genvoice/catalog-gen', 'start'],
       {
         cwd: repoRoot,
         stdio: 'inherit',
@@ -34,16 +34,33 @@ function runCatalogGen(repoRoot: string): Promise<void> {
     )
     child.on('exit', (code) => {
       if (code === 0) resolvePromise()
-      else reject(new Error(`catalog:gen exited with code ${code}`))
+      else reject(new Error(`catalog-gen exited with code ${code}`))
     })
     child.on('error', reject)
   })
+}
+
+function reloadDevCatalog(server: ViteDevServer, repoRoot: string) {
+  const paths = [
+    join(repoRoot, 'packages/catalog/src/index.ts'),
+    join(repoRoot, 'packages/catalog/src/data/icons.json'),
+    join(repoRoot, 'packages/custom-icons/src/react.ts'),
+    join(repoRoot, 'packages/custom-icons/src/collection.json'),
+  ]
+
+  for (const file of paths) {
+    const mod = server.moduleGraph.getModuleById(file)
+    if (mod) server.moduleGraph.invalidateModule(mod)
+  }
+
+  server.ws.send({ type: 'full-reload' })
 }
 
 export function customIconUploadPlugin(): Plugin {
   const pluginDir = dirname(fileURLToPath(import.meta.url))
   const repoRoot = resolve(pluginDir, '../..')
   const svgDir = join(repoRoot, 'packages/custom-icons/svg')
+  const colorDir = join(svgDir, 'color')
 
   return {
     name: 'genvoice-custom-icon-upload',
@@ -68,6 +85,7 @@ export function customIconUploadPlugin(): Plugin {
           const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
             name?: string
             content?: string
+            colorMode?: 'mono' | 'preserved'
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -90,20 +108,28 @@ export function customIconUploadPlugin(): Plugin {
             return
           }
 
-          mkdirSync(svgDir, { recursive: true })
-          const filePath = join(svgDir, `${name}.svg`)
+          const colorMode = body.colorMode === 'preserved' ? 'preserved' : 'mono'
+          const targetDir = colorMode === 'preserved' ? colorDir : svgDir
+          mkdirSync(targetDir, { recursive: true })
+          const filePath = join(targetDir, `${name}.svg`)
           writeFileSync(filePath, `${content}\n`, 'utf8')
 
           await runCatalogGen(repoRoot)
 
-          server.ws.send({ type: 'full-reload' })
+          reloadDevCatalog(server, repoRoot)
+
+          const relativePath =
+            colorMode === 'preserved'
+              ? `packages/custom-icons/svg/color/${name}.svg`
+              : `packages/custom-icons/svg/${name}.svg`
 
           res.setHeader('Content-Type', 'application/json')
           res.end(
             JSON.stringify({
               ok: true,
               id: `gv:${name}`,
-              path: `packages/custom-icons/svg/${name}.svg`,
+              path: relativePath,
+              colorMode,
             }),
           )
         } catch (err) {

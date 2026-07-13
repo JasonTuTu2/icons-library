@@ -68,12 +68,14 @@ registerCustomIcons()
 
 ## Custom icons from Figma
 
-1. Export SVG from Figma (prefer 24×24 monochrome).
-2. Add via **Upload SVG** in the browser (`pnpm dev`), or commit to `packages/custom-icons/svg/kebab-name.svg`.
-3. Run `pnpm catalog:gen` after git adds (upload regenerates automatically).
+1. Export SVG from Figma (prefer 24×24).
+2. Add via **Upload SVG** in the browser (`pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
+   - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
+   - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
+3. Run `pnpm catalog:gen` after git adds (upload regenerates + rebuilds packages automatically).
 4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap.
 
-Monochrome SVGs are rewritten to `currentColor`. Multi-color support is planned via `svg/color/` later.
+Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 
 ## Offline Iconify
 
