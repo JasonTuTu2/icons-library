@@ -106,3 +106,8 @@ pnpm changeset
 | React | `react` 18+, `@ant-design/icons` ^5–6, `@iconify/react` ^5–6 |
 | Vue | `vue` 3.3+, `@ant-design/icons-vue` ^7, `@iconify/vue` ^4–5 |
 | Custom | `@iconify/react` and/or `@iconify/vue` |
+
+## Download
+
+Download the latest release from:
+https://github.com/JasonTuTu2/icons-library/releases/latest
