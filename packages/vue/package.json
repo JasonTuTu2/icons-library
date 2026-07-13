@@ -1,0 +1,52 @@
+{
+  "name": "@genvoice/icons-vue",
+  "version": "0.1.0",
+  "description": "Vue 3 Icon component for GenVoice Icons (Ant Design + Iconify)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @genvoice/icons-core --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@genvoice/icons-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@ant-design/icons-vue": "^7.0.0",
+    "@iconify/vue": "^4.0.0 || ^5.0.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@ant-design/icons-vue": { "optional": true },
+    "@iconify/vue": { "optional": true }
+  },
+  "devDependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "@iconify/vue": "^4.3.0",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^25.0.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "vue": "^3.5.13"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

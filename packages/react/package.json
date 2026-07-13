@@ -1,0 +1,55 @@
+{
+  "name": "@genvoice/icons-react",
+  "version": "0.1.0",
+  "description": "React Icon component for GenVoice Icons (Ant Design + Iconify)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react --external @ant-design/icons --external @iconify/react --external @genvoice/icons-core --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@genvoice/icons-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@ant-design/icons": "^5.0.0 || ^6.0.0",
+    "@iconify/react": "^5.0.0 || ^6.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@ant-design/icons": { "optional": true },
+    "@iconify/react": { "optional": true }
+  },
+  "devDependencies": {
+    "@ant-design/icons": "^5.5.2",
+    "@iconify/react": "^5.1.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

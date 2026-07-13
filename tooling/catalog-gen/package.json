@@ -1,0 +1,23 @@
+{
+  "name": "@genvoice/catalog-gen",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/generate.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "build": "echo \"catalog-gen has no build\"",
+    "test": "echo \"catalog-gen has no tests\"",
+    "clean": "echo \"ok\""
+  },
+  "devDependencies": {
+    "@ant-design/icons": "^5.5.2",
+    "@iconify-json/heroicons": "^1.2.2",
+    "@iconify-json/lucide": "^1.2.25",
+    "@iconify-json/mdi": "^1.2.3",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
