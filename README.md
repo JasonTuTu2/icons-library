@@ -122,7 +122,30 @@ registerCustomIcons()
 | Iconify | `set:name` | `mdi:home`, `lucide:settings` |
 | GenVoice custom | `gv:kebab-name` | `gv:billing-alert` |
 
-Use **`label`** for meaningful icons, or **`decorative`** for pure decoration.
+### Props
+
+| Prop | Type | Default | Notes |
+|------|------|---------|--------|
+| `name` | `string` | — | Required. Canonical id (`ant:…`, `gv:…`, or Iconify `prefix:name`) |
+| `size` | `number \| string` | `1em` | Number = px; string = CSS length |
+| `color` | `string` | `currentColor` | Monochrome `gv:` icons follow this; multi-color `gv:` icons keep baked fills |
+| `label` | `string` | — | Accessible name for meaningful icons |
+| `decorative` | `boolean` | `false` | Presentational; sets `aria-hidden` |
+| `className` / `class` | `string` | — | React / Vue |
+| `style` | CSS object | — | Merged with size/color/rotate |
+| `rotate` | `number` | — | Degrees (CSS `transform`) |
+| `spin` | `boolean` | `false` | **Ant icons only** — ignored for Iconify and `gv:` |
+
+Use **`label`** for meaningful icons, or **`decorative`** for pure decoration. Prefer wrapping interactive icons in a button or link rather than putting click handlers on the icon alone.
+
+### Catalog (optional)
+
+```ts
+import { searchIcons, getIconById } from '@JasonTuTu2/icons-catalog'
+
+searchIcons({ query: 'billing', source: 'custom', limit: 20 })
+getIconById('gv:billing-alert')
+```
 
 ### Offline Iconify (optional)
 
@@ -141,6 +164,8 @@ addCollection(mdi)
 | Vue | `vue` 3.3+, `@ant-design/icons-vue` ^7, `@iconify/vue` ^4–5 |
 | Custom | `@iconify/react` and/or `@iconify/vue` |
 
+Changelogs: [`packages/react`](packages/react/CHANGELOG.md), [`packages/vue`](packages/vue/CHANGELOG.md), [`packages/custom-icons`](packages/custom-icons/CHANGELOG.md), and siblings under `packages/*/CHANGELOG.md`. Published versions: https://github.com/JasonTuTu2?tab=packages
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -149,48 +174,17 @@ addCollection(mdi)
 | `404 Not Found` | No access to the repo/package, or wrong package name |
 | `gv:` icons missing | Call `registerCustomIcons()` once at bootstrap |
 | `iconExists` / build error with Iconify React 6 | Fixed in latest packages — upgrade `@JasonTuTu2/icons-react` (uses `iconLoaded` with v5 fallback) |
+| `color` does nothing on a `gv:` icon | Multi-color icons preserve fills; use a monochrome SVG if you need recoloring |
 | Works locally, fails in CI | Set `NODE_AUTH_TOKEN` and `packages: read` in the workflow |
 
-## Icon browser (UI)
+## Icon browser
 
 Search icons, preview them, check licensing, and copy React/Vue snippets.
 
-- **Live:** https://JasonTuTu2.github.io/icons-library/ (GitHub Pages; deploys from `main`)
-- **Local:** `pnpm dev` → http://localhost:5173
+- **Live:** https://JasonTuTu2.github.io/icons-library/
+- **Local (contributors):** `pnpm catalog:gen && pnpm build && pnpm dev` → http://localhost:5173
 
-### Upload & publish from Pages
-
-On the live browser:
-
-1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; cheap; multi-file OK). Staging-only commits do **not** redeploy Pages.
-2. **Apply staged to library** — one Action promotes **whatever is staged on GitHub right now** (everyone’s pending icons), runs `catalog:gen`, clears staging, then Pages redeploys.
-3. **Publish** — separate; patch-bumps and publishes packages to GitHub Packages (unchanged).
-
-**One-time repo setup:** add a secret named `ICON_BROWSER_TOKEN` (fine-grained or classic PAT) with:
-
-- `contents: write`
-- `actions: write`
-
-Use that same secret for Pages build injection and for Apply workflow pushes. Then redeploy Pages (push to `main` or run **Deploy icon browser**).
-
-**Caveat:** until login/auth is added, anyone who can open the public Pages site can stage/apply/publish (they can also extract the baked token). Treat this as temporary open access.
-
-| Action | What happens |
-|--------|----------------|
-| Add to staging | Contents API → `staging/mono` or `staging/color` (shared queue; no Action) |
-| Apply staged | `workflow_dispatch` → `apply-staged-icons` moves staging → library, `catalog:gen`, Pages redeploys |
-| Publish | `workflow_dispatch` → `publish-packages` patch bump + GitHub Packages |
-
-Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
-
-```bash
-pnpm install
-pnpm catalog:gen   # first time / after SVG changes
-pnpm build
-pnpm dev
-```
-
-Product apps still install `@JasonTuTu2/icons-react` / `icons-vue` from GitHub Packages — the browser is a catalog, not an npm package.
+Product apps still install packages from GitHub Packages — the browser is a catalog UI, not an npm package. Adding/publishing brand SVGs is for maintainers (see below).
 
 ## Licensing
 
@@ -227,6 +221,31 @@ From Figma / git:
 4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap. Publish so consumers get the new version.
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
+
+### Upload & publish from Pages
+
+On the live browser:
+
+1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; cheap; multi-file OK). Staging-only commits do **not** redeploy Pages.
+2. **Apply staged to library** — one Action promotes **whatever is staged on GitHub right now** (everyone’s pending icons), runs `catalog:gen`, clears staging, then Pages redeploys.
+3. **Publish** — separate; patch-bumps and publishes packages to GitHub Packages.
+
+**One-time repo setup:** add a secret named `ICON_BROWSER_TOKEN` (fine-grained or classic PAT) with:
+
+- `contents: write`
+- `actions: write`
+
+Use that same secret for Pages build injection and for Apply workflow pushes. Then redeploy Pages (push to `main` or run **Deploy icon browser**).
+
+**Caveat:** until login/auth is added, anyone who can open the public Pages site can stage/apply/publish (they can also extract the baked token). Treat this as temporary open access.
+
+| Action | What happens |
+|--------|----------------|
+| Add to staging | Contents API → `staging/mono` or `staging/color` (shared queue; no Action) |
+| Apply staged | `workflow_dispatch` → `apply-staged-icons` moves staging → library, `catalog:gen`, Pages redeploys |
+| Publish | `workflow_dispatch` → `publish-packages` patch bump + GitHub Packages |
+
+Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
 
 ### Publishing
 
