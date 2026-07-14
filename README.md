@@ -151,6 +151,22 @@ addCollection(mdi)
 | `iconExists` / build error with Iconify React 6 | Fixed in latest packages — upgrade `@JasonTuTu2/icons-react` (uses `iconLoaded` with v5 fallback) |
 | Works locally, fails in CI | Set `NODE_AUTH_TOKEN` and `packages: read` in the workflow |
 
+## Icon browser (UI)
+
+Search icons, preview them, check licensing, and copy React/Vue snippets.
+
+- **Live:** https://JasonTuTu2.github.io/icons-library/ (GitHub Pages; deploys from `main`)
+- **Local:** `pnpm dev` → http://localhost:5173 (Upload SVG works only locally)
+
+```bash
+pnpm install
+pnpm catalog:gen   # first time / after SVG changes
+pnpm build
+pnpm dev
+```
+
+Product apps still install `@JasonTuTu2/icons-react` / `icons-vue` from GitHub Packages — the browser is a catalog, not an npm package.
+
 ## Licensing
 
 GenVoice packages are **MIT**. Icon artwork remains under upstream licenses (Ant Design Icons MIT; Iconify collections vary). Custom `gv:` icons are GenVoice proprietary / internal unless noted.
@@ -170,14 +186,18 @@ pnpm typecheck
 pnpm changeset
 ```
 
-### Custom icons from Figma
+### Adding custom icons
 
-1. Export SVG from Figma (prefer 24×24).
-2. Add via **Upload SVG** in the browser (`pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
+**App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added by **contributors** here, then published.
+
+From Figma:
+
+1. Export SVG (prefer 24×24).
+2. Add via **Upload SVG** in the local browser (`pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
    - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
 3. Run `pnpm catalog:gen` after git adds (upload regenerates + rebuilds packages automatically).
-4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap.
+4. Commit, open a PR, and release so consumers get the new version (`gv:kebab-name` + `registerCustomIcons()` at bootstrap).
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 

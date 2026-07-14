@@ -6,7 +6,9 @@ import { customIconUploadPlugin } from './vite.custom-upload-plugin'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // GitHub Pages serves at https://JasonTuTu2.github.io/icons-library/
+  base: command === 'build' ? '/icons-library/' : '/',
   plugins: [react(), customIconUploadPlugin()],
   resolve: {
     alias: {
@@ -30,4 +32,4 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 5000,
   },
-})
+}))
