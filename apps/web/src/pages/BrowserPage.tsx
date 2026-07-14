@@ -143,7 +143,7 @@ export function BrowserPage() {
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
               {isGithubAdminEnabled()
-                ? ' Upload SVGs or Publish packages from the toolbar.'
+                ? ' Stage SVGs, Apply when ready, or Publish packages from the toolbar.'
                 : ' Upload custom Figma SVGs with Upload (local dev or Pages with ICON_BROWSER_TOKEN).'}
             </p>
           </aside>

@@ -6,8 +6,14 @@ export interface IconUploadPayload {
   colorMode: IconColorMode
 }
 
+export interface StagedIcon {
+  name: string
+  colorMode: IconColorMode
+  path: string
+}
+
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
-const BATCH_SIZE = 5
+const STAGING_BASE = 'packages/custom-icons/staging'
 
 function getConfig() {
   const token = import.meta.env.VITE_GITHUB_TOKEN?.trim() ?? ''
@@ -45,7 +51,21 @@ export function packagesUrl(): string {
   return `https://github.com/${owner}?tab=packages`
 }
 
-async function githubFetch(path: string, init: RequestInit): Promise<void> {
+function stagingDir(colorMode: IconColorMode): string {
+  return colorMode === 'preserved' ? 'color' : 'mono'
+}
+
+function toBase64Utf8(text: string): string {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary)
+}
+
+async function githubFetch(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
   const { token, repo } = getConfig()
   if (!token || !repo) {
     throw new Error('GitHub upload/publish is not configured for this build.')
@@ -62,6 +82,11 @@ async function githubFetch(path: string, init: RequestInit): Promise<void> {
     },
   })
 
+  return res
+}
+
+async function githubJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await githubFetch(path, init)
   if (!res.ok) {
     let detail = res.statusText
     try {
@@ -72,17 +97,16 @@ async function githubFetch(path: string, init: RequestInit): Promise<void> {
     }
     throw new Error(`GitHub API ${res.status}: ${detail}`)
   }
+  if (res.status === 204) return undefined as T
+  return (await res.json()) as T
 }
 
-/** Fire repository_dispatch in small batches to keep payloads small. */
-export async function dispatchIconUpload(
-  icons: IconUploadPayload[],
-): Promise<void> {
+function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
   if (icons.length === 0) {
     throw new Error('No icons to upload.')
   }
 
-  for (const icon of icons) {
+  return icons.map((icon) => {
     const name = sanitizeIconName(icon.name)
     if (!name) {
       throw new Error(
@@ -93,28 +117,111 @@ export async function dispatchIconUpload(
     if (!content || !/<svg[\s>]/i.test(content)) {
       throw new Error(`"${icon.name}" must be an SVG document.`)
     }
+    return {
+      name,
+      content,
+      colorMode: icon.colorMode === 'preserved' ? 'preserved' : 'mono',
+    }
+  })
+}
+
+async function getFileSha(path: string): Promise<string | undefined> {
+  const res = await githubFetch(`/contents/${path}`)
+  if (res.status === 404) return undefined
+  if (!res.ok) {
+    let detail = res.statusText
+    try {
+      const body = (await res.json()) as { message?: string }
+      if (body.message) detail = body.message
+    } catch {
+      // ignore
+    }
+    throw new Error(`GitHub API ${res.status}: ${detail}`)
   }
+  const body = (await res.json()) as { sha?: string }
+  return body.sha
+}
 
-  const normalized = icons.map((icon) => ({
-    name: sanitizeIconName(icon.name)!,
-    content: icon.content.trim(),
-    colorMode: icon.colorMode === 'preserved' ? 'preserved' : 'mono',
-  }))
+/** Write icons into the shared staging folder (Contents API, no Action). */
+export async function stageIcons(icons: IconUploadPayload[]): Promise<void> {
+  const normalized = validateIcons(icons)
 
-  for (let i = 0; i < normalized.length; i += BATCH_SIZE) {
-    const batch = normalized.slice(i, i + BATCH_SIZE)
-    await githubFetch('/dispatches', {
-      method: 'POST',
-      body: JSON.stringify({
-        event_type: 'icon-upload',
-        client_payload: { icons: batch },
-      }),
+  for (const icon of normalized) {
+    const dir = stagingDir(icon.colorMode)
+    const path = `${STAGING_BASE}/${dir}/${icon.name}.svg`
+    const sha = await getFileSha(path)
+    const body: Record<string, string> = {
+      message: `Stage icon gv:${icon.name}`,
+      content: toBase64Utf8(`${icon.content}\n`),
+      branch: 'main',
+    }
+    if (sha) body.sha = sha
+
+    await githubJson(`/contents/${path}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
     })
   }
 }
 
+async function listStagingDir(
+  dir: 'mono' | 'color',
+  colorMode: IconColorMode,
+): Promise<StagedIcon[]> {
+  const res = await githubFetch(`/contents/${STAGING_BASE}/${dir}`)
+  if (res.status === 404) return []
+  if (!res.ok) {
+    let detail = res.statusText
+    try {
+      const body = (await res.json()) as { message?: string }
+      if (body.message) detail = body.message
+    } catch {
+      // ignore
+    }
+    throw new Error(`GitHub API ${res.status}: ${detail}`)
+  }
+
+  const entries = (await res.json()) as Array<{
+    name: string
+    path: string
+    type: string
+  }>
+
+  if (!Array.isArray(entries)) return []
+
+  return entries
+    .filter(
+      (entry) =>
+        entry.type === 'file' &&
+        entry.name.toLowerCase().endsWith('.svg') &&
+        !entry.name.startsWith('.'),
+    )
+    .map((entry) => ({
+      name: entry.name.replace(/\.svg$/i, ''),
+      colorMode,
+      path: entry.path,
+    }))
+}
+
+/** List all staged SVGs currently on main. */
+export async function listStagedIcons(): Promise<StagedIcon[]> {
+  const [mono, color] = await Promise.all([
+    listStagingDir('mono', 'mono'),
+    listStagingDir('color', 'preserved'),
+  ])
+  return [...mono, ...color].sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/** Promote whatever is staged now into the library (one Action). */
+export async function dispatchApplyStaged(): Promise<void> {
+  await githubJson('/actions/workflows/apply-staged-icons.yml/dispatches', {
+    method: 'POST',
+    body: JSON.stringify({ ref: 'main' }),
+  })
+}
+
 export async function dispatchPublish(): Promise<void> {
-  await githubFetch('/actions/workflows/publish-packages.yml/dispatches', {
+  await githubJson('/actions/workflows/publish-packages.yml/dispatches', {
     method: 'POST',
     body: JSON.stringify({ ref: 'main' }),
   })

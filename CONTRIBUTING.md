@@ -17,26 +17,29 @@
 
 ## Adding a custom icon
 
-Preferred: use **Upload SVG** on the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/) (requires `ICON_BROWSER_TOKEN` secret). That commits to `main` via Actions — no PR.
+Preferred: use the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/) (requires `ICON_BROWSER_TOKEN` secret):
+
+1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
+2. **Apply staged to library** — one Action promotes whatever is staged now, regenerates the catalog, clears staging.
 
 ### Monochrome (recolorable) — local / git
 
 1. Export a monochrome SVG from Figma.
-2. Save as `packages/custom-icons/svg/kebab-name.svg` (or upload with Monochrome mode in `pnpm dev` / Pages).
+2. Save as `packages/custom-icons/svg/kebab-name.svg` (or stage/apply / `pnpm dev` upload).
 3. Run `pnpm catalog:gen` if you added files via git.
-4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json` (Pages upload does this in CI).
+4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json` (Pages Apply does this in CI).
 
 ### Multi-color (preserved fills)
 
 1. Export a multi-color SVG from Figma.
-2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or upload with Multi-color mode).
+2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or stage/apply with Multi-color mode).
 3. Run `pnpm catalog:gen` if via git.
 
 Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 
-Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. Uploading icons does not publish packages by itself.
+Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. Staging and Apply do not publish packages by themselves.
 
 Manual publish (local):
 

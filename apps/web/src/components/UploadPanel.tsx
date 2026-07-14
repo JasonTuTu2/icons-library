@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  dispatchIconUpload,
-  isGithubAdminEnabled,
-  sanitizeIconName,
   actionsUrl,
+  dispatchApplyStaged,
+  isGithubAdminEnabled,
+  listStagedIcons,
+  sanitizeIconName,
+  stageIcons,
   type IconColorMode,
+  type StagedIcon,
 } from '../lib/github'
 
 interface UploadItem {
@@ -55,6 +58,8 @@ export function UploadPanel({
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [colorMode, setColorMode] = useState<IconColorMode>('mono')
+  const [staged, setStaged] = useState<StagedIcon[]>([])
+  const [stagedLoading, setStagedLoading] = useState(false)
 
   const canSubmit = useMemo(
     () =>
@@ -62,6 +67,18 @@ export function UploadPanel({
       items.every((item) => sanitizeIconName(item.name) !== null),
     [items],
   )
+
+  const refreshStaged = useCallback(async () => {
+    if (mode !== 'github') return
+    setStagedLoading(true)
+    try {
+      setStaged(await listStagedIcons())
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setStagedLoading(false)
+    }
+  }, [mode])
 
   function close() {
     setOpen(false)
@@ -76,6 +93,12 @@ export function UploadPanel({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
 
+  useEffect(() => {
+    if (open && mode === 'github') {
+      void refreshStaged()
+    }
+  }, [open, mode, refreshStaged])
+
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
     const svgs = Array.from(fileList).filter((f) =>
@@ -86,31 +109,69 @@ export function UploadPanel({
     setMessage(null)
   }
 
-  async function handleUpload() {
-    if (!uploadEnabled || !canSubmit) return
+  async function handleStage() {
+    if (mode !== 'github' || !canSubmit) return
     setBusy(true)
     setMessage(null)
     try {
       const count = items.length
-      const lastName = sanitizeIconName(items[items.length - 1]!.name)!
+      await stageIcons(
+        items.map((item) => ({
+          name: item.name,
+          content: item.content,
+          colorMode,
+        })),
+      )
+      setItems([])
+      await refreshStaged()
+      setMessage(
+        `Staged ${count} icon(s) on GitHub (shared queue). Click Apply when ready — no Action ran yet.`,
+      )
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
 
-      if (mode === 'github') {
-        await dispatchIconUpload(
-          items.map((item) => ({
-            name: item.name,
-            content: item.content,
-            colorMode,
-          })),
-        )
-        setItems([])
-        setMessage(
-          `Queued ${count} icon(s) on main. Catalog regenerates in Actions — refresh the site in ~1–2 minutes. ${actionsUrl()}`,
-        )
-        onUploaded(`gv:${lastName}`)
+  async function handleApplyStaged() {
+    if (mode !== 'github') return
+    setBusy(true)
+    setMessage(null)
+    try {
+      const current = await listStagedIcons()
+      setStaged(current)
+      if (current.length === 0) {
+        setMessage('Nothing is staged on GitHub right now.')
         return
       }
 
+      const names = current.map((icon) => `gv:${icon.name}`).join(', ')
+      const ok = window.confirm(
+        `Apply ${current.length} staged icon(s) to the library?\n\n${names}\n\nApplies whatever is staged on GitHub right now. If someone else is still adding icons, they will not be included unless they click Apply again after.`,
+      )
+      if (!ok) return
+
+      await dispatchApplyStaged()
+      const first = current[0]
+      if (first) onUploaded(`gv:${first.name}`)
+      setMessage(
+        `Apply queued for ${current.length} icon(s). Catalog regenerates in Actions — refresh Pages after it finishes. ${actionsUrl()}`,
+      )
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleLocalUpload() {
+    if (mode !== 'local' || !canSubmit) return
+    setBusy(true)
+    setMessage(null)
+    try {
       let lastId = ''
+      const count = items.length
       for (const item of items) {
         const res = await fetch('/__gv/icons/upload', {
           method: 'POST',
@@ -172,7 +233,7 @@ export function UploadPanel({
                 Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
                 Choose monochrome (recolorable) or multi-color (preserved fills).
                 {mode === 'github'
-                  ? ' Saves go straight to main via GitHub Actions.'
+                  ? ' On Pages, files go to a shared staging folder first; Apply promotes everyone\'s staged icons in one Action.'
                   : ' Writes to disk and regenerates the catalog locally.'}
               </p>
               <label className="field">
@@ -230,18 +291,65 @@ export function UploadPanel({
                 </ul>
               ) : null}
 
-              <button
-                type="button"
-                className="ghost accent"
-                disabled={!canSubmit || busy}
-                onClick={() => void handleUpload()}
-              >
-                {busy
-                  ? 'Uploading…'
-                  : mode === 'github'
-                    ? 'Save to GitHub'
-                    : 'Save to library'}
-              </button>
+              {mode === 'github' ? (
+                <>
+                  <button
+                    type="button"
+                    className="ghost accent"
+                    disabled={!canSubmit || busy}
+                    onClick={() => void handleStage()}
+                  >
+                    {busy ? 'Working…' : 'Add to staging'}
+                  </button>
+
+                  <div className="staged-block">
+                    <div className="staged-header">
+                      <strong>Staged on GitHub</strong>
+                      <button
+                        type="button"
+                        className="ghost"
+                        disabled={busy || stagedLoading}
+                        onClick={() => void refreshStaged()}
+                      >
+                        {stagedLoading ? 'Refreshing…' : 'Refresh'}
+                      </button>
+                    </div>
+                    {staged.length === 0 ? (
+                      <p className="staged-empty">No staged icons.</p>
+                    ) : (
+                      <ul className="staged-list">
+                        {staged.map((icon) => (
+                          <li key={icon.path}>
+                            <code>gv:{icon.name}</code>
+                            <span>
+                              {icon.colorMode === 'preserved'
+                                ? 'multi-color'
+                                : 'mono'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <button
+                      type="button"
+                      className="ghost accent"
+                      disabled={busy || staged.length === 0}
+                      onClick={() => void handleApplyStaged()}
+                    >
+                      {busy ? 'Working…' : 'Apply staged to library'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="ghost accent"
+                  disabled={!canSubmit || busy}
+                  onClick={() => void handleLocalUpload()}
+                >
+                  {busy ? 'Uploading…' : 'Save to library'}
+                </button>
+              )}
             </>
           )}
           {message ? <p className="copy-toast">{message}</p> : null}

@@ -160,23 +160,28 @@ Search icons, preview them, check licensing, and copy React/Vue snippets.
 
 ### Upload & publish from Pages
 
-On the live browser you can **Upload SVG** (commits brand icons to `main` via Actions) and **Publish** (patch-bumps and publishes packages to GitHub Packages). No PR — changes land on `main` directly.
+On the live browser:
+
+1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; cheap; multi-file OK). Staging-only commits do **not** redeploy Pages.
+2. **Apply staged to library** — one Action promotes **whatever is staged on GitHub right now** (everyone’s pending icons), runs `catalog:gen`, clears staging, then Pages redeploys.
+3. **Publish** — separate; patch-bumps and publishes packages to GitHub Packages (unchanged).
 
 **One-time repo setup:** add a secret named `ICON_BROWSER_TOKEN` (fine-grained or classic PAT) with:
 
 - `contents: write`
 - `actions: write`
 
-Use that same secret for Pages build injection and for workflow pushes (so upload commits re-trigger the Pages deploy). Then redeploy Pages (push to `main` or run **Deploy icon browser**).
+Use that same secret for Pages build injection and for Apply workflow pushes. Then redeploy Pages (push to `main` or run **Deploy icon browser**).
 
-**Caveat:** until login/auth is added, anyone who can open the public Pages site can upload icons and trigger publishes (they can also extract the baked token). Treat this as temporary open access.
+**Caveat:** until login/auth is added, anyone who can open the public Pages site can stage/apply/publish (they can also extract the baked token). Treat this as temporary open access.
 
 | Action | What happens |
 |--------|----------------|
-| Upload SVG | `repository_dispatch` → `upload-icons` workflow writes SVGs, runs `catalog:gen`, commits to `main`, Pages redeploys |
-| Publish | `workflow_dispatch` → `publish-packages` workflow creates a patch changeset, versions, publishes to GitHub Packages |
+| Add to staging | Contents API → `staging/mono` or `staging/color` (shared queue; no Action) |
+| Apply staged | `workflow_dispatch` → `apply-staged-icons` moves staging → library, `catalog:gen`, Pages redeploys |
+| Publish | `workflow_dispatch` → `publish-packages` patch bump + GitHub Packages |
 
-Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub.
+Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
 
 ```bash
 pnpm install
@@ -210,7 +215,7 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
-**Preferred (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), use **Upload SVG**, wait for Actions + Pages refresh, then click **Publish** when ready for a new package version.
+**Preferred (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Add to staging** (multi-file OK), then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
 From Figma / git:
 
@@ -218,14 +223,14 @@ From Figma / git:
 2. Add via **Upload SVG** in the browser (Pages or `pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
    - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
-3. Local git adds: run `pnpm catalog:gen` (Pages upload regenerates in CI).
+3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
 4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap. Publish so consumers get the new version.
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 
 ### Publishing
 
-Packages publish to GitHub Packages when someone clicks **Publish** in the icon browser (see `.github/workflows/publish-packages.yml`), or via manual `workflow_dispatch`. Uploads to `main` do **not** auto-publish.
+Packages publish to GitHub Packages when someone clicks **Publish** in the icon browser (see `.github/workflows/publish-packages.yml`), or via manual `workflow_dispatch`. Staging/Apply do **not** auto-publish.
 
 Local publish:
 

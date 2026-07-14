@@ -3,6 +3,8 @@ name: Deploy icon browser
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'packages/custom-icons/staging/**'
   workflow_dispatch:
 
 permissions:
