@@ -28,6 +28,11 @@
       "width": 24,
       "height": 24
     },
+    "demo": {
+      "body": "<path fill=\"currentColor\" d=\"M9.075 2.95c.124 0 .225.1.225.225V4.75h5.4V3.175c0-.124.1-.225.225-.225h1.35c.124 0 .225.1.225.225V4.75h1.8a2.7 2.7 0 0 1 2.7 2.7v9.9a2.7 2.7 0 0 1-2.7 2.7H5.7a2.7 2.7 0 0 1-2.7-2.7v-9.9a2.7 2.7 0 0 1 2.7-2.7h1.8V3.175c0-.124.1-.225.225-.225zm5.625 3.6H9.3v1.575c0 .124-.1.225-.225.225h-1.35a.225.225 0 0 1-.225-.225V6.55H5.7a.9.9 0 0 0-.9.9V9.7h14.4V7.45a.9.9 0 0 0-.9-.9h-1.8v1.575c0 .124-.1.225-.225.225h-1.35a.225.225 0 0 1-.225-.225zM4.8 11.5v5.85a.9.9 0 0 0 .9.9h12.6a.9.9 0 0 0 .9-.9V11.5z\"/>",
+      "width": 24,
+      "height": 24
+    },
     "smoke-test": {
       "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
       "width": 24,
