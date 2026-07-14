@@ -60,17 +60,18 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <ol>
           <li>Export SVG from Figma (prefer 24×24, simple paths).</li>
           <li>
-            Commit to <code>packages/custom-icons/svg/</code> (monochrome) or{' '}
-            <code>svg/color/</code> (multi-color), or use <strong>Upload SVG</strong>{' '}
-            in the browser while running <code>pnpm dev</code> and pick a color mode.
-          </li>
-          <li>
-            Run <code>pnpm catalog:gen</code> if you added files via git (upload
-            regenerates and rebuilds packages automatically).
+            Prefer <strong>Add to staging</strong> in this browser (monochrome or
+            multi-color), then <strong>Apply staged to library</strong> and{' '}
+            <strong>Publish</strong>. Or commit to{' '}
+            <code>packages/custom-icons/svg/</code> (mono) /{' '}
+            <code>svg/color/</code> (multi-color) and run{' '}
+            <code>pnpm catalog:gen</code>. Local <code>pnpm dev</code> upload
+            writes to disk without GitHub staging.
           </li>
           <li>
             Use <code>gv:kebab-name</code> in designs and code. Custom icons
-            register automatically when you import <code>Icon</code>.
+            register automatically when you import <code>Icon</code> — no
+            bootstrap call.
           </li>
         </ol>
         <p>
@@ -85,26 +86,34 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Props</h2>
         <ul>
           <li>
-            <code>name</code> — canonical id (<code>ant:HomeOutlined</code>,{' '}
-            <code>gv:billing-alert</code>, or Iconify <code>prefix:name</code>)
+            <code>name</code> — required canonical id (<code>ant:HomeOutlined</code>
+            , <code>gv:billing-alert</code>, or Iconify <code>prefix:name</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}
             <code>1em</code>)
           </li>
           <li>
-            <code>color</code> — CSS color (default <code>currentColor</code>)
+            <code>color</code> — CSS color (default <code>currentColor</code>).
+            Works for monochrome <code>gv:</code> icons; multi-color <code>gv:</code>{' '}
+            icons keep baked fills
           </li>
           <li>
             <code>label</code> — accessible name for meaningful icons
           </li>
           <li>
-            <code>decorative</code> — marks presentational icons{' '}
+            <code>decorative</code> — presentational; sets{' '}
             <code>aria-hidden</code>
           </li>
           <li>
-            <code>className</code> / <code>class</code>, <code>style</code>,{' '}
-            <code>spin</code>, <code>rotate</code>
+            <code>className</code> / <code>class</code>, <code>style</code>
+          </li>
+          <li>
+            <code>rotate</code> — degrees (CSS transform)
+          </li>
+          <li>
+            <code>spin</code> — Ant icons only; ignored for Iconify and{' '}
+            <code>gv:</code>
           </li>
         </ul>
       </section>
