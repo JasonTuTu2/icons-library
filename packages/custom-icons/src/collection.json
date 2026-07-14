@@ -43,6 +43,21 @@
       "width": 24,
       "height": 24
     },
+    "staging-1": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
+      "width": 24,
+      "height": 24
+    },
+    "staging-2": {
+      "body": "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" rx=\"4\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\" d=\"M7 12h10m-5-5v10\"/>",
+      "width": 24,
+      "height": 24
+    },
+    "staging-3": {
+      "body": "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" rx=\"4\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\" d=\"M7 12h10m-5-5v10\"/>",
+      "width": 24,
+      "height": 24
+    },
     "staging-test": {
       "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
       "width": 24,
