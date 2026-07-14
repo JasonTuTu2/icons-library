@@ -1,5 +1,15 @@
 # @JasonTuTu2/icons-custom
 
+## 0.3.0
+
+### Minor Changes
+
+- bb88d7b: Auto-register GenVoice custom icons when importing Icon — no bootstrap `registerCustomIcons()` call.
+
+### Patch Changes
+
+- Publish from icon browser.
+
 ## 0.2.8
 
 ### Patch Changes

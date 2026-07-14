@@ -1,5 +1,19 @@
 # @JasonTuTu2/icons-vue
 
+## 0.3.0
+
+### Minor Changes
+
+- bb88d7b: Auto-register GenVoice custom icons when importing Icon — no bootstrap `registerCustomIcons()` call.
+
+### Patch Changes
+
+- Publish from icon browser.
+- Updated dependencies [bb88d7b]
+- Updated dependencies
+  - @JasonTuTu2/icons-custom@0.3.0
+  - @JasonTuTu2/icons-core@0.3.0
+
 ## 0.2.8
 
 ### Patch Changes
