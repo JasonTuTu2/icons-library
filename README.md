@@ -156,7 +156,27 @@ addCollection(mdi)
 Search icons, preview them, check licensing, and copy React/Vue snippets.
 
 - **Live:** https://JasonTuTu2.github.io/icons-library/ (GitHub Pages; deploys from `main`)
-- **Local:** `pnpm dev` → http://localhost:5173 (Upload SVG works only locally)
+- **Local:** `pnpm dev` → http://localhost:5173
+
+### Upload & publish from Pages
+
+On the live browser you can **Upload SVG** (commits brand icons to `main` via Actions) and **Publish** (patch-bumps and publishes packages to GitHub Packages). No PR — changes land on `main` directly.
+
+**One-time repo setup:** add a secret named `ICON_BROWSER_TOKEN` (fine-grained or classic PAT) with:
+
+- `contents: write`
+- `actions: write`
+
+Use that same secret for Pages build injection and for workflow pushes (so upload commits re-trigger the Pages deploy). Then redeploy Pages (push to `main` or run **Deploy icon browser**).
+
+**Caveat:** until login/auth is added, anyone who can open the public Pages site can upload icons and trigger publishes (they can also extract the baked token). Treat this as temporary open access.
+
+| Action | What happens |
+|--------|----------------|
+| Upload SVG | `repository_dispatch` → `upload-icons` workflow writes SVGs, runs `catalog:gen`, commits to `main`, Pages redeploys |
+| Publish | `workflow_dispatch` → `publish-packages` workflow creates a patch changeset, versions, publishes to GitHub Packages |
+
+Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub.
 
 ```bash
 pnpm install
@@ -188,22 +208,26 @@ pnpm changeset
 
 ### Adding custom icons
 
-**App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added by **contributors** here, then published.
+**App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
-From Figma:
+**Preferred (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), use **Upload SVG**, wait for Actions + Pages refresh, then click **Publish** when ready for a new package version.
+
+From Figma / git:
 
 1. Export SVG (prefer 24×24).
-2. Add via **Upload SVG** in the local browser (`pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
+2. Add via **Upload SVG** in the browser (Pages or `pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
    - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
-3. Run `pnpm catalog:gen` after git adds (upload regenerates + rebuilds packages automatically).
-4. Commit, open a PR, and release so consumers get the new version (`gv:kebab-name` + `registerCustomIcons()` at bootstrap).
+3. Local git adds: run `pnpm catalog:gen` (Pages upload regenerates in CI).
+4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap. Publish so consumers get the new version.
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 
 ### Publishing
 
-Packages publish to GitHub Packages via Changesets when release PRs merge to `main` (see `.github/workflows/release.yml`).
+Packages publish to GitHub Packages when someone clicks **Publish** in the icon browser (see `.github/workflows/publish-packages.yml`), or via manual `workflow_dispatch`. Uploads to `main` do **not** auto-publish.
+
+Local publish:
 
 ```bash
 export NODE_AUTH_TOKEN=ghp_...   # write:packages

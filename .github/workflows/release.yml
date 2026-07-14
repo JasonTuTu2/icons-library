@@ -1,8 +1,9 @@
 name: Release
 
+# Package publishing is user-triggered via the icon browser Publish button
+# (workflow_dispatch on publish-packages.yml) or manually from the Actions tab.
 on:
-  push:
-    branches: [main, master]
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -12,9 +13,10 @@ jobs:
     permissions:
       contents: write
       packages: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
@@ -25,11 +27,15 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: "@JasonTuTu2"
       - run: pnpm install --frozen-lockfile
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
+      - name: Version and publish (uses existing changesets if any)
+        run: |
+          if [ -n "$(find .changeset -name '*.md' ! -name 'README.md' 2>/dev/null)" ]; then
+            pnpm version-packages
+          fi
+          pnpm release
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git push --follow-tags origin HEAD:main || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

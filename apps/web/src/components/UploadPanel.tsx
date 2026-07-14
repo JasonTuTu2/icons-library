@@ -1,4 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import {
+  dispatchIconUpload,
+  isGithubAdminEnabled,
+  sanitizeIconName,
+  actionsUrl,
+  type IconColorMode,
+} from '../lib/github'
 
 interface UploadItem {
   fileName: string
@@ -8,7 +15,7 @@ interface UploadItem {
 }
 
 interface UploadPanelProps {
-  uploadEnabled: boolean
+  localUploadEnabled: boolean
   onUploaded: (id: string) => void
 }
 
@@ -18,13 +25,7 @@ function fileToUploadItem(file: File): Promise<UploadItem> {
     reader.onload = () => {
       const content = String(reader.result ?? '')
       const base = file.name.replace(/\.svg$/i, '')
-      const name = base
-        .trim()
-        .toLowerCase()
-        .replace(/[\s_]+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
+      const name = sanitizeIconName(base) ?? ''
       resolve({
         fileName: file.name,
         name,
@@ -37,15 +38,28 @@ function fileToUploadItem(file: File): Promise<UploadItem> {
   })
 }
 
-export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
+export function UploadPanel({
+  localUploadEnabled,
+  onUploaded,
+}: UploadPanelProps) {
+  const githubEnabled = isGithubAdminEnabled()
+  const uploadEnabled = localUploadEnabled || githubEnabled
+  const mode: 'local' | 'github' | 'none' = localUploadEnabled
+    ? 'local'
+    : githubEnabled
+      ? 'github'
+      : 'none'
+
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<UploadItem[]>([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
-  const [colorMode, setColorMode] = useState<'mono' | 'preserved'>('mono')
+  const [colorMode, setColorMode] = useState<IconColorMode>('mono')
 
   const canSubmit = useMemo(
-    () => items.length > 0 && items.every((item) => item.name.length > 0),
+    () =>
+      items.length > 0 &&
+      items.every((item) => sanitizeIconName(item.name) !== null),
     [items],
   )
 
@@ -77,8 +91,26 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
     setBusy(true)
     setMessage(null)
     try {
-      let lastId = ''
       const count = items.length
+      const lastName = sanitizeIconName(items[items.length - 1]!.name)!
+
+      if (mode === 'github') {
+        await dispatchIconUpload(
+          items.map((item) => ({
+            name: item.name,
+            content: item.content,
+            colorMode,
+          })),
+        )
+        setItems([])
+        setMessage(
+          `Queued ${count} icon(s) on main. Catalog regenerates in Actions — refresh the site in ~1–2 minutes. ${actionsUrl()}`,
+        )
+        onUploaded(`gv:${lastName}`)
+        return
+      }
+
+      let lastId = ''
       for (const item of items) {
         const res = await fetch('/__gv/icons/upload', {
           method: 'POST',
@@ -130,24 +162,25 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
           </div>
           {!uploadEnabled ? (
             <p>
-              Upload writes to disk only during local <code>pnpm dev</code>. To
-              add icons in production builds, commit SVGs under{' '}
-              <code>packages/custom-icons/svg/</code> (mono) or{' '}
-              <code>svg/color/</code> (multi-color) and run{' '}
-              <code>pnpm catalog:gen</code>.
+              Upload is not configured. Locally, run <code>pnpm dev</code>. On
+              GitHub Pages, set the <code>ICON_BROWSER_TOKEN</code> repo secret
+              and redeploy.
             </p>
           ) : (
             <>
               <p>
                 Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
                 Choose monochrome (recolorable) or multi-color (preserved fills).
+                {mode === 'github'
+                  ? ' Saves go straight to main via GitHub Actions.'
+                  : ' Writes to disk and regenerates the catalog locally.'}
               </p>
               <label className="field">
                 <span>Color mode</span>
                 <select
                   value={colorMode}
                   onChange={(e) =>
-                    setColorMode(e.target.value as 'mono' | 'preserved')
+                    setColorMode(e.target.value as IconColorMode)
                   }
                 >
                   <option value="mono">Monochrome (currentColor)</option>
@@ -203,7 +236,11 @@ export function UploadPanel({ uploadEnabled, onUploaded }: UploadPanelProps) {
                 disabled={!canSubmit || busy}
                 onClick={() => void handleUpload()}
               >
-                {busy ? 'Uploading…' : 'Save to library'}
+                {busy
+                  ? 'Uploading…'
+                  : mode === 'github'
+                    ? 'Save to GitHub'
+                    : 'Save to library'}
               </button>
             </>
           )}

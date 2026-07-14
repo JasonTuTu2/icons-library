@@ -1,0 +1,98 @@
+name: Upload icons
+
+on:
+  repository_dispatch:
+    types: [icon-upload]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upload-icons
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PAT so the push can trigger pages.yml (GITHUB_TOKEN pushes do not)
+          token: ${{ secrets.ICON_BROWSER_TOKEN }}
+
+      - id: write
+        name: Write uploaded SVGs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const icons = context.payload.client_payload?.icons
+            if (!Array.isArray(icons) || icons.length === 0) {
+              core.setFailed('client_payload.icons must be a non-empty array')
+              return
+            }
+
+            const kebab = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
+            const names = []
+
+            for (const icon of icons) {
+              const name = String(icon.name ?? '')
+                .replace(/\.svg$/i, '')
+                .trim()
+                .toLowerCase()
+                .replace(/[\s_]+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+
+              if (!name || !kebab.test(name)) {
+                core.setFailed(`Invalid icon name: ${icon.name}`)
+                return
+              }
+
+              const content = String(icon.content ?? '').trim()
+              if (!content || !/<svg[\s>]/i.test(content)) {
+                core.setFailed(`Content for ${name} must be an SVG document`)
+                return
+              }
+
+              const colorMode =
+                icon.colorMode === 'preserved' ? 'preserved' : 'mono'
+              const dir =
+                colorMode === 'preserved'
+                  ? 'packages/custom-icons/svg/color'
+                  : 'packages/custom-icons/svg'
+              fs.mkdirSync(dir, { recursive: true })
+              fs.writeFileSync(path.join(dir, `${name}.svg`), `${content}\n`, 'utf8')
+              names.push(`gv:${name}`)
+              core.info(`Wrote ${dir}/${name}.svg`)
+            }
+
+            core.setOutput('names', names.join(', '))
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm catalog:gen
+
+      - name: Commit and push
+        env:
+          ICON_NAMES: ${{ steps.write.outputs.names }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/custom-icons packages/catalog
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Add custom icon(s) from icon browser: ${ICON_NAMES}"
+          git push

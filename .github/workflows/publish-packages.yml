@@ -1,0 +1,70 @@
+name: Publish packages
+
+on:
+  workflow_dispatch:
+
+concurrency: publish-packages-${{ github.ref }}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PAT so version pushes can trigger downstream workflows if needed
+          token: ${{ secrets.ICON_BROWSER_TOKEN }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@JasonTuTu2"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create patch changeset
+        run: |
+          {
+            echo '---'
+            echo '"@JasonTuTu2/icons-core": patch'
+            echo '"@JasonTuTu2/icons-catalog": patch'
+            echo '"@JasonTuTu2/icons-react": patch'
+            echo '"@JasonTuTu2/icons-vue": patch'
+            echo '"@JasonTuTu2/icons-custom": patch'
+            echo '---'
+            echo ''
+            echo 'Publish from icon browser.'
+          } > .changeset/icon-browser-publish.md
+
+      - name: Version packages
+        run: pnpm version-packages
+
+      - name: Commit version bumps
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No version changes"
+            exit 1
+          fi
+          git commit -m "Version packages (publish from icon browser)"
+
+      - name: Build and publish to GitHub Packages
+        run: pnpm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push version commits and tags
+        run: git push --follow-tags origin HEAD:main

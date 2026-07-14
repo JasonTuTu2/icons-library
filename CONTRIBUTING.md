@@ -10,37 +10,33 @@
 
 ## Scripts
 
-- `pnpm dev` — icon browser (supports custom SVG upload locally)
+- `pnpm dev` — icon browser (local SVG upload to disk)
 - `pnpm test` — unit tests
 - `pnpm typecheck` — TypeScript across packages
 - `pnpm catalog:gen` — rebuild catalog JSON, custom collection, and package `dist/` outputs
 
-## Adding a custom icon (PR)
+## Adding a custom icon
 
-### Monochrome (recolorable)
+Preferred: use **Upload SVG** on the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/) (requires `ICON_BROWSER_TOKEN` secret). That commits to `main` via Actions — no PR.
+
+### Monochrome (recolorable) — local / git
 
 1. Export a monochrome SVG from Figma.
-2. Save as `packages/custom-icons/svg/kebab-name.svg` (or upload with Monochrome mode in `pnpm dev`).
-3. Run `pnpm catalog:gen`.
-4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json`.
-5. Open a PR.
+2. Save as `packages/custom-icons/svg/kebab-name.svg` (or upload with Monochrome mode in `pnpm dev` / Pages).
+3. Run `pnpm catalog:gen` if you added files via git.
+4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json` (Pages upload does this in CI).
 
 ### Multi-color (preserved fills)
 
 1. Export a multi-color SVG from Figma.
 2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or upload with Multi-color mode).
-3. Run `pnpm catalog:gen`.
-4. Commit as above.
+3. Run `pnpm catalog:gen` if via git.
 
 Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 
-Packages are published to **GitHub Packages** (`https://npm.pkg.github.com`) under the `@JasonTuTu2` scope. This repo uses [Changesets](https://github.com/changesets/changesets):
-
-1. `pnpm changeset` (open a PR with the changeset file)
-2. On merge to `main`, the Release workflow opens a version PR (or publishes if one is ready)
-3. Merging the version PR runs `pnpm release` and publishes to GitHub Packages
+Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. Uploading icons does not publish packages by itself.
 
 Manual publish (local):
 
@@ -53,6 +49,8 @@ pnpm release
 Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token with `read:packages` — see the README.
 
 `@JasonTuTu2/icons-web` and `@JasonTuTu2/catalog-gen` stay private and are not published.
+
+**Security note:** the Pages build embeds `ICON_BROWSER_TOKEN` so the public UI can call GitHub. Until auth is added, treat upload/publish as open to anyone with the site URL.
 
 ## Guidelines
 

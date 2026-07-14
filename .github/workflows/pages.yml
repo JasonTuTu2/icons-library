@@ -28,7 +28,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm catalog:gen
-      - run: pnpm --filter @JasonTuTu2/icons-web... build
+      - name: Build icon browser
+        run: pnpm --filter @JasonTuTu2/icons-web... build
+        env:
+          VITE_GITHUB_TOKEN: ${{ secrets.ICON_BROWSER_TOKEN }}
+          VITE_GITHUB_REPO: ${{ github.repository }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist
