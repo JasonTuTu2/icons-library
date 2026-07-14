@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-core
 
+## 0.2.5
+
+### Patch Changes
+
+- Publish from icon browser.
+
 ## 0.2.4
 
 ### Patch Changes
