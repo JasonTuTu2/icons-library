@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-core
 
+## 0.2.2
+
+### Patch Changes
+
+- c73503a: Support @iconify/react v6 (`iconLoaded`) and trim demo/junk custom SVGs to a small brand set.
+
 ## 0.2.1
 
 ### Patch Changes
