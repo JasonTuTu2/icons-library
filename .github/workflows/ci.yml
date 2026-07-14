@@ -3,7 +3,12 @@ name: CI
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      # Staging commits (Contents API) should not burn Actions minutes
+      - 'packages/custom-icons/staging/**'
   pull_request:
+    paths-ignore:
+      - 'packages/custom-icons/staging/**'
 
 jobs:
   build:
