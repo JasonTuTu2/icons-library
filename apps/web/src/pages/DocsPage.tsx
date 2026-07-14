@@ -26,9 +26,6 @@ pnpm add @JasonTuTu2/icons-react @ant-design/icons @iconify/react
 # Vue
 pnpm add @JasonTuTu2/icons-vue @ant-design/icons-vue @iconify/vue
 
-# Custom GenVoice brand icons
-pnpm add @JasonTuTu2/icons-custom
-
 # Optional offline Iconify sets
 pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         </pre>
@@ -38,10 +35,7 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         <h2>Usage</h2>
         <h3>React</h3>
         <pre>
-          <code>{`import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'
-import { Icon } from '@JasonTuTu2/icons-react'
-
-registerCustomIcons()
+          <code>{`import { Icon } from '@JasonTuTu2/icons-react'
 
 <Icon name="ant:HomeOutlined" size={24} label="Home" />
 <Icon name="mdi:home" size="1.5em" decorative />
@@ -50,10 +44,7 @@ registerCustomIcons()
         <h3>Vue</h3>
         <pre>
           <code>{`<script setup>
-import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
 import { Icon } from '@JasonTuTu2/icons-vue'
-
-registerCustomIcons()
 </script>
 
 <template>
@@ -78,8 +69,8 @@ registerCustomIcons()
             regenerates and rebuilds packages automatically).
           </li>
           <li>
-            Use <code>gv:kebab-name</code> in designs and code. Call{' '}
-            <code>registerCustomIcons()</code> once at app bootstrap.
+            Use <code>gv:kebab-name</code> in designs and code. Custom icons
+            register automatically when you import <code>Icon</code>.
           </li>
         </ol>
         <p>

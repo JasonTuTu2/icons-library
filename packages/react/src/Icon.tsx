@@ -6,6 +6,7 @@ import {
   type ReactElement,
 } from 'react'
 import * as IconifyReact from '@iconify/react'
+import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -16,6 +17,8 @@ import {
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
 import { iconifyIconExists } from './iconifyCompat.js'
 import type { AntIconComponent, IconProps } from './types.js'
+
+registerCustomIcons()
 
 const { Icon: IconifyIcon } = IconifyReact
 
@@ -136,8 +139,8 @@ export function Icon({
   if (parsed.provider === 'custom' && !iconifyIconExists(IconifyReact, parsed.id)) {
     if (isDev()) {
       console.warn(
-        `[GenVoice Icons] Custom icon "${name}" is not registered. ` +
-          'Call registerCustomIcons() from @JasonTuTu2/icons-custom/react at app bootstrap.',
+        `[GenVoice Icons] Custom icon "${name}" was not found in @JasonTuTu2/icons-custom. ` +
+          'Publish/upgrade the package after adding the SVG, or check the kebab name.',
       )
     }
     return <MissingIcon name={name} style={mergedStyle} className={className} />

@@ -1,5 +1,6 @@
 import { computed, defineComponent, h, onMounted, ref, watch, type PropType, type CSSProperties } from 'vue'
 import * as IconifyVue from '@iconify/vue'
+import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -10,6 +11,8 @@ import {
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
 import { iconifyIconExists } from './iconifyCompat.js'
 import type { AntIconComponent } from './types.js'
+
+registerCustomIcons()
 
 const { Icon: IconifyIcon } = IconifyVue
 
@@ -131,8 +134,8 @@ export const Icon = defineComponent({
       if (p.provider === 'custom' && !iconifyIconExists(IconifyVue, p.id)) {
         if (isDev()) {
           console.warn(
-            `[GenVoice Icons] Custom icon "${props.name}" is not registered. ` +
-              'Call registerCustomIcons() from @JasonTuTu2/icons-custom/vue at app bootstrap.',
+            `[GenVoice Icons] Custom icon "${props.name}" was not found in @JasonTuTu2/icons-custom. ` +
+              'Publish/upgrade the package after adding the SVG, or check the kebab name.',
           )
         }
         return h('span', {

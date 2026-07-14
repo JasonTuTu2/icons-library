@@ -60,15 +60,9 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
 }
 
 export function reactSnippet(id: string): string {
-  if (id.startsWith('gv:')) {
-    return `import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'\nimport { Icon } from '@JasonTuTu2/icons-react'\n\nregisterCustomIcons()\n\n<Icon name="${id}" size={24} label="…" />`
-  }
   return `import { Icon } from '@JasonTuTu2/icons-react'\n\n<Icon name="${id}" size={24} label="…" />`
 }
 
 export function vueSnippet(id: string): string {
-  if (id.startsWith('gv:')) {
-    return `<script setup>\nimport { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'\nimport { Icon } from '@JasonTuTu2/icons-vue'\n\nregisterCustomIcons()\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
-  }
   return `<script setup>\nimport { Icon } from '@JasonTuTu2/icons-vue'\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
 }

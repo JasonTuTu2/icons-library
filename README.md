@@ -10,7 +10,7 @@ Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=pa
 |---------|-------------|
 | `@JasonTuTu2/icons-react` | React `<Icon>` component |
 | `@JasonTuTu2/icons-vue` | Vue 3 `<Icon>` component |
-| `@JasonTuTu2/icons-custom` | GenVoice brand SVGs + `registerCustomIcons()` |
+| `@JasonTuTu2/icons-custom` | GenVoice brand SVGs (pulled in by react/vue) |
 | `@JasonTuTu2/icons-core` | Shared types & helpers (usually transitive) |
 | `@JasonTuTu2/icons-catalog` | Icon metadata + search helpers |
 | `@JasonTuTu2/icons-web` | Icon browser + docs (private app, not published) |
@@ -64,13 +64,13 @@ If `GITHUB_TOKEN` cannot see packages under another user’s account, use a PAT 
 **React**
 
 ```bash
-pnpm add @JasonTuTu2/icons-react @JasonTuTu2/icons-custom @ant-design/icons @iconify/react
+pnpm add @JasonTuTu2/icons-react @ant-design/icons @iconify/react
 ```
 
 **Vue 3**
 
 ```bash
-pnpm add @JasonTuTu2/icons-vue @JasonTuTu2/icons-custom @ant-design/icons-vue @iconify/vue
+pnpm add @JasonTuTu2/icons-vue @ant-design/icons-vue @iconify/vue
 ```
 
 Optional:
@@ -82,15 +82,12 @@ pnpm add @iconify-json/mdi   # offline Iconify set example
 
 ## Usage
 
-Call `registerCustomIcons()` once at app bootstrap before using any `gv:` icon.
+`gv:` icons register automatically when you import `Icon` (via `@JasonTuTu2/icons-custom`). No bootstrap call needed.
 
 ### React
 
 ```tsx
-import { registerCustomIcons } from '@JasonTuTu2/icons-custom/react'
 import { Icon } from '@JasonTuTu2/icons-react'
-
-registerCustomIcons()
 
 <Icon name="ant:HomeOutlined" size={24} label="Home" />
 <Icon name="mdi:home" size="1.5em" decorative />
@@ -101,10 +98,7 @@ registerCustomIcons()
 
 ```vue
 <script setup>
-import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
 import { Icon } from '@JasonTuTu2/icons-vue'
-
-registerCustomIcons()
 </script>
 
 <template>
@@ -172,7 +166,7 @@ Changelogs: [`packages/react`](packages/react/CHANGELOG.md), [`packages/vue`](pa
 |---------|-----|
 | `401 Unauthorized` | Token missing/expired; needs `read:packages` |
 | `404 Not Found` | No access to the repo/package, or wrong package name |
-| `gv:` icons missing | Call `registerCustomIcons()` once at bootstrap |
+| `gv:` icons missing | Upgrade `@JasonTuTu2/icons-react` / `icons-vue` (and transitive `icons-custom`); confirm the SVG was published |
 | `iconExists` / build error with Iconify React 6 | Fixed in latest packages — upgrade `@JasonTuTu2/icons-react` (uses `iconLoaded` with v5 fallback) |
 | `color` does nothing on a `gv:` icon | Multi-color icons preserve fills; use a monochrome SVG if you need recoloring |
 | Works locally, fails in CI | Set `NODE_AUTH_TOKEN` and `packages: read` in the workflow |
@@ -218,7 +212,7 @@ From Figma / git:
    - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
 3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
-4. Use `gv:kebab-name` and call `registerCustomIcons()` once at bootstrap. Publish so consumers get the new version.
+4. Use `gv:kebab-name` in designs and code. Publish so consumers get the new version (`Icon` auto-registers custom icons).
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 

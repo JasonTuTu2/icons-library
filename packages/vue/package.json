@@ -19,14 +19,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @JasonTuTu2/icons-core --clean",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @JasonTuTu2/icons-core --external @JasonTuTu2/icons-custom --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "tsc --noEmit",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@JasonTuTu2/icons-core": "workspace:*"
+    "@JasonTuTu2/icons-core": "workspace:*",
+    "@JasonTuTu2/icons-custom": "workspace:*"
   },
   "peerDependencies": {
     "@ant-design/icons-vue": "^7.0.0",

@@ -126,6 +126,9 @@ importers:
       '@JasonTuTu2/icons-core':
         specifier: workspace:*
         version: link:../core
+      '@JasonTuTu2/icons-custom':
+        specifier: workspace:*
+        version: link:../custom-icons
     devDependencies:
       '@ant-design/icons':
         specifier: ^5.5.2
@@ -169,6 +172,9 @@ importers:
       '@JasonTuTu2/icons-core':
         specifier: workspace:*
         version: link:../core
+      '@JasonTuTu2/icons-custom':
+        specifier: workspace:*
+        version: link:../custom-icons
     devDependencies:
       '@ant-design/icons-vue':
         specifier: ^7.0.1
