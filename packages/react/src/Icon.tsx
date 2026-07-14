@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type ReactElement,
 } from 'react'
-import { Icon as IconifyIcon, iconExists } from '@iconify/react'
+import * as IconifyReact from '@iconify/react'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -14,7 +14,10 @@ import {
   warnMissingA11y,
 } from '@JasonTuTu2/icons-core'
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
+import { iconifyIconExists } from './iconifyCompat.js'
 import type { AntIconComponent, IconProps } from './types.js'
+
+const { Icon: IconifyIcon } = IconifyReact
 
 function MissingIcon({ name, style, className }: {
   name: string
@@ -130,7 +133,7 @@ export function Icon({
     )
   }
 
-  if (parsed.provider === 'custom' && !iconExists(parsed.id)) {
+  if (parsed.provider === 'custom' && !iconifyIconExists(IconifyReact, parsed.id)) {
     if (isDev()) {
       console.warn(
         `[GenVoice Icons] Custom icon "${name}" is not registered. ` +

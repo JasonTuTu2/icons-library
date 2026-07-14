@@ -15,7 +15,7 @@ describe('catalog', () => {
   it('builds snippets', () => {
     expect(reactSnippet('mdi:home')).toContain('mdi:home')
     expect(vueSnippet('ant:HomeOutlined')).toContain('ant:HomeOutlined')
-    expect(reactSnippet('gv:star')).toContain('registerCustomIcons')
-    expect(vueSnippet('gv:star')).toContain('@JasonTuTu2/icons-custom/vue')
+    expect(reactSnippet('gv:billing-alert')).toContain('registerCustomIcons')
+    expect(vueSnippet('gv:billing-alert')).toContain('@JasonTuTu2/icons-custom/vue')
   })
 })

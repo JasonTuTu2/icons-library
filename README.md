@@ -110,7 +110,7 @@ registerCustomIcons()
 <template>
   <Icon name="ant:HomeOutlined" :size="24" label="Home" />
   <Icon name="mdi:home" size="1.5em" decorative />
-  <Icon name="gv:star" :size="24" label="Favorite" />
+  <Icon name="gv:cart" :size="24" label="Cart" />
 </template>
 ```
 
@@ -148,6 +148,7 @@ addCollection(mdi)
 | `401 Unauthorized` | Token missing/expired; needs `read:packages` |
 | `404 Not Found` | No access to the repo/package, or wrong package name |
 | `gv:` icons missing | Call `registerCustomIcons()` once at bootstrap |
+| `iconExists` / build error with Iconify React 6 | Fixed in latest packages — upgrade `@JasonTuTu2/icons-react` (uses `iconLoaded` with v5 fallback) |
 | Works locally, fails in CI | Set `NODE_AUTH_TOKEN` and `packages: read` in the workflow |
 
 ## Licensing

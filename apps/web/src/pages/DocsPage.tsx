@@ -59,7 +59,7 @@ registerCustomIcons()
 <template>
   <Icon name="ant:HomeOutlined" :size="24" label="Home" />
   <Icon name="mdi:home" size="1.5em" decorative />
-  <Icon name="gv:star" :size="24" label="Favorite" />
+  <Icon name="gv:cart" :size="24" label="Cart" />
 </template>`}</code>
         </pre>
       </section>
@@ -95,7 +95,7 @@ registerCustomIcons()
         <ul>
           <li>
             <code>name</code> — canonical id (<code>ant:HomeOutlined</code>,{' '}
-            <code>gv:star</code>, or Iconify <code>prefix:name</code>)
+            <code>gv:billing-alert</code>, or Iconify <code>prefix:name</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}

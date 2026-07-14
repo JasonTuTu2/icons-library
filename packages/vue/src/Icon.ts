@@ -1,5 +1,5 @@
 import { computed, defineComponent, h, onMounted, ref, watch, type PropType, type CSSProperties } from 'vue'
-import { Icon as IconifyIcon, iconExists } from '@iconify/vue'
+import * as IconifyVue from '@iconify/vue'
 import {
   buildIconStyle,
   getA11yAttributes,
@@ -8,7 +8,10 @@ import {
   warnMissingA11y,
 } from '@JasonTuTu2/icons-core'
 import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
+import { iconifyIconExists } from './iconifyCompat.js'
 import type { AntIconComponent } from './types.js'
+
+const { Icon: IconifyIcon } = IconifyVue
 
 export const Icon = defineComponent({
   name: 'GvIcon',
@@ -125,7 +128,7 @@ export const Icon = defineComponent({
         })
       }
 
-      if (p.provider === 'custom' && !iconExists(p.id)) {
+      if (p.provider === 'custom' && !iconifyIconExists(IconifyVue, p.id)) {
         if (isDev()) {
           console.warn(
             `[GenVoice Icons] Custom icon "${props.name}" is not registered. ` +
