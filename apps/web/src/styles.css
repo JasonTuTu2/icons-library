@@ -22,6 +22,8 @@
   --font: "Inter", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
   --transition: 0.18s ease;
+  /** Neutral icon foreground — separate from UI text navy so mono SVGs render true-to-file. */
+  --icon-fg: #1a1a1a;
 }
 
 * {
@@ -307,7 +309,7 @@ pre {
   border-radius: 12px;
   padding: 0.65rem 0.35rem;
   cursor: pointer;
-  color: inherit;
+  color: var(--icon-fg);
   font: inherit;
   min-width: 0;
   transition:
@@ -384,6 +386,7 @@ pre {
   min-height: 7rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
+  color: var(--icon-fg);
   background:
     linear-gradient(45deg, rgba(11, 31, 92, 0.03) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(11, 31, 92, 0.03) 25%, transparent 25%),
@@ -560,11 +563,8 @@ pre {
 }
 
 .upload-preview-mono {
-  background: var(--navy);
-}
-
-.upload-preview-mono img {
-  filter: invert(1) sepia(1) saturate(3) hue-rotate(175deg) brightness(1.05);
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .upload-preview-color {
