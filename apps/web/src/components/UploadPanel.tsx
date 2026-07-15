@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
-  actionsUrl,
+  actionsWorkflowUrl,
   dispatchApplyStaged,
+  findIconNameConflicts,
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   listStagedIcons,
@@ -9,6 +10,7 @@ import {
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
+  type IconNameConflict,
   type StagedIcon,
 } from '../lib/github'
 import { useGithubSessionToken } from '../lib/githubAuth'
@@ -18,6 +20,8 @@ import {
   setUnpublishedIcons,
   useUnpublishedSelection,
 } from '../lib/unpublishedSelection'
+import { useDialogAccessibility } from '../lib/useDialogAccessibility'
+import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 
 interface UploadItem {
   fileName: string
@@ -52,6 +56,28 @@ function fileToUploadItem(file: File): Promise<UploadItem> {
   })
 }
 
+function revokePreviewUrls(items: UploadItem[]): void {
+  for (const item of items) {
+    URL.revokeObjectURL(item.previewUrl)
+  }
+}
+
+function formatConflicts(conflicts: IconNameConflict[]): string {
+  return conflicts
+    .map((c) => {
+      const where =
+        c.location === 'library-mono'
+          ? 'library (mono)'
+          : c.location === 'library-color'
+            ? 'library (multi-color)'
+            : c.location === 'staging-mono'
+              ? 'staging (mono)'
+              : 'staging (multi-color)'
+      return `• gv:${c.name} — already in ${where}`
+    })
+    .join('\n')
+}
+
 export function UploadPanel({
   localUploadEnabled,
   onUploaded,
@@ -69,10 +95,16 @@ export function UploadPanel({
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<UploadItem[]>([])
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<ReactNode>(null)
   const [staged, setStaged] = useState<StagedIcon[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
+
+  const close = useCallback(() => {
+    setOpen(false)
+  }, [])
+
+  const panelRef = useDialogAccessibility(open, close)
 
   const canSubmit = useMemo(
     () =>
@@ -98,17 +130,14 @@ export function UploadPanel({
     }
   }, [mode, githubAuthed])
 
-  function close() {
-    setOpen(false)
-  }
-
   useEffect(() => {
-    if (!open) return
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') close()
+    if (!open) {
+      setItems((prev) => {
+        if (prev.length > 0) revokePreviewUrls(prev)
+        return []
+      })
+      setMessage(null)
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
 
   useEffect(() => {
@@ -127,11 +156,33 @@ export function UploadPanel({
     setMessage(null)
   }
 
+  function removeItem(index: number) {
+    setItems((prev) => {
+      const target = prev[index]
+      if (target) URL.revokeObjectURL(target.previewUrl)
+      return prev.filter((_, i) => i !== index)
+    })
+  }
+
+  async function confirmNameConflicts(
+    names: string[],
+  ): Promise<boolean> {
+    if (mode !== 'github' || !githubAuthed) return true
+    const conflicts = await findIconNameConflicts(names)
+    if (conflicts.length === 0) return true
+    return window.confirm(
+      `Name conflict(s) found — staging will overwrite existing files:\n\n${formatConflicts(conflicts)}\n\nContinue?`,
+    )
+  }
+
   async function handleStage() {
     if (mode !== 'github' || !canSubmit || !githubAuthed) return
     setBusy(true)
     setMessage(null)
     try {
+      const names = items.map((item) => item.name)
+      if (!(await confirmNameConflicts(names))) return
+
       const count = items.length
       await stageIcons(
         items.map((item) => ({
@@ -140,7 +191,10 @@ export function UploadPanel({
           colorMode: item.colorMode,
         })),
       )
-      setItems([])
+      setItems((prev) => {
+        revokePreviewUrls(prev)
+        return []
+      })
       await refreshStaged()
       setMessage(
         `Staged ${count} icon(s) on GitHub (shared queue). Click Apply when ready — no Action ran yet.`,
@@ -174,7 +228,10 @@ export function UploadPanel({
       const first = current[0]
       if (first) onUploaded(`gv:${first.name}`)
       setMessage(
-        `Apply queued for ${current.length} icon(s). Catalog regenerates in Actions — refresh Pages after it finishes. ${actionsUrl()}`,
+        <WorkflowQueuedNotice
+          workflowLabel="Apply workflow"
+          workflowUrl={actionsWorkflowUrl('apply-staged-icons.yml')}
+        />,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -210,7 +267,10 @@ export function UploadPanel({
         }
         lastId = data.id
       }
-      setItems([])
+      setItems((prev) => {
+        revokePreviewUrls(prev)
+        return []
+      })
       setMessage(`Uploaded ${count} icon(s). Catalog regenerated.`)
       if (lastId) onUploaded(lastId)
     } catch (err) {
@@ -227,217 +287,259 @@ export function UploadPanel({
       </button>
 
       {open ? (
-        <div className="upload-panel">
-          <div className="upload-panel-header">
-            <strong>Upload SVG</strong>
-            <button
-              type="button"
-              className="ghost upload-close"
-              onClick={close}
-              aria-label="Close upload"
-            >
-              ×
-            </button>
-          </div>
-          {!uploadEnabled ? (
-            <p>
-              Upload is not configured. Locally, run <code>pnpm dev</code>. On
-              GitHub Pages, ensure <code>VITE_GITHUB_REPO</code> is set at build
-              time and use <strong>Connect GitHub</strong> with a PAT.
-            </p>
-          ) : mode === 'github' && !githubAuthed ? (
-            <p>
-              Connect with a GitHub PAT (<code>contents: write</code> +{' '}
-              <code>actions: write</code>) using the toolbar button. Tokens stay
-              in this browser tab only — Actions use the{' '}
-              <code>ICON_BROWSER_TOKEN</code> secret for apply/publish pushes.
-            </p>
-          ) : (
-            <>
+        <>
+          <button
+            type="button"
+            className="panel-backdrop"
+            aria-label="Close upload dialog"
+            onClick={close}
+          />
+          <div
+            ref={panelRef}
+            className="upload-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upload-panel-title"
+          >
+            <div className="upload-panel-header">
+              <strong id="upload-panel-title">Upload SVG</strong>
+              <button
+                type="button"
+                className="ghost upload-close"
+                onClick={close}
+                aria-label="Close upload"
+                data-autofocus
+              >
+                ×
+              </button>
+            </div>
+            {!uploadEnabled ? (
               <p>
-                Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
-                Set each icon to monochrome (recolorable) or multi-color (preserved
-                fills).
-                {mode === 'github'
-                  ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
-                  : ' Writes to disk and regenerates the catalog locally.'}
+                Upload is not configured. Locally, run <code>pnpm dev</code>. On
+                GitHub Pages, ensure <code>VITE_GITHUB_REPO</code> is set at
+                build time and use <strong>Connect GitHub</strong> with a PAT.
               </p>
-              <label className="upload-drop">
-                <input
-                  type="file"
-                  accept=".svg,image/svg+xml"
-                  multiple
-                  onChange={(e) => void handleFiles(e.target.files)}
-                />
-                <span>Choose SVG files or drop them here</span>
-              </label>
+            ) : mode === 'github' && !githubAuthed ? (
+              <p>
+                Connect with a GitHub PAT (<code>contents: write</code> +{' '}
+                <code>actions: write</code>) using the toolbar button. Tokens
+                stay in this browser tab only — Actions use the{' '}
+                <code>ICON_BROWSER_TOKEN</code> secret for apply/publish pushes.
+              </p>
+            ) : (
+              <>
+                <p>
+                  Drop Figma-exported SVGs. Names become{' '}
+                  <code>gv:kebab-name</code>. Set each icon to monochrome
+                  (recolorable) or multi-color (preserved fills).
+                  {mode === 'github'
+                    ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
+                    : ' Writes to disk and regenerates the catalog locally.'}
+                </p>
+                <label className="upload-drop">
+                  <input
+                    type="file"
+                    accept=".svg,image/svg+xml"
+                    multiple
+                    onChange={(e) => void handleFiles(e.target.files)}
+                  />
+                  <span>Choose SVG files or drop them here</span>
+                </label>
 
-              {items.length > 0 ? (
-                <ul className="upload-list">
-                  {items.map((item, index) => (
-                    <li key={`${item.fileName}-${index}`}>
-                      <img src={item.previewUrl} alt="" width={28} height={28} />
-                      <label>
-                        <span>gv:</span>
-                        <input
-                          value={item.name}
+                {items.length > 0 ? (
+                  <ul className="upload-list">
+                    {items.map((item, index) => (
+                      <li key={`${item.fileName}-${index}`}>
+                        <span
+                          className={
+                            item.colorMode === 'preserved'
+                              ? 'upload-preview upload-preview-color'
+                              : 'upload-preview upload-preview-mono'
+                          }
+                          title={
+                            item.colorMode === 'preserved'
+                              ? 'Multi-color preview'
+                              : 'Monochrome preview (tinted)'
+                          }
+                        >
+                          <img
+                            src={item.previewUrl}
+                            alt=""
+                            width={28}
+                            height={28}
+                          />
+                        </span>
+                        <label>
+                          <span>gv:</span>
+                          <input
+                            value={item.name}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              setItems((prev) =>
+                                prev.map((row, i) =>
+                                  i === index ? { ...row, name: value } : row,
+                                ),
+                              )
+                            }}
+                          />
+                        </label>
+                        <select
+                          className="color-mode-select"
+                          aria-label={`Color mode for gv:${item.name || 'icon'}`}
+                          value={item.colorMode}
                           onChange={(e) => {
-                            const value = e.target.value
+                            const value = e.target.value as IconColorMode
                             setItems((prev) =>
                               prev.map((row, i) =>
-                                i === index ? { ...row, name: value } : row,
+                                i === index
+                                  ? {
+                                      ...row,
+                                      colorMode:
+                                        value === 'preserved'
+                                          ? 'preserved'
+                                          : 'mono',
+                                    }
+                                  : row,
                               ),
                             )
                           }}
-                        />
-                      </label>
-                      <select
-                        className="color-mode-select"
-                        aria-label={`Color mode for gv:${item.name || 'icon'}`}
-                        value={item.colorMode}
-                        onChange={(e) => {
-                          const value = e.target.value as IconColorMode
-                          setItems((prev) =>
-                            prev.map((row, i) =>
-                              i === index
-                                ? {
-                                    ...row,
-                                    colorMode:
-                                      value === 'preserved'
-                                        ? 'preserved'
-                                        : 'mono',
-                                  }
-                                : row,
-                            ),
-                          )
-                        }}
-                      >
-                        <option value="mono">Monochrome</option>
-                        <option value="preserved">Multi-color</option>
-                      </select>
+                        >
+                          <option value="mono">Monochrome</option>
+                          <option value="preserved">Multi-color</option>
+                        </select>
+                        <button
+                          type="button"
+                          className="ghost"
+                          onClick={() => removeItem(index)}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {mode === 'github' ? (
+                  <>
+                    <button
+                      type="button"
+                      className="ghost accent"
+                      disabled={!canSubmit || busy}
+                      onClick={() => void handleStage()}
+                    >
+                      {busy ? 'Working…' : 'Add to staging'}
+                    </button>
+
+                    <div className="staged-block">
+                      <div className="staged-header">
+                        <strong>Staged on GitHub</strong>
+                        <button
+                          type="button"
+                          className="ghost"
+                          disabled={busy || stagedLoading}
+                          onClick={() => void refreshStaged()}
+                        >
+                          {stagedLoading ? 'Refreshing…' : 'Refresh'}
+                        </button>
+                      </div>
+                      {staged.length === 0 ? (
+                        <p className="staged-empty">No staged icons.</p>
+                      ) : (
+                        <ul className="staged-list">
+                          {staged.map((icon) => (
+                            <li key={icon.path}>
+                              <code>gv:{icon.name}</code>
+                              <span>
+                                {icon.colorMode === 'preserved'
+                                  ? 'multi-color'
+                                  : 'mono'}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       <button
                         type="button"
-                        className="ghost"
-                        onClick={() =>
-                          setItems((prev) => prev.filter((_, i) => i !== index))
-                        }
+                        className="ghost accent"
+                        disabled={busy || staged.length === 0}
+                        onClick={() => void handleApplyStaged()}
                       >
-                        Remove
+                        {busy ? 'Working…' : 'Apply staged to library'}
                       </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+                    </div>
 
-              {mode === 'github' ? (
-                <>
+                    <div className="staged-block">
+                      <div className="staged-header">
+                        <strong>In library (unpublished)</strong>
+                      </div>
+                      <p className="staged-hint">
+                        Checked icons ship on Publish. Unchecked stay out of
+                        this package, then return to the library as unpublished
+                        for a later release.
+                      </p>
+                      {unpublished.length === 0 ? (
+                        <p className="staged-empty">No unpublished icons.</p>
+                      ) : (
+                        <>
+                          <label className="check-all">
+                            <input
+                              type="checkbox"
+                              checked={allChecked}
+                              onChange={(e) =>
+                                setAllUnpublishedChecked(e.target.checked)
+                              }
+                            />
+                            <span>Check all</span>
+                          </label>
+                          <ul className="staged-list check-list">
+                            {unpublished.map((icon) => (
+                              <li key={icon.path}>
+                                <label className="check-row">
+                                  <input
+                                    type="checkbox"
+                                    checked={checkedPaths.has(icon.path)}
+                                    onChange={(e) =>
+                                      setUnpublishedChecked(
+                                        icon.path,
+                                        e.target.checked,
+                                      )
+                                    }
+                                  />
+                                  <code>gv:{icon.name}</code>
+                                  <span>
+                                    {icon.colorMode === 'preserved'
+                                      ? 'multi-color'
+                                      : 'mono'}
+                                  </span>
+                                </label>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : (
                   <button
                     type="button"
                     className="ghost accent"
                     disabled={!canSubmit || busy}
-                    onClick={() => void handleStage()}
+                    onClick={() => void handleLocalUpload()}
                   >
-                    {busy ? 'Working…' : 'Add to staging'}
+                    {busy ? 'Uploading…' : 'Save to library'}
                   </button>
-
-                  <div className="staged-block">
-                    <div className="staged-header">
-                      <strong>Staged on GitHub</strong>
-                      <button
-                        type="button"
-                        className="ghost"
-                        disabled={busy || stagedLoading}
-                        onClick={() => void refreshStaged()}
-                      >
-                        {stagedLoading ? 'Refreshing…' : 'Refresh'}
-                      </button>
-                    </div>
-                    {staged.length === 0 ? (
-                      <p className="staged-empty">No staged icons.</p>
-                    ) : (
-                      <ul className="staged-list">
-                        {staged.map((icon) => (
-                          <li key={icon.path}>
-                            <code>gv:{icon.name}</code>
-                            <span>
-                              {icon.colorMode === 'preserved'
-                                ? 'multi-color'
-                                : 'mono'}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <button
-                      type="button"
-                      className="ghost accent"
-                      disabled={busy || staged.length === 0}
-                      onClick={() => void handleApplyStaged()}
-                    >
-                      {busy ? 'Working…' : 'Apply staged to library'}
-                    </button>
-                  </div>
-
-                  <div className="staged-block">
-                    <div className="staged-header">
-                      <strong>In library (unpublished)</strong>
-                    </div>
-                    {unpublished.length === 0 ? (
-                      <p className="staged-empty">No unpublished icons.</p>
-                    ) : (
-                      <>
-                        <label className="check-all">
-                          <input
-                            type="checkbox"
-                            checked={allChecked}
-                            onChange={(e) =>
-                              setAllUnpublishedChecked(e.target.checked)
-                            }
-                          />
-                          <span>Check all</span>
-                        </label>
-                        <ul className="staged-list check-list">
-                          {unpublished.map((icon) => (
-                            <li key={icon.path}>
-                              <label className="check-row">
-                                <input
-                                  type="checkbox"
-                                  checked={checkedPaths.has(icon.path)}
-                                  onChange={(e) =>
-                                    setUnpublishedChecked(
-                                      icon.path,
-                                      e.target.checked,
-                                    )
-                                  }
-                                />
-                                <code>gv:{icon.name}</code>
-                                <span>
-                                  {icon.colorMode === 'preserved'
-                                    ? 'multi-color'
-                                    : 'mono'}
-                                </span>
-                              </label>
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
-                  </div>
-                </>
+                )}
+              </>
+            )}
+            {message ? (
+              typeof message === 'string' ? (
+                <p className="copy-toast">{message}</p>
               ) : (
-                <button
-                  type="button"
-                  className="ghost accent"
-                  disabled={!canSubmit || busy}
-                  onClick={() => void handleLocalUpload()}
-                >
-                  {busy ? 'Uploading…' : 'Save to library'}
-                </button>
-              )}
-            </>
-          )}
-          {message ? <p className="copy-toast">{message}</p> : null}
-        </div>
+                message
+              )
+            ) : null}
+          </div>
+        </>
       ) : null}
     </div>
   )

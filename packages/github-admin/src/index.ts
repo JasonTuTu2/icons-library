@@ -24,13 +24,33 @@ export interface PublishReadiness {
   stagedCount: number
 }
 
+export interface IconNameConflict {
+  name: string
+  location:
+    | 'library-mono'
+    | 'library-color'
+    | 'staging-mono'
+    | 'staging-color'
+}
+
+export interface DispatchPublishOptions {
+  /**
+   * Library SVG paths to omit from this publish (unchecked unpublished icons).
+   * Held aside during version/publish, then restored to the library afterward
+   * so they remain unpublished for a later release — not demoted to staging.
+   */
+  deferPaths?: string[]
+}
+
 export interface GithubAdminClient {
   stageIcons(icons: IconUploadPayload[]): Promise<void>
   listStagedIcons(): Promise<StagedIcon[]>
   listUnpublishedIcons(): Promise<StagedIcon[]>
+  /** Existing library / staging files that collide with these kebab names. */
+  findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
   getPublishReadiness(): Promise<PublishReadiness>
   dispatchApplyStaged(): Promise<void>
-  dispatchPublish(): Promise<void>
+  dispatchPublish(options?: DispatchPublishOptions): Promise<void>
 }
 
 /** Thrown when GitHub rejects credentials (401/403). Callers should clear stored tokens. */
@@ -70,6 +90,13 @@ export function actionsUrl(repo: string): string {
   return isValidRepo(repo)
     ? `https://github.com/${repo}/actions`
     : `https://github.com/${DEFAULT_REPO}/actions`
+}
+
+/** Deep link to a specific workflow’s run history. */
+export function actionsWorkflowUrl(repo: string, workflowFile: string): string {
+  const base = isValidRepo(repo) ? repo : DEFAULT_REPO
+  const file = workflowFile.replace(/^.*\//, '')
+  return `https://github.com/${base}/actions/workflows/${file}`
 }
 
 export function packagesUrl(repo: string): string {
@@ -298,6 +325,47 @@ export function createGithubAdminClient(
       return icons.sort((a, b) => a.name.localeCompare(b.name))
     },
 
+    async findIconNameConflicts(names: string[]): Promise<IconNameConflict[]> {
+      const unique = [
+        ...new Set(
+          names
+            .map((n) => sanitizeIconName(n))
+            .filter((n): n is string => Boolean(n)),
+        ),
+      ]
+      const conflicts: IconNameConflict[] = []
+
+      for (const name of unique) {
+        const checks: Array<{
+          path: string
+          location: IconNameConflict['location']
+        }> = [
+          {
+            path: `packages/custom-icons/svg/${name}.svg`,
+            location: 'library-mono',
+          },
+          {
+            path: `packages/custom-icons/svg/color/${name}.svg`,
+            location: 'library-color',
+          },
+          {
+            path: `${STAGING_BASE}/mono/${name}.svg`,
+            location: 'staging-mono',
+          },
+          {
+            path: `${STAGING_BASE}/color/${name}.svg`,
+            location: 'staging-color',
+          },
+        ]
+        for (const check of checks) {
+          const sha = await getFileSha(check.path)
+          if (sha) conflicts.push({ name, location: check.location })
+        }
+      }
+
+      return conflicts
+    },
+
     async getPublishReadiness(): Promise<PublishReadiness> {
       const staged = await this.listStagedIcons()
       const stagedCount = staged.length
@@ -329,10 +397,18 @@ export function createGithubAdminClient(
       })
     },
 
-    async dispatchPublish(): Promise<void> {
+    async dispatchPublish(options?: DispatchPublishOptions): Promise<void> {
+      const deferPaths = (options?.deferPaths ?? []).filter((p) =>
+        p.startsWith('packages/custom-icons/svg/'),
+      )
       await githubJson('/actions/workflows/publish-packages.yml/dispatches', {
         method: 'POST',
-        body: JSON.stringify({ ref: 'main' }),
+        body: JSON.stringify({
+          ref: 'main',
+          inputs: {
+            defer_paths: JSON.stringify(deferPaths),
+          },
+        }),
       })
     },
   }

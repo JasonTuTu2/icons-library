@@ -11,7 +11,7 @@
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
     ],
-    "reasoning": "Stage icon SVGs and dispatch Apply/Publish GitHub Actions; load DM Sans / IBM Plex Mono to match the icon browser UI."
+    "reasoning": "Stage icon SVGs to GitHub via the Contents API; load DM Sans / IBM Plex Mono to match the icon browser UI."
   },
   "documentAccess": "dynamic-page"
 }

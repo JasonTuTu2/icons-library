@@ -406,17 +406,70 @@ pre {
   word-break: break-word;
 }
 
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(28, 36, 48, 0.28);
+  cursor: pointer;
+}
+
 .upload-panel {
   position: absolute;
   right: 1.5rem;
   top: 7.5rem;
   z-index: 20;
   width: min(420px, calc(100vw - 2rem));
+  max-height: calc(100vh - 8.5rem);
+  overflow: auto;
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg-elevated);
   box-shadow: var(--shadow);
+}
+
+.upload-preview {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.upload-preview img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.upload-preview-mono {
+  background: #1c2430;
+}
+
+.upload-preview-mono img {
+  /* Tint bitmap preview toward brand green so mono mode is obvious */
+  filter: invert(1) sepia(1) saturate(4) hue-rotate(110deg) brightness(0.95);
+}
+
+.upload-preview-color {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.staged-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.workflow-toast a {
+  font-weight: 600;
 }
 
 .upload-panel-header {

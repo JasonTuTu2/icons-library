@@ -26,7 +26,7 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (stage / apply / pu
 2. In Figma Desktop: **Plugins → Development → Import plugin from manifest…** → select `apps/figma-plugin/manifest.json`.
 3. **Connect GitHub** — paste a PAT with `contents:write` and `actions:write` (stored in Figma `clientStorage` on this machine).
 4. Select icon frame(s)/component(s) → **Load selection** → edit kebab names → choose **Mono** or **Multi-color** → **Stage**.
-5. **Apply staged** when ready to promote into the library (same Action as Pages). **Publish** when releasing packages.
+5. Finish in the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Apply staged to library**, then **Publish** when releasing packages. (The plugin stages only; Apply/Publish live in the browser.)
 
 Repo target defaults to `JasonTuTu2/icons-library`; override at build time with `GITHUB_REPO=owner/repo`.
 
@@ -35,6 +35,15 @@ Repo target defaults to `JasonTuTu2/icons-library`; override at build time with 
 1. **Connect GitHub** — session PAT (`contents: write` + `actions: write`); not embedded in the site.
 2. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
 3. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
+4. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
+
+### First publish (happy path)
+
+1. **Connect GitHub** in the icon browser (or stage from the Figma plugin first).
+2. **Add to staging** → **Apply staged to library**.
+3. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
+4. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
+5. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.
 
 ### Monochrome (recolorable) — local / git
 
@@ -54,7 +63,7 @@ Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 
-Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the Figma plugin or icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. Staging and Apply do not publish packages by themselves.
+Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. The Figma plugin stages icons only — Apply and Publish are done in the browser. Staging and Apply do not publish packages by themselves.
 
 Manual publish (local):
 

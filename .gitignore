@@ -11,3 +11,4 @@ coverage
 .vite
 apps/web/dist
 tooling/bundle-smoke/tmp-bundle
+packages/custom-icons/.publish-hold/

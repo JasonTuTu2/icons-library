@@ -58,12 +58,15 @@ import { Icon } from '@JasonTuTu2/icons-vue'
       <section>
         <h2>Custom icons from Figma</h2>
         <ol>
-          <li>Export SVG from Figma (prefer 24×24, simple paths).</li>
           <li>
-            Prefer <strong>Connect GitHub</strong>, then <strong>Add to
-            staging</strong> (monochrome or multi-color), then{' '}
-            <strong>Apply staged to library</strong> and <strong>Publish</strong>.
-            Or commit to <code>packages/custom-icons/svg/</code> (mono) /{' '}
+            Prefer the Figma Development plugin: Connect GitHub → Load selection
+            → Stage. Then finish in the icon browser.
+          </li>
+          <li>
+            In the browser: <strong>Apply staged to library</strong>, wait ~1–2
+            minutes on Actions, hard-refresh, then check unpublished icons and{' '}
+            <strong>Publish</strong>. Or commit to{' '}
+            <code>packages/custom-icons/svg/</code> (mono) /{' '}
             <code>svg/color/</code> (multi-color) and run{' '}
             <code>pnpm catalog:gen</code>. Local <code>pnpm dev</code> upload
             writes to disk without GitHub staging.
@@ -77,9 +80,26 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <p>
           Monochrome icons are normalized to <code>currentColor</code> so{' '}
           <code>color</code> / CSS inheritance works. Multi-color icons preserve
-          their fills; the <code>color</code> prop may not recolor them. Filter by
-          color mode in the browser to separate the two.
+          their fills; the <code>color</code> prop may not recolor them. Filter
+          by color mode in the browser to separate the two.
         </p>
+      </section>
+
+      <section>
+        <h2>First publish (happy path)</h2>
+        <ol>
+          <li>Connect GitHub in the icon browser (or Stage from Figma first).</li>
+          <li>Add to staging → Apply staged to library.</li>
+          <li>
+            Track the Apply workflow on Actions (~1–2 min), then hard-refresh
+            Pages.
+          </li>
+          <li>
+            Under Upload → unpublished, check icons to ship (unchecked stay out
+            of this package, then return to the library as unpublished).
+          </li>
+          <li>Publish → wait for the publish Action → confirm GitHub Packages.</li>
+        </ol>
       </section>
 
       <section>

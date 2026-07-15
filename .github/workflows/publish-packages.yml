@@ -2,6 +2,15 @@ name: Publish packages
 
 on:
   workflow_dispatch:
+    inputs:
+      defer_paths:
+        description: >-
+          JSON array of library SVG paths to omit from this publish
+          (unchecked unpublished icons). They are held aside during
+          version/publish, then restored to the library afterward.
+          Example: ["packages/custom-icons/svg/foo.svg"]
+        required: false
+        default: '[]'
 
 concurrency: publish-packages-${{ github.ref }}
 
@@ -19,6 +28,54 @@ jobs:
           token: ${{ secrets.ICON_BROWSER_TOKEN }}
           fetch-depth: 0
 
+      - id: defer
+        name: Hold unchecked icons aside for this publish
+        env:
+          DEFER_PATHS: ${{ inputs.defer_paths }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json, os, shutil
+          from pathlib import Path
+
+          raw = os.environ.get("DEFER_PATHS") or "[]"
+          try:
+              paths = json.loads(raw)
+          except json.JSONDecodeError as err:
+              raise SystemExit(f"Invalid defer_paths JSON: {err}") from err
+
+          if not isinstance(paths, list):
+              raise SystemExit("defer_paths must be a JSON array")
+
+          hold = Path("packages/custom-icons/.publish-hold")
+          deferred = []
+          for item in paths:
+              if not isinstance(item, str):
+                  continue
+              rel = item.replace("\\", "/").lstrip("/")
+              if not rel.startswith("packages/custom-icons/svg/") or not rel.lower().endswith(".svg"):
+                  print(f"Skip invalid path: {item}")
+                  continue
+              if "/staging/" in rel or "/.publish-hold/" in rel:
+                  print(f"Skip non-library path: {item}")
+                  continue
+              src = Path(rel)
+              if not src.is_file():
+                  print(f"Skip missing: {rel}")
+                  continue
+              color = "color" if "/svg/color/" in rel else "mono"
+              dst_dir = hold / color
+              dst_dir.mkdir(parents=True, exist_ok=True)
+              dst = dst_dir / src.name
+              shutil.move(str(src), str(dst))
+              deferred.append(rel)
+              print(f"Held aside {rel} -> {dst.as_posix()}")
+
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          with out.open("a", encoding="utf-8") as fh:
+              fh.write(f"count={len(deferred)}\n")
+          PY
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
@@ -31,6 +88,10 @@ jobs:
           scope: "@JasonTuTu2"
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Regenerate catalog after hold
+        if: steps.defer.outputs.count != '0'
+        run: pnpm catalog:gen
 
       - name: Create patch changeset
         run: |
@@ -65,6 +126,56 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore held icons to library
+        if: steps.defer.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import shutil
+          from pathlib import Path
+
+          hold = Path("packages/custom-icons/.publish-hold")
+          mono_dst = Path("packages/custom-icons/svg")
+          color_dst = Path("packages/custom-icons/svg/color")
+          mono_dst.mkdir(parents=True, exist_ok=True)
+          color_dst.mkdir(parents=True, exist_ok=True)
+
+          restored = 0
+          for src in sorted((hold / "mono").glob("*.svg")) if (hold / "mono").is_dir() else []:
+              dst = mono_dst / src.name
+              shutil.move(str(src), str(dst))
+              print(f"Restored {dst.as_posix()}")
+              restored += 1
+          for src in sorted((hold / "color").glob("*.svg")) if (hold / "color").is_dir() else []:
+              dst = color_dst / src.name
+              shutil.move(str(src), str(dst))
+              print(f"Restored {dst.as_posix()}")
+              restored += 1
+
+          if hold.exists():
+              shutil.rmtree(hold, ignore_errors=True)
+
+          if restored == 0:
+              raise SystemExit("Expected held icons to restore, found none")
+          print(f"Restored {restored} icon(s) to library")
+          PY
+
+      - name: Regenerate catalog after restore
+        if: steps.defer.outputs.count != '0'
+        run: pnpm catalog:gen
+
+      - name: Commit restored unpublished icons
+        if: steps.defer.outputs.count != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/custom-icons packages/catalog
+          if git diff --staged --quiet; then
+            echo "No restore changes"
+            exit 1
+          fi
+          git commit -m "Restore deferred unpublished icons after publish"
 
       - name: Push version commits and tags
         run: git push --follow-tags origin HEAD:main

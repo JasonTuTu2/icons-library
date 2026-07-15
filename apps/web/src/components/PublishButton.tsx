@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import {
-  actionsUrl,
+  actionsWorkflowUrl,
   dispatchPublish,
   getPublishReadiness,
   isGithubAdminEnabled,
@@ -11,9 +11,11 @@ import {
 import { useGithubSessionToken } from '../lib/githubAuth'
 import {
   getCheckedUnpublishedIcons,
+  getUncheckedUnpublishedIcons,
   hasUnpublishedSelectionLoaded,
   setUnpublishedIcons,
 } from '../lib/unpublishedSelection'
+import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 
 function formatPublishIconList(
   icons: Array<{ name: string; colorMode: string }>,
@@ -31,34 +33,33 @@ export function PublishButton() {
   const repoConfigured = isGithubRepoConfigured()
   const enabled = isGithubAdminEnabled()
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [notice, setNotice] = useState<ReactNode>(null)
 
-  if (!repoConfigured) return null
-
-  if (!enabled) {
-    return <p className="admin-hint">Connect GitHub to publish</p>
-  }
-
-  async function handlePublish() {
+  const handlePublish = useCallback(async () => {
     setBusy(true)
-    setMessage(null)
+    setNotice(null)
     try {
       const readiness = await getPublishReadiness()
-      let selected = getCheckedUnpublishedIcons()
-      // Warm selection if Publish is used before opening Upload (all checked).
       if (readiness.hasNewIcons && !hasUnpublishedSelectionLoaded()) {
         setUnpublishedIcons(await listUnpublishedIcons())
-        selected = getCheckedUnpublishedIcons()
       }
+
+      const selected = getCheckedUnpublishedIcons()
+      const deferred = getUncheckedUnpublishedIcons()
       const selectedList = formatPublishIconList(selected)
+      const deferredList = formatPublishIconList(deferred)
 
       if (readiness.stagedCount > 0) {
         const iconsNote =
           selected.length > 0
-            ? `\n\nChecked unpublished icons:\n${selectedList}`
+            ? `\n\nChecked icons that will ship:\n${selectedList}`
+            : ''
+        const deferNote =
+          deferred.length > 0
+            ? `\n\nUnchecked icons stay out of this package, then return to the library as unpublished:\n${deferredList}`
             : ''
         const ok = window.confirm(
-          `${readiness.stagedCount} icon(s) are still in staging and will not be included in this publish.\n\nApply staged icons to the library first if you want them shipped.${iconsNote}\n\nPublish package versions anyway?`,
+          `${readiness.stagedCount} icon(s) are still in staging and will not be included in this publish.\n\nApply staged icons to the library first if you want them shipped.${iconsNote}${deferNote}\n\nPublish package versions anyway?`,
         )
         if (!ok) return
       } else if (!readiness.hasNewIcons) {
@@ -68,7 +69,12 @@ export function PublishButton() {
         if (!ok) return
       } else if (selected.length === 0) {
         const ok = window.confirm(
-          'No unpublished icons are checked.\n\nPublishing will bump package versions, but you have not selected any unpublished SVGs.\n\nPublish anyway?',
+          `No unpublished icons are checked.\n\nAll ${deferred.length} unpublished icon(s) stay out of this package, then return to the library as unpublished for a later release. Publishing will only bump package versions.\n\n${deferredList}\n\nPublish anyway?`,
+        )
+        if (!ok) return
+      } else if (deferred.length > 0) {
+        const ok = window.confirm(
+          `Publish these icons?\n\n${selectedList}\n\nUnchecked icons stay out of this package, then return to the library as unpublished:\n${deferredList}\n\nBump patch versions and publish to GitHub Packages?`,
         )
         if (!ok) return
       } else {
@@ -78,15 +84,32 @@ export function PublishButton() {
         if (!ok) return
       }
 
-      await dispatchPublish()
-      setMessage(
-        `Publish workflow queued. Packages will appear under ${packagesUrl()}. Track progress: ${actionsUrl()}`,
+      await dispatchPublish({
+        deferPaths: deferred.map((icon) => icon.path),
+      })
+      setNotice(
+        <WorkflowQueuedNotice
+          className="publish-toast"
+          workflowLabel="Publish workflow"
+          workflowUrl={actionsWorkflowUrl('publish-packages.yml')}
+          packagesHref={packagesUrl()}
+        />,
       )
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : String(err))
+      setNotice(
+        <p className="copy-toast publish-toast" role="status">
+          {err instanceof Error ? err.message : String(err)}
+        </p>,
+      )
     } finally {
       setBusy(false)
     }
+  }, [])
+
+  if (!repoConfigured) return null
+
+  if (!enabled) {
+    return <p className="admin-hint">Connect GitHub to publish</p>
   }
 
   return (
@@ -99,7 +122,7 @@ export function PublishButton() {
       >
         {busy ? 'Publishing…' : 'Publish'}
       </button>
-      {message ? <p className="copy-toast publish-toast">{message}</p> : null}
+      {notice}
     </div>
   )
 }

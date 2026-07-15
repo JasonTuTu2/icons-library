@@ -1,11 +1,14 @@
 import {
   actionsUrl as sharedActionsUrl,
+  actionsWorkflowUrl as sharedActionsWorkflowUrl,
   createGithubAdminClient,
   GithubAuthError,
   isValidRepo,
   packagesUrl as sharedPackagesUrl,
   sanitizeIconName,
+  type DispatchPublishOptions,
   type IconColorMode,
+  type IconNameConflict,
   type IconUploadPayload,
   type PublishReadiness,
   type StagedIcon,
@@ -15,7 +18,14 @@ import {
   getGithubSessionToken,
 } from './githubAuth.js'
 
-export type { IconColorMode, IconUploadPayload, PublishReadiness, StagedIcon }
+export type {
+  DispatchPublishOptions,
+  IconColorMode,
+  IconNameConflict,
+  IconUploadPayload,
+  PublishReadiness,
+  StagedIcon,
+}
 export { sanitizeIconName }
 
 function getRepo(): string {
@@ -63,6 +73,10 @@ export function actionsUrl(): string {
   return sharedActionsUrl(getRepo())
 }
 
+export function actionsWorkflowUrl(workflowFile: string): string {
+  return sharedActionsWorkflowUrl(getRepo(), workflowFile)
+}
+
 export function packagesUrl(): string {
   return sharedPackagesUrl(getRepo())
 }
@@ -82,6 +96,12 @@ export async function listUnpublishedIcons(): Promise<StagedIcon[]> {
   return withAuthClear(() => getClient().listUnpublishedIcons())
 }
 
+export async function findIconNameConflicts(
+  names: string[],
+): Promise<IconNameConflict[]> {
+  return withAuthClear(() => getClient().findIconNameConflicts(names))
+}
+
 /** Promote whatever is staged now into the library (one Action). */
 export async function dispatchApplyStaged(): Promise<void> {
   return withAuthClear(() => getClient().dispatchApplyStaged())
@@ -91,6 +111,8 @@ export async function getPublishReadiness(): Promise<PublishReadiness> {
   return withAuthClear(() => getClient().getPublishReadiness())
 }
 
-export async function dispatchPublish(): Promise<void> {
-  return withAuthClear(() => getClient().dispatchPublish())
+export async function dispatchPublish(
+  options?: DispatchPublishOptions,
+): Promise<void> {
+  return withAuthClear(() => getClient().dispatchPublish(options))
 }
