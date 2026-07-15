@@ -1,0 +1,13 @@
+{
+  "name": "GenVoice Icons",
+  "id": "genvoice-icons-library",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["https://api.github.com"],
+    "reasoning": "Stage icon SVGs and dispatch Apply/Publish GitHub Actions workflows."
+  },
+  "documentAccess": "dynamic-page"
+}

@@ -14,6 +14,7 @@ Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=pa
 | `@JasonTuTu2/icons-core` | Shared types & helpers (usually transitive) |
 | `@JasonTuTu2/icons-catalog` | Icon metadata + search helpers |
 | `@JasonTuTu2/icons-web` | Icon browser + docs (private app, not published) |
+| `@JasonTuTu2/icons-figma` | Figma plugin for stage/apply/publish (private, not published) |
 
 ## Install
 
@@ -203,26 +204,28 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
-**Preferred (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Add to staging** (multi-file OK), then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
+**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)), select icons, **Stage** → **Apply staged**, then **Publish** when releasing. Same GitHub staging folder and Actions as the web browser.
+
+**Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Add to staging** (multi-file OK), then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
 From Figma / git:
 
-1. Export SVG (prefer 24×24).
-2. Add via **Upload SVG** in the browser (Pages or `pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
+1. Export SVG (prefer 24×24), or use the Figma plugin **Load selection**.
+2. Add via the plugin, **Upload SVG** in the browser (Pages or `pnpm dev`), choosing **Monochrome** or **Multi-color**, or commit files:
    - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
-3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
+3. Local git adds: run `pnpm catalog:gen` (Pages/Figma **Apply** regenerates in CI).
 4. Use `gv:kebab-name` in designs and code. Publish so consumers get the new version (`Icon` auto-registers custom icons).
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
 
-### Upload & publish from Pages
+### Upload & publish from Pages or Figma
 
-On the live browser:
+On the live browser or Figma plugin:
 
-1. **Connect GitHub** — paste a PAT into the toolbar (stored in tab `sessionStorage` only). Needs `contents: write` + `actions: write` on this repo.
+1. **Connect GitHub** — paste a PAT (browser: tab `sessionStorage`; Figma: `clientStorage`). Needs `contents: write` + `actions: write` on this repo.
 2. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages.
-3. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret (not the browser).
+3. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret (not the browser/plugin).
 4. **Publish** — dispatches publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
 **Repo setup (secrets & variables):**
@@ -232,19 +235,19 @@ On the live browser:
 | Secret | `ICON_BROWSER_TOKEN` | PAT used **only in Actions** for apply/publish git pushes (`contents: write`; include `actions: write` if the same token is also used by maintainers in the browser) |
 | Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-The Pages build **does not** embed a write token. Anonymous visitors cannot stage/apply/publish.
+The Pages build and Figma plugin **do not** embed a write token. Anonymous visitors cannot stage/apply/publish.
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Session PAT → Contents API → `staging/mono` or `staging/color` |
-| Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library + `catalog:gen` |
-| Publish | Session PAT dispatches → Action publishes with package permissions |
+| Add to staging | Session/plugin PAT → Contents API → `staging/mono` or `staging/color` |
+| Apply staged | PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library + `catalog:gen` |
+| Publish | PAT dispatches → Action publishes with package permissions |
 
 Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
 
 ### Publishing
 
-Packages publish to GitHub Packages when someone clicks **Publish** in the icon browser (see `.github/workflows/publish-packages.yml`), or via manual `workflow_dispatch`. Staging/Apply do **not** auto-publish.
+Packages publish to GitHub Packages when someone clicks **Publish** in the Figma plugin or icon browser (see `.github/workflows/publish-packages.yml`), or via manual `workflow_dispatch`. Staging/Apply do **not** auto-publish.
 
 Local publish:
 
