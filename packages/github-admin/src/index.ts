@@ -27,6 +27,7 @@ export interface PublishReadiness {
 export interface GithubAdminClient {
   stageIcons(icons: IconUploadPayload[]): Promise<void>
   listStagedIcons(): Promise<StagedIcon[]>
+  listUnpublishedIcons(): Promise<StagedIcon[]>
   getPublishReadiness(): Promise<PublishReadiness>
   dispatchApplyStaged(): Promise<void>
   dispatchPublish(): Promise<void>
@@ -253,6 +254,50 @@ export function createGithubAdminClient(
       return [...mono, ...color].sort((a, b) => a.name.localeCompare(b.name))
     },
 
+    async listUnpublishedIcons(): Promise<StagedIcon[]> {
+      const commits = await githubJson<
+        Array<{ sha: string; commit: { message: string } }>
+      >('/commits?sha=main&per_page=50')
+
+      const publishCommit = commits.find((entry) =>
+        /Version packages/i.test(entry.commit.message),
+      )
+
+      // No prior publish — treat everything as already "published" for this list
+      // (avoid dumping the whole library). Empty list; Publish warn still allows.
+      if (!publishCommit) {
+        return []
+      }
+
+      if (commits[0]?.sha === publishCommit.sha) {
+        return []
+      }
+
+      const compare = await githubJson<{
+        files?: Array<{ filename: string; status?: string }>
+      }>(`/compare/${publishCommit.sha}...main`)
+
+      const icons: StagedIcon[] = []
+      for (const file of compare.files ?? []) {
+        if (file.status === 'removed') continue
+        const path = file.filename.replace(/\\/g, '/')
+        if (
+          !path.startsWith('packages/custom-icons/svg/') ||
+          !path.toLowerCase().endsWith('.svg') ||
+          path.includes('/staging/')
+        ) {
+          continue
+        }
+        const base = path.split('/').pop()!.replace(/\.svg$/i, '')
+        const colorMode: IconColorMode = path.includes('/svg/color/')
+          ? 'preserved'
+          : 'mono'
+        icons.push({ name: base, colorMode, path })
+      }
+
+      return icons.sort((a, b) => a.name.localeCompare(b.name))
+    },
+
     async getPublishReadiness(): Promise<PublishReadiness> {
       const staged = await this.listStagedIcons()
       const stagedCount = staged.length
@@ -265,30 +310,16 @@ export function createGithubAdminClient(
         /Version packages/i.test(entry.commit.message),
       )
 
-      // No prior publish on record — don't block on "no new icons".
+      // No prior publish on record — don't block with the "no new icons" warn.
       if (!publishCommit) {
         return { hasNewIcons: true, stagedCount }
       }
 
-      // Already at the publish tip → nothing new since then.
-      if (commits[0]?.sha === publishCommit.sha) {
-        return { hasNewIcons: false, stagedCount }
+      const unpublished = await this.listUnpublishedIcons()
+      return {
+        hasNewIcons: unpublished.length > 0,
+        stagedCount,
       }
-
-      const compare = await githubJson<{
-        files?: Array<{ filename: string }>
-      }>(`/compare/${publishCommit.sha}...main`)
-
-      const hasNewIcons = (compare.files ?? []).some((file) => {
-        const path = file.filename.replace(/\\/g, '/')
-        return (
-          path.startsWith('packages/custom-icons/svg/') &&
-          path.toLowerCase().endsWith('.svg') &&
-          !path.includes('/staging/')
-        )
-      })
-
-      return { hasNewIcons, stagedCount }
     },
 
     async dispatchApplyStaged(): Promise<void> {

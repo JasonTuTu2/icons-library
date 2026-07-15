@@ -77,6 +77,11 @@ export async function listStagedIcons(): Promise<StagedIcon[]> {
   return withAuthClear(() => getClient().listStagedIcons())
 }
 
+/** Custom SVGs applied to the library since the last package publish. */
+export async function listUnpublishedIcons(): Promise<StagedIcon[]> {
+  return withAuthClear(() => getClient().listUnpublishedIcons())
+}
+
 /** Promote whatever is staged now into the library (one Action). */
 export async function dispatchApplyStaged(): Promise<void> {
   return withAuthClear(() => getClient().dispatchApplyStaged())

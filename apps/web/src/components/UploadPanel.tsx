@@ -5,6 +5,7 @@ import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   listStagedIcons,
+  listUnpublishedIcons,
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
@@ -64,6 +65,7 @@ export function UploadPanel({
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [staged, setStaged] = useState<StagedIcon[]>([])
+  const [unpublished, setUnpublished] = useState<StagedIcon[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
 
   const canSubmit = useMemo(
@@ -77,7 +79,12 @@ export function UploadPanel({
     if (mode !== 'github' || !githubAuthed) return
     setStagedLoading(true)
     try {
-      setStaged(await listStagedIcons())
+      const [nextStaged, nextUnpublished] = await Promise.all([
+        listStagedIcons(),
+        listUnpublishedIcons(),
+      ])
+      setStaged(nextStaged)
+      setUnpublished(nextUnpublished)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
     } finally {
@@ -363,6 +370,28 @@ export function UploadPanel({
                     >
                       {busy ? 'Working…' : 'Apply staged to library'}
                     </button>
+                  </div>
+
+                  <div className="staged-block">
+                    <div className="staged-header">
+                      <strong>In library (unpublished)</strong>
+                    </div>
+                    {unpublished.length === 0 ? (
+                      <p className="staged-empty">No unpublished icons.</p>
+                    ) : (
+                      <ul className="staged-list">
+                        {unpublished.map((icon) => (
+                          <li key={icon.path}>
+                            <code>gv:{icon.name}</code>
+                            <span>
+                              {icon.colorMode === 'preserved'
+                                ? 'multi-color'
+                                : 'mono'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </>
               ) : (
