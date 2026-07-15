@@ -37,6 +37,8 @@ Repo target defaults to `JasonTuTu2/icons-library`; override at build time with 
 3. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
 4. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
+To **remove** a custom icon: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes the SVG from the library.
+
 ### First publish (happy path)
 
 1. **Connect GitHub** in the icon browser (or stage from the Figma plugin first).

@@ -86,6 +86,23 @@ import { Icon } from '@JasonTuTu2/icons-vue'
       </section>
 
       <section>
+        <h2>Removing a custom icon</h2>
+        <ol>
+          <li>
+            Select a <code>gv:</code> icon → <strong>Stage removal</strong>{' '}
+            (shared marker on GitHub).
+          </li>
+          <li>
+            <strong>Apply staged to library</strong> — deletes the SVG and
+            regenerates the catalog.
+          </li>
+          <li>
+            <strong>Publish</strong> so consumer packages no longer include it.
+          </li>
+        </ol>
+      </section>
+
+      <section>
         <h2>First publish (happy path)</h2>
         <ol>
           <li>Connect GitHub in the icon browser (or Stage from Figma first).</li>

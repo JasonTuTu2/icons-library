@@ -6,12 +6,15 @@ import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   listStagedIcons,
+  listStagedRemovals,
   listUnpublishedIcons,
   sanitizeIconName,
   stageIcons,
+  unstageRemoval,
   type IconColorMode,
   type IconNameConflict,
   type StagedIcon,
+  type StagedRemoval,
 } from '../lib/github'
 import { useGithubSessionToken } from '../lib/githubAuth'
 import {
@@ -72,7 +75,9 @@ function formatConflicts(conflicts: IconNameConflict[]): string {
             ? 'library (multi-color)'
             : c.location === 'staging-mono'
               ? 'staging (mono)'
-              : 'staging (multi-color)'
+              : c.location === 'staging-color'
+                ? 'staging (multi-color)'
+                : 'staged removals'
       return `• gv:${c.name} — already in ${where}`
     })
     .join('\n')
@@ -97,6 +102,7 @@ export function UploadPanel({
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<ReactNode>(null)
   const [staged, setStaged] = useState<StagedIcon[]>([])
+  const [stagedRemovals, setStagedRemovals] = useState<StagedRemoval[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
 
@@ -113,15 +119,19 @@ export function UploadPanel({
     [items],
   )
 
+  const hasStagedWork = staged.length > 0 || stagedRemovals.length > 0
+
   const refreshStaged = useCallback(async () => {
     if (mode !== 'github' || !githubAuthed) return
     setStagedLoading(true)
     try {
-      const [nextStaged, nextUnpublished] = await Promise.all([
+      const [nextStaged, nextRemovals, nextUnpublished] = await Promise.all([
         listStagedIcons(),
+        listStagedRemovals(),
         listUnpublishedIcons(),
       ])
       setStaged(nextStaged)
+      setStagedRemovals(nextRemovals)
       setUnpublishedIcons(nextUnpublished)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -211,16 +221,24 @@ export function UploadPanel({
     setBusy(true)
     setMessage(null)
     try {
-      const current = await listStagedIcons()
+      const [current, currentRemovals] = await Promise.all([
+        listStagedIcons(),
+        listStagedRemovals(),
+      ])
       setStaged(current)
-      if (current.length === 0) {
+      setStagedRemovals(currentRemovals)
+      if (current.length === 0 && currentRemovals.length === 0) {
         setMessage('Nothing is staged on GitHub right now.')
         return
       }
 
-      const names = current.map((icon) => `gv:${icon.name}`).join(', ')
+      const addNames = current.map((icon) => `+ gv:${icon.name}`).join('\n')
+      const removeNames = currentRemovals
+        .map((icon) => `- gv:${icon.name}`)
+        .join('\n')
+      const summary = [addNames, removeNames].filter(Boolean).join('\n')
       const ok = window.confirm(
-        `Apply ${current.length} staged icon(s) to the library?\n\n${names}\n\nApplies whatever is staged on GitHub right now. If someone else is still adding icons, they will not be included unless they click Apply again after.`,
+        `Apply staged changes to the library?\n\n${summary}\n\nApplies whatever is staged on GitHub right now (adds and removals). If someone else is still editing staging, they will not be included unless they click Apply again after.`,
       )
       if (!ok) return
 
@@ -233,6 +251,21 @@ export function UploadPanel({
           workflowUrl={actionsWorkflowUrl('apply-staged-icons.yml')}
         />,
       )
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleUnstageRemoval(name: string) {
+    if (mode !== 'github' || !githubAuthed) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      await unstageRemoval(name)
+      await refreshStaged()
+      setMessage(`Unstaged removal of gv:${name}.`)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
     } finally {
@@ -443,7 +476,7 @@ export function UploadPanel({
                         </button>
                       </div>
                       {staged.length === 0 ? (
-                        <p className="staged-empty">No staged icons.</p>
+                        <p className="staged-empty">No staged adds.</p>
                       ) : (
                         <ul className="staged-list">
                           {staged.map((icon) => (
@@ -458,10 +491,35 @@ export function UploadPanel({
                           ))}
                         </ul>
                       )}
+
+                      <strong className="staged-subheader">
+                        Staged removals
+                      </strong>
+                      {stagedRemovals.length === 0 ? (
+                        <p className="staged-empty">No staged removals.</p>
+                      ) : (
+                        <ul className="staged-list">
+                          {stagedRemovals.map((icon) => (
+                            <li key={icon.path} className="staged-removal-row">
+                              <code>gv:{icon.name}</code>
+                              <button
+                                type="button"
+                                className="ghost"
+                                disabled={busy}
+                                onClick={() =>
+                                  void handleUnstageRemoval(icon.name)
+                                }
+                              >
+                                Unstage
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       <button
                         type="button"
                         className="ghost accent"
-                        disabled={busy || staged.length === 0}
+                        disabled={busy || !hasStagedWork}
                         onClick={() => void handleApplyStaged()}
                       >
                         {busy ? 'Working…' : 'Apply staged to library'}

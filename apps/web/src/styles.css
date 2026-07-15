@@ -633,6 +633,32 @@ pre {
   color: var(--accent);
 }
 
+.ghost.danger {
+  background: rgba(155, 44, 44, 0.08);
+  border-color: rgba(155, 44, 44, 0.35);
+  color: var(--danger);
+}
+
+.detail-actions {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+}
+
+.staged-subheader {
+  display: block;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.staged-removal-row {
+  align-items: center;
+}
+
+.staged-removal-row code {
+  color: var(--danger);
+}
+
 .ghost:disabled {
   opacity: 0.55;
   cursor: not-allowed;

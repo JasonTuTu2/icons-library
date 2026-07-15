@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { Icon } from '@JasonTuTu2/icons-react'
+import {
+  isGithubAdminEnabled,
+  isGithubRepoConfigured,
+  stageRemovals,
+} from '../lib/github'
+import { useGithubSessionToken } from '../lib/githubAuth'
 
 interface IconDetailProps {
   icon: IconMeta
   reactCode: string
   vueCode: string
   onClose: () => void
+  onRemovalStaged?: (name: string) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -23,13 +30,45 @@ export function IconDetail({
   reactCode,
   vueCode,
   onClose,
+  onRemovalStaged,
 }: IconDetailProps) {
+  useGithubSessionToken()
   const [copied, setCopied] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [removeMessage, setRemoveMessage] = useState<string | null>(null)
+
+  const canStageRemoval =
+    icon.source === 'custom' &&
+    icon.id.startsWith('gv:') &&
+    isGithubRepoConfigured() &&
+    isGithubAdminEnabled()
 
   async function handleCopy(label: string, text: string) {
     const ok = await copyText(text)
     setCopied(ok ? label : 'failed')
     window.setTimeout(() => setCopied(null), 1600)
+  }
+
+  async function handleStageRemoval() {
+    const name = icon.id.replace(/^gv:/, '')
+    const ok = window.confirm(
+      `Stage removal of ${icon.id}?\n\nThis writes a shared marker on GitHub. The SVG stays in the library until someone clicks Apply staged. Consumers keep the icon until you Publish after Apply.`,
+    )
+    if (!ok) return
+
+    setBusy(true)
+    setRemoveMessage(null)
+    try {
+      await stageRemovals([name])
+      setRemoveMessage(
+        `Staged removal of ${icon.id}. Apply from Upload when ready.`,
+      )
+      onRemovalStaged?.(name)
+    } catch (err) {
+      setRemoveMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -69,7 +108,9 @@ export function IconDetail({
           <div>
             <dt>Color mode</dt>
             <dd>
-              {icon.colorMode === 'preserved' ? 'Multi-color (preserved)' : 'Monochrome'}
+              {icon.colorMode === 'preserved'
+                ? 'Multi-color (preserved)'
+                : 'Monochrome'}
               {icon.colorMode === 'preserved' ? (
                 <span className="meta-note">
                   {' '}
@@ -95,6 +136,35 @@ export function IconDetail({
           </dd>
         </div>
       </dl>
+
+      {canStageRemoval ? (
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="ghost danger"
+            disabled={busy}
+            onClick={() => void handleStageRemoval()}
+          >
+            {busy ? 'Staging…' : 'Stage removal'}
+          </button>
+          <p className="meta-note">
+            Stages a shared removal marker. Apply deletes the SVG from the
+            library; Publish drops it from packages.
+          </p>
+          {removeMessage ? (
+            <p className="copy-toast" role="status">
+              {removeMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : icon.source === 'custom' &&
+        icon.id.startsWith('gv:') &&
+        isGithubRepoConfigured() &&
+        !isGithubAdminEnabled() ? (
+        <p className="meta-note">
+          Connect GitHub to stage removal of this custom icon.
+        </p>
+      ) : null}
 
       <section className="snippet">
         <div className="snippet-head">

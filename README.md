@@ -236,6 +236,8 @@ On the live browser or Figma plugin:
 3. **Apply staged to library** (browser) — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret (not the browser/plugin).
 4. **Publish** (browser) — check unpublished icons to include; unchecked icons are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
+**Remove a custom icon:** select `gv:…` in the browser → **Stage removal** → **Apply staged** (deletes the SVG + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
+
 **Repo setup (secrets & variables):**
 
 | Kind | Name | Purpose |
@@ -248,7 +250,8 @@ The Pages build and Figma plugin **do not** embed a write token. Anonymous visit
 | Action | What happens |
 |--------|----------------|
 | Add to staging | Session/plugin PAT → Contents API → `staging/mono` or `staging/color` |
-| Apply staged | Browser PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library + `catalog:gen` |
+| Stage removal | Session PAT → Contents API → `staging/remove/{name}.remove` |
+| Apply staged | Browser PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
 | Publish | Browser PAT dispatches (unchecked held aside for this package, then restored) → Action publishes with package permissions |
 
 Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.

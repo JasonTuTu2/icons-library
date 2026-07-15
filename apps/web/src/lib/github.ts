@@ -12,6 +12,7 @@ import {
   type IconUploadPayload,
   type PublishReadiness,
   type StagedIcon,
+  type StagedRemoval,
 } from '@JasonTuTu2/github-admin'
 import {
   clearGithubSessionToken,
@@ -25,6 +26,7 @@ export type {
   IconUploadPayload,
   PublishReadiness,
   StagedIcon,
+  StagedRemoval,
 }
 export { sanitizeIconName }
 
@@ -86,9 +88,24 @@ export async function stageIcons(icons: IconUploadPayload[]): Promise<void> {
   return withAuthClear(() => getClient().stageIcons(icons))
 }
 
+/** Stage library icon names for removal on next Apply. */
+export async function stageRemovals(names: string[]): Promise<void> {
+  return withAuthClear(() => getClient().stageRemovals(names))
+}
+
+/** Cancel a staged removal marker. */
+export async function unstageRemoval(name: string): Promise<void> {
+  return withAuthClear(() => getClient().unstageRemoval(name))
+}
+
 /** List all staged SVGs currently on main. */
 export async function listStagedIcons(): Promise<StagedIcon[]> {
   return withAuthClear(() => getClient().listStagedIcons())
+}
+
+/** List staged removal markers. */
+export async function listStagedRemovals(): Promise<StagedRemoval[]> {
+  return withAuthClear(() => getClient().listStagedRemovals())
 }
 
 /** Custom SVGs applied to the library since the last package publish. */

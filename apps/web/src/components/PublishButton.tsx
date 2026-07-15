@@ -59,12 +59,12 @@ export function PublishButton() {
             ? `\n\nUnchecked icons stay out of this package, then return to the library as unpublished:\n${deferredList}`
             : ''
         const ok = window.confirm(
-          `${readiness.stagedCount} icon(s) are still in staging and will not be included in this publish.\n\nApply staged icons to the library first if you want them shipped.${iconsNote}${deferNote}\n\nPublish package versions anyway?`,
+          `${readiness.stagedCount} staged add(s)/removal(s) are still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${iconsNote}${deferNote}\n\nPublish package versions anyway?`,
         )
         if (!ok) return
       } else if (!readiness.hasNewIcons) {
         const ok = window.confirm(
-          'No new custom SVGs have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no new icons for consumers.\n\nPublish anyway?',
+          'No custom SVG adds or removals have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no library changes for consumers.\n\nPublish anyway?',
         )
         if (!ok) return
       } else if (selected.length === 0) {

@@ -19,13 +19,13 @@ jobs:
           token: ${{ secrets.ICON_BROWSER_TOKEN }}
 
       - id: promote
-        name: Promote staging SVGs into library
+        name: Promote staging adds and removals
         run: |
           set -euo pipefail
           STAGING=packages/custom-icons/staging
           MONO_DST=packages/custom-icons/svg
           COLOR_DST=packages/custom-icons/svg/color
-          mkdir -p "$MONO_DST" "$COLOR_DST"
+          mkdir -p "$MONO_DST" "$COLOR_DST" "$STAGING/remove"
           names=()
 
           shopt -s nullglob
@@ -40,6 +40,26 @@ jobs:
             mv -f "$f" "$COLOR_DST/$base"
             names+=("gv:${base%.svg}")
             echo "Promoted color/$base"
+          done
+          for f in "$STAGING"/remove/*.remove; do
+            name=$(basename "$f" .remove)
+            removed=0
+            if [[ -f "$MONO_DST/$name.svg" ]]; then
+              rm -f "$MONO_DST/$name.svg"
+              removed=1
+              echo "Removed mono/$name.svg"
+            fi
+            if [[ -f "$COLOR_DST/$name.svg" ]]; then
+              rm -f "$COLOR_DST/$name.svg"
+              removed=1
+              echo "Removed color/$name.svg"
+            fi
+            rm -f "$f"
+            if [[ "$removed" -eq 1 ]]; then
+              names+=("-gv:$name")
+            else
+              echo "Removal marker for $name had no library SVG"
+            fi
           done
           shopt -u nullglob
 

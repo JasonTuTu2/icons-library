@@ -12,15 +12,21 @@ export interface StagedIcon {
   path: string
 }
 
+/** Tombstone in staging/remove — Apply deletes the matching library SVG(s). */
+export interface StagedRemoval {
+  name: string
+  path: string
+}
+
 export interface GithubAdminConfig {
   token: string
   repo: string
 }
 
 export interface PublishReadiness {
-  /** Custom SVGs applied to the library since the last package version publish. */
+  /** Custom SVG adds/removes applied to the library since the last package version publish. */
   hasNewIcons: boolean
-  /** Icons still sitting in staging (not yet Apply'd). */
+  /** Staged adds + removal markers waiting for Apply. */
   stagedCount: number
 }
 
@@ -31,6 +37,7 @@ export interface IconNameConflict {
     | 'library-color'
     | 'staging-mono'
     | 'staging-color'
+    | 'staging-remove'
 }
 
 export interface DispatchPublishOptions {
@@ -44,7 +51,10 @@ export interface DispatchPublishOptions {
 
 export interface GithubAdminClient {
   stageIcons(icons: IconUploadPayload[]): Promise<void>
+  stageRemovals(names: string[]): Promise<void>
+  unstageRemoval(name: string): Promise<void>
   listStagedIcons(): Promise<StagedIcon[]>
+  listStagedRemovals(): Promise<StagedRemoval[]>
   listUnpublishedIcons(): Promise<StagedIcon[]>
   /** Existing library / staging files that collide with these kebab names. */
   findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
@@ -66,7 +76,12 @@ export class GithubAuthError extends Error {
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 const STAGING_BASE = 'packages/custom-icons/staging'
+const REMOVE_DIR = `${STAGING_BASE}/remove`
 const DEFAULT_REPO = 'JasonTuTu2/icons-library'
+
+function removalMarkerPath(name: string): string {
+  return `${REMOVE_DIR}/${name}.remove`
+}
 
 export function sanitizeIconName(raw: string): string | null {
   const base = raw
@@ -209,10 +224,38 @@ export function createGithubAdminClient(
     return body.sha
   }
 
+  async function deletePath(path: string, message: string): Promise<boolean> {
+    const sha = await getFileSha(path)
+    if (!sha) return false
+    await githubJson(`/contents/${path}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ message, sha, branch: 'main' }),
+    })
+    return true
+  }
+
+  async function putTextFile(
+    path: string,
+    content: string,
+    message: string,
+  ): Promise<void> {
+    const sha = await getFileSha(path)
+    const body: Record<string, string> = {
+      message,
+      content: toBase64Utf8(content),
+      branch: 'main',
+    }
+    if (sha) body.sha = sha
+    await githubJson(`/contents/${path}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    })
+  }
+
   async function listStagingDir(
-    dir: 'mono' | 'color',
-    colorMode: IconColorMode,
-  ): Promise<StagedIcon[]> {
+    dir: 'mono' | 'color' | 'remove',
+    colorMode?: IconColorMode,
+  ): Promise<StagedIcon[] | StagedRemoval[]> {
     const res = await githubFetch(`/contents/${STAGING_BASE}/${dir}`)
     if (res.status === 404) return []
     if (!res.ok) {
@@ -237,6 +280,21 @@ export function createGithubAdminClient(
 
     if (!Array.isArray(entries)) return []
 
+    if (dir === 'remove') {
+      return entries
+        .filter(
+          (entry) =>
+            entry.type === 'file' &&
+            entry.name.toLowerCase().endsWith('.remove') &&
+            !entry.name.startsWith('.'),
+        )
+        .map((entry) => ({
+          name: entry.name.replace(/\.remove$/i, ''),
+          path: entry.path,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    }
+
     return entries
       .filter(
         (entry) =>
@@ -246,7 +304,7 @@ export function createGithubAdminClient(
       )
       .map((entry) => ({
         name: entry.name.replace(/\.svg$/i, ''),
-        colorMode,
+        colorMode: colorMode!,
         path: entry.path,
       }))
   }
@@ -256,29 +314,89 @@ export function createGithubAdminClient(
       const normalized = validateIcons(icons)
 
       for (const icon of normalized) {
+        // An add cancels a pending removal for the same name.
+        await deletePath(
+          removalMarkerPath(icon.name),
+          `Cancel staged removal gv:${icon.name}`,
+        )
+
         const dir = stagingDir(icon.colorMode)
         const path = `${STAGING_BASE}/${dir}/${icon.name}.svg`
-        const sha = await getFileSha(path)
-        const body: Record<string, string> = {
-          message: `Stage icon gv:${icon.name}`,
-          content: toBase64Utf8(`${icon.content}\n`),
-          branch: 'main',
-        }
-        if (sha) body.sha = sha
+        await putTextFile(
+          path,
+          `${icon.content}\n`,
+          `Stage icon gv:${icon.name}`,
+        )
+      }
+    },
 
-        await githubJson(`/contents/${path}`, {
-          method: 'PUT',
-          body: JSON.stringify(body),
-        })
+    async stageRemovals(names: string[]): Promise<void> {
+      const unique = [
+        ...new Set(
+          names
+            .map((n) => sanitizeIconName(n))
+            .filter((n): n is string => Boolean(n)),
+        ),
+      ]
+      if (unique.length === 0) {
+        throw new Error('No icon names to remove.')
+      }
+
+      for (const name of unique) {
+        const monoPath = `packages/custom-icons/svg/${name}.svg`
+        const colorPath = `packages/custom-icons/svg/color/${name}.svg`
+        const [monoSha, colorSha] = await Promise.all([
+          getFileSha(monoPath),
+          getFileSha(colorPath),
+        ])
+        if (!monoSha && !colorSha) {
+          throw new Error(
+            `gv:${name} is not in the library — nothing to stage for removal.`,
+          )
+        }
+
+        // A removal cancels a pending add for the same name.
+        await deletePath(
+          `${STAGING_BASE}/mono/${name}.svg`,
+          `Cancel staged add gv:${name} (mono)`,
+        )
+        await deletePath(
+          `${STAGING_BASE}/color/${name}.svg`,
+          `Cancel staged add gv:${name} (color)`,
+        )
+
+        await putTextFile(
+          removalMarkerPath(name),
+          `remove gv:${name}\n`,
+          `Stage removal gv:${name}`,
+        )
+      }
+    },
+
+    async unstageRemoval(name: string): Promise<void> {
+      const sanitized = sanitizeIconName(name)
+      if (!sanitized) {
+        throw new Error(`Invalid icon name "${name}".`)
+      }
+      const deleted = await deletePath(
+        removalMarkerPath(sanitized),
+        `Unstage removal gv:${sanitized}`,
+      )
+      if (!deleted) {
+        throw new Error(`gv:${sanitized} is not staged for removal.`)
       }
     },
 
     async listStagedIcons(): Promise<StagedIcon[]> {
       const [mono, color] = await Promise.all([
-        listStagingDir('mono', 'mono'),
-        listStagingDir('color', 'preserved'),
+        listStagingDir('mono', 'mono') as Promise<StagedIcon[]>,
+        listStagingDir('color', 'preserved') as Promise<StagedIcon[]>,
       ])
       return [...mono, ...color].sort((a, b) => a.name.localeCompare(b.name))
+    },
+
+    async listStagedRemovals(): Promise<StagedRemoval[]> {
+      return (await listStagingDir('remove')) as StagedRemoval[]
     },
 
     async listUnpublishedIcons(): Promise<StagedIcon[]> {
@@ -356,6 +474,10 @@ export function createGithubAdminClient(
             path: `${STAGING_BASE}/color/${name}.svg`,
             location: 'staging-color',
           },
+          {
+            path: removalMarkerPath(name),
+            location: 'staging-remove',
+          },
         ]
         for (const check of checks) {
           const sha = await getFileSha(check.path)
@@ -367,8 +489,11 @@ export function createGithubAdminClient(
     },
 
     async getPublishReadiness(): Promise<PublishReadiness> {
-      const staged = await this.listStagedIcons()
-      const stagedCount = staged.length
+      const [staged, removals] = await Promise.all([
+        this.listStagedIcons(),
+        this.listStagedRemovals(),
+      ])
+      const stagedCount = staged.length + removals.length
 
       const commits = await githubJson<
         Array<{ sha: string; commit: { message: string } }>
@@ -383,9 +508,25 @@ export function createGithubAdminClient(
         return { hasNewIcons: true, stagedCount }
       }
 
-      const unpublished = await this.listUnpublishedIcons()
+      if (commits[0]?.sha === publishCommit.sha) {
+        return { hasNewIcons: false, stagedCount }
+      }
+
+      const compare = await githubJson<{
+        files?: Array<{ filename: string; status?: string }>
+      }>(`/compare/${publishCommit.sha}...main`)
+
+      const hasLibrarySvgChange = (compare.files ?? []).some((file) => {
+        const path = file.filename.replace(/\\/g, '/')
+        return (
+          path.startsWith('packages/custom-icons/svg/') &&
+          path.toLowerCase().endsWith('.svg') &&
+          !path.includes('/staging/')
+        )
+      })
+
       return {
-        hasNewIcons: unpublished.length > 0,
+        hasNewIcons: hasLibrarySvgChange,
         stagedCount,
       }
     },
