@@ -1,6 +1,9 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { BrowserPage } from './pages/BrowserPage'
 import { DocsPage } from './pages/DocsPage'
+import { packagesUrl } from './lib/github'
+
+const packageVersion = import.meta.env.VITE_PACKAGE_VERSION
 
 export function App() {
   return (
@@ -13,12 +16,23 @@ export function App() {
             <p>Ant Design + Iconify for React &amp; Vue</p>
           </div>
         </div>
-        <nav className="nav">
-          <NavLink to="/" end>
-            Browse
-          </NavLink>
-          <NavLink to="/docs">Docs</NavLink>
-        </nav>
+        <div className="topbar-end">
+          <a
+            className="package-version"
+            href={packagesUrl()}
+            target="_blank"
+            rel="noreferrer"
+            title="GitHub Packages (linked package set)"
+          >
+            v{packageVersion}
+          </a>
+          <nav className="nav">
+            <NavLink to="/" end>
+              Browse
+            </NavLink>
+            <NavLink to="/docs">Docs</NavLink>
+          </nav>
+        </div>
       </header>
       <main className="main">
         <Routes>

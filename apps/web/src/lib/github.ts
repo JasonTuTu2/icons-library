@@ -47,7 +47,7 @@ export function actionsUrl(): string {
 
 export function packagesUrl(): string {
   const { repo } = getConfig()
-  const owner = repo.split('/')[0] ?? 'JasonTuTu2'
+  const owner = repo.split('/')[0] || 'JasonTuTu2'
   return `https://github.com/${owner}?tab=packages`
 }
 

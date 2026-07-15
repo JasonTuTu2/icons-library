@@ -92,6 +92,29 @@ pre {
   gap: 0.5rem;
 }
 
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.package-version {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+}
+
+.package-version:hover {
+  color: var(--accent);
+  border-color: var(--accent-soft);
+}
+
 .nav a {
   text-decoration: none;
   color: var(--muted);
