@@ -137,35 +137,6 @@ export function IconDetail({
         </div>
       </dl>
 
-      {canStageRemoval ? (
-        <div className="detail-actions">
-          <button
-            type="button"
-            className="ghost danger"
-            disabled={busy}
-            onClick={() => void handleStageRemoval()}
-          >
-            {busy ? 'Staging…' : 'Stage removal'}
-          </button>
-          <p className="meta-note">
-            Stages a shared removal marker. Apply deletes the SVG from the
-            library; Publish drops it from packages.
-          </p>
-          {removeMessage ? (
-            <p className="copy-toast" role="status">
-              {removeMessage}
-            </p>
-          ) : null}
-        </div>
-      ) : icon.source === 'custom' &&
-        icon.id.startsWith('gv:') &&
-        isGithubRepoConfigured() &&
-        !isGithubAdminEnabled() ? (
-        <p className="meta-note">
-          Connect GitHub to stage removal of this custom icon.
-        </p>
-      ) : null}
-
       <section className="snippet">
         <div className="snippet-head">
           <h3>React</h3>
@@ -197,6 +168,35 @@ export function IconDetail({
           <code>{vueCode}</code>
         </pre>
       </section>
+
+      {canStageRemoval ? (
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="ghost danger"
+            disabled={busy}
+            onClick={() => void handleStageRemoval()}
+          >
+            {busy ? 'Staging…' : 'Stage removal'}
+          </button>
+          <p className="meta-note">
+            Stages a shared removal marker. Apply deletes the SVG from the
+            library; Publish drops it from packages.
+          </p>
+          {removeMessage ? (
+            <p className="copy-toast" role="status">
+              {removeMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : icon.source === 'custom' &&
+        icon.id.startsWith('gv:') &&
+        isGithubRepoConfigured() &&
+        !isGithubAdminEnabled() ? (
+        <p className="meta-note">
+          Connect GitHub to stage removal of this custom icon.
+        </p>
+      ) : null}
 
       {copied ? (
         <p className="copy-toast" role="status">
