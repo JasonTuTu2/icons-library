@@ -542,6 +542,38 @@ pre {
   color: var(--muted);
 }
 
+.check-all {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.check-list li {
+  display: block;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.check-row code {
+  flex: 1;
+  min-width: 0;
+}
+
+.check-row span {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
 .ghost.accent {
   background: var(--accent-soft);
   border-color: rgba(15, 110, 86, 0.3);

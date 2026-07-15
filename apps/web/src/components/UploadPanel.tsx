@@ -12,6 +12,12 @@ import {
   type StagedIcon,
 } from '../lib/github'
 import { useGithubSessionToken } from '../lib/githubAuth'
+import {
+  setAllUnpublishedChecked,
+  setUnpublishedChecked,
+  setUnpublishedIcons,
+  useUnpublishedSelection,
+} from '../lib/unpublishedSelection'
 
 interface UploadItem {
   fileName: string
@@ -65,8 +71,8 @@ export function UploadPanel({
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [staged, setStaged] = useState<StagedIcon[]>([])
-  const [unpublished, setUnpublished] = useState<StagedIcon[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
+  const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
 
   const canSubmit = useMemo(
     () =>
@@ -84,7 +90,7 @@ export function UploadPanel({
         listUnpublishedIcons(),
       ])
       setStaged(nextStaged)
-      setUnpublished(nextUnpublished)
+      setUnpublishedIcons(nextUnpublished)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
     } finally {
@@ -379,18 +385,42 @@ export function UploadPanel({
                     {unpublished.length === 0 ? (
                       <p className="staged-empty">No unpublished icons.</p>
                     ) : (
-                      <ul className="staged-list">
-                        {unpublished.map((icon) => (
-                          <li key={icon.path}>
-                            <code>gv:{icon.name}</code>
-                            <span>
-                              {icon.colorMode === 'preserved'
-                                ? 'multi-color'
-                                : 'mono'}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                      <>
+                        <label className="check-all">
+                          <input
+                            type="checkbox"
+                            checked={allChecked}
+                            onChange={(e) =>
+                              setAllUnpublishedChecked(e.target.checked)
+                            }
+                          />
+                          <span>Check all</span>
+                        </label>
+                        <ul className="staged-list check-list">
+                          {unpublished.map((icon) => (
+                            <li key={icon.path}>
+                              <label className="check-row">
+                                <input
+                                  type="checkbox"
+                                  checked={checkedPaths.has(icon.path)}
+                                  onChange={(e) =>
+                                    setUnpublishedChecked(
+                                      icon.path,
+                                      e.target.checked,
+                                    )
+                                  }
+                                />
+                                <code>gv:{icon.name}</code>
+                                <span>
+                                  {icon.colorMode === 'preserved'
+                                    ? 'multi-color'
+                                    : 'mono'}
+                                </span>
+                              </label>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
                     )}
                   </div>
                 </>
