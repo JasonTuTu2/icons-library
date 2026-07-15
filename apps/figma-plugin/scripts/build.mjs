@@ -46,19 +46,31 @@ async function writeUiHtml() {
   <meta charset="utf-8" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f3efe6;
-      --surface: #fffdf8;
-      --ink: #1c2430;
-      --muted: #5b6675;
-      --line: #d7d0c3;
-      --accent: #0f6e56;
-      --accent-soft: #d8efe7;
-      --danger: #9b2c2c;
-      --font: "DM Sans", "Segoe UI", sans-serif;
+      --navy: #0b1f5c;
+      --navy-dark: #071436;
+      --blue: #1ea7ff;
+      --blue-hover: #1590e0;
+      --blue-soft: #e8f4ff;
+      --bg: #f4f6fa;
+      --surface: #ffffff;
+      --ink: #0b1f5c;
+      --muted: #5c6b8a;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --accent: #1ea7ff;
+      --accent-soft: #e8f4ff;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --shadow-sm: 0 1px 2px rgba(11, 31, 92, 0.05);
+      --shadow: 0 4px 16px rgba(11, 31, 92, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: "Inter", "Segoe UI", system-ui, sans-serif;
       --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --transition: 0.18s ease;
     }
     * { box-sizing: border-box; }
     body {
@@ -66,20 +78,30 @@ async function writeUiHtml() {
       padding: 12px;
       font: 12.5px/1.45 var(--font);
       color: var(--ink);
-      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(ellipse 80% 50% at 0% 0%, rgba(30, 167, 255, 0.07), transparent 50%),
+        linear-gradient(180deg, #eef2f8 0%, var(--bg) 100%);
       min-height: 100%;
     }
-    a { color: var(--accent); }
+    a {
+      color: var(--blue);
+      transition: color var(--transition);
+    }
+    a:hover { color: var(--blue-hover); }
     code { font-family: var(--mono); font-size: 0.92em; }
     h1 {
       margin: 0 0 2px;
       font-size: 15px;
       font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--navy);
     }
     .sub {
       margin: 0 0 12px;
       color: var(--muted);
       font-size: 12px;
+      font-weight: 500;
     }
     .toolbar {
       display: flex;
@@ -89,16 +111,18 @@ async function writeUiHtml() {
       margin-bottom: 10px;
     }
     .panel {
-      padding: 10px;
+      padding: 12px;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: var(--radius);
       background: var(--surface);
       margin-bottom: 10px;
+      box-shadow: var(--shadow);
     }
     .lede {
       margin: 0 0 10px;
       color: var(--muted);
       font-size: 12px;
+      line-height: 1.5;
     }
     .field {
       display: flex;
@@ -107,42 +131,71 @@ async function writeUiHtml() {
       margin-bottom: 8px;
     }
     .field span {
-      font-size: 11px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--muted);
       font-weight: 600;
     }
     .field input {
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: 6px 8px;
       font: inherit;
-      background: #fff;
+      font-weight: 500;
+      background: var(--surface);
       color: var(--ink);
       width: 100%;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .field input:focus {
+      outline: none;
+      border-color: rgba(30, 167, 255, 0.55);
+      box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
     }
     .ghost {
       border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 8px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
       padding: 5px 10px;
       font: inherit;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       color: var(--ink);
+      transition:
+        border-color var(--transition),
+        color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
     }
     .ghost:hover:not(:disabled) {
-      border-color: var(--accent);
-      color: var(--accent);
+      border-color: rgba(30, 167, 255, 0.45);
+      color: var(--blue);
+      background: var(--accent-soft);
+      box-shadow: var(--shadow-sm);
+    }
+    .ghost:active:not(:disabled) {
+      transform: scale(0.98);
     }
     .ghost.accent {
-      background: var(--accent-soft);
-      border-color: rgba(15, 110, 86, 0.3);
-      color: var(--accent);
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue-hover) 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(30, 167, 255, 0.3);
+    }
+    .ghost.accent:hover:not(:disabled) {
+      background: linear-gradient(180deg, #38b5ff 0%, var(--blue) 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(30, 167, 255, 0.35);
     }
     .ghost:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     .row {
       display: flex;
@@ -169,6 +222,10 @@ async function writeUiHtml() {
       grid-template-columns: 24px minmax(0, 1fr) 5.25rem auto;
       gap: 6px;
       align-items: center;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
     }
     .upload-list img {
       width: 24px;
@@ -191,7 +248,13 @@ async function writeUiHtml() {
       border-radius: 6px;
       padding: 4px 6px;
       font: inherit;
-      background: #fff;
+      background: var(--surface);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .upload-list input:focus {
+      outline: none;
+      border-color: rgba(30, 167, 255, 0.55);
+      box-shadow: 0 0 0 2px rgba(30, 167, 255, 0.12);
     }
     .upload-list .color-mode-select {
       border: 1px solid var(--line);
@@ -199,13 +262,16 @@ async function writeUiHtml() {
       padding: 4px;
       font: inherit;
       font-size: 11px;
-      background: #fff;
+      font-weight: 500;
+      background: var(--surface);
       color: var(--ink);
     }
     .section {
       margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--line);
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
     }
     .section-head {
       display: flex;
@@ -214,7 +280,11 @@ async function writeUiHtml() {
       gap: 8px;
       margin-bottom: 6px;
     }
-    .section-head strong { font-size: 12px; }
+    .section-head strong {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+    }
     .empty {
       margin: 0;
       font-size: 12px;
@@ -225,7 +295,7 @@ async function writeUiHtml() {
       margin: 0 0 8px;
       padding: 0;
       display: grid;
-      gap: 3px;
+      gap: 4px;
       max-height: 7rem;
       overflow: auto;
     }
@@ -234,8 +304,12 @@ async function writeUiHtml() {
       justify-content: space-between;
       gap: 8px;
       font-size: 11px;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
     }
-    .staged-list span { color: var(--muted); }
+    .staged-list span { color: var(--muted); font-weight: 500; }
     .links {
       margin: 0;
       font-size: 11px;
@@ -244,7 +318,7 @@ async function writeUiHtml() {
     }
     .toast {
       margin: 8px 0 0;
-      color: var(--accent);
+      color: var(--blue);
       font-weight: 600;
       font-size: 12px;
       word-break: break-word;
