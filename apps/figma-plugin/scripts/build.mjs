@@ -303,7 +303,6 @@ async function writeUiHtml() {
     <ul class="upload-list" id="icon-list"></ul>
     <div class="actions">
       <button type="button" class="ghost accent" id="btn-stage" disabled>Add to staging</button>
-      <button type="button" class="ghost accent" id="btn-publish" disabled>Publish</button>
     </div>
 
     <div class="staged-block">
@@ -313,6 +312,7 @@ async function writeUiHtml() {
       </div>
       <div id="staged-body"></div>
       <button type="button" class="ghost accent" id="btn-apply" disabled>Apply staged to library</button>
+      <button type="button" class="ghost accent" id="btn-publish" disabled>Publish</button>
       <p class="footer-links"><a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a> · <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a></p>
     </div>
   </div>
