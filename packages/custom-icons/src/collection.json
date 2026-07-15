@@ -128,26 +128,6 @@
       "width": 24,
       "height": 24
     },
-    "staging-3": {
-      "body": "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" rx=\"4\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\" d=\"M7 12h10m-5-5v10\"/>",
-      "width": 24,
-      "height": 24
-    },
-    "staging-test": {
-      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
-      "width": 24,
-      "height": 24
-    },
-    "staging-test-2": {
-      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
-      "width": 24,
-      "height": 24
-    },
-    "staging-test-3": {
-      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
-      "width": 24,
-      "height": 24
-    },
     "tab-bar-item": {
       "body": "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M38.594 13.994a.94.94 0 0 0-1.189 0l-10.062 8.25a.937.937 0 0 0 .594 1.662h1.458l.745 8.142c.073.805.748 1.42 1.556 1.42h3.492c.345 0 .625-.28.625-.625v-4.802c0-1.875 1.53-1.875 1.874-1.875h.626c.345 0 1.874 0 1.874 1.875v4.802c0 .346.28.625.626.625h3.491c.808 0 1.483-.615 1.556-1.42l.745-8.142h1.457a.938.938 0 0 0 .595-1.662z\" clip-rule=\"evenodd\"/>",
       "width": 76,
