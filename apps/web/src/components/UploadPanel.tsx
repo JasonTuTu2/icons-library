@@ -3,12 +3,14 @@ import {
   actionsUrl,
   dispatchApplyStaged,
   isGithubAdminEnabled,
+  isGithubRepoConfigured,
   listStagedIcons,
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
   type StagedIcon,
 } from '../lib/github'
+import { useGithubSessionToken } from '../lib/githubAuth'
 
 interface UploadItem {
   fileName: string
@@ -45,11 +47,13 @@ export function UploadPanel({
   localUploadEnabled,
   onUploaded,
 }: UploadPanelProps) {
-  const githubEnabled = isGithubAdminEnabled()
-  const uploadEnabled = localUploadEnabled || githubEnabled
+  const sessionToken = useGithubSessionToken()
+  const githubRepoConfigured = isGithubRepoConfigured()
+  const githubAuthed = isGithubAdminEnabled()
+  const uploadEnabled = localUploadEnabled || githubRepoConfigured
   const mode: 'local' | 'github' | 'none' = localUploadEnabled
     ? 'local'
-    : githubEnabled
+    : githubRepoConfigured
       ? 'github'
       : 'none'
 
@@ -69,7 +73,7 @@ export function UploadPanel({
   )
 
   const refreshStaged = useCallback(async () => {
-    if (mode !== 'github') return
+    if (mode !== 'github' || !githubAuthed) return
     setStagedLoading(true)
     try {
       setStaged(await listStagedIcons())
@@ -78,7 +82,7 @@ export function UploadPanel({
     } finally {
       setStagedLoading(false)
     }
-  }, [mode])
+  }, [mode, githubAuthed])
 
   function close() {
     setOpen(false)
@@ -94,10 +98,10 @@ export function UploadPanel({
   }, [open])
 
   useEffect(() => {
-    if (open && mode === 'github') {
+    if (open && mode === 'github' && githubAuthed) {
       void refreshStaged()
     }
-  }, [open, mode, refreshStaged])
+  }, [open, mode, githubAuthed, refreshStaged, sessionToken])
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
@@ -110,7 +114,7 @@ export function UploadPanel({
   }
 
   async function handleStage() {
-    if (mode !== 'github' || !canSubmit) return
+    if (mode !== 'github' || !canSubmit || !githubAuthed) return
     setBusy(true)
     setMessage(null)
     try {
@@ -135,7 +139,7 @@ export function UploadPanel({
   }
 
   async function handleApplyStaged() {
-    if (mode !== 'github') return
+    if (mode !== 'github' || !githubAuthed) return
     setBusy(true)
     setMessage(null)
     try {
@@ -224,8 +228,15 @@ export function UploadPanel({
           {!uploadEnabled ? (
             <p>
               Upload is not configured. Locally, run <code>pnpm dev</code>. On
-              GitHub Pages, set the <code>ICON_BROWSER_TOKEN</code> repo secret
-              and redeploy.
+              GitHub Pages, ensure <code>VITE_GITHUB_REPO</code> is set at build
+              time and use <strong>Connect GitHub</strong> with a PAT.
+            </p>
+          ) : mode === 'github' && !githubAuthed ? (
+            <p>
+              Connect with a GitHub PAT (<code>contents: write</code> +{' '}
+              <code>actions: write</code>) using the toolbar button. Tokens stay
+              in this browser tab only — Actions use the{' '}
+              <code>ICON_BROWSER_TOKEN</code> secret for apply/publish pushes.
             </p>
           ) : (
             <>
@@ -233,7 +244,7 @@ export function UploadPanel({
                 Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
                 Choose monochrome (recolorable) or multi-color (preserved fills).
                 {mode === 'github'
-                  ? ' On Pages, files go to a shared staging folder first; Apply promotes everyone\'s staged icons in one Action.'
+                  ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
                   : ' Writes to disk and regenerates the catalog locally.'}
               </p>
               <label className="field">

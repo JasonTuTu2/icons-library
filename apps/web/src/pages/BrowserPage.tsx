@@ -11,7 +11,8 @@ import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
-import { isGithubAdminEnabled } from '../lib/github'
+import { GithubConnect } from '../components/GithubConnect'
+import { isGithubRepoConfigured } from '../lib/github'
 
 export function BrowserPage() {
   const sets = useMemo(() => getSets(), [])
@@ -110,6 +111,7 @@ export function BrowserPage() {
             <option value="preserved">Multi-color</option>
           </select>
         </label>
+        <GithubConnect />
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -142,9 +144,9 @@ export function BrowserPage() {
             <p>
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
-              {isGithubAdminEnabled()
-                ? ' Stage SVGs, Apply when ready, or Publish packages from the toolbar.'
-                : ' Upload custom Figma SVGs with Upload (local dev or Pages with ICON_BROWSER_TOKEN).'}
+              {isGithubRepoConfigured()
+                ? ' Connect GitHub with a PAT to stage SVGs, Apply, or Publish. Write tokens never ship in the Pages build.'
+                : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
             </p>
           </aside>
         )}

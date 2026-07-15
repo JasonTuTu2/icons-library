@@ -115,6 +115,19 @@ pre {
   border-color: var(--accent-soft);
 }
 
+.admin-hint {
+  margin: 0;
+  align-self: end;
+  padding-bottom: 0.55rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.github-connect-panel {
+  min-width: min(22rem, 90vw);
+}
+
 .nav a {
   text-decoration: none;
   color: var(--muted);

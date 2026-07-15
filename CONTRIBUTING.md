@@ -17,10 +17,11 @@
 
 ## Adding a custom icon
 
-Preferred: use the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/) (requires `ICON_BROWSER_TOKEN` secret):
+Preferred: use the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/):
 
-1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
-2. **Apply staged to library** — one Action promotes whatever is staged now, regenerates the catalog, clears staging.
+1. **Connect GitHub** — session PAT (`contents: write` + `actions: write`); not embedded in the site.
+2. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
+3. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
 
 ### Monochrome (recolorable) — local / git
 
@@ -53,7 +54,7 @@ Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token wi
 
 `@JasonTuTu2/icons-web` and `@JasonTuTu2/catalog-gen` stay private and are not published.
 
-**Security note:** the Pages build embeds `ICON_BROWSER_TOKEN` so the public UI can call GitHub. Until auth is added, treat upload/publish as open to anyone with the site URL.
+**Security:** Pages does **not** embed write tokens. Maintainers connect a session PAT in the browser; Apply/Publish Action jobs use the `ICON_BROWSER_TOKEN` repo secret. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo`.
 
 ## Guidelines
 

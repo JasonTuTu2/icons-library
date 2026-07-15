@@ -1,3 +1,8 @@
+import {
+  clearGithubSessionToken,
+  getGithubSessionToken,
+} from './githubAuth.js'
+
 export type IconColorMode = 'mono' | 'preserved'
 
 export interface IconUploadPayload {
@@ -15,15 +20,30 @@ export interface StagedIcon {
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 const STAGING_BASE = 'packages/custom-icons/staging'
 
-function getConfig() {
-  const token = import.meta.env.VITE_GITHUB_TOKEN?.trim() ?? ''
-  const repo = import.meta.env.VITE_GITHUB_REPO?.trim() ?? ''
-  return { token, repo }
+function getRepo(): string {
+  return import.meta.env.VITE_GITHUB_REPO?.trim() ?? ''
 }
 
+/**
+ * Token used for browser → GitHub API calls.
+ * Prefer a session PAT (Connect button). Optional VITE_GITHUB_TOKEN is for local
+ * .env only — Pages builds must NOT inject a write token.
+ */
+function getToken(): string {
+  return (
+    getGithubSessionToken() ||
+    import.meta.env.VITE_GITHUB_TOKEN?.trim() ||
+    ''
+  )
+}
+
+export function isGithubRepoConfigured(): boolean {
+  return getRepo().includes('/')
+}
+
+/** True when the UI can call GitHub write/dispatch APIs. */
 export function isGithubAdminEnabled(): boolean {
-  const { token, repo } = getConfig()
-  return Boolean(token && repo.includes('/'))
+  return isGithubRepoConfigured() && Boolean(getToken())
 }
 
 export function sanitizeIconName(raw: string): string | null {
@@ -41,12 +61,14 @@ export function sanitizeIconName(raw: string): string | null {
 }
 
 export function actionsUrl(): string {
-  const { repo } = getConfig()
-  return `https://github.com/${repo}/actions`
+  const repo = getRepo()
+  return repo.includes('/')
+    ? `https://github.com/${repo}/actions`
+    : 'https://github.com/JasonTuTu2/icons-library/actions'
 }
 
 export function packagesUrl(): string {
-  const { repo } = getConfig()
+  const repo = getRepo()
   const owner = repo.split('/')[0] || 'JasonTuTu2'
   return `https://github.com/${owner}?tab=packages`
 }
@@ -66,9 +88,17 @@ async function githubFetch(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const { token, repo } = getConfig()
-  if (!token || !repo) {
-    throw new Error('GitHub upload/publish is not configured for this build.')
+  const token = getToken()
+  const repo = getRepo()
+  if (!repo.includes('/')) {
+    throw new Error(
+      'GitHub repo is not configured for this build (VITE_GITHUB_REPO).',
+    )
+  }
+  if (!token) {
+    throw new Error(
+      'Connect with a GitHub PAT first (contents:write + actions:write).',
+    )
   }
 
   const res = await fetch(`https://api.github.com/repos/${repo}${path}`, {
@@ -94,6 +124,9 @@ async function githubJson<T>(path: string, init?: RequestInit): Promise<T> {
       if (body.message) detail = body.message
     } catch {
       // ignore
+    }
+    if (res.status === 401 || res.status === 403) {
+      clearGithubSessionToken()
     }
     throw new Error(`GitHub API ${res.status}: ${detail}`)
   }

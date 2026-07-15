@@ -60,10 +60,10 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <ol>
           <li>Export SVG from Figma (prefer 24×24, simple paths).</li>
           <li>
-            Prefer <strong>Add to staging</strong> in this browser (monochrome or
-            multi-color), then <strong>Apply staged to library</strong> and{' '}
-            <strong>Publish</strong>. Or commit to{' '}
-            <code>packages/custom-icons/svg/</code> (mono) /{' '}
+            Prefer <strong>Connect GitHub</strong>, then <strong>Add to
+            staging</strong> (monochrome or multi-color), then{' '}
+            <strong>Apply staged to library</strong> and <strong>Publish</strong>.
+            Or commit to <code>packages/custom-icons/svg/</code> (mono) /{' '}
             <code>svg/color/</code> (multi-color) and run{' '}
             <code>pnpm catalog:gen</code>. Local <code>pnpm dev</code> upload
             writes to disk without GitHub staging.

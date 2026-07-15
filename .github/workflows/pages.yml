@@ -33,8 +33,9 @@ jobs:
       - name: Build icon browser
         run: pnpm --filter @JasonTuTu2/icons-web... build
         env:
-          VITE_GITHUB_TOKEN: ${{ secrets.ICON_BROWSER_TOKEN }}
-          VITE_GITHUB_REPO: ${{ github.repository }}
+          # Public repo id only — never inject write tokens into the static site.
+          # Optional override via repo variable ICON_BROWSER_REPO (owner/name).
+          VITE_GITHUB_REPO: ${{ vars.ICON_BROWSER_REPO || github.repository }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist

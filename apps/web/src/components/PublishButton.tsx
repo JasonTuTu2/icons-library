@@ -3,15 +3,23 @@ import {
   actionsUrl,
   dispatchPublish,
   isGithubAdminEnabled,
+  isGithubRepoConfigured,
   packagesUrl,
 } from '../lib/github'
+import { useGithubSessionToken } from '../lib/githubAuth'
 
 export function PublishButton() {
+  useGithubSessionToken()
+  const repoConfigured = isGithubRepoConfigured()
   const enabled = isGithubAdminEnabled()
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  if (!enabled) return null
+  if (!repoConfigured) return null
+
+  if (!enabled) {
+    return <p className="admin-hint">Connect GitHub to publish</p>
+  }
 
   async function handlePublish() {
     const ok = window.confirm(

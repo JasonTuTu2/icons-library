@@ -220,24 +220,25 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 On the live browser:
 
-1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; cheap; multi-file OK). Staging-only commits do **not** redeploy Pages.
-2. **Apply staged to library** — one Action promotes **whatever is staged on GitHub right now** (everyone’s pending icons), runs `catalog:gen`, clears staging, then Pages redeploys.
-3. **Publish** — separate; patch-bumps and publishes packages to GitHub Packages.
+1. **Connect GitHub** — paste a PAT into the toolbar (stored in tab `sessionStorage` only). Needs `contents: write` + `actions: write` on this repo.
+2. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages.
+3. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret (not the browser).
+4. **Publish** — dispatches publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
-**One-time repo setup:** add a secret named `ICON_BROWSER_TOKEN` (fine-grained or classic PAT) with:
+**Repo setup (secrets & variables):**
 
-- `contents: write`
-- `actions: write`
+| Kind | Name | Purpose |
+|------|------|---------|
+| Secret | `ICON_BROWSER_TOKEN` | PAT used **only in Actions** for apply/publish git pushes (`contents: write`; include `actions: write` if the same token is also used by maintainers in the browser) |
+| Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-Use that same secret for Pages build injection and for Apply workflow pushes. Then redeploy Pages (push to `main` or run **Deploy icon browser**).
-
-**Caveat:** until login/auth is added, anyone who can open the public Pages site can stage/apply/publish (they can also extract the baked token). Treat this as temporary open access.
+The Pages build **does not** embed a write token. Anonymous visitors cannot stage/apply/publish.
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Contents API → `staging/mono` or `staging/color` (shared queue; no Action) |
-| Apply staged | `workflow_dispatch` → `apply-staged-icons` moves staging → library, `catalog:gen`, Pages redeploys |
-| Publish | `workflow_dispatch` → `publish-packages` patch bump + GitHub Packages |
+| Add to staging | Session PAT → Contents API → `staging/mono` or `staging/color` |
+| Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library + `catalog:gen` |
+| Publish | Session PAT dispatches → Action publishes with package permissions |
 
 Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
 
