@@ -163,6 +163,16 @@
       "width": 40,
       "height": 40
     },
+    "table-three": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"3.5\" d=\"M15 5H8.333A3.333 3.333 0 0 0 5 8.333V15M15 5h16.667A3.333 3.333 0 0 1 35 8.333V15M15 5v30M5 15v16.667A3.333 3.333 0 0 0 8.333 35H15M5 15h30m0 0v16.667A3.333 3.333 0 0 1 31.667 35H15\"/>",
+      "width": 40,
+      "height": 40
+    },
+    "table-two": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"3.5\" d=\"M15 5H8.333A3.333 3.333 0 0 0 5 8.333V15M15 5h16.667A3.333 3.333 0 0 1 35 8.333V15M15 5v30M5 15v16.667A3.333 3.333 0 0 0 8.333 35H15M5 15h30m0 0v16.667A3.333 3.333 0 0 1 31.667 35H15\"/>",
+      "width": 40,
+      "height": 40
+    },
     "test-1": {
       "body": "<rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" rx=\"4\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"2\" d=\"M7 12h10m-5-5v10\"/>",
       "width": 24,
