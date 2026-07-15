@@ -24,6 +24,7 @@ let token = ''
 let icons: ExportIcon[] = []
 let staged: StagedIcon[] = []
 let busy = false
+let authOpen = false
 
 function post(msg: UiToPluginMessage): void {
   parent.postMessage({ pluginMessage: msg }, '*')
@@ -42,10 +43,8 @@ function setMessage(text: string, isError = false): void {
 }
 
 function getColorMode(): IconColorMode {
-  const checked = document.querySelector(
-    'input[name="colorMode"]:checked',
-  ) as HTMLInputElement | null
-  return checked?.value === 'preserved' ? 'preserved' : 'mono'
+  const select = $('color-mode') as HTMLSelectElement
+  return select.value === 'preserved' ? 'preserved' : 'mono'
 }
 
 function getClient() {
@@ -71,18 +70,22 @@ function updateActionButtons(): void {
   ;($('btn-stage') as HTMLButtonElement).disabled =
     !authed || icons.length === 0 || busy
   ;($('btn-refresh') as HTMLButtonElement).disabled = !authed || busy
-  ;($('btn-apply') as HTMLButtonElement).disabled = !authed || busy
+  ;($('btn-apply') as HTMLButtonElement).disabled =
+    !authed || busy || staged.length === 0
   ;($('btn-publish') as HTMLButtonElement).disabled = !authed || busy
 }
 
 function renderAuth(): void {
+  const toolbar = $('auth-toolbar')
   const panel = $('auth-panel')
+
   if (token) {
-    panel.innerHTML = `
-      <p class="hint">Connected to <code>${GITHUB_REPO}</code></p>
-      <div class="row">
-        <button type="button" id="btn-disconnect">Disconnect GitHub</button>
-      </div>
+    authOpen = false
+    panel.classList.add('hidden')
+    panel.innerHTML = ''
+    toolbar.innerHTML = `
+      <button type="button" class="ghost" id="btn-disconnect">Disconnect GitHub</button>
+      <span class="footer-links">Connected to <code>${GITHUB_REPO}</code></span>
     `
     $('btn-disconnect').onclick = () => {
       post({ type: 'clear-token' })
@@ -90,18 +93,58 @@ function renderAuth(): void {
     return
   }
 
-  panel.innerHTML = `
-    <p class="hint">PAT needs <code>contents:write</code> and <code>actions:write</code>.</p>
-    <label for="pat">GitHub PAT</label>
-    <input type="password" id="pat" placeholder="ghp_…" autocomplete="off" />
-    <div class="row">
-      <button type="button" class="primary" id="btn-connect">Connect</button>
-    </div>
+  toolbar.innerHTML = `
+    <button type="button" class="ghost" id="btn-connect-toggle">Connect GitHub</button>
   `
+  $('btn-connect-toggle').onclick = () => {
+    authOpen = !authOpen
+    renderAuthForm()
+  }
+
+  if (authOpen) {
+    renderAuthForm()
+  } else {
+    panel.classList.add('hidden')
+    panel.innerHTML = ''
+  }
+}
+
+function renderAuthForm(): void {
+  const panel = $('auth-panel')
+  if (!authOpen || token) {
+    panel.classList.add('hidden')
+    panel.innerHTML = ''
+    return
+  }
+
+  panel.classList.remove('hidden')
+  panel.innerHTML = `
+    <div class="staged-header" style="margin-bottom:0.65rem">
+      <strong>Connect GitHub</strong>
+      <button type="button" class="ghost" id="btn-auth-close" aria-label="Close">×</button>
+    </div>
+    <p>
+      Paste a fine-grained or classic PAT with
+      <code>contents: write</code> and <code>actions: write</code> on this repo.
+      Stored in Figma <code>clientStorage</code> on this machine.
+    </p>
+    <label class="field">
+      <span>Personal access token</span>
+      <input type="password" id="pat" placeholder="ghp_… or github_pat_…" autocomplete="off" />
+    </label>
+    <button type="button" class="ghost accent" id="btn-connect">Save token</button>
+  `
+  $('btn-auth-close').onclick = () => {
+    authOpen = false
+    renderAuth()
+  }
   $('btn-connect').onclick = () => {
     const value = ($('pat') as HTMLInputElement).value.trim()
     if (!value) {
-      setMessage('Paste a GitHub PAT with contents:write and actions:write.', true)
+      setMessage(
+        'Paste a GitHub PAT with contents:write and actions:write.',
+        true,
+      )
       return
     }
     post({ type: 'set-token', token: value })
@@ -110,44 +153,83 @@ function renderAuth(): void {
 
 function renderIcons(): void {
   const list = $('icon-list')
+  const hint = $('selection-hint')
   list.innerHTML = ''
+
+  if (icons.length === 0) {
+    hint.classList.remove('hidden')
+    updateActionButtons()
+    return
+  }
+
+  hint.classList.add('hidden')
   for (const icon of icons) {
     const li = document.createElement('li')
-    const preview = document.createElement('div')
-    preview.className = 'preview'
+
     const img = document.createElement('img')
     img.src = icon.previewUrl
     img.alt = ''
-    preview.appendChild(img)
 
+    const label = document.createElement('label')
+    const prefix = document.createElement('span')
+    prefix.textContent = 'gv:'
     const input = document.createElement('input')
     input.type = 'text'
     input.value = icon.name
     input.addEventListener('input', () => {
       icon.name = input.value
     })
+    label.appendChild(prefix)
+    label.appendChild(input)
 
-    li.appendChild(preview)
-    li.appendChild(input)
+    const remove = document.createElement('button')
+    remove.type = 'button'
+    remove.className = 'ghost'
+    remove.textContent = 'Remove'
+    remove.onclick = () => {
+      URL.revokeObjectURL(icon.previewUrl)
+      icons = icons.filter((row) => row.id !== icon.id)
+      renderIcons()
+    }
+
+    li.appendChild(img)
+    li.appendChild(label)
+    li.appendChild(remove)
     list.appendChild(li)
   }
   updateActionButtons()
 }
 
 function renderStaged(): void {
-  const list = $('staged-list')
-  list.innerHTML = ''
+  const body = $('staged-body')
+  body.innerHTML = ''
+
   if (staged.length === 0) {
-    const li = document.createElement('li')
-    li.textContent = token ? 'Nothing staged.' : 'Connect to list staged icons.'
-    list.appendChild(li)
+    const p = document.createElement('p')
+    p.className = 'staged-empty'
+    p.textContent = token
+      ? 'No staged icons.'
+      : 'Connect GitHub to list staged icons.'
+    body.appendChild(p)
+    updateActionButtons()
     return
   }
+
+  const list = document.createElement('ul')
+  list.className = 'staged-list'
   for (const item of staged) {
     const li = document.createElement('li')
-    li.textContent = `gv:${item.name} (${item.colorMode === 'preserved' ? 'multi-color' : 'mono'})`
+    const code = document.createElement('code')
+    code.textContent = `gv:${item.name}`
+    const span = document.createElement('span')
+    span.textContent =
+      item.colorMode === 'preserved' ? 'multi-color' : 'mono'
+    li.appendChild(code)
+    li.appendChild(span)
     list.appendChild(li)
   }
+  body.appendChild(list)
+  updateActionButtons()
 }
 
 function setLinks(): void {
@@ -263,6 +345,7 @@ onmessage = (event: MessageEvent) => {
     case 'ready':
     case 'token': {
       token = msg.token
+      authOpen = false
       renderAuth()
       updateActionButtons()
       renderStaged()

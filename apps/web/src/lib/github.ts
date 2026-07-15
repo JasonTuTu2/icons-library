@@ -7,6 +7,7 @@ import {
   sanitizeIconName,
   type IconColorMode,
   type IconUploadPayload,
+  type PublishReadiness,
   type StagedIcon,
 } from '@JasonTuTu2/github-admin'
 import {
@@ -14,7 +15,7 @@ import {
   getGithubSessionToken,
 } from './githubAuth.js'
 
-export type { IconColorMode, IconUploadPayload, StagedIcon }
+export type { IconColorMode, IconUploadPayload, PublishReadiness, StagedIcon }
 export { sanitizeIconName }
 
 function getRepo(): string {
@@ -79,6 +80,10 @@ export async function listStagedIcons(): Promise<StagedIcon[]> {
 /** Promote whatever is staged now into the library (one Action). */
 export async function dispatchApplyStaged(): Promise<void> {
   return withAuthClear(() => getClient().dispatchApplyStaged())
+}
+
+export async function getPublishReadiness(): Promise<PublishReadiness> {
+  return withAuthClear(() => getClient().getPublishReadiness())
 }
 
 export async function dispatchPublish(): Promise<void> {

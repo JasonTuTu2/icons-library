@@ -44,116 +44,280 @@ async function writeUiHtml() {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f5f5f5;
-      --surface: #fff;
-      --text: #1a1a1a;
-      --muted: #666;
-      --border: #ddd;
-      --accent: #0b5fff;
-      --danger: #b42318;
+      --bg: #f3efe6;
+      --bg-elevated: #fffdf8;
+      --ink: #1c2430;
+      --muted: #5b6675;
+      --line: #d7d0c3;
+      --accent: #0f6e56;
+      --accent-soft: #d8efe7;
+      --danger: #9b2c2c;
+      --shadow: 0 12px 28px rgba(28, 36, 48, 0.08);
+      --radius: 14px;
+      --font: "DM Sans", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font: 12px/1.4 Inter, system-ui, sans-serif;
-      color: var(--text);
-      background: var(--bg);
+      font: 12.5px/1.45 var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 110, 86, 0.12), transparent 40%),
+        linear-gradient(180deg, #efe8db 0%, var(--bg) 45%, #ebe4d7 100%);
       padding: 12px;
+      min-height: 100%;
     }
-    h1 { font-size: 14px; margin: 0 0 8px; }
-    h2 { font-size: 12px; margin: 16px 0 8px; font-weight: 600; }
-    p, .hint { color: var(--muted); margin: 0 0 8px; }
-    button {
-      font: inherit;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 6px;
-      padding: 6px 10px;
-    }
-    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    label { display: block; margin-bottom: 4px; }
-    input[type="password"], input[type="text"] {
-      width: 100%;
-      font: inherit;
-      padding: 6px 8px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      margin-bottom: 8px;
-    }
-    .icon-list { list-style: none; margin: 0; padding: 0; }
-    .icon-list li {
+    a { color: var(--accent); }
+    code { font-family: var(--mono); font-size: 0.92em; }
+    .brand {
       display: flex;
-      gap: 8px;
+      gap: 0.7rem;
       align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
     }
-    .icon-list li:last-child { border-bottom: none; }
-    .preview {
-      width: 28px;
-      height: 28px;
+    .brand-mark {
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 0.7rem;
       flex-shrink: 0;
-      background: #f0f0f0;
-      border-radius: 4px;
+      background: linear-gradient(135deg, #0f6e56, #1f9d7a 55%, #f0c75e);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+    .brand strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .brand p {
+      margin: 0.12rem 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .panel {
+      padding: 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      box-shadow: var(--shadow);
+      margin-bottom: 0.75rem;
+    }
+    .panel > p, .lede {
+      margin: 0 0 0.7rem;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-bottom: 0.7rem;
+    }
+    .field span {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .field input,
+    .field select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+      width: 100%;
+    }
+    .ghost {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .ghost:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .ghost.accent {
+      background: var(--accent-soft);
+      border-color: rgba(15, 110, 86, 0.3);
+      color: var(--accent);
+    }
+    .ghost:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.35rem;
+    }
+    .upload-drop {
       display: grid;
       place-items: center;
-      overflow: hidden;
+      min-height: 3.5rem;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.7rem;
+      text-align: center;
+      font-size: 0.84rem;
     }
-    .preview img { max-width: 24px; max-height: 24px; }
-    .icon-list input[type="text"] { margin: 0; flex: 1; }
-    .message { margin-top: 8px; word-break: break-word; }
-    .message.error { color: var(--danger); }
-    .staged { font-size: 11px; }
-    .staged li { padding: 2px 0; border: none; display: block; }
-    a { color: var(--accent); }
+    .upload-list {
+      list-style: none;
+      margin: 0 0 0.7rem;
+      padding: 0;
+      display: grid;
+      gap: 0.45rem;
+      max-height: 10rem;
+      overflow: auto;
+    }
+    .upload-list li {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .upload-list img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      background: #f3efe6;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+    }
+    .upload-list label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      margin: 0;
+    }
+    .upload-list input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.3rem 0.45rem;
+      font: inherit;
+      background: #fff;
+    }
+    .staged-block {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 0.55rem;
+    }
+    .staged-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .staged-header strong { font-size: 0.85rem; }
+    .staged-empty {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .staged-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.3rem;
+      max-height: 8rem;
+      overflow: auto;
+    }
+    .staged-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+    }
+    .staged-list span { color: var(--muted); }
+    .footer-links {
+      margin: 0.15rem 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .copy-toast {
+      margin: 0.55rem 0 0;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.8rem;
+      word-break: break-word;
+    }
+    .copy-toast.error { color: var(--danger); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <h1>GenVoice Icons</h1>
-  <p class="hint">Select frames/components, then stage to GitHub. Apply regenerates the library; Publish releases packages.</p>
+  <header class="brand">
+    <div class="brand-mark" aria-hidden="true"></div>
+    <div>
+      <strong>GenVoice Icons</strong>
+      <p>Stage · Apply · Publish from Figma</p>
+    </div>
+  </header>
 
-  <div class="panel" id="auth-panel"></div>
+  <div class="toolbar" id="auth-toolbar"></div>
+  <div class="panel hidden" id="auth-panel"></div>
 
   <div class="panel">
-    <div class="row">
-      <button type="button" id="btn-export">Load selection</button>
-      <label style="display:flex;align-items:center;gap:4px;margin:0">
-        <input type="radio" name="colorMode" value="mono" checked /> Mono
-      </label>
-      <label style="display:flex;align-items:center;gap:4px;margin:0">
-        <input type="radio" name="colorMode" value="preserved" /> Multi-color
-      </label>
+    <p class="lede">Select frames or components, load them here, then stage to the shared GitHub folder. Apply promotes into the library; Publish releases packages.</p>
+    <label class="field">
+      <span>Color mode</span>
+      <select id="color-mode">
+        <option value="mono" selected>Monochrome (currentColor)</option>
+        <option value="preserved">Multi-color (preserved)</option>
+      </select>
+    </label>
+    <div class="upload-drop" id="selection-hint">Select icon frames, then load selection</div>
+    <div class="actions">
+      <button type="button" class="ghost" id="btn-export">Load selection</button>
     </div>
-    <ul class="icon-list" id="icon-list"></ul>
-    <div class="row">
-      <button type="button" class="primary" id="btn-stage" disabled>Stage</button>
+    <ul class="upload-list" id="icon-list"></ul>
+    <div class="actions">
+      <button type="button" class="ghost accent" id="btn-stage" disabled>Add to staging</button>
+      <button type="button" class="ghost accent" id="btn-publish" disabled>Publish</button>
+    </div>
+
+    <div class="staged-block">
+      <div class="staged-header">
+        <strong>Staged on GitHub</strong>
+        <button type="button" class="ghost" id="btn-refresh" disabled>Refresh</button>
+      </div>
+      <div id="staged-body"></div>
+      <button type="button" class="ghost accent" id="btn-apply" disabled>Apply staged to library</button>
+      <p class="footer-links"><a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a> · <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a></p>
     </div>
   </div>
 
-  <div class="panel">
-    <h2>Staged on main</h2>
-    <div class="row">
-      <button type="button" id="btn-refresh" disabled>Refresh</button>
-      <button type="button" class="primary" id="btn-apply" disabled>Apply staged</button>
-      <button type="button" id="btn-publish" disabled>Publish</button>
-    </div>
-    <ul class="icon-list staged" id="staged-list"></ul>
-    <p class="hint"><a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a> · <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a></p>
-  </div>
-
-  <p class="message" id="message"></p>
+  <p class="copy-toast" id="message"></p>
   <script>${uiJs}</script>
 </body>
 </html>

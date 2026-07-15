@@ -17,9 +17,17 @@ export interface GithubAdminConfig {
   repo: string
 }
 
+export interface PublishReadiness {
+  /** Custom SVGs applied to the library since the last package version publish. */
+  hasNewIcons: boolean
+  /** Icons still sitting in staging (not yet Apply'd). */
+  stagedCount: number
+}
+
 export interface GithubAdminClient {
   stageIcons(icons: IconUploadPayload[]): Promise<void>
   listStagedIcons(): Promise<StagedIcon[]>
+  getPublishReadiness(): Promise<PublishReadiness>
   dispatchApplyStaged(): Promise<void>
   dispatchPublish(): Promise<void>
 }
@@ -243,6 +251,44 @@ export function createGithubAdminClient(
         listStagingDir('color', 'preserved'),
       ])
       return [...mono, ...color].sort((a, b) => a.name.localeCompare(b.name))
+    },
+
+    async getPublishReadiness(): Promise<PublishReadiness> {
+      const staged = await this.listStagedIcons()
+      const stagedCount = staged.length
+
+      const commits = await githubJson<
+        Array<{ sha: string; commit: { message: string } }>
+      >('/commits?sha=main&per_page=50')
+
+      const publishCommit = commits.find((entry) =>
+        /Version packages/i.test(entry.commit.message),
+      )
+
+      // No prior publish on record — don't block on "no new icons".
+      if (!publishCommit) {
+        return { hasNewIcons: true, stagedCount }
+      }
+
+      // Already at the publish tip → nothing new since then.
+      if (commits[0]?.sha === publishCommit.sha) {
+        return { hasNewIcons: false, stagedCount }
+      }
+
+      const compare = await githubJson<{
+        files?: Array<{ filename: string }>
+      }>(`/compare/${publishCommit.sha}...main`)
+
+      const hasNewIcons = (compare.files ?? []).some((file) => {
+        const path = file.filename.replace(/\\/g, '/')
+        return (
+          path.startsWith('packages/custom-icons/svg/') &&
+          path.toLowerCase().endsWith('.svg') &&
+          !path.includes('/staging/')
+        )
+      })
+
+      return { hasNewIcons, stagedCount }
     },
 
     async dispatchApplyStaged(): Promise<void> {
