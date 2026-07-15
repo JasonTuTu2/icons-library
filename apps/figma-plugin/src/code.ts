@@ -4,7 +4,7 @@ import {
   type UiToPluginMessage,
 } from './messages'
 
-figma.showUI(__html__, { width: 400, height: 640, themeColors: true })
+figma.showUI(__html__, { width: 360, height: 520, themeColors: true })
 
 function post(msg: PluginToUiMessage): void {
   figma.ui.postMessage(msg)

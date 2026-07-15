@@ -4,7 +4,10 @@ import { BrowserRouter } from 'react-router-dom'
 import * as AntIcons from '@ant-design/icons'
 import { registerAntIcons } from '@JasonTuTu2/icons-react'
 import { App } from './App'
+import { consumeGithubTokenFromUrl } from './lib/githubAuth'
 import './styles.css'
+
+consumeGithubTokenFromUrl()
 
 registerAntIcons(AntIcons as never)
 

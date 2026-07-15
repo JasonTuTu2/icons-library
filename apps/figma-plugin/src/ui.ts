@@ -66,9 +66,6 @@ function updateActionButtons(): void {
   ;($('btn-stage') as HTMLButtonElement).disabled =
     !authed || icons.length === 0 || busy
   ;($('btn-refresh') as HTMLButtonElement).disabled = !authed || busy
-  ;($('btn-apply') as HTMLButtonElement).disabled =
-    !authed || busy || staged.length === 0
-  ;($('btn-publish') as HTMLButtonElement).disabled = !authed || busy
 }
 
 function renderAuth(): void {
@@ -81,7 +78,7 @@ function renderAuth(): void {
     panel.innerHTML = ''
     toolbar.innerHTML = `
       <button type="button" class="ghost" id="btn-disconnect">Disconnect GitHub</button>
-      <span class="footer-links">Connected to <code>${GITHUB_REPO}</code></span>
+      <span class="links">Connected to <code>${GITHUB_REPO}</code></span>
     `
     $('btn-disconnect').onclick = () => {
       post({ type: 'clear-token' })
@@ -115,14 +112,13 @@ function renderAuthForm(): void {
 
   panel.classList.remove('hidden')
   panel.innerHTML = `
-    <div class="staged-header" style="margin-bottom:0.65rem">
+    <div class="section-head">
       <strong>Connect GitHub</strong>
       <button type="button" class="ghost" id="btn-auth-close" aria-label="Close">×</button>
     </div>
-    <p>
-      Paste a fine-grained or classic PAT with
-      <code>contents: write</code> and <code>actions: write</code> on this repo.
-      Stored in Figma <code>clientStorage</code> on this machine.
+    <p class="lede">
+      Paste a PAT with <code>contents: write</code> and <code>actions: write</code>.
+      Stored in Figma on this machine.
     </p>
     <label class="field">
       <span>Personal access token</span>
@@ -224,7 +220,7 @@ function renderStaged(): void {
 
   if (staged.length === 0) {
     const p = document.createElement('p')
-    p.className = 'staged-empty'
+    p.className = 'empty'
     p.textContent = token
       ? 'No staged icons.'
       : 'Connect GitHub to list staged icons.'
@@ -251,6 +247,11 @@ function renderStaged(): void {
 }
 
 function setLinks(): void {
+  const browserBase = 'https://JasonTuTu2.github.io/icons-library/'
+  const browser = $('link-browser') as HTMLAnchorElement
+  browser.href = token
+    ? `${browserBase}#gv-github-token=${encodeURIComponent(token)}`
+    : browserBase
   ;($('link-actions') as HTMLAnchorElement).href = actionsUrl(GITHUB_REPO)
   ;($('link-packages') as HTMLAnchorElement).href = packagesUrl(GITHUB_REPO)
 }
@@ -299,7 +300,7 @@ $('btn-stage').onclick = async () => {
     })
     await withAuthClear(() => getClient().stageIcons(payload))
     setMessage(
-      `Staged ${payload.length} icon(s). Apply when ready to promote into the library.`,
+      `Staged ${payload.length} icon(s). Continue in the icon browser to apply and publish.`,
     )
     await refreshStaged()
   } catch (err) {
@@ -314,63 +315,6 @@ $('btn-refresh').onclick = () => {
   void refreshStaged()
 }
 
-$('btn-apply').onclick = async () => {
-  if (!token) return
-  busy = true
-  updateActionButtons()
-  setMessage('')
-  try {
-    await withAuthClear(() => getClient().dispatchApplyStaged())
-    setMessage(
-      `Apply workflow queued. Track progress: ${actionsUrl(GITHUB_REPO)}`,
-    )
-  } catch (err) {
-    setMessage(err instanceof Error ? err.message : String(err), true)
-  } finally {
-    busy = false
-    updateActionButtons()
-  }
-}
-
-$('btn-publish').onclick = async () => {
-  if (!token) return
-  busy = true
-  updateActionButtons()
-  setMessage('')
-  try {
-    const readiness = await withAuthClear(() =>
-      getClient().getPublishReadiness(),
-    )
-
-    if (readiness.stagedCount > 0) {
-      const ok = window.confirm(
-        `${readiness.stagedCount} icon(s) are still in staging and will not be included in this publish.\n\nApply staged icons to the library first if you want them shipped.\n\nPublish package versions anyway?`,
-      )
-      if (!ok) return
-    } else if (!readiness.hasNewIcons) {
-      const ok = window.confirm(
-        'No new custom SVGs have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no new icons for consumers.\n\nPublish anyway?',
-      )
-      if (!ok) return
-    } else {
-      const ok = window.confirm(
-        'Bump patch versions and publish all packages to GitHub Packages?',
-      )
-      if (!ok) return
-    }
-
-    await withAuthClear(() => getClient().dispatchPublish())
-    setMessage(
-      `Publish workflow queued. Packages: ${packagesUrl(GITHUB_REPO)}. Track: ${actionsUrl(GITHUB_REPO)}`,
-    )
-  } catch (err) {
-    setMessage(err instanceof Error ? err.message : String(err), true)
-  } finally {
-    busy = false
-    updateActionButtons()
-  }
-}
-
 onmessage = (event: MessageEvent) => {
   const msg = event.data?.pluginMessage as PluginToUiMessage | undefined
   if (!msg) return
@@ -382,6 +326,7 @@ onmessage = (event: MessageEvent) => {
       authOpen = false
       renderAuth()
       updateActionButtons()
+      setLinks()
       renderStaged()
       if (token) void refreshStaged()
       break

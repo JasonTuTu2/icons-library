@@ -50,93 +50,71 @@ async function writeUiHtml() {
   <style>
     :root {
       --bg: #f3efe6;
-      --bg-elevated: #fffdf8;
+      --surface: #fffdf8;
       --ink: #1c2430;
       --muted: #5b6675;
       --line: #d7d0c3;
       --accent: #0f6e56;
       --accent-soft: #d8efe7;
       --danger: #9b2c2c;
-      --shadow: 0 12px 28px rgba(28, 36, 48, 0.08);
-      --radius: 14px;
       --font: "DM Sans", "Segoe UI", sans-serif;
       --mono: "IBM Plex Mono", ui-monospace, monospace;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
+      padding: 12px;
       font: 12.5px/1.45 var(--font);
       color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(15, 110, 86, 0.12), transparent 40%),
-        linear-gradient(180deg, #efe8db 0%, var(--bg) 45%, #ebe4d7 100%);
-      padding: 12px;
+      background: var(--bg);
       min-height: 100%;
     }
     a { color: var(--accent); }
     code { font-family: var(--mono); font-size: 0.92em; }
-    .brand {
-      display: flex;
-      gap: 0.7rem;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-    .brand-mark {
-      width: 2.1rem;
-      height: 2.1rem;
-      border-radius: 0.7rem;
-      flex-shrink: 0;
-      background: linear-gradient(135deg, #0f6e56, #1f9d7a 55%, #f0c75e);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    }
-    .brand strong {
-      display: block;
-      font-size: 0.95rem;
+    h1 {
+      margin: 0 0 2px;
+      font-size: 15px;
       font-weight: 700;
     }
-    .brand p {
-      margin: 0.12rem 0 0;
+    .sub {
+      margin: 0 0 12px;
       color: var(--muted);
-      font-size: 0.78rem;
+      font-size: 12px;
     }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.45rem;
+      gap: 6px;
       align-items: center;
-      margin-bottom: 0.75rem;
+      margin-bottom: 10px;
     }
     .panel {
-      padding: 0.85rem;
+      padding: 10px;
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--bg-elevated);
-      box-shadow: var(--shadow);
-      margin-bottom: 0.75rem;
+      border-radius: 10px;
+      background: var(--surface);
+      margin-bottom: 10px;
     }
-    .panel > p, .lede {
-      margin: 0 0 0.7rem;
+    .lede {
+      margin: 0 0 10px;
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 12px;
     }
     .field {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
-      margin-bottom: 0.7rem;
+      gap: 4px;
+      margin-bottom: 8px;
     }
     .field span {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      font-size: 11px;
       color: var(--muted);
       font-weight: 600;
     }
-    .field input,
-    .field select {
+    .field input {
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
+      padding: 6px 8px;
       font: inherit;
       background: #fff;
       color: var(--ink);
@@ -145,10 +123,10 @@ async function writeUiHtml() {
     .ghost {
       border: 1px solid var(--line);
       background: #fff;
-      border-radius: 999px;
-      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      padding: 5px 10px;
       font: inherit;
-      font-size: 0.8rem;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       color: var(--ink);
@@ -163,56 +141,46 @@ async function writeUiHtml() {
       color: var(--accent);
     }
     .ghost:disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
     }
-    .actions {
+    .row {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.45rem;
-      margin-top: 0.35rem;
+      gap: 6px;
+      margin: 8px 0;
     }
-    .upload-drop {
-      display: grid;
-      place-items: center;
-      min-height: 3.5rem;
-      border: 1px dashed var(--line);
-      border-radius: 12px;
-      padding: 0.7rem;
+    .hint {
+      margin: 0 0 8px;
       color: var(--muted);
-      margin-bottom: 0.7rem;
-      text-align: center;
-      font-size: 0.84rem;
+      font-size: 12px;
     }
     .upload-list {
       list-style: none;
-      margin: 0 0 0.7rem;
+      margin: 0 0 8px;
       padding: 0;
       display: grid;
-      gap: 0.45rem;
-      max-height: 10rem;
+      gap: 6px;
+      max-height: 11rem;
       overflow: auto;
     }
     .upload-list li {
       display: grid;
-      grid-template-columns: 28px minmax(0, 1fr) 5.5rem auto;
-      gap: 0.45rem;
+      grid-template-columns: 24px minmax(0, 1fr) 5.25rem auto;
+      gap: 6px;
       align-items: center;
     }
     .upload-list img {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       object-fit: contain;
-      background: #f3efe6;
-      border-radius: 6px;
-      border: 1px solid var(--line);
     }
     .upload-list label {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 2px;
       font-family: var(--mono);
-      font-size: 0.78rem;
+      font-size: 11px;
       margin: 0;
       min-width: 0;
     }
@@ -220,107 +188,106 @@ async function writeUiHtml() {
       flex: 1;
       min-width: 0;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0.3rem 0.45rem;
+      border-radius: 6px;
+      padding: 4px 6px;
       font: inherit;
       background: #fff;
     }
     .upload-list .color-mode-select {
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0.3rem 0.35rem;
+      border-radius: 6px;
+      padding: 4px;
       font: inherit;
-      font-size: 0.75rem;
+      font-size: 11px;
       background: #fff;
       color: var(--ink);
     }
-    .staged-block {
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
+    .section {
+      margin-top: 12px;
+      padding-top: 10px;
       border-top: 1px solid var(--line);
-      display: grid;
-      gap: 0.55rem;
     }
-    .staged-header {
+    .section-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
+      gap: 8px;
+      margin-bottom: 6px;
     }
-    .staged-header strong { font-size: 0.85rem; }
-    .staged-empty {
+    .section-head strong { font-size: 12px; }
+    .empty {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 12px;
       color: var(--muted);
     }
     .staged-list {
       list-style: none;
-      margin: 0;
+      margin: 0 0 8px;
       padding: 0;
       display: grid;
-      gap: 0.3rem;
-      max-height: 8rem;
+      gap: 3px;
+      max-height: 7rem;
       overflow: auto;
     }
     .staged-list li {
       display: flex;
       justify-content: space-between;
-      gap: 0.5rem;
-      font-size: 0.78rem;
+      gap: 8px;
+      font-size: 11px;
     }
     .staged-list span { color: var(--muted); }
-    .footer-links {
-      margin: 0.15rem 0 0;
-      font-size: 0.78rem;
+    .links {
+      margin: 0;
+      font-size: 11px;
       color: var(--muted);
+      line-height: 1.5;
     }
-    .copy-toast {
-      margin: 0.55rem 0 0;
+    .toast {
+      margin: 8px 0 0;
       color: var(--accent);
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 12px;
       word-break: break-word;
     }
-    .copy-toast.error { color: var(--danger); }
+    .toast.error { color: var(--danger); }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <header class="brand">
-    <div class="brand-mark" aria-hidden="true"></div>
-    <div>
-      <strong>GenVoice Icons</strong>
-      <p>Stage · Apply · Publish from Figma</p>
-    </div>
-  </header>
+  <h1>GenVoice Icons</h1>
+  <p class="sub">Stage icons from Figma</p>
 
   <div class="toolbar" id="auth-toolbar"></div>
   <div class="panel hidden" id="auth-panel"></div>
 
   <div class="panel">
-    <p class="lede">Select frames or components, load them here, then stage to the shared GitHub folder. Set each icon to Mono or Multi. Apply promotes into the library; Publish releases packages.</p>
-    <div class="upload-drop" id="selection-hint">Select icon frames, then load selection</div>
-    <div class="actions">
+    <p class="lede">Load a selection, set Mono or Multi per icon, then stage. Apply and publish in the icon browser.</p>
+    <p class="hint" id="selection-hint">Select frames, then load selection.</p>
+    <div class="row">
       <button type="button" class="ghost" id="btn-export">Load selection</button>
-    </div>
-    <ul class="upload-list" id="icon-list"></ul>
-    <div class="actions">
       <button type="button" class="ghost accent" id="btn-stage" disabled>Add to staging</button>
     </div>
+    <ul class="upload-list" id="icon-list"></ul>
 
-    <div class="staged-block">
-      <div class="staged-header">
+    <div class="section">
+      <div class="section-head">
         <strong>Staged on GitHub</strong>
         <button type="button" class="ghost" id="btn-refresh" disabled>Refresh</button>
       </div>
       <div id="staged-body"></div>
-      <button type="button" class="ghost accent" id="btn-apply" disabled>Apply staged to library</button>
-      <button type="button" class="ghost accent" id="btn-publish" disabled>Publish</button>
-      <p class="footer-links"><a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a> · <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a></p>
+      <p class="links">
+        Continue in the
+        <a id="link-browser" href="https://JasonTuTu2.github.io/icons-library/" target="_blank" rel="noreferrer">icon browser</a>
+        to apply and publish.
+        <br />
+        <a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a>
+        ·
+        <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a>
+      </p>
     </div>
   </div>
 
-  <p class="copy-toast" id="message"></p>
+  <p class="toast" id="message"></p>
   <script>${uiJs}</script>
 </body>
 </html>
