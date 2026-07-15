@@ -299,8 +299,8 @@ export function UploadPanel({
                           )
                         }}
                       >
-                        <option value="mono">Mono</option>
-                        <option value="preserved">Multi</option>
+                        <option value="mono">Monochrome</option>
+                        <option value="preserved">Multi-color</option>
                       </select>
                       <button
                         type="button"
