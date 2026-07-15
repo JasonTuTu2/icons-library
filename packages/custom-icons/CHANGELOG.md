@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-custom
 
+## 0.3.5
+
+### Patch Changes
+
+- Publish from icon browser.
+
 ## 0.3.4
 
 ### Patch Changes
