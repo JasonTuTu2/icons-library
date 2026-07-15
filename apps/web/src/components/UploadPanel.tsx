@@ -17,6 +17,7 @@ interface UploadItem {
   name: string
   content: string
   previewUrl: string
+  colorMode: IconColorMode
 }
 
 interface UploadPanelProps {
@@ -36,6 +37,7 @@ function fileToUploadItem(file: File): Promise<UploadItem> {
         name,
         content,
         previewUrl: URL.createObjectURL(file),
+        colorMode: 'mono',
       })
     }
     reader.onerror = () => reject(reader.error)
@@ -61,7 +63,6 @@ export function UploadPanel({
   const [items, setItems] = useState<UploadItem[]>([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
-  const [colorMode, setColorMode] = useState<IconColorMode>('mono')
   const [staged, setStaged] = useState<StagedIcon[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
 
@@ -123,7 +124,7 @@ export function UploadPanel({
         items.map((item) => ({
           name: item.name,
           content: item.content,
-          colorMode,
+          colorMode: item.colorMode,
         })),
       )
       setItems([])
@@ -183,7 +184,7 @@ export function UploadPanel({
           body: JSON.stringify({
             name: item.name,
             content: item.content,
-            colorMode,
+            colorMode: item.colorMode,
           }),
         })
         const data = (await res.json()) as {
@@ -242,23 +243,12 @@ export function UploadPanel({
             <>
               <p>
                 Drop Figma-exported SVGs. Names become <code>gv:kebab-name</code>.
-                Choose monochrome (recolorable) or multi-color (preserved fills).
+                Set each icon to monochrome (recolorable) or multi-color (preserved
+                fills).
                 {mode === 'github'
                   ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
                   : ' Writes to disk and regenerates the catalog locally.'}
               </p>
-              <label className="field">
-                <span>Color mode</span>
-                <select
-                  value={colorMode}
-                  onChange={(e) =>
-                    setColorMode(e.target.value as IconColorMode)
-                  }
-                >
-                  <option value="mono">Monochrome (currentColor)</option>
-                  <option value="preserved">Multi-color (preserved)</option>
-                </select>
-              </label>
               <label className="upload-drop">
                 <input
                   type="file"
@@ -288,6 +278,30 @@ export function UploadPanel({
                           }}
                         />
                       </label>
+                      <select
+                        className="color-mode-select"
+                        aria-label={`Color mode for gv:${item.name || 'icon'}`}
+                        value={item.colorMode}
+                        onChange={(e) => {
+                          const value = e.target.value as IconColorMode
+                          setItems((prev) =>
+                            prev.map((row, i) =>
+                              i === index
+                                ? {
+                                    ...row,
+                                    colorMode:
+                                      value === 'preserved'
+                                        ? 'preserved'
+                                        : 'mono',
+                                  }
+                                : row,
+                            ),
+                          )
+                        }}
+                      >
+                        <option value="mono">Mono</option>
+                        <option value="preserved">Multi</option>
+                      </select>
                       <button
                         type="button"
                         className="ghost"

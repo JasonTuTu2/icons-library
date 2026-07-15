@@ -467,7 +467,7 @@ pre {
 
 .upload-list li {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: 28px minmax(0, 1fr) 5.5rem auto;
   gap: 0.5rem;
   align-items: center;
 }
@@ -478,14 +478,26 @@ pre {
   gap: 0.25rem;
   font-family: var(--mono);
   font-size: 0.8rem;
+  min-width: 0;
 }
 
 .upload-list input {
   flex: 1;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.35rem 0.5rem;
   font: inherit;
+}
+
+.upload-list .color-mode-select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.3rem 0.35rem;
+  font: inherit;
+  font-size: 0.75rem;
+  background: #fff;
+  color: var(--ink);
 }
 
 .staged-block {

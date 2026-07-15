@@ -195,7 +195,7 @@ async function writeUiHtml() {
     }
     .upload-list li {
       display: grid;
-      grid-template-columns: 28px 1fr auto;
+      grid-template-columns: 28px minmax(0, 1fr) 5.5rem auto;
       gap: 0.45rem;
       align-items: center;
     }
@@ -214,6 +214,7 @@ async function writeUiHtml() {
       font-family: var(--mono);
       font-size: 0.78rem;
       margin: 0;
+      min-width: 0;
     }
     .upload-list input {
       flex: 1;
@@ -223,6 +224,15 @@ async function writeUiHtml() {
       padding: 0.3rem 0.45rem;
       font: inherit;
       background: #fff;
+    }
+    .upload-list .color-mode-select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.3rem 0.35rem;
+      font: inherit;
+      font-size: 0.75rem;
+      background: #fff;
+      color: var(--ink);
     }
     .staged-block {
       margin-top: 0.75rem;
@@ -288,14 +298,7 @@ async function writeUiHtml() {
   <div class="panel hidden" id="auth-panel"></div>
 
   <div class="panel">
-    <p class="lede">Select frames or components, load them here, then stage to the shared GitHub folder. Apply promotes into the library; Publish releases packages.</p>
-    <label class="field">
-      <span>Color mode</span>
-      <select id="color-mode">
-        <option value="mono" selected>Monochrome (currentColor)</option>
-        <option value="preserved">Multi-color (preserved)</option>
-      </select>
-    </label>
+    <p class="lede">Select frames or components, load them here, then stage to the shared GitHub folder. Set each icon to Mono or Multi. Apply promotes into the library; Publish releases packages.</p>
     <div class="upload-drop" id="selection-hint">Select icon frames, then load selection</div>
     <div class="actions">
       <button type="button" class="ghost" id="btn-export">Load selection</button>

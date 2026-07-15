@@ -18,6 +18,7 @@ interface ExportIcon {
   name: string
   content: string
   previewUrl: string
+  colorMode: IconColorMode
 }
 
 let token = ''
@@ -40,11 +41,6 @@ function setMessage(text: string, isError = false): void {
   const el = $('message')
   el.textContent = text
   el.classList.toggle('error', isError)
-}
-
-function getColorMode(): IconColorMode {
-  const select = $('color-mode') as HTMLSelectElement
-  return select.value === 'preserved' ? 'preserved' : 'mono'
 }
 
 function getClient() {
@@ -182,6 +178,27 @@ function renderIcons(): void {
     label.appendChild(prefix)
     label.appendChild(input)
 
+    const colorSelect = document.createElement('select')
+    colorSelect.className = 'color-mode-select'
+    colorSelect.setAttribute(
+      'aria-label',
+      `Color mode for gv:${icon.name || 'icon'}`,
+    )
+    for (const opt of [
+      { value: 'mono', label: 'Mono' },
+      { value: 'preserved', label: 'Multi' },
+    ] as const) {
+      const option = document.createElement('option')
+      option.value = opt.value
+      option.textContent = opt.label
+      if (icon.colorMode === opt.value) option.selected = true
+      colorSelect.appendChild(option)
+    }
+    colorSelect.addEventListener('change', () => {
+      icon.colorMode =
+        colorSelect.value === 'preserved' ? 'preserved' : 'mono'
+    })
+
     const remove = document.createElement('button')
     remove.type = 'button'
     remove.className = 'ghost'
@@ -194,6 +211,7 @@ function renderIcons(): void {
 
     li.appendChild(img)
     li.appendChild(label)
+    li.appendChild(colorSelect)
     li.appendChild(remove)
     list.appendChild(li)
   }
@@ -270,7 +288,6 @@ $('btn-stage').onclick = async () => {
   updateActionButtons()
   setMessage('')
   try {
-    const colorMode = getColorMode()
     const payload = icons.map((icon) => {
       const name = sanitizeIconName(icon.name)
       if (!name) {
@@ -278,7 +295,7 @@ $('btn-stage').onclick = async () => {
           `Invalid icon name "${icon.name}". Use kebab-case, e.g. billing-alert.`,
         )
       }
-      return { name, content: icon.content, colorMode }
+      return { name, content: icon.content, colorMode: icon.colorMode }
     })
     await withAuthClear(() => getClient().stageIcons(payload))
     setMessage(
@@ -373,6 +390,7 @@ onmessage = (event: MessageEvent) => {
       revokePreviews()
       icons = msg.icons.map((icon) => ({
         ...icon,
+        colorMode: 'mono' as IconColorMode,
         previewUrl: URL.createObjectURL(
           new Blob([icon.content], { type: 'image/svg+xml' }),
         ),
