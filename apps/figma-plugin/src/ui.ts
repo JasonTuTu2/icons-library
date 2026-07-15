@@ -185,8 +185,8 @@ function renderIcons(): void {
       `Color mode for gv:${icon.name || 'icon'}`,
     )
     for (const opt of [
-      { value: 'mono', label: 'Monochrome' },
-      { value: 'preserved', label: 'Multi-color' },
+      { value: 'mono', label: 'Mono' },
+      { value: 'preserved', label: 'Multi' },
     ] as const) {
       const option = document.createElement('option')
       option.value = opt.value

@@ -195,7 +195,7 @@ async function writeUiHtml() {
     }
     .upload-list li {
       display: grid;
-      grid-template-columns: 28px minmax(0, 1fr) 7.25rem auto;
+      grid-template-columns: 28px minmax(0, 1fr) 5.5rem auto;
       gap: 0.45rem;
       align-items: center;
     }
