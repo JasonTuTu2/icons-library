@@ -47,7 +47,11 @@ async function exportSelection(): Promise<void> {
   for (const node of selection) {
     try {
       const bytes = await node.exportAsync({ format: 'SVG' })
-      const content = new TextDecoder().decode(bytes)
+      // Figma main-thread sandbox has no TextDecoder; avoid spread for large SVGs.
+      let content = ''
+      for (let i = 0; i < bytes.length; i++) {
+        content += String.fromCharCode(bytes[i]!)
+      }
       const name = sanitizeLayerName(node.name) || node.name
       icons.push({ id: node.id, name, content })
     } catch (err) {
