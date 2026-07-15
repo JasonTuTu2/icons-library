@@ -1,6 +1,6 @@
 {
   "name": "@JasonTuTu2/icons-vue",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Vue 3 Icon component for GenVoice Icons (Ant Design + Iconify)",
   "license": "MIT",
   "type": "module",
