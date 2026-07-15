@@ -78,6 +78,11 @@
       "width": 24,
       "height": 24
     },
+    "shopping-cart": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M2 2h8l5.36 26.78a4 4 0 0 0 4 3.22H38.8a4 4 0 0 0 4-3.22L46 12H12m8 30a2 2 0 1 1-4 0 2 2 0 0 1 4 0m22 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0\"/>",
+      "width": 48,
+      "height": 48
+    },
     "smoke-test": {
       "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2\"/><path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21\"/>",
       "width": 24,
