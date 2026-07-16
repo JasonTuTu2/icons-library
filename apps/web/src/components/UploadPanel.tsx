@@ -232,13 +232,19 @@ export function UploadPanel({
         return
       }
 
-      const addNames = current.map((icon) => `+ gv:${icon.name}`).join('\n')
+      const addNames = current.map((icon) => `• gv:${icon.name}`).join('\n')
       const removeNames = currentRemovals
-        .map((icon) => `- gv:${icon.name}`)
+        .map((icon) => `• gv:${icon.name}`)
         .join('\n')
-      const summary = [addNames, removeNames].filter(Boolean).join('\n')
+      const addSection =
+        current.length > 0 ? `Adds (${current.length}):\n${addNames}` : ''
+      const removeSection =
+        currentRemovals.length > 0
+          ? `Removals (${currentRemovals.length}):\n${removeNames}`
+          : ''
+      const summary = [addSection, removeSection].filter(Boolean).join('\n\n')
       const ok = window.confirm(
-        `Apply staged changes to the library?\n\n${summary}\n\nApplies whatever is staged on GitHub right now (adds and removals). If someone else is still editing staging, they will not be included unless they click Apply again after.`,
+        `Apply staged changes to the library?\n\n${summary}\n\nApplies whatever is staged on GitHub right now. If someone else is still editing staging, they will not be included unless they click Apply again after.`,
       )
       if (!ok) return
 

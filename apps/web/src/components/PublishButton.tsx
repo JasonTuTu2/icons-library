@@ -34,9 +34,28 @@ function formatRemovalList(removals: StagedRemoval[]): string {
   return removals.map((icon) => `• gv:${icon.name}`).join('\n')
 }
 
+function addsNote(
+  icons: Array<{ name: string; colorMode: string }>,
+  label = 'Adds',
+): string {
+  if (icons.length === 0) return ''
+  return `\n\n${label} (${icons.length}):\n${formatPublishIconList(icons)}`
+}
+
 function removalsNote(removals: StagedRemoval[]): string {
   if (removals.length === 0) return ''
-  return `\n\nRemovals in this publish (already applied to the library):\n${formatRemovalList(removals)}`
+  return `\n\nRemovals (${removals.length}):\n${formatRemovalList(removals)}`
+}
+
+function stagedWaitingSummary(addCount: number, removalCount: number): string {
+  const parts: string[] = []
+  if (addCount > 0) parts.push(`${addCount} staged add${addCount === 1 ? '' : 's'}`)
+  if (removalCount > 0) {
+    parts.push(
+      `${removalCount} staged removal${removalCount === 1 ? '' : 's'}`,
+    )
+  }
+  return parts.join(' and ')
 }
 
 export function PublishButton() {
@@ -61,21 +80,20 @@ export function PublishButton() {
 
       const selected = getCheckedUnpublishedIcons()
       const deferred = getUncheckedUnpublishedIcons()
-      const selectedList = formatPublishIconList(selected)
-      const deferredList = formatPublishIconList(deferred)
-      const removedNote = removalsNote(removals)
+      const addSection = addsNote(selected)
+      const deferSection = addsNote(
+        deferred,
+        'Unchecked adds (stay out of this package, then return to the library)',
+      )
+      const removeSection = removalsNote(removals)
 
       if (readiness.stagedCount > 0) {
-        const iconsNote =
-          selected.length > 0
-            ? `\n\nChecked icons that will ship:\n${selectedList}`
-            : ''
-        const deferNote =
-          deferred.length > 0
-            ? `\n\nUnchecked icons stay out of this package, then return to the library as unpublished:\n${deferredList}`
-            : ''
+        const waiting = stagedWaitingSummary(
+          readiness.stagedAddCount,
+          readiness.stagedRemovalCount,
+        )
         const ok = window.confirm(
-          `${readiness.stagedCount} staged add(s)/removal(s) are still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${iconsNote}${deferNote}${removedNote}\n\nPublish package versions anyway?`,
+          `${waiting} still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${addSection}${deferSection}${removeSection}\n\nPublish package versions anyway?`,
         )
         if (!ok) return
       } else if (!readiness.hasNewIcons) {
@@ -85,30 +103,17 @@ export function PublishButton() {
         if (!ok) return
       } else if (selected.length === 0 && removals.length === 0) {
         const ok = window.confirm(
-          `No unpublished icons are checked.\n\nAll ${deferred.length} unpublished icon(s) stay out of this package, then return to the library as unpublished for a later release. Publishing will only bump package versions.\n\n${deferredList}\n\nPublish anyway?`,
+          `No unpublished adds are checked and there are no applied removals.\n\nUnchecked adds (${deferred.length}) stay out of this package, then return to the library as unpublished. Publishing will only bump package versions.${deferSection}\n\nPublish anyway?`,
         )
         if (!ok) return
       } else if (selected.length === 0) {
         const ok = window.confirm(
-          `No new unpublished icons are checked.${removedNote}\n\n${
-            deferred.length > 0
-              ? `Unchecked adds stay out of this package:\n${deferredList}\n\n`
-              : ''
-          }Bump patch versions and publish to GitHub Packages?`,
-        )
-        if (!ok) return
-      } else if (deferred.length > 0) {
-        const ok = window.confirm(
-          `Publish these icons?\n\n${selectedList}${removedNote}\n\nUnchecked icons stay out of this package, then return to the library as unpublished:\n${deferredList}\n\nBump patch versions and publish to GitHub Packages?`,
+          `No unpublished adds are checked.${removeSection}${deferSection}\n\nBump patch versions and publish to GitHub Packages?`,
         )
         if (!ok) return
       } else {
         const ok = window.confirm(
-          `Publish these changes?\n\n${
-            selected.length > 0
-              ? `Adds:\n${selectedList}`
-              : 'No new icons checked.'
-          }${removedNote}\n\nBump patch versions and publish all packages to GitHub Packages?`,
+          `Publish these changes?${addSection}${removeSection}${deferSection}\n\nBump patch versions and publish to GitHub Packages?`,
         )
         if (!ok) return
       }

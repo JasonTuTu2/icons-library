@@ -28,6 +28,8 @@ export interface PublishReadiness {
   hasNewIcons: boolean
   /** Staged adds + removal markers waiting for Apply. */
   stagedCount: number
+  stagedAddCount: number
+  stagedRemovalCount: number
 }
 
 export interface IconNameConflict {
@@ -520,7 +522,9 @@ export function createGithubAdminClient(
         this.listStagedIcons(),
         this.listStagedRemovals(),
       ])
-      const stagedCount = staged.length + removals.length
+      const stagedAddCount = staged.length
+      const stagedRemovalCount = removals.length
+      const stagedCount = stagedAddCount + stagedRemovalCount
 
       const commits = await githubJson<
         Array<{ sha: string; commit: { message: string } }>
@@ -532,11 +536,16 @@ export function createGithubAdminClient(
 
       // No prior publish on record — don't block with the "no new icons" warn.
       if (!publishCommit) {
-        return { hasNewIcons: true, stagedCount }
+        return { hasNewIcons: true, stagedCount, stagedAddCount, stagedRemovalCount }
       }
 
       if (commits[0]?.sha === publishCommit.sha) {
-        return { hasNewIcons: false, stagedCount }
+        return {
+          hasNewIcons: false,
+          stagedCount,
+          stagedAddCount,
+          stagedRemovalCount,
+        }
       }
 
       const compare = await githubJson<{
@@ -555,6 +564,8 @@ export function createGithubAdminClient(
       return {
         hasNewIcons: hasLibrarySvgChange,
         stagedCount,
+        stagedAddCount,
+        stagedRemovalCount,
       }
     },
 
