@@ -88,8 +88,9 @@ jobs:
       - if: steps.promote.outputs.count != '0'
         run: pnpm install --frozen-lockfile
 
+      # Source JSON only — Pages builds package dist/ from the committed files.
       - if: steps.promote.outputs.count != '0'
-        run: pnpm catalog:gen
+        run: pnpm catalog:gen:src
 
       - name: Commit and push
         if: steps.promote.outputs.count != '0'

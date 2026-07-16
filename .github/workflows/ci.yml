@@ -12,6 +12,10 @@ on:
 
 jobs:
   build:
+    # Skip Apply bot commits on main — Pages redeploys the browser; full CI is redundant.
+    if: >
+      github.event_name != 'push' ||
+      !(startsWith(github.event.head_commit.message, 'Apply staged icons from icon browser:'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
