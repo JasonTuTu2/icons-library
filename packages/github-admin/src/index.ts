@@ -56,6 +56,8 @@ export interface GithubAdminClient {
   listStagedIcons(): Promise<StagedIcon[]>
   listStagedRemovals(): Promise<StagedRemoval[]>
   listUnpublishedIcons(): Promise<StagedIcon[]>
+  /** Library SVGs deleted (Apply removal) since the last package publish. */
+  listUnpublishedRemovals(): Promise<StagedRemoval[]>
   /** Existing library / staging files that collide with these kebab names. */
   findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
   getPublishReadiness(): Promise<PublishReadiness>
@@ -309,6 +311,28 @@ export function createGithubAdminClient(
       }))
   }
 
+  /**
+   * Diff main against the last "Version packages" commit.
+   * Null when there is no prior publish or HEAD is that publish.
+   */
+  async function compareSinceLastPublish(): Promise<{
+    files?: Array<{ filename: string; status?: string }>
+  } | null> {
+    const commits = await githubJson<
+      Array<{ sha: string; commit: { message: string } }>
+    >('/commits?sha=main&per_page=50')
+
+    const publishCommit = commits.find((entry) =>
+      /Version packages/i.test(entry.commit.message),
+    )
+
+    // No prior publish — avoid dumping the whole library.
+    if (!publishCommit) return null
+    if (commits[0]?.sha === publishCommit.sha) return null
+
+    return githubJson(`/compare/${publishCommit.sha}...main`)
+  }
+
   return {
     async stageIcons(icons: IconUploadPayload[]): Promise<void> {
       const normalized = validateIcons(icons)
@@ -400,27 +424,8 @@ export function createGithubAdminClient(
     },
 
     async listUnpublishedIcons(): Promise<StagedIcon[]> {
-      const commits = await githubJson<
-        Array<{ sha: string; commit: { message: string } }>
-      >('/commits?sha=main&per_page=50')
-
-      const publishCommit = commits.find((entry) =>
-        /Version packages/i.test(entry.commit.message),
-      )
-
-      // No prior publish — treat everything as already "published" for this list
-      // (avoid dumping the whole library). Empty list; Publish warn still allows.
-      if (!publishCommit) {
-        return []
-      }
-
-      if (commits[0]?.sha === publishCommit.sha) {
-        return []
-      }
-
-      const compare = await githubJson<{
-        files?: Array<{ filename: string; status?: string }>
-      }>(`/compare/${publishCommit.sha}...main`)
+      const compare = await compareSinceLastPublish()
+      if (!compare) return []
 
       const icons: StagedIcon[] = []
       for (const file of compare.files ?? []) {
@@ -441,6 +446,28 @@ export function createGithubAdminClient(
       }
 
       return icons.sort((a, b) => a.name.localeCompare(b.name))
+    },
+
+    async listUnpublishedRemovals(): Promise<StagedRemoval[]> {
+      const compare = await compareSinceLastPublish()
+      if (!compare) return []
+
+      const removals: StagedRemoval[] = []
+      for (const file of compare.files ?? []) {
+        if (file.status !== 'removed') continue
+        const path = file.filename.replace(/\\/g, '/')
+        if (
+          !path.startsWith('packages/custom-icons/svg/') ||
+          !path.toLowerCase().endsWith('.svg') ||
+          path.includes('/staging/')
+        ) {
+          continue
+        }
+        const base = path.split('/').pop()!.replace(/\.svg$/i, '')
+        removals.push({ name: base, path })
+      }
+
+      return removals.sort((a, b) => a.name.localeCompare(b.name))
     },
 
     async findIconNameConflicts(names: string[]): Promise<IconNameConflict[]> {

@@ -113,6 +113,11 @@ export async function listUnpublishedIcons(): Promise<StagedIcon[]> {
   return withAuthClear(() => getClient().listUnpublishedIcons())
 }
 
+/** Library SVGs removed since the last package publish (after Apply). */
+export async function listUnpublishedRemovals(): Promise<StagedRemoval[]> {
+  return withAuthClear(() => getClient().listUnpublishedRemovals())
+}
+
 export async function findIconNameConflicts(
   names: string[],
 ): Promise<IconNameConflict[]> {
