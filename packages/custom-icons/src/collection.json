@@ -13,6 +13,11 @@
       "width": 48,
       "height": 48
     },
+    "box-the-builder": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6.54 13.92 24 24.02l17.46-10.1M24 44.16V24m18 8V16a4 4 0 0 0-2-3.46l-14-8a4 4 0 0 0-4 0l-14 8A4 4 0 0 0 6 16v16a4 4 0 0 0 2 3.46l14 8a4 4 0 0 0 4 0l14-8A4 4 0 0 0 42 32\"/>",
+      "width": 48,
+      "height": 48
+    },
     "brand-mark": {
       "body": "<circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"#0F6E56\"/><circle cx=\"12\" cy=\"12\" r=\"5\" fill=\"#F0C75E\"/><path stroke=\"#1C2430\" stroke-linecap=\"round\" stroke-width=\"1.75\" d=\"M12 7v5l3 2\"/>",
       "width": 24,
@@ -33,7 +38,17 @@
       "width": 24,
       "height": 24
     },
+    "earphones-infinity": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6 36V24a18 18 0 1 1 36 0v12m0 2a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h6zM6 38a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6a4 4 0 0 0-4-4H6z\"/>",
+      "width": 48,
+      "height": 48
+    },
     "headphones": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6 36V24a18 18 0 1 1 36 0v12m0 2a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h6zM6 38a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6a4 4 0 0 0-4-4H6z\"/>",
+      "width": 48,
+      "height": 48
+    },
+    "headphones-yay": {
       "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6 36V24a18 18 0 1 1 36 0v12m0 2a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h6zM6 38a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6a4 4 0 0 0-4-4H6z\"/>",
       "width": 48,
       "height": 48
