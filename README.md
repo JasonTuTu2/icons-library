@@ -204,39 +204,40 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
-**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). The plugin panel **is** the icon browser. Select icons → **Load selection** → **Stage** → **Apply staged** → **Publish**. The plugin only exports SVGs from the canvas — it does not call GitHub.
+**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). The plugin panel loads SVGs only (**Load selection** → **Stage**). Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers). PNG/JPG brand images are uploaded in the full browser, not the plugin.
 
-**Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Add to staging** (multi-file OK), then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
+**Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Upload** SVG / PNG / JPG → **Add to staging**, then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
 ### First publish (happy path)
 
-1. **Stage** (Figma plugin **Load selection** → **Stage**, or Upload SVG) → **Apply staged to library**.
+1. **Stage** (Figma plugin **Load selection** → **Stage**, or Upload SVG/PNG/JPG) → **Apply staged to library**.
 2. Open the linked **Actions** run — wait ~1–2 minutes, then hard-refresh Pages.
-3. In **Upload SVG**, under **In library (unpublished)**, check icons to ship (unchecked stay out of this package, then return to the library).
+3. In **Upload**, under **In library (unpublished)**, check assets to ship (unchecked stay out of this package, then return to the library).
 4. **Publish** → wait for the publish Action → confirm versions under GitHub Packages.
 
 From Figma / git:
 
 1. Prefer the Figma plugin: **Load selection** → review names / Mono·Multi → **Stage**.
-2. Or commit files / use Upload SVG in the browser (Pages or `pnpm dev`):
-   - Monochrome: `packages/custom-icons/svg/kebab-name.svg`
-   - Multi-color: `packages/custom-icons/svg/color/kebab-name.svg`
+2. Or commit files / use Upload in the browser (Pages or `pnpm dev`):
+   - Monochrome SVG: `packages/custom-icons/svg/kebab-name.svg`
+   - Multi-color SVG: `packages/custom-icons/svg/color/kebab-name.svg`
+   - Brand image: `packages/custom-icons/images/kebab-name.png` (or `.jpg` / `.jpeg`)
 3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
-4. Use `gv:kebab-name` in designs and code. Publish so consumers get the new version (`Icon` auto-registers custom icons).
+4. Use `gv:kebab-name` with `<Icon />` for SVGs. Brand images use `img:kebab-name` and ship as files — import from `@JasonTuTu2/icons-custom/images/…` (not `<Icon />`).
 
-Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Names are shared across both folders — do not reuse the same kebab name.
+Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Do not reuse the same kebab name across mono SVG, color SVG, and images.
 
 ### Upload & publish from Pages
 
 On the live icon browser, **staging** uses the embedded Pages token (no personal PAT). **Apply** and **Publish** only appear for developers who open the site with a session PAT (see CONTRIBUTING — magic URL `#gv-github-token=`).
 
-1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (same Contents API, via the embedded browser).
+1. **Add to staging** — writes SVGs into `staging/mono|color/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (SVG only).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
-3. **Publish** — check unpublished icons to include; unchecked icons are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
+3. **Publish** — check unpublished icons/images to include; unchecked assets are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
-The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage; Apply/Publish happen in the full icon browser after a magic-URL PAT.
+The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SVG); Apply/Publish and PNG/JPG upload happen in the full icon browser.
 
-**Remove a custom icon:** select `gv:…` in the browser → **Stage removal** → **Apply staged** (deletes the SVG + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
+**Remove a custom asset:** select `gv:…` or `img:…` in the browser → **Stage removal** → **Apply staged** (deletes the file + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
 
 **Repo setup (secrets & variables):**
 
@@ -249,7 +250,7 @@ Anyone with the Pages URL can stage. Apply/Publish need a personal PAT via `#gv-
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Embedded token → Contents API → `staging/mono` or `staging/color` |
+| Add to staging | Embedded token → Contents API → `staging/mono`, `staging/color`, or `staging/images` |
 | Stage removal | Embedded token → Contents API → `staging/remove/{name}.remove` |
 | Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
 | Publish | Session PAT dispatches → Action publishes with package permissions |

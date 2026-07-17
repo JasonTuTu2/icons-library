@@ -23,6 +23,9 @@ export function BrowserPage() {
   const [colorModeFilter, setColorModeFilter] = useState<
     '' | 'mono' | 'preserved'
   >('')
+  const [assetKindFilter, setAssetKindFilter] = useState<
+    '' | 'icon' | 'image'
+  >('')
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -50,8 +53,9 @@ export function BrowserPage() {
         set: setFilter || undefined,
         source: sourceFilter || undefined,
         colorMode: colorModeFilter || undefined,
+        assetKind: assetKindFilter || undefined,
       }),
-    [deferredQuery, setFilter, sourceFilter, colorModeFilter],
+    [deferredQuery, setFilter, sourceFilter, colorModeFilter, assetKindFilter],
   )
 
   return (
@@ -110,13 +114,26 @@ export function BrowserPage() {
             <option value="preserved">Multi-color</option>
           </select>
         </label>
+        <label className="field">
+          <span>Asset</span>
+          <select
+            value={assetKindFilter}
+            onChange={(e) =>
+              setAssetKindFilter(e.target.value as '' | 'icon' | 'image')
+            }
+          >
+            <option value="">Icons + images</option>
+            <option value="icon">Vector icons</option>
+            <option value="image">Brand images</option>
+          </select>
+        </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
             const icon = getIconById(id)
             if (icon) setSelected(icon)
             setSourceFilter('custom')
-            setQuery(id.replace(/^gv:/, ''))
+            setQuery(id.replace(/^(gv|img):/, ''))
           }}
         />
         <PublishButton />
@@ -132,8 +149,8 @@ export function BrowserPage() {
         {selected ? (
           <IconDetail
             icon={selected}
-            reactCode={reactSnippet(selected.id)}
-            vueCode={vueSnippet(selected.id)}
+            reactCode={reactSnippet(selected.id, { format: selected.format })}
+            vueCode={vueSnippet(selected.id, { format: selected.format })}
             onClose={() => setSelected(null)}
             onRemovalStaged={() => setSourceFilter('custom')}
           />
@@ -141,11 +158,11 @@ export function BrowserPage() {
           <aside className="detail empty-detail">
             <h2>Select an icon</h2>
             <p>
-              Browse the grid to preview icons, copy React or Vue snippets, and
-              review license details.
+              Browse the grid to preview icons and brand images, copy snippets,
+              and review license details.
               {isGithubRepoConfigured()
-                ? ' Use Upload to stage SVGs or stage removals. Maintainers Apply and Publish.'
-                : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
+                ? ' Use Upload for SVG / PNG / JPG. Maintainers Apply and Publish.'
+                : ' Upload custom assets with Upload (local `pnpm dev`).'}
             </p>
           </aside>
         )}

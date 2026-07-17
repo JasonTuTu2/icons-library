@@ -6,10 +6,12 @@ import mdi from '@iconify-json/mdi/icons.json'
 import lucide from '@iconify-json/lucide/icons.json'
 import heroicons from '@iconify-json/heroicons/icons.json'
 import { collectAllCustomIcons } from './customSvg.js'
+import { collectCustomImages } from './customImages.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = join(__dirname, '../../../packages/catalog/src/data/icons.json')
 const customSvgDir = join(__dirname, '../../../packages/custom-icons/svg')
+const customImagesDir = join(__dirname, '../../../packages/custom-icons/images')
 const customCollectionPath = join(
   __dirname,
   '../../../packages/custom-icons/src/collection.json',
@@ -39,6 +41,9 @@ interface IconMeta {
   license: IconLicense
   name: string
   colorMode?: 'mono' | 'preserved'
+  assetKind?: 'icon' | 'image'
+  format?: 'png' | 'jpg' | 'jpeg'
+  assetPath?: string
 }
 
 const antLicense: IconLicense = {
@@ -103,6 +108,13 @@ const sets: IconSetInfo[] = [
     source: 'custom',
     license: customLicense,
     prefix: 'gv',
+  },
+  {
+    id: 'genvoice-images',
+    name: 'GenVoice Brand Images',
+    source: 'custom',
+    license: customLicense,
+    prefix: 'img',
   },
 ]
 
@@ -222,6 +234,36 @@ function collectCustomIcons(): IconMeta[] {
     license: customLicense,
     name: item.name,
     colorMode: item.colorMode,
+    assetKind: 'icon' as const,
+  }))
+}
+
+function collectBrandImages(): IconMeta[] {
+  const { images, warnings } = collectCustomImages(customImagesDir)
+  for (const warning of warnings) {
+    console.warn(`[catalog-gen] ${warning}`)
+  }
+  console.log(`Found ${images.length} brand image(s) in ${customImagesDir}`)
+
+  return images.map((item) => ({
+    id: `img:${item.name}`,
+    title: item.title,
+    tags: [
+      item.name,
+      'img',
+      'image',
+      'genvoice',
+      'custom',
+      item.format,
+      'brand-image',
+    ],
+    set: 'genvoice-images',
+    source: 'custom' as const,
+    license: customLicense,
+    name: item.name,
+    assetKind: 'image' as const,
+    format: item.format,
+    assetPath: item.publicPath,
   }))
 }
 
@@ -236,6 +278,7 @@ function main() {
     ...collectAntIcons(),
     ...iconifySets.flatMap(({ data, set }) => collectIconify(data, set)),
     ...collectCustomIcons(),
+    ...collectBrandImages(),
   ]
 
   const catalog = {

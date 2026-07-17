@@ -18,13 +18,15 @@ import {
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 
 function formatPublishIconList(
-  icons: Array<{ name: string; colorMode: string }>,
+  icons: Array<{ name: string; colorMode?: string; kind?: string; format?: string }>,
 ): string {
   return icons
-    .map(
-      (icon) =>
-        `• gv:${icon.name} (${icon.colorMode === 'preserved' ? 'multi-color' : 'mono'})`,
-    )
+    .map((icon) => {
+      if (icon.kind === 'image') {
+        return `• img:${icon.name} (${(icon.format ?? 'image').toUpperCase()})`
+      }
+      return `• gv:${icon.name} (${icon.colorMode === 'preserved' ? 'multi-color' : 'mono'})`
+    })
     .join('\n')
 }
 
@@ -33,7 +35,7 @@ function formatRemovalList(removals: StagedRemoval[]): string {
 }
 
 function addsNote(
-  icons: Array<{ name: string; colorMode: string }>,
+  icons: Array<{ name: string; colorMode?: string; kind?: string; format?: string }>,
   label = 'Adds',
 ): string {
   if (icons.length === 0) return ''

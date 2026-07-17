@@ -237,6 +237,10 @@ export function FigmaDock() {
         >
           Open icon browser
         </a>
+        <span className="figma-dock-link-note">
+          {' '}
+          — upload PNG/JPG brand images there
+        </span>
       </p>
     </section>
   )

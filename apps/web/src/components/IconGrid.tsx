@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { Icon } from '@JasonTuTu2/icons-react'
+import { customImagePublicUrl } from '../lib/customImageUrl'
 
 const COLS = 8
 const ROW_HEIGHT = 96
@@ -10,6 +11,21 @@ interface IconGridProps {
   icons: IconMeta[]
   selectedId?: string
   onSelect: (icon: IconMeta) => void
+}
+
+function CellPreview({ icon }: { icon: IconMeta }) {
+  if (icon.assetKind === 'image' && icon.assetPath) {
+    return (
+      <img
+        className="icon-cell-image"
+        src={customImagePublicUrl(icon.assetPath)}
+        alt=""
+        width={28}
+        height={28}
+      />
+    )
+  }
+  return <Icon name={icon.id} size={28} decorative />
 }
 
 export function IconGrid({ icons, selectedId, onSelect }: IconGridProps) {
@@ -51,7 +67,7 @@ export function IconGrid({ icons, selectedId, onSelect }: IconGridProps) {
                   onClick={() => onSelect(icon)}
                   title={icon.id}
                 >
-                  <Icon name={icon.id} size={28} decorative />
+                  <CellPreview icon={icon} />
                   <span>{icon.name}</span>
                 </button>
               ))}

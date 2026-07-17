@@ -9,7 +9,7 @@ const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
 function sanitizeIconName(raw: string): string | null {
   const base = raw
-    .replace(/\.svg$/i, '')
+    .replace(/\.(svg|png|jpe?g)$/i, '')
     .trim()
     .toLowerCase()
     .replace(/[\s_]+/g, '-')
@@ -61,6 +61,7 @@ export function customIconUploadPlugin(): Plugin {
   const repoRoot = resolve(pluginDir, '../..')
   const svgDir = join(repoRoot, 'packages/custom-icons/svg')
   const colorDir = join(svgDir, 'color')
+  const imagesDir = join(repoRoot, 'packages/custom-icons/images')
 
   return {
     name: 'genvoice-custom-icon-upload',
@@ -86,6 +87,8 @@ export function customIconUploadPlugin(): Plugin {
             name?: string
             content?: string
             colorMode?: 'mono' | 'preserved'
+            kind?: 'svg' | 'image'
+            format?: 'png' | 'jpg' | 'jpeg'
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -95,6 +98,49 @@ export function customIconUploadPlugin(): Plugin {
             res.end(
               JSON.stringify({
                 error: 'Invalid icon name. Use kebab-case, e.g. billing-alert.',
+              }),
+            )
+            return
+          }
+
+          if (body.kind === 'image') {
+            const format = body.format
+            if (!format || !['png', 'jpg', 'jpeg'].includes(format)) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json')
+              res.end(
+                JSON.stringify({
+                  error: 'Image uploads require format png, jpg, or jpeg.',
+                }),
+              )
+              return
+            }
+            const raw = (body.content ?? '').trim()
+            const base64 = raw.includes(',')
+              ? raw.slice(raw.indexOf(',') + 1)
+              : raw
+            if (!base64) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ error: 'Image content is empty.' }))
+              return
+            }
+
+            mkdirSync(imagesDir, { recursive: true })
+            const filePath = join(imagesDir, `${name}.${format}`)
+            writeFileSync(filePath, Buffer.from(base64, 'base64'))
+
+            await runCatalogGen(repoRoot)
+            reloadDevCatalog(server, repoRoot)
+
+            res.setHeader('Content-Type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: true,
+                id: `img:${name}`,
+                path: `packages/custom-icons/images/${name}.${format}`,
+                kind: 'image',
+                format,
               }),
             )
             return
@@ -130,6 +176,7 @@ export function customIconUploadPlugin(): Plugin {
               id: `gv:${name}`,
               path: relativePath,
               colorMode,
+              kind: 'svg',
             }),
           )
         } catch (err) {

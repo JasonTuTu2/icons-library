@@ -6,10 +6,12 @@ import {
   isValidRepo,
   packagesUrl as sharedPackagesUrl,
   sanitizeIconName,
+  type AssetKind,
   type DispatchPublishOptions,
   type IconColorMode,
   type IconNameConflict,
   type IconUploadPayload,
+  type ImageFormat,
   type PublishReadiness,
   type StagedIcon,
   type StagedRemoval,
@@ -21,10 +23,12 @@ import {
 } from './githubAuth.js'
 
 export type {
+  AssetKind,
   DispatchPublishOptions,
   IconColorMode,
   IconNameConflict,
   IconUploadPayload,
+  ImageFormat,
   PublishReadiness,
   StagedIcon,
   StagedRemoval,

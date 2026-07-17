@@ -26,11 +26,13 @@ export interface SearchOptions {
   set?: string
   source?: 'ant' | 'iconify' | 'custom'
   colorMode?: 'mono' | 'preserved'
+  /** Filter custom brand images vs vector icons. */
+  assetKind?: 'icon' | 'image'
   limit?: number
 }
 
 export function searchIcons(options: SearchOptions = {}): IconMeta[] {
-  const { query = '', set, source, colorMode, limit } = options
+  const { query = '', set, source, colorMode, assetKind, limit } = options
   const q = query.trim().toLowerCase()
 
   let results = catalog.icons
@@ -43,6 +45,11 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
   }
   if (colorMode) {
     results = results.filter((icon) => icon.colorMode === colorMode)
+  }
+  if (assetKind === 'image') {
+    results = results.filter((icon) => icon.assetKind === 'image')
+  } else if (assetKind === 'icon') {
+    results = results.filter((icon) => icon.assetKind !== 'image')
   }
   if (q) {
     results = results.filter((icon) => {
@@ -59,10 +66,26 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
   return results
 }
 
-export function reactSnippet(id: string): string {
+export function reactSnippet(
+  id: string,
+  options?: { format?: 'png' | 'jpg' | 'jpeg' },
+): string {
+  if (id.startsWith('img:')) {
+    const name = id.slice(4)
+    const ext = options?.format ?? 'png'
+    return `// Brand image — not an Iconify glyph.\n// From @JasonTuTu2/icons-custom (after install):\nimport logoUrl from '@JasonTuTu2/icons-custom/images/${name}.${ext}'\n\n<img src={logoUrl} alt="…" />`
+  }
   return `import { Icon } from '@JasonTuTu2/icons-react'\n\n<Icon name="${id}" size={24} label="…" />`
 }
 
-export function vueSnippet(id: string): string {
+export function vueSnippet(
+  id: string,
+  options?: { format?: 'png' | 'jpg' | 'jpeg' },
+): string {
+  if (id.startsWith('img:')) {
+    const name = id.slice(4)
+    const ext = options?.format ?? 'png'
+    return `<script setup>\nimport logoUrl from '@JasonTuTu2/icons-custom/images/${name}.${ext}'\n</script>\n\n<template>\n  <img :src="logoUrl" alt="…" />\n</template>`
+  }
   return `<script setup>\nimport { Icon } from '@JasonTuTu2/icons-vue'\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
 }

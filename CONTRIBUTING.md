@@ -41,17 +41,27 @@ The app stores the token in `sessionStorage` for that tab and strips it from the
 
 ### Pages icon browser
 
-1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage). From Figma: **Load selection** → **Stage**.
+1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage). From Figma: **Load selection** → **Stage** (SVG). From the full browser Upload: SVG and/or PNG/JPG.
 2. **Apply staged to library** (dev magic URL) — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
-3. **Publish** (dev magic URL) — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
+3. **Publish** (dev magic URL) — check unpublished icons/images to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
-To **remove** a custom icon: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes the SVG from the library.
+To **remove** a custom SVG or brand image: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes matching library files.
+
+### Brand images (PNG / JPG)
+
+Parallel to SVG icons — same stage → apply → publish flow, but **not** Iconify / `<Icon />`:
+
+- Catalog id: `img:kebab-name`
+- Library path: `packages/custom-icons/images/`
+- Staging: `packages/custom-icons/staging/images/`
+- Consumers: `import url from '@JasonTuTu2/icons-custom/images/name.png'` then `<img src={url} />`
+- Figma plugin does **not** export rasters — use the full icon browser Upload panel
 
 ### First publish (happy path)
 
-1. **Stage** (Figma **Load selection** → **Stage**, or Upload SVG) → **Apply staged to library**.
+1. **Stage** (Figma **Load selection** → **Stage**, or Upload SVG/PNG/JPG) → **Apply staged to library**.
 2. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
-3. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
+3. Open **Upload**, review **In library (unpublished)**, leave checked what should ship.
 4. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.
 
 ### Monochrome (recolorable) — local / git
@@ -67,7 +77,7 @@ To **remove** a custom icon: open it in the browser → **Stage removal** → **
 2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or stage/apply with Multi-color mode).
 3. Run `pnpm catalog:gen` if via git.
 
-Do not reuse a kebab name that already exists in the other folder.
+Do not reuse a kebab name that already exists as mono SVG, color SVG, or brand image.
 
 
 ## Releases

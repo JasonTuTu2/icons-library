@@ -17,7 +17,7 @@ export interface IconSetInfo {
 }
 
 export interface IconMeta {
-  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, or gv:star */
+  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, gv:star, or img:logo */
   id: string
   /** Display title */
   title: string
@@ -28,8 +28,17 @@ export interface IconMeta {
   license: IconLicense
   /** Iconify/custom body name without prefix, or Ant export name */
   name: string
-  /** Custom icons only: mono (currentColor) or preserved multi-color */
+  /** Custom SVG icons only: mono (currentColor) or preserved multi-color */
   colorMode?: 'mono' | 'preserved'
+  /** Custom assets: vector icon (default) or brand image (png/jpg). */
+  assetKind?: 'icon' | 'image'
+  /** Brand images only: file format. */
+  format?: 'png' | 'jpg' | 'jpeg'
+  /**
+   * Brand images: path under the icon browser public root
+   * (e.g. custom-images/logo.png).
+   */
+  assetPath?: string
 }
 
 export interface IconCatalog {

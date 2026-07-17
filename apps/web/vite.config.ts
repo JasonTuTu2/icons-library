@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { customIconUploadPlugin } from './vite.custom-upload-plugin'
+import { copyCustomImagesPlugin } from './vite.copy-custom-images-plugin'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const packageVersion = (
@@ -17,7 +18,7 @@ export default defineConfig(({ command }) => {
   return {
     // GitHub Pages serves at https://JasonTuTu2.github.io/icons-library/
     base: command === 'build' ? '/icons-library/' : '/',
-    plugins: [react(), customIconUploadPlugin()],
+    plugins: [react(), customIconUploadPlugin(), copyCustomImagesPlugin()],
     define: {
       'import.meta.env.VITE_PACKAGE_VERSION': JSON.stringify(packageVersion),
     },

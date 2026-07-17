@@ -6,6 +6,7 @@ import {
   isGithubRepoConfigured,
   stageRemovals,
 } from '../lib/github'
+import { customImagePublicUrl } from '../lib/customImageUrl'
 
 interface IconDetailProps {
   icon: IconMeta
@@ -35,11 +36,12 @@ export function IconDetail({
   const [busy, setBusy] = useState(false)
   const [removeMessage, setRemoveMessage] = useState<string | null>(null)
 
-  const canStageRemoval =
+  const isCustomAsset =
     icon.source === 'custom' &&
-    icon.id.startsWith('gv:') &&
-    isGithubRepoConfigured() &&
-    isGithubAdminEnabled()
+    (icon.id.startsWith('gv:') || icon.id.startsWith('img:'))
+
+  const canStageRemoval =
+    isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
 
   async function handleCopy(label: string, text: string) {
     const ok = await copyText(text)
@@ -48,9 +50,9 @@ export function IconDetail({
   }
 
   async function handleStageRemoval() {
-    const name = icon.id.replace(/^gv:/, '')
+    const name = icon.id.replace(/^(gv|img):/, '')
     const ok = window.confirm(
-      `Stage removal of ${icon.id}?\n\nThis writes a shared marker on GitHub. The SVG stays in the library until someone clicks Apply staged. Consumers keep the icon until you Publish after Apply.`,
+      `Stage removal of ${icon.id}?\n\nThis writes a shared marker on GitHub. The file stays in the library until someone clicks Apply staged. Consumers keep it until you Publish after Apply.`,
     )
     if (!ok) return
 
@@ -69,6 +71,8 @@ export function IconDetail({
     }
   }
 
+  const isImage = icon.assetKind === 'image'
+
   return (
     <aside className="detail">
       <div className="detail-header">
@@ -79,7 +83,15 @@ export function IconDetail({
       </div>
 
       <div className="detail-preview">
-        <Icon name={icon.id} size={56} label={icon.title} />
+        {isImage && icon.assetPath ? (
+          <img
+            className="detail-preview-image"
+            src={customImagePublicUrl(icon.assetPath)}
+            alt={icon.title}
+          />
+        ) : (
+          <Icon name={icon.id} size={56} label={icon.title} />
+        )}
       </div>
 
       <dl className="meta">
@@ -100,8 +112,15 @@ export function IconDetail({
           <dt>Set / source</dt>
           <dd>
             {icon.set} · {icon.source}
+            {isImage ? ' · brand image' : ''}
           </dd>
         </div>
+        {icon.format ? (
+          <div>
+            <dt>Format</dt>
+            <dd>{icon.format.toUpperCase()}</dd>
+          </div>
+        ) : null}
         {icon.colorMode ? (
           <div>
             <dt>Color mode</dt>
@@ -137,7 +156,7 @@ export function IconDetail({
 
       <section className="snippet">
         <div className="snippet-head">
-          <h3>React</h3>
+          <h3>{isImage ? 'Usage' : 'React'}</h3>
           <button
             type="button"
             className="ghost"
@@ -151,21 +170,39 @@ export function IconDetail({
         </pre>
       </section>
 
-      <section className="snippet">
-        <div className="snippet-head">
-          <h3>Vue</h3>
-          <button
-            type="button"
-            className="ghost"
-            onClick={() => handleCopy('vue', vueCode)}
-          >
-            Copy
-          </button>
-        </div>
-        <pre>
-          <code>{vueCode}</code>
-        </pre>
-      </section>
+      {!isImage ? (
+        <section className="snippet">
+          <div className="snippet-head">
+            <h3>Vue</h3>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => handleCopy('vue', vueCode)}
+            >
+              Copy
+            </button>
+          </div>
+          <pre>
+            <code>{vueCode}</code>
+          </pre>
+        </section>
+      ) : (
+        <section className="snippet">
+          <div className="snippet-head">
+            <h3>Vue</h3>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => handleCopy('vue', vueCode)}
+            >
+              Copy
+            </button>
+          </div>
+          <pre>
+            <code>{vueCode}</code>
+          </pre>
+        </section>
+      )}
 
       {canStageRemoval ? (
         <div className="detail-actions">
@@ -178,7 +215,7 @@ export function IconDetail({
             {busy ? 'Staging…' : 'Stage removal'}
           </button>
           <p className="meta-note">
-            Stages a shared removal marker. Apply deletes the SVG from the
+            Stages a shared removal marker. Apply deletes the file from the
             library; Publish drops it from packages.
           </p>
           {removeMessage ? (
@@ -187,8 +224,7 @@ export function IconDetail({
             </p>
           ) : null}
         </div>
-      ) : icon.source === 'custom' &&
-        icon.id.startsWith('gv:') &&
+      ) : isCustomAsset &&
         isGithubRepoConfigured() &&
         !isGithubAdminEnabled() ? (
         <p className="meta-note">

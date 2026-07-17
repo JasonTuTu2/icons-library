@@ -59,23 +59,23 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Custom icons from Figma</h2>
         <ol>
           <li>
-            Prefer the Figma Development plugin (panel = icon browser):{' '}
-            <strong>Load selection</strong> → <strong>Stage</strong> (no GitHub
-            calls in the plugin).
+            Prefer the Figma Development plugin (SVG Load/Stage). Upload PNG/JPG
+            brand images in the full icon browser.
           </li>
           <li>
             Then a maintainer runs <strong>Apply staged to library</strong>, wait
             ~1–2 minutes on Actions, hard-refresh, then check unpublished icons
             and <strong>Publish</strong>. Or commit to{' '}
             <code>packages/custom-icons/svg/</code> (mono) /{' '}
-            <code>svg/color/</code> (multi-color) and run{' '}
+            <code>svg/color/</code> (multi-color) /{' '}
+            <code>images/</code> (PNG/JPG) and run{' '}
             <code>pnpm catalog:gen</code>. Local <code>pnpm dev</code> upload
             writes to disk without GitHub staging.
           </li>
           <li>
-            Use <code>gv:kebab-name</code> in designs and code. Custom icons
-            register automatically when you import <code>Icon</code> — no
-            bootstrap call.
+            Use <code>gv:kebab-name</code> with <code>Icon</code> for SVGs.
+            Brand images use <code>img:kebab-name</code> and file imports from{' '}
+            <code>@JasonTuTu2/icons-custom/images/…</code>.
           </li>
         </ol>
         <p>
@@ -90,8 +90,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Removing a custom icon</h2>
         <ol>
           <li>
-            Select a <code>gv:</code> icon → <strong>Stage removal</strong>{' '}
-            (shared marker on GitHub).
+            Select a <code>gv:</code> or <code>img:</code> asset →{' '}
+            <strong>Stage removal</strong> (shared marker on GitHub).
           </li>
           <li>
             A maintainer runs <strong>Apply staged to library</strong> — deletes

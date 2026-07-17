@@ -25,7 +25,8 @@ jobs:
           STAGING=packages/custom-icons/staging
           MONO_DST=packages/custom-icons/svg
           COLOR_DST=packages/custom-icons/svg/color
-          mkdir -p "$MONO_DST" "$COLOR_DST" "$STAGING/remove"
+          IMG_DST=packages/custom-icons/images
+          mkdir -p "$MONO_DST" "$COLOR_DST" "$IMG_DST" "$STAGING/remove" "$STAGING/images"
           names=()
 
           shopt -s nullglob
@@ -41,6 +42,14 @@ jobs:
             names+=("gv:${base%.svg}")
             echo "Promoted color/$base"
           done
+          for f in "$STAGING"/images/*.{png,jpg,jpeg}; do
+            [[ -e "$f" ]] || continue
+            base=$(basename "$f")
+            mv -f "$f" "$IMG_DST/$base"
+            name="${base%.*}"
+            names+=("img:${name}")
+            echo "Promoted images/$base"
+          done
           for f in "$STAGING"/remove/*.remove; do
             name=$(basename "$f" .remove)
             removed=0
@@ -54,11 +63,18 @@ jobs:
               removed=1
               echo "Removed color/$name.svg"
             fi
+            for ext in png jpg jpeg; do
+              if [[ -f "$IMG_DST/$name.$ext" ]]; then
+                rm -f "$IMG_DST/$name.$ext"
+                removed=1
+                echo "Removed images/$name.$ext"
+              fi
+            done
             rm -f "$f"
             if [[ "$removed" -eq 1 ]]; then
-              names+=("-gv:$name")
+              names+=("-${name}")
             else
-              echo "Removal marker for $name had no library SVG"
+              echo "Removal marker for $name had no library asset"
             fi
           done
           shopt -u nullglob

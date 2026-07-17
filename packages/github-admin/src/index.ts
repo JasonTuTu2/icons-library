@@ -1,18 +1,30 @@
 export type IconColorMode = 'mono' | 'preserved'
+export type AssetKind = 'svg' | 'image'
+export type ImageFormat = 'png' | 'jpg' | 'jpeg'
 
 export interface IconUploadPayload {
   name: string
+  /** SVG document text, or base64 for images (no data: URL prefix). */
   content: string
-  colorMode: IconColorMode
+  /** Required for SVG; ignored for images. */
+  colorMode?: IconColorMode
+  /** Defaults to svg. */
+  kind?: AssetKind
+  /** Required when kind is image. */
+  format?: ImageFormat
 }
 
 export interface StagedIcon {
   name: string
-  colorMode: IconColorMode
   path: string
+  kind: AssetKind
+  /** SVG only. */
+  colorMode?: IconColorMode
+  /** Image only. */
+  format?: ImageFormat
 }
 
-/** Tombstone in staging/remove — Apply deletes the matching library SVG(s). */
+/** Tombstone in staging/remove — Apply deletes matching library SVG(s) and/or image. */
 export interface StagedRemoval {
   name: string
   path: string
@@ -24,7 +36,7 @@ export interface GithubAdminConfig {
 }
 
 export interface PublishReadiness {
-  /** Custom SVG adds/removes applied to the library since the last package version publish. */
+  /** Custom SVG/image adds/removes applied to the library since the last package version publish. */
   hasNewIcons: boolean
   /** Staged adds + removal markers waiting for Apply. */
   stagedCount: number
@@ -37,14 +49,16 @@ export interface IconNameConflict {
   location:
     | 'library-mono'
     | 'library-color'
+    | 'library-image'
     | 'staging-mono'
     | 'staging-color'
+    | 'staging-image'
     | 'staging-remove'
 }
 
 export interface DispatchPublishOptions {
   /**
-   * Library SVG paths to omit from this publish (unchecked unpublished icons).
+   * Library SVG/image paths to omit from this publish (unchecked unpublished icons).
    * Held aside during version/publish, then restored to the library afterward
    * so they remain unpublished for a later release — not demoted to staging.
    */
@@ -81,15 +95,30 @@ export class GithubAuthError extends Error {
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 const STAGING_BASE = 'packages/custom-icons/staging'
 const REMOVE_DIR = `${STAGING_BASE}/remove`
+const IMAGES_DIR = 'packages/custom-icons/images'
+const STAGING_IMAGES = `${STAGING_BASE}/images`
 const DEFAULT_REPO = 'JasonTuTu2/icons-library'
+const IMAGE_EXTS = ['png', 'jpg', 'jpeg'] as const
 
 function removalMarkerPath(name: string): string {
   return `${REMOVE_DIR}/${name}.remove`
 }
 
+function parseImageFormat(raw: string): ImageFormat | null {
+  const ext = raw.replace(/^\./, '').toLowerCase()
+  if (ext === 'png' || ext === 'jpg' || ext === 'jpeg') return ext
+  return null
+}
+
+function stripDataUrlBase64(content: string): string {
+  const trimmed = content.trim()
+  const match = trimmed.match(/^data:[^;]+;base64,(.+)$/i)
+  return (match?.[1] ?? trimmed).replace(/\s+/g, '')
+}
+
 export function sanitizeIconName(raw: string): string | null {
   const base = raw
-    .replace(/\.svg$/i, '')
+    .replace(/\.(svg|png|jpe?g)$/i, '')
     .trim()
     .toLowerCase()
     .replace(/[\s_]+/g, '-')
@@ -99,6 +128,16 @@ export function sanitizeIconName(raw: string): string | null {
 
   if (!base || !KEBAB.test(base)) return null
   return base
+}
+
+function findImageFileName(
+  fileNames: Set<string>,
+  name: string,
+): string | undefined {
+  for (const ext of IMAGE_EXTS) {
+    if (fileNames.has(`${name}.${ext}`)) return `${name}.${ext}`
+  }
+  return undefined
 }
 
 export function isValidRepo(repo: string): boolean {
@@ -146,6 +185,23 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
         `Invalid icon name "${icon.name}". Use kebab-case, e.g. billing-alert.`,
       )
     }
+
+    const kind: AssetKind = icon.kind === 'image' ? 'image' : 'svg'
+
+    if (kind === 'image') {
+      const format = parseImageFormat(icon.format ?? '')
+      if (!format) {
+        throw new Error(
+          `"${icon.name}" image uploads require format png, jpg, or jpeg.`,
+        )
+      }
+      const content = stripDataUrlBase64(icon.content)
+      if (!content) {
+        throw new Error(`"${icon.name}" image content is empty.`)
+      }
+      return { name, content, kind, format }
+    }
+
     const content = icon.content.trim()
     if (!content || !/<svg[\s>]/i.test(content)) {
       throw new Error(`"${icon.name}" must be an SVG document.`)
@@ -153,9 +209,50 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
     return {
       name,
       content,
+      kind: 'svg' as const,
       colorMode: icon.colorMode === 'preserved' ? 'preserved' : 'mono',
     }
   })
+}
+
+function isLibraryAssetPath(path: string): boolean {
+  const p = path.replace(/\\/g, '/')
+  if (p.includes('/staging/') || p.includes('/.publish-hold/')) return false
+  if (
+    p.startsWith('packages/custom-icons/svg/') &&
+    p.toLowerCase().endsWith('.svg')
+  ) {
+    return true
+  }
+  if (
+    p.startsWith(`${IMAGES_DIR}/`) &&
+    /\.(png|jpe?g)$/i.test(p)
+  ) {
+    return true
+  }
+  return false
+}
+
+function stagedFromLibraryPath(path: string): StagedIcon | null {
+  const p = path.replace(/\\/g, '/')
+  if (!isLibraryAssetPath(p)) return null
+  const base = p.split('/').pop()!
+  if (p.startsWith(`${IMAGES_DIR}/`)) {
+    const format = parseImageFormat(base.slice(base.lastIndexOf('.') + 1))
+    if (!format) return null
+    return {
+      name: base.replace(/\.(png|jpe?g)$/i, ''),
+      path: p,
+      kind: 'image',
+      format,
+    }
+  }
+  return {
+    name: base.replace(/\.svg$/i, ''),
+    path: p,
+    kind: 'svg',
+    colorMode: p.includes('/svg/color/') ? 'preserved' : 'mono',
+  }
 }
 
 export function createGithubAdminClient(
@@ -238,14 +335,14 @@ export function createGithubAdminClient(
     return true
   }
 
-  async function putTextFile(
+  async function putBase64File(
     path: string,
-    content: string,
+    base64Content: string,
     message: string,
   ): Promise<void> {
     const body: Record<string, string> = {
       message,
-      content: toBase64Utf8(content),
+      content: base64Content,
       branch: 'main',
     }
 
@@ -282,6 +379,14 @@ export function createGithubAdminClient(
     }
   }
 
+  async function putTextFile(
+    path: string,
+    content: string,
+    message: string,
+  ): Promise<void> {
+    return putBase64File(path, toBase64Utf8(content), message)
+  }
+
   async function listContentFileNames(dirPath: string): Promise<Set<string>> {
     const res = await githubFetch(`/contents/${dirPath}`)
     if (res.status === 404) return new Set()
@@ -313,7 +418,7 @@ export function createGithubAdminClient(
   }
 
   async function listStagingDir(
-    dir: 'mono' | 'color' | 'remove',
+    dir: 'mono' | 'color' | 'remove' | 'images',
     colorMode?: IconColorMode,
   ): Promise<StagedIcon[] | StagedRemoval[]> {
     const res = await githubFetch(`/contents/${STAGING_BASE}/${dir}`)
@@ -355,6 +460,28 @@ export function createGithubAdminClient(
         .sort((a, b) => a.name.localeCompare(b.name))
     }
 
+    if (dir === 'images') {
+      return entries
+        .filter(
+          (entry) =>
+            entry.type === 'file' &&
+            /\.(png|jpe?g)$/i.test(entry.name) &&
+            !entry.name.startsWith('.'),
+        )
+        .map((entry) => {
+          const format = parseImageFormat(
+            entry.name.slice(entry.name.lastIndexOf('.') + 1),
+          )!
+          return {
+            name: entry.name.replace(/\.(png|jpe?g)$/i, ''),
+            path: entry.path,
+            kind: 'image' as const,
+            format,
+          }
+        })
+        .sort((a, b) => a.name.localeCompare(b.name))
+    }
+
     return entries
       .filter(
         (entry) =>
@@ -366,6 +493,7 @@ export function createGithubAdminClient(
         name: entry.name.replace(/\.svg$/i, ''),
         colorMode: colorMode!,
         path: entry.path,
+        kind: 'svg' as const,
       }))
   }
 
@@ -399,10 +527,28 @@ export function createGithubAdminClient(
         // An add cancels a pending removal for the same name.
         await deletePath(
           removalMarkerPath(icon.name),
-          `Cancel staged removal gv:${icon.name}`,
+          `Cancel staged removal ${icon.kind === 'image' ? 'img' : 'gv'}:${icon.name}`,
         )
 
-        const dir = stagingDir(icon.colorMode)
+        if (icon.kind === 'image') {
+          const format = icon.format!
+          // Drop any other staged image ext for this name.
+          for (const ext of IMAGE_EXTS) {
+            if (ext === format) continue
+            await deletePath(
+              `${STAGING_IMAGES}/${icon.name}.${ext}`,
+              `Cancel staged image img:${icon.name} (.${ext})`,
+            )
+          }
+          await putBase64File(
+            `${STAGING_IMAGES}/${icon.name}.${format}`,
+            icon.content,
+            `Stage image img:${icon.name}`,
+          )
+          continue
+        }
+
+        const dir = stagingDir(icon.colorMode ?? 'mono')
         const path = `${STAGING_BASE}/${dir}/${icon.name}.svg`
         await putTextFile(
           path,
@@ -424,16 +570,21 @@ export function createGithubAdminClient(
         throw new Error('No icon names to remove.')
       }
 
+      const libraryImages = await listContentFileNames(IMAGES_DIR)
+
       for (const name of unique) {
         const monoPath = `packages/custom-icons/svg/${name}.svg`
         const colorPath = `packages/custom-icons/svg/color/${name}.svg`
-        const [monoSha, colorSha] = await Promise.all([
+        const imageFile = findImageFileName(libraryImages, name)
+        const imagePath = imageFile ? `${IMAGES_DIR}/${imageFile}` : undefined
+        const [monoSha, colorSha, imageSha] = await Promise.all([
           getFileSha(monoPath),
           getFileSha(colorPath),
+          imagePath ? getFileSha(imagePath) : Promise.resolve(undefined),
         ])
-        if (!monoSha && !colorSha) {
+        if (!monoSha && !colorSha && !imageSha) {
           throw new Error(
-            `gv:${name} is not in the library — nothing to stage for removal.`,
+            `${name} is not in the library (gv: or img:) — nothing to stage for removal.`,
           )
         }
 
@@ -446,11 +597,17 @@ export function createGithubAdminClient(
           `${STAGING_BASE}/color/${name}.svg`,
           `Cancel staged add gv:${name} (color)`,
         )
+        for (const ext of IMAGE_EXTS) {
+          await deletePath(
+            `${STAGING_IMAGES}/${name}.${ext}`,
+            `Cancel staged image img:${name}`,
+          )
+        }
 
         await putTextFile(
           removalMarkerPath(name),
-          `remove gv:${name}\n`,
-          `Stage removal gv:${name}`,
+          `remove ${name}\n`,
+          `Stage removal ${name}`,
         )
       }
     },
@@ -462,19 +619,22 @@ export function createGithubAdminClient(
       }
       const deleted = await deletePath(
         removalMarkerPath(sanitized),
-        `Unstage removal gv:${sanitized}`,
+        `Unstage removal ${sanitized}`,
       )
       if (!deleted) {
-        throw new Error(`gv:${sanitized} is not staged for removal.`)
+        throw new Error(`${sanitized} is not staged for removal.`)
       }
     },
 
     async listStagedIcons(): Promise<StagedIcon[]> {
-      const [mono, color] = await Promise.all([
+      const [mono, color, images] = await Promise.all([
         listStagingDir('mono', 'mono') as Promise<StagedIcon[]>,
         listStagingDir('color', 'preserved') as Promise<StagedIcon[]>,
+        listStagingDir('images') as Promise<StagedIcon[]>,
       ])
-      return [...mono, ...color].sort((a, b) => a.name.localeCompare(b.name))
+      return [...mono, ...color, ...images].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      )
     },
 
     async listStagedRemovals(): Promise<StagedRemoval[]> {
@@ -488,19 +648,8 @@ export function createGithubAdminClient(
       const icons: StagedIcon[] = []
       for (const file of compare.files ?? []) {
         if (file.status === 'removed') continue
-        const path = file.filename.replace(/\\/g, '/')
-        if (
-          !path.startsWith('packages/custom-icons/svg/') ||
-          !path.toLowerCase().endsWith('.svg') ||
-          path.includes('/staging/')
-        ) {
-          continue
-        }
-        const base = path.split('/').pop()!.replace(/\.svg$/i, '')
-        const colorMode: IconColorMode = path.includes('/svg/color/')
-          ? 'preserved'
-          : 'mono'
-        icons.push({ name: base, colorMode, path })
+        const staged = stagedFromLibraryPath(file.filename)
+        if (staged) icons.push(staged)
       }
 
       return icons.sort((a, b) => a.name.localeCompare(b.name))
@@ -513,16 +662,10 @@ export function createGithubAdminClient(
       const removals: StagedRemoval[] = []
       for (const file of compare.files ?? []) {
         if (file.status !== 'removed') continue
-        const path = file.filename.replace(/\\/g, '/')
-        if (
-          !path.startsWith('packages/custom-icons/svg/') ||
-          !path.toLowerCase().endsWith('.svg') ||
-          path.includes('/staging/')
-        ) {
-          continue
+        const staged = stagedFromLibraryPath(file.filename)
+        if (staged) {
+          removals.push({ name: staged.name, path: staged.path })
         }
-        const base = path.split('/').pop()!.replace(/\.svg$/i, '')
-        removals.push({ name: base, path })
       }
 
       return removals.sort((a, b) => a.name.localeCompare(b.name))
@@ -539,14 +682,23 @@ export function createGithubAdminClient(
       if (unique.length === 0) return []
 
       // List directories once — avoid per-path GET 404s for names that are new.
-      const [libraryMono, libraryColor, stagingMono, stagingColor, stagingRemove] =
-        await Promise.all([
-          listContentFileNames('packages/custom-icons/svg'),
-          listContentFileNames('packages/custom-icons/svg/color'),
-          listContentFileNames(`${STAGING_BASE}/mono`),
-          listContentFileNames(`${STAGING_BASE}/color`),
-          listContentFileNames(`${STAGING_BASE}/remove`),
-        ])
+      const [
+        libraryMono,
+        libraryColor,
+        libraryImages,
+        stagingMono,
+        stagingColor,
+        stagingImages,
+        stagingRemove,
+      ] = await Promise.all([
+        listContentFileNames('packages/custom-icons/svg'),
+        listContentFileNames('packages/custom-icons/svg/color'),
+        listContentFileNames(IMAGES_DIR),
+        listContentFileNames(`${STAGING_BASE}/mono`),
+        listContentFileNames(`${STAGING_BASE}/color`),
+        listContentFileNames(STAGING_IMAGES),
+        listContentFileNames(`${STAGING_BASE}/remove`),
+      ])
 
       const conflicts: IconNameConflict[] = []
       for (const name of unique) {
@@ -556,11 +708,17 @@ export function createGithubAdminClient(
         if (libraryColor.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'library-color' })
         }
+        if (findImageFileName(libraryImages, name)) {
+          conflicts.push({ name, location: 'library-image' })
+        }
         if (stagingMono.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'staging-mono' })
         }
         if (stagingColor.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'staging-color' })
+        }
+        if (findImageFileName(stagingImages, name)) {
+          conflicts.push({ name, location: 'staging-image' })
         }
         if (stagingRemove.has(`${name}.remove`)) {
           conflicts.push({ name, location: 'staging-remove' })
@@ -589,7 +747,12 @@ export function createGithubAdminClient(
 
       // No prior publish on record — don't block with the "no new icons" warn.
       if (!publishCommit) {
-        return { hasNewIcons: true, stagedCount, stagedAddCount, stagedRemovalCount }
+        return {
+          hasNewIcons: true,
+          stagedCount,
+          stagedAddCount,
+          stagedRemovalCount,
+        }
       }
 
       if (commits[0]?.sha === publishCommit.sha) {
@@ -605,17 +768,12 @@ export function createGithubAdminClient(
         files?: Array<{ filename: string; status?: string }>
       }>(`/compare/${publishCommit.sha}...main`)
 
-      const hasLibrarySvgChange = (compare.files ?? []).some((file) => {
-        const path = file.filename.replace(/\\/g, '/')
-        return (
-          path.startsWith('packages/custom-icons/svg/') &&
-          path.toLowerCase().endsWith('.svg') &&
-          !path.includes('/staging/')
-        )
-      })
+      const hasLibraryChange = (compare.files ?? []).some((file) =>
+        isLibraryAssetPath(file.filename),
+      )
 
       return {
-        hasNewIcons: hasLibrarySvgChange,
+        hasNewIcons: hasLibraryChange,
         stagedCount,
         stagedAddCount,
         stagedRemovalCount,
@@ -630,8 +788,10 @@ export function createGithubAdminClient(
     },
 
     async dispatchPublish(options?: DispatchPublishOptions): Promise<void> {
-      const deferPaths = (options?.deferPaths ?? []).filter((p) =>
-        p.startsWith('packages/custom-icons/svg/'),
+      const deferPaths = (options?.deferPaths ?? []).filter(
+        (p) =>
+          p.startsWith('packages/custom-icons/svg/') ||
+          p.startsWith(`${IMAGES_DIR}/`),
       )
       await githubJson('/actions/workflows/publish-packages.yml/dispatches', {
         method: 'POST',

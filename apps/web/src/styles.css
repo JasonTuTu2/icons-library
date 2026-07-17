@@ -568,6 +568,33 @@ pre {
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
+.upload-preview-image {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.upload-format-tag {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  align-self: center;
+}
+
+.icon-cell-image {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.detail-preview-image {
+  max-width: 120px;
+  max-height: 120px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
 .staged-hint {
   margin: 0;
   font-size: 0.8rem;
@@ -1136,4 +1163,9 @@ html.figma-host code {
 .figma-dock-link a:hover {
   text-decoration: underline;
   color: var(--plugin-bg-brand-hover);
+}
+
+.figma-dock-link-note {
+  color: var(--figma-color-text-secondary, #b3b3b3);
+  font-size: 11px;
 }

@@ -14,6 +14,7 @@ import {
   unstageRemoval,
   type IconColorMode,
   type IconNameConflict,
+  type ImageFormat,
   type StagedIcon,
   type StagedRemoval,
 } from '../lib/github'
@@ -38,7 +39,9 @@ interface UploadItem {
   name: string
   content: string
   previewUrl: string
+  kind: 'svg' | 'image'
   colorMode: IconColorMode
+  format?: ImageFormat
 }
 
 interface UploadPanelProps {
@@ -55,6 +58,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     previewUrl: URL.createObjectURL(
       new Blob([icon.content], { type: 'image/svg+xml' }),
     ),
+    kind: 'svg',
     colorMode: icon.colorMode,
   }
 }
@@ -89,8 +93,43 @@ function readInitialHandoff(): {
   return { open: false, items: [], message: null }
 }
 
+function parseImageFormat(fileName: string): ImageFormat | null {
+  const lower = fileName.toLowerCase()
+  if (lower.endsWith('.png')) return 'png'
+  if (lower.endsWith('.jpg')) return 'jpg'
+  if (lower.endsWith('.jpeg')) return 'jpeg'
+  return null
+}
+
 function fileToUploadItem(file: File): Promise<UploadItem[]> {
   return new Promise((resolve, reject) => {
+    const imageFormat = parseImageFormat(file.name)
+    if (imageFormat) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const dataUrl = String(reader.result ?? '')
+        const base64 = dataUrl.includes(',')
+          ? dataUrl.slice(dataUrl.indexOf(',') + 1)
+          : dataUrl
+        const base = file.name.replace(/\.(png|jpe?g)$/i, '')
+        const name = sanitizeIconName(base) ?? ''
+        resolve([
+          {
+            fileName: file.name,
+            name,
+            content: base64,
+            previewUrl: URL.createObjectURL(file),
+            kind: 'image',
+            colorMode: 'mono',
+            format: imageFormat,
+          },
+        ])
+      }
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(file)
+      return
+    }
+
     const reader = new FileReader()
     reader.onload = () => {
       const content = String(reader.result ?? '')
@@ -111,6 +150,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           name,
           content,
           previewUrl: URL.createObjectURL(file),
+          kind: 'svg',
           colorMode: 'mono',
         },
       ])
@@ -131,17 +171,28 @@ function formatConflicts(conflicts: IconNameConflict[]): string {
     .map((c) => {
       const where =
         c.location === 'library-mono'
-          ? 'library (mono)'
+          ? 'library (mono SVG)'
           : c.location === 'library-color'
-            ? 'library (multi-color)'
-            : c.location === 'staging-mono'
-              ? 'staging (mono)'
-              : c.location === 'staging-color'
-                ? 'staging (multi-color)'
-                : 'staged removals'
-      return `• gv:${c.name} — already in ${where}`
+            ? 'library (multi-color SVG)'
+            : c.location === 'library-image'
+              ? 'library (brand image)'
+              : c.location === 'staging-mono'
+                ? 'staging (mono SVG)'
+                : c.location === 'staging-color'
+                  ? 'staging (multi-color SVG)'
+                  : c.location === 'staging-image'
+                    ? 'staging (brand image)'
+                    : 'staged removals'
+      return `• ${c.name} — already in ${where}`
     })
     .join('\n')
+}
+
+function stagedAssetLabel(icon: StagedIcon): string {
+  if (icon.kind === 'image') {
+    return `img:${icon.name} (${icon.format ?? 'image'})`
+  }
+  return `gv:${icon.name} (${icon.colorMode === 'preserved' ? 'multi-color' : 'mono'})`
 }
 
 export function UploadPanel({
@@ -248,7 +299,13 @@ export function UploadPanel({
     if (!fileList?.length) return
     const files = Array.from(fileList).filter((f) => {
       const lower = f.name.toLowerCase()
-      return lower.endsWith('.svg') || lower.endsWith('.json')
+      return (
+        lower.endsWith('.svg') ||
+        lower.endsWith('.json') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg')
+      )
     })
     if (files.length === 0) return
     try {
@@ -290,11 +347,21 @@ export function UploadPanel({
 
       const count = items.length
       await stageIcons(
-        items.map((item) => ({
-          name: item.name,
-          content: item.content,
-          colorMode: item.colorMode,
-        })),
+        items.map((item) =>
+          item.kind === 'image'
+            ? {
+                name: item.name,
+                content: item.content,
+                kind: 'image' as const,
+                format: item.format!,
+              }
+            : {
+                name: item.name,
+                content: item.content,
+                kind: 'svg' as const,
+                colorMode: item.colorMode,
+              },
+        ),
       )
       setItems((prev) => {
         revokePreviewUrls(prev)
@@ -302,7 +369,7 @@ export function UploadPanel({
       })
       await refreshStaged()
       setMessage(
-        `Staged ${count} icon(s) on GitHub (shared queue). Click Apply when ready — no Action ran yet.`,
+        `Staged ${count} asset(s) on GitHub (shared queue). Maintainers Apply when ready — no Action ran yet.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -327,9 +394,9 @@ export function UploadPanel({
         return
       }
 
-      const addNames = current.map((icon) => `• gv:${icon.name}`).join('\n')
+      const addNames = current.map((icon) => `• ${stagedAssetLabel(icon)}`).join('\n')
       const removeNames = currentRemovals
-        .map((icon) => `• gv:${icon.name}`)
+        .map((icon) => `• ${icon.name}`)
         .join('\n')
       const addSection =
         current.length > 0 ? `Adds (${current.length}):\n${addNames}` : ''
@@ -345,7 +412,11 @@ export function UploadPanel({
 
       await dispatchApplyStaged()
       const first = current[0]
-      if (first) onUploaded(`gv:${first.name}`)
+      if (first) {
+        onUploaded(
+          first.kind === 'image' ? `img:${first.name}` : `gv:${first.name}`,
+        )
+      }
       setMessage(
         <WorkflowQueuedNotice
           workflowLabel="Apply workflow"
@@ -366,7 +437,7 @@ export function UploadPanel({
     try {
       await unstageRemoval(name)
       await refreshStaged()
-      setMessage(`Unstaged removal of gv:${name}.`)
+      setMessage(`Unstaged removal of ${name}.`)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
     } finally {
@@ -389,6 +460,8 @@ export function UploadPanel({
             name: item.name,
             content: item.content,
             colorMode: item.colorMode,
+            kind: item.kind,
+            format: item.format,
           }),
         })
         const data = (await res.json()) as {
@@ -405,7 +478,7 @@ export function UploadPanel({
         revokePreviewUrls(prev)
         return []
       })
-      setMessage(`Uploaded ${count} icon(s). Catalog regenerated.`)
+      setMessage(`Uploaded ${count} asset(s). Catalog regenerated.`)
       if (lastId) onUploaded(lastId)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -417,7 +490,7 @@ export function UploadPanel({
   return (
     <div className="upload-wrap">
       <button type="button" className="ghost" onClick={() => setOpen(true)}>
-        Upload SVG
+        Upload
       </button>
 
       {open ? (
@@ -436,7 +509,7 @@ export function UploadPanel({
             aria-labelledby="upload-panel-title"
           >
             <div className="upload-panel-header">
-              <strong id="upload-panel-title">Upload SVG</strong>
+              <strong id="upload-panel-title">Upload SVG / PNG / JPG</strong>
               <button
                 type="button"
                 className="ghost upload-close"
@@ -465,22 +538,23 @@ export function UploadPanel({
                   </p>
                 ) : (
                   <p>
-                    Drop Figma-exported SVGs. Names become{' '}
-                    <code>gv:kebab-name</code>. Set each icon to monochrome
-                    (recolorable) or multi-color (preserved fills).
+                    Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
+                    <code>gv:kebab-name</code> (set mono / multi-color). Images
+                    become <code>img:kebab-name</code> (not usable with{' '}
+                    <code>&lt;Icon /&gt;</code>).
                     {mode === 'github'
-                      ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
+                      ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged assets in one Action."
                       : ' Writes to disk and regenerates the catalog locally.'}
                   </p>
                 )}
                 <label className="upload-drop">
                   <input
                     type="file"
-                    accept=".svg,.json,image/svg+xml,application/json"
+                    accept=".svg,.png,.jpg,.jpeg,.json,image/svg+xml,image/png,image/jpeg,application/json"
                     multiple
                     onChange={(e) => void handleFiles(e.target.files)}
                   />
-                  <span>Choose SVG files or drop them here</span>
+                  <span>Choose SVG / PNG / JPG files or drop them here</span>
                 </label>
 
                 {items.length > 0 ? (
@@ -489,14 +563,18 @@ export function UploadPanel({
                       <li key={`${item.fileName}-${index}`}>
                         <span
                           className={
-                            item.colorMode === 'preserved'
-                              ? 'upload-preview upload-preview-color'
-                              : 'upload-preview upload-preview-mono'
+                            item.kind === 'image'
+                              ? 'upload-preview upload-preview-image'
+                              : item.colorMode === 'preserved'
+                                ? 'upload-preview upload-preview-color'
+                                : 'upload-preview upload-preview-mono'
                           }
                           title={
-                            item.colorMode === 'preserved'
-                              ? 'Multi-color preview'
-                              : 'Monochrome preview (tinted)'
+                            item.kind === 'image'
+                              ? `Brand image (${item.format})`
+                              : item.colorMode === 'preserved'
+                                ? 'Multi-color preview'
+                                : 'Monochrome preview (tinted)'
                           }
                         >
                           <img
@@ -507,7 +585,7 @@ export function UploadPanel({
                           />
                         </span>
                         <label>
-                          <span>gv:</span>
+                          <span>{item.kind === 'image' ? 'img:' : 'gv:'}</span>
                           <input
                             value={item.name}
                             onChange={(e) => {
@@ -520,30 +598,36 @@ export function UploadPanel({
                             }}
                           />
                         </label>
-                        <select
-                          className="color-mode-select"
-                          aria-label={`Color mode for gv:${item.name || 'icon'}`}
-                          value={item.colorMode}
-                          onChange={(e) => {
-                            const value = e.target.value as IconColorMode
-                            setItems((prev) =>
-                              prev.map((row, i) =>
-                                i === index
-                                  ? {
-                                      ...row,
-                                      colorMode:
-                                        value === 'preserved'
-                                          ? 'preserved'
-                                          : 'mono',
-                                    }
-                                  : row,
-                              ),
-                            )
-                          }}
-                        >
-                          <option value="mono">Monochrome</option>
-                          <option value="preserved">Multi-color</option>
-                        </select>
+                        {item.kind === 'svg' ? (
+                          <select
+                            className="color-mode-select"
+                            aria-label={`Color mode for gv:${item.name || 'icon'}`}
+                            value={item.colorMode}
+                            onChange={(e) => {
+                              const value = e.target.value as IconColorMode
+                              setItems((prev) =>
+                                prev.map((row, i) =>
+                                  i === index
+                                    ? {
+                                        ...row,
+                                        colorMode:
+                                          value === 'preserved'
+                                            ? 'preserved'
+                                            : 'mono',
+                                      }
+                                    : row,
+                                ),
+                              )
+                            }}
+                          >
+                            <option value="mono">Monochrome</option>
+                            <option value="preserved">Multi-color</option>
+                          </select>
+                        ) : (
+                          <span className="upload-format-tag">
+                            {(item.format ?? 'image').toUpperCase()}
+                          </span>
+                        )}
                         <button
                           type="button"
                           className="ghost"
@@ -589,11 +673,17 @@ export function UploadPanel({
                         <ul className="staged-list">
                           {staged.map((icon) => (
                             <li key={icon.path}>
-                              <code>gv:{icon.name}</code>
+                              <code>
+                                {icon.kind === 'image'
+                                  ? `img:${icon.name}`
+                                  : `gv:${icon.name}`}
+                              </code>
                               <span>
-                                {icon.colorMode === 'preserved'
-                                  ? 'multi-color'
-                                  : 'mono'}
+                                {icon.kind === 'image'
+                                  ? (icon.format ?? 'image').toUpperCase()
+                                  : icon.colorMode === 'preserved'
+                                    ? 'multi-color'
+                                    : 'mono'}
                               </span>
                             </li>
                           ))}
@@ -609,7 +699,7 @@ export function UploadPanel({
                         <ul className="staged-list">
                           {stagedRemovals.map((icon) => (
                             <li key={icon.path} className="staged-removal-row">
-                              <code>gv:{icon.name}</code>
+                              <code>{icon.name}</code>
                               <button
                                 type="button"
                                 className="ghost"
@@ -674,11 +764,17 @@ export function UploadPanel({
                                       )
                                     }
                                   />
-                                  <code>gv:{icon.name}</code>
+                                  <code>
+                                    {icon.kind === 'image'
+                                      ? `img:${icon.name}`
+                                      : `gv:${icon.name}`}
+                                  </code>
                                   <span>
-                                    {icon.colorMode === 'preserved'
-                                      ? 'multi-color'
-                                      : 'mono'}
+                                    {icon.kind === 'image'
+                                      ? (icon.format ?? 'image').toUpperCase()
+                                      : icon.colorMode === 'preserved'
+                                        ? 'multi-color'
+                                        : 'mono'}
                                   </span>
                                 </label>
                               </li>

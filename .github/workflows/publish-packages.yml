@@ -5,10 +5,10 @@ on:
     inputs:
       defer_paths:
         description: >-
-          JSON array of library SVG paths to omit from this publish
-          (unchecked unpublished icons). They are held aside during
+          JSON array of library SVG/image paths to omit from this publish
+          (unchecked unpublished assets). They are held aside during
           version/publish, then restored to the library afterward.
-          Example: ["packages/custom-icons/svg/foo.svg"]
+          Example: ["packages/custom-icons/svg/foo.svg","packages/custom-icons/images/logo.png"]
         required: false
         default: '[]'
 
@@ -53,7 +53,9 @@ jobs:
               if not isinstance(item, str):
                   continue
               rel = item.replace("\\", "/").lstrip("/")
-              if not rel.startswith("packages/custom-icons/svg/") or not rel.lower().endswith(".svg"):
+              is_svg = rel.startswith("packages/custom-icons/svg/") and rel.lower().endswith(".svg")
+              is_img = rel.startswith("packages/custom-icons/images/") and rel.lower().endswith((".png", ".jpg", ".jpeg"))
+              if not is_svg and not is_img:
                   print(f"Skip invalid path: {item}")
                   continue
               if "/staging/" in rel or "/.publish-hold/" in rel:
@@ -63,8 +65,11 @@ jobs:
               if not src.is_file():
                   print(f"Skip missing: {rel}")
                   continue
-              color = "color" if "/svg/color/" in rel else "mono"
-              dst_dir = hold / color
+              if is_img:
+                  dst_dir = hold / "images"
+              else:
+                  color = "color" if "/svg/color/" in rel else "mono"
+                  dst_dir = hold / color
               dst_dir.mkdir(parents=True, exist_ok=True)
               dst = dst_dir / src.name
               shutil.move(str(src), str(dst))
@@ -138,8 +143,10 @@ jobs:
           hold = Path("packages/custom-icons/.publish-hold")
           mono_dst = Path("packages/custom-icons/svg")
           color_dst = Path("packages/custom-icons/svg/color")
+          img_dst = Path("packages/custom-icons/images")
           mono_dst.mkdir(parents=True, exist_ok=True)
           color_dst.mkdir(parents=True, exist_ok=True)
+          img_dst.mkdir(parents=True, exist_ok=True)
 
           restored = 0
           for src in sorted((hold / "mono").glob("*.svg")) if (hold / "mono").is_dir() else []:
@@ -152,13 +159,23 @@ jobs:
               shutil.move(str(src), str(dst))
               print(f"Restored {dst.as_posix()}")
               restored += 1
+          if (hold / "images").is_dir():
+              for src in sorted((hold / "images").iterdir()):
+                  if not src.is_file():
+                      continue
+                  if src.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+                      continue
+                  dst = img_dst / src.name
+                  shutil.move(str(src), str(dst))
+                  print(f"Restored {dst.as_posix()}")
+                  restored += 1
 
           if hold.exists():
               shutil.rmtree(hold, ignore_errors=True)
 
           if restored == 0:
               raise SystemExit("Expected held icons to restore, found none")
-          print(f"Restored {restored} icon(s) to library")
+          print(f"Restored {restored} asset(s) to library")
           PY
 
       - name: Regenerate catalog after restore
