@@ -89,6 +89,13 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           asset). Default is <em>No category</em>. Edit category later in the
           detail sidebar for custom <code>ci:</code> / <code>img:</code> assets.
         </p>
+        <p>
+          Each custom asset also has a <strong>Variant</strong> (
+          <code>regular</code> or <code>filled</code>, default{' '}
+          <code>regular</code>). Names ending in <code>-regular</code> or{' '}
+          <code>-filled</code> are detected automatically; you can override
+          before Stage or in the detail sidebar.
+        </p>
       </section>
 
       <section>

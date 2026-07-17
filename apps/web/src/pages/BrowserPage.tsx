@@ -11,17 +11,20 @@ import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
-import { isGithubRepoConfigured } from '../lib/github'
+import { isGithubRepoConfigured, type IconVariant } from '../lib/github'
 
 /** Toolbar sentinel: show all categories. */
 const CATEGORY_ALL = ''
 /** Toolbar sentinel: icons with no category assigned. */
 const CATEGORY_NONE = '__none__'
 
+const VARIANT_ALL = ''
+
 export function BrowserPage() {
   const categories = useMemo(() => getCustomCategories(), [])
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
+  const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -51,8 +54,11 @@ export function BrowserPage() {
     } else if (categoryFilter !== CATEGORY_ALL) {
       options.category = categoryFilter
     }
+    if (variantFilter === 'regular' || variantFilter === 'filled') {
+      options.variant = variantFilter
+    }
     return searchIcons(options)
-  }, [deferredQuery, categoryFilter])
+  }, [deferredQuery, categoryFilter, variantFilter])
 
   return (
     <div className="browser">
@@ -80,6 +86,17 @@ export function BrowserPage() {
                 {category}
               </option>
             ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>Variant</span>
+          <select
+            value={variantFilter}
+            onChange={(e) => setVariantFilter(e.target.value)}
+          >
+            <option value={VARIANT_ALL}>All variants</option>
+            <option value="regular">Regular</option>
+            <option value="filled">Filled</option>
           </select>
         </label>
         <UploadPanel
@@ -111,6 +128,11 @@ export function BrowserPage() {
                 current
                   ? { ...current, category: category || undefined }
                   : current,
+              )
+            }
+            onVariantUpdated={(variant: IconVariant) =>
+              setSelected((current) =>
+                current ? { ...current, variant } : current,
               )
             }
           />

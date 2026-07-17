@@ -1,17 +1,21 @@
 import {
   createEmptyMetadata,
   getIconCategory,
+  getIconVariant,
   normalizeCategory,
+  normalizeVariant,
   parseMetadataJson,
   parseStagingMetaFile,
   serializeMetadata,
-  setIconCategory,
+  setIconMetadata,
   type CustomIconMetadata,
+  type IconVariant,
 } from './metadata.js'
 
 export type IconColorMode = 'mono' | 'preserved' | 'gradient'
 export type AssetKind = 'svg' | 'image'
 export type ImageFormat = 'png' | 'jpg' | 'jpeg'
+export type { IconVariant }
 
 export interface IconUploadPayload {
   name: string
@@ -21,6 +25,8 @@ export interface IconUploadPayload {
   colorMode?: IconColorMode
   /** Custom asset category; empty string means no category. */
   category?: string
+  /** Custom asset variant; defaults to regular. */
+  variant?: IconVariant
   /** Defaults to svg. */
   kind?: AssetKind
   /** Required when kind is image. */
@@ -37,6 +43,8 @@ export interface StagedIcon {
   format?: ImageFormat
   /** Custom asset category; empty string means no category. */
   category?: string
+  /** Custom asset variant; defaults to regular. */
+  variant?: IconVariant
 }
 
 /** Tombstone in staging/remove — Apply deletes matching library SVG(s) and/or image. */
@@ -107,6 +115,10 @@ export interface GithubAdminClient {
   dispatchPublish(options?: DispatchPublishOptions): Promise<void>
   getCustomMetadata(): Promise<CustomIconMetadata>
   updateIconCategory(name: string, category: string): Promise<void>
+  updateIconMetadata(
+    name: string,
+    patch: { category?: string; variant?: IconVariant },
+  ): Promise<void>
 }
 
 /** Thrown when GitHub rejects credentials (401/403). Callers should clear stored tokens. */
@@ -136,14 +148,20 @@ export {
   STAGING_META_DIR,
   categoryLabel,
   createEmptyMetadata,
+  detectVariantFromName,
+  detectVariantSuffix,
   getIconCategory,
+  getIconVariant,
   mergeStagingMetaIntoMetadata,
   normalizeCategory,
+  normalizeVariant,
   parseMetadataJson,
   parseStagingMetaFile,
   removeIconMetadata,
   serializeMetadata,
   setIconCategory,
+  setIconMetadata,
+  variantLabel,
 } from './metadata.js'
 
 function stagingMetaPath(name: string): string {
@@ -262,7 +280,14 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       if (!content) {
         throw new Error(`"${icon.name}" image content is empty.`)
       }
-      return { name, content, kind, format, category: normalizeCategory(icon.category) }
+      return {
+        name,
+        content,
+        kind,
+        format,
+        category: normalizeCategory(icon.category),
+        variant: normalizeVariant(icon.variant),
+      }
     }
 
     const content = icon.content.trim()
@@ -275,6 +300,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       kind: 'svg' as const,
       colorMode: normalizeColorMode(icon.colorMode),
       category: normalizeCategory(icon.category),
+      variant: normalizeVariant(icon.variant),
     }
   })
 }
@@ -505,11 +531,15 @@ export function createGithubAdminClient(
   async function writeStagingMeta(
     name: string,
     category: string,
+    variant: IconVariant = 'regular',
   ): Promise<void> {
     await putTextFile(
       stagingMetaPath(name),
-      `${JSON.stringify({ category: normalizeCategory(category) })}\n`,
-      `Stage category for ${name}`,
+      `${JSON.stringify({
+        category: normalizeCategory(category),
+        variant: normalizeVariant(variant),
+      })}\n`,
+      `Stage metadata for ${name}`,
     )
   }
 
@@ -517,7 +547,9 @@ export function createGithubAdminClient(
     await deletePath(stagingMetaPath(name), message)
   }
 
-  async function readStagingMetaMap(): Promise<Map<string, string>> {
+  async function readStagingMetaMap(): Promise<
+    Map<string, { category: string; variant: IconVariant }>
+  > {
     const res = await githubFetch(`/contents/${STAGING_META}`)
     if (res.status === 404) return new Map()
     if (!res.ok) {
@@ -540,34 +572,41 @@ export function createGithubAdminClient(
     }>
     if (!Array.isArray(entries)) return new Map()
 
-    const map = new Map<string, string>()
+    const map = new Map<string, { category: string; variant: IconVariant }>()
     for (const entry of entries) {
       if (entry.type !== 'file' || !entry.name.endsWith('.json')) continue
       const name = entry.name.replace(/\.json$/i, '')
       const file = await readContentFile(`${STAGING_META}/${entry.name}`)
       if (!file) continue
-      const { category } = parseStagingMetaFile(
-        decodeBase64Utf8(file.contentBase64),
-      )
-      map.set(name, category)
+      const meta = parseStagingMetaFile(decodeBase64Utf8(file.contentBase64))
+      map.set(name, meta)
     }
     return map
   }
 
-  function attachCategories(
+  function attachMetadata(
     icons: StagedIcon[],
-    categories: Map<string, string>,
+    stagingMeta: Map<string, { category: string; variant: IconVariant }>,
     libraryMetadata?: CustomIconMetadata,
   ): StagedIcon[] {
-    return icons.map((icon) => ({
-      ...icon,
-      category:
-        categories.get(icon.name) ??
-        (libraryMetadata
-          ? getIconCategory(libraryMetadata, icon.name)
-          : undefined) ??
-        '',
-    }))
+    return icons.map((icon) => {
+      const staged = stagingMeta.get(icon.name)
+      return {
+        ...icon,
+        category:
+          staged?.category ??
+          (libraryMetadata
+            ? getIconCategory(libraryMetadata, icon.name)
+            : undefined) ??
+          '',
+        variant:
+          staged?.variant ??
+          (libraryMetadata
+            ? getIconVariant(libraryMetadata, icon.name)
+            : undefined) ??
+          'regular',
+      }
+    })
   }
 
   async function listContentFileNames(dirPath: string): Promise<Set<string>> {
@@ -728,7 +767,11 @@ export function createGithubAdminClient(
             icon.content,
             `Stage image img:${icon.name}`,
           )
-          await writeStagingMeta(icon.name, icon.category ?? '')
+          await writeStagingMeta(
+            icon.name,
+            icon.category ?? '',
+            icon.variant ?? 'regular',
+          )
           continue
         }
 
@@ -747,7 +790,11 @@ export function createGithubAdminClient(
           `${icon.content}\n`,
           `Stage icon ci:${icon.name}`,
         )
-        await writeStagingMeta(icon.name, icon.category ?? '')
+        await writeStagingMeta(
+          icon.name,
+          icon.category ?? '',
+          icon.variant ?? 'regular',
+        )
       }
     },
 
@@ -802,7 +849,7 @@ export function createGithubAdminClient(
             `Cancel staged image img:${name}`,
           )
         }
-        await deleteStagingMeta(name, `Cancel staged category for ${name}`)
+        await deleteStagingMeta(name, `Cancel staged metadata for ${name}`)
 
         await putTextFile(
           removalMarkerPath(name),
@@ -836,7 +883,7 @@ export function createGithubAdminClient(
           readStagingMetaMap(),
           readMetadataFile(),
         ])
-      return attachCategories(
+      return attachMetadata(
         [...mono, ...color, ...gradient, ...images].sort((a, b) =>
           a.name.localeCompare(b.name),
         ),
@@ -861,7 +908,7 @@ export function createGithubAdminClient(
         if (staged) icons.push(staged)
       }
 
-      return attachCategories(
+      return attachMetadata(
         icons.sort((a, b) => a.name.localeCompare(b.name)),
         new Map(),
         libraryMetadata,
@@ -1074,18 +1121,28 @@ export function createGithubAdminClient(
     },
 
     async updateIconCategory(name: string, category: string): Promise<void> {
+      await this.updateIconMetadata(name, { category })
+    },
+
+    async updateIconMetadata(
+      name: string,
+      patch: { category?: string; variant?: IconVariant },
+    ): Promise<void> {
       const sanitized = sanitizeIconName(name)
       if (!sanitized) {
         throw new Error(`Invalid icon name "${name}".`)
       }
-      const metadata = setIconCategory(
+      const metadata = setIconMetadata(
         await readMetadataFile(),
         sanitized,
-        category,
+        patch,
       )
+      const parts: string[] = []
+      if (patch.category !== undefined) parts.push('category')
+      if (patch.variant !== undefined) parts.push('variant')
       await writeMetadataFile(
         metadata,
-        `Update category for ${sanitized}`,
+        `Update ${parts.join(' and ') || 'metadata'} for ${sanitized}`,
       )
     },
   }

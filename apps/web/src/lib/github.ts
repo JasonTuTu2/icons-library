@@ -5,18 +5,15 @@ import {
   GithubAuthError,
   isValidRepo,
   packagesUrl as sharedPackagesUrl,
-  sanitizeIconName,
-  type AssetKind,
   type AssetPreview,
   type DispatchPublishOptions,
-  type IconColorMode,
   type IconNameConflict,
   type IconUploadPayload,
-  type ImageFormat,
   type PublishReadiness,
   type StagedIcon,
   type StagedRemoval,
   type CustomIconMetadata,
+  type IconVariant,
 } from '@JasonTuTu2/github-admin'
 import {
   clearGithubSessionToken,
@@ -32,12 +29,17 @@ export type {
   IconNameConflict,
   IconUploadPayload,
   ImageFormat,
+  IconVariant,
   PublishReadiness,
   StagedIcon,
   StagedRemoval,
   CustomIconMetadata,
-}
-export { sanitizeIconName }
+} from '@JasonTuTu2/github-admin'
+export {
+  sanitizeIconName,
+  detectVariantFromName,
+  detectVariantSuffix,
+} from '@JasonTuTu2/github-admin'
 
 function getRepo(): string {
   return import.meta.env.VITE_GITHUB_REPO?.trim() ?? ''
@@ -205,5 +207,12 @@ export async function updateIconCategory(
   name: string,
   category: string,
 ): Promise<void> {
-  return withAuthClear(() => getStagingClient().updateIconCategory(name, category))
+  return updateIconMetadata(name, { category })
+}
+
+export async function updateIconMetadata(
+  name: string,
+  patch: { category?: string; variant?: IconVariant },
+): Promise<void> {
+  return withAuthClear(() => getStagingClient().updateIconMetadata(name, patch))
 }

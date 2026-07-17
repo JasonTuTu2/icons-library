@@ -5,10 +5,12 @@ import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   stageRemovals,
-  updateIconCategory,
+  updateIconMetadata,
+  type IconVariant,
 } from '../lib/github'
 import { customImagePublicUrl } from '../lib/customImageUrl'
 import { CategorySelect, categoryLabel } from './CategorySelect'
+import { VariantSelect, variantLabel } from './VariantSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -21,6 +23,7 @@ interface IconDetailProps {
   onClose: () => void
   onRemovalStaged?: (name: string) => void
   onCategoryUpdated?: (category: string) => void
+  onVariantUpdated?: (variant: IconVariant) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -39,6 +42,7 @@ export function IconDetail({
   onClose,
   onRemovalStaged,
   onCategoryUpdated,
+  onVariantUpdated,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -47,6 +51,11 @@ export function IconDetail({
   const [categoryMessage, setCategoryMessage] = useState<string | null>(null)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const [categoryValue, setCategoryValue] = useState(icon.category ?? '')
+  const [variantBusy, setVariantBusy] = useState(false)
+  const [variantMessage, setVariantMessage] = useState<string | null>(null)
+  const [variantValue, setVariantValue] = useState<IconVariant>(
+    icon.variant === 'filled' ? 'filled' : 'regular',
+  )
 
   const isCustomAsset =
     icon.source === 'custom' &&
@@ -55,12 +64,13 @@ export function IconDetail({
   const canStageRemoval =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
 
-  const canEditCategory =
+  const canEditMeta =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
 
   useEffect(() => {
     setCategoryValue(icon.category ?? '')
-  }, [icon.id, icon.category])
+    setVariantValue(icon.variant === 'filled' ? 'filled' : 'regular')
+  }, [icon.id, icon.category, icon.variant])
 
   useEffect(() => {
     if (!isCustomAsset) return
@@ -80,12 +90,12 @@ export function IconDetail({
   async function handleCategoryChange(nextCategory: string) {
     const name = icon.name
     setCategoryValue(nextCategory)
-    if (!canEditCategory) return
+    if (!canEditMeta) return
 
     setCategoryBusy(true)
     setCategoryMessage(null)
     try {
-      await updateIconCategory(name, nextCategory)
+      await updateIconMetadata(name, { category: nextCategory })
       onCategoryUpdated?.(nextCategory)
       setCategoryMessage('Category saved.')
     } catch (err) {
@@ -93,6 +103,25 @@ export function IconDetail({
       setCategoryMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setCategoryBusy(false)
+    }
+  }
+
+  async function handleVariantChange(nextVariant: IconVariant) {
+    const name = icon.name
+    setVariantValue(nextVariant)
+    if (!canEditMeta) return
+
+    setVariantBusy(true)
+    setVariantMessage(null)
+    try {
+      await updateIconMetadata(name, { variant: nextVariant })
+      onVariantUpdated?.(nextVariant)
+      setVariantMessage('Variant saved.')
+    } catch (err) {
+      setVariantValue(icon.variant === 'filled' ? 'filled' : 'regular')
+      setVariantMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setVariantBusy(false)
     }
   }
 
@@ -197,7 +226,7 @@ export function IconDetail({
           <div>
             <dt>Category</dt>
             <dd>
-              {canEditCategory ? (
+              {canEditMeta ? (
                 <CategorySelect
                   value={categoryValue}
                   onChange={(category) => void handleCategoryChange(category)}
@@ -218,6 +247,30 @@ export function IconDetail({
               {categoryMessage ? (
                 <p className="meta-note" role="status">
                   {categoryMessage}
+                </p>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset ? (
+          <div>
+            <dt>Variant</dt>
+            <dd>
+              {canEditMeta ? (
+                <VariantSelect
+                  value={variantValue}
+                  onChange={(variant) => void handleVariantChange(variant)}
+                  ariaLabel={`Variant for ${icon.id}`}
+                />
+              ) : (
+                variantLabel(icon.variant)
+              )}
+              {variantBusy ? (
+                <span className="meta-note"> Saving…</span>
+              ) : null}
+              {variantMessage ? (
+                <p className="meta-note" role="status">
+                  {variantMessage}
                 </p>
               ) : null}
             </dd>

@@ -730,7 +730,10 @@ pre {
 .upload-list .color-mode-select,
 .category-select,
 .upload-list .category-select,
-.figma-dock-list .category-select {
+.figma-dock-list .category-select,
+.variant-select,
+.upload-list .variant-select,
+.figma-dock-list .variant-select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.3rem 0.35rem;
@@ -772,6 +775,18 @@ pre {
   gap: 0.5rem;
   align-items: center;
   margin: 0.75rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.apply-all-variant {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0 0 0.35rem;
   padding: 0.65rem 0.75rem;
   border: 1px dashed var(--line);
   border-radius: var(--radius-sm);

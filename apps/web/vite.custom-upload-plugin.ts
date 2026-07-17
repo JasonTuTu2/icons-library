@@ -10,11 +10,17 @@ const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
 interface CustomIconMetadata {
   categories: string[]
-  icons: Record<string, { category?: string }>
+  icons: Record<string, { category?: string; variant?: 'regular' | 'filled' }>
 }
 
 function normalizeCategory(raw: string | undefined | null): string {
   return (raw ?? '').trim()
+}
+
+function normalizeVariant(
+  raw: string | undefined | null,
+): 'regular' | 'filled' {
+  return raw === 'filled' ? 'filled' : 'regular'
 }
 
 function readMetadata(metadataPath: string): CustomIconMetadata {
@@ -30,14 +36,22 @@ function writeMetadata(metadataPath: string, metadata: CustomIconMetadata): void
   writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, 'utf8')
 }
 
-function setIconCategoryMetadata(
+function setIconMetadataLocal(
   metadataPath: string,
   name: string,
-  category: string,
+  patch: { category?: string; variant?: 'regular' | 'filled' },
 ): void {
   const metadata = readMetadata(metadataPath)
-  const cat = normalizeCategory(category)
-  metadata.icons[name] = { category: cat }
+  const current = metadata.icons[name] ?? {}
+  const cat =
+    patch.category !== undefined
+      ? normalizeCategory(patch.category)
+      : normalizeCategory(current.category)
+  const variant =
+    patch.variant !== undefined
+      ? normalizeVariant(patch.variant)
+      : normalizeVariant(current.variant)
+  metadata.icons[name] = { category: cat, variant }
   if (cat && !metadata.categories.includes(cat)) {
     metadata.categories.push(cat)
     metadata.categories.sort((a, b) => a.localeCompare(b))
@@ -137,6 +151,7 @@ export function customIconUploadPlugin(): Plugin {
             kind?: 'svg' | 'image'
             format?: 'png' | 'jpg' | 'jpeg'
             category?: string
+            variant?: 'regular' | 'filled'
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -177,7 +192,10 @@ export function customIconUploadPlugin(): Plugin {
             mkdirSync(imagesDir, { recursive: true })
             const filePath = join(imagesDir, `${name}.${format}`)
             writeFileSync(filePath, Buffer.from(base64, 'base64'))
-            setIconCategoryMetadata(metadataFile, name, body.category ?? '')
+            setIconMetadataLocal(metadataFile, name, {
+              category: body.category ?? '',
+              variant: normalizeVariant(body.variant),
+            })
 
             await runCatalogGen(repoRoot)
             reloadDevCatalog(server, repoRoot)
@@ -218,7 +236,10 @@ export function customIconUploadPlugin(): Plugin {
           mkdirSync(targetDir, { recursive: true })
           const filePath = join(targetDir, `${name}.svg`)
           writeFileSync(filePath, `${content}\n`, 'utf8')
-          setIconCategoryMetadata(metadataFile, name, body.category ?? '')
+          setIconMetadataLocal(metadataFile, name, {
+            category: body.category ?? '',
+            variant: normalizeVariant(body.variant),
+          })
 
           await runCatalogGen(repoRoot)
 

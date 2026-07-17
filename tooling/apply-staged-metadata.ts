@@ -17,6 +17,7 @@ import {
   removeIconMetadata,
   serializeMetadata,
   STAGING_META_DIR,
+  type IconVariant,
 } from '../packages/github-admin/src/metadata.ts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -34,16 +35,24 @@ function writeMetadata(metadata: ReturnType<typeof parseMetadataJson>): void {
   writeFileSync(path, serializeMetadata(metadata), 'utf8')
 }
 
-function readStagingMetaEntries(): Array<{ name: string; category: string }> {
+function readStagingMetaEntries(): Array<{
+  name: string
+  category: string
+  variant: IconVariant
+}> {
   const dir = join(repoRoot, STAGING_META_DIR)
   if (!existsSync(dir)) return []
-  const entries: Array<{ name: string; category: string }> = []
+  const entries: Array<{
+    name: string
+    category: string
+    variant: IconVariant
+  }> = []
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.json') || file.startsWith('.')) continue
     const name = file.replace(/\.json$/i, '')
     const raw = readFileSync(join(dir, file), 'utf8')
-    const { category } = parseStagingMetaFile(raw)
-    entries.push({ name, category })
+    const { category, variant } = parseStagingMetaFile(raw)
+    entries.push({ name, category, variant })
     unlinkSync(join(dir, file))
   }
   return entries
@@ -54,7 +63,7 @@ function main(): void {
   const stagingEntries = readStagingMetaEntries()
   if (stagingEntries.length > 0) {
     metadata = mergeStagingMetaIntoMetadata(metadata, stagingEntries)
-    console.log(`Merged ${stagingEntries.length} staged category file(s)`)
+    console.log(`Merged ${stagingEntries.length} staged metadata file(s)`)
   }
 
   const removedRaw = process.env.REMOVED_NAMES?.trim() ?? ''
@@ -69,7 +78,7 @@ function main(): void {
   if (stagingEntries.length > 0 || removedNames.length > 0) {
     writeMetadata(metadata)
   } else {
-    console.log('No category metadata changes')
+    console.log('No icon metadata changes')
   }
 }
 

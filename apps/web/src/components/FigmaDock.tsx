@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
+  detectVariantFromName,
+  detectVariantSuffix,
   findIconNameConflicts,
   isGithubAdminEnabled,
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
+  type IconVariant,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { conflictMessagesForItems } from '../lib/nameConflicts'
@@ -17,6 +20,7 @@ import {
   type FigmaExportIcon,
 } from '../lib/figmaHost'
 import { ApplyAllCategory, CategorySelect } from './CategorySelect'
+import { ApplyAllVariant, VariantSelect } from './VariantSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -29,6 +33,7 @@ interface PendingIcon {
   previewUrl: string
   colorMode: IconColorMode
   category: string
+  variant: IconVariant
 }
 
 function toPending(icon: FigmaExportIcon): PendingIcon {
@@ -42,6 +47,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
     ),
     colorMode: detectSvgColorMode(icon.content),
     category: '',
+    variant: detectVariantFromName(name),
   }
 }
 
@@ -187,6 +193,7 @@ export function FigmaDock() {
           content: icon.content,
           colorMode: icon.colorMode,
           category: icon.category,
+          variant: icon.variant,
         }
       })
 
@@ -248,8 +255,9 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi, category, and names, then Stage.
-          Names already in the library or staging must be changed first.
+          Load from the canvas, set Mono/Multi, category, variant, and names,
+          then Stage. Names already in the library or staging must be changed
+          first.
         </p>
       )}
       {pending.length > 0 ? (
@@ -261,6 +269,11 @@ export function FigmaDock() {
             }
             onApplyAll={(category) =>
               setPending((prev) => prev.map((row) => ({ ...row, category })))
+            }
+          />
+          <ApplyAllVariant
+            onApplyAll={(variant) =>
+              setPending((prev) => prev.map((row) => ({ ...row, variant })))
             }
           />
           <ul className="figma-dock-list">
@@ -281,9 +294,15 @@ export function FigmaDock() {
                     onChange={(e) => {
                       const value = e.target.value
                       setPending((prev) =>
-                        prev.map((row, i) =>
-                          i === index ? { ...row, name: value } : row,
-                        ),
+                        prev.map((row, i) => {
+                          if (i !== index) return row
+                          const suffix = detectVariantSuffix(value)
+                          return {
+                            ...row,
+                            name: value,
+                            variant: suffix ?? row.variant,
+                          }
+                        }),
                       )
                     }}
                   />
@@ -325,6 +344,17 @@ export function FigmaDock() {
                     )
                   }
                   ariaLabel={`Category for ci:${icon.name || 'icon'}`}
+                />
+                <VariantSelect
+                  value={icon.variant}
+                  onChange={(variant) =>
+                    setPending((prev) =>
+                      prev.map((row, i) =>
+                        i === index ? { ...row, variant } : row,
+                      ),
+                    )
+                  }
+                  ariaLabel={`Variant for ci:${icon.name || 'icon'}`}
                 />
                 <button
                   type="button"

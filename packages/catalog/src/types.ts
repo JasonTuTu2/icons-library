@@ -40,6 +40,8 @@ export interface IconMeta {
   assetPath?: string
   /** Custom assets only: designer-assigned category (empty = no category). */
   category?: string
+  /** Custom assets only: regular or filled. */
+  variant?: 'regular' | 'filled'
 }
 
 export interface IconCatalog {

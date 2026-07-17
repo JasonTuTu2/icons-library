@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import {
   actionsWorkflowUrl,
   dispatchApplyStaged,
+  detectVariantFromName,
+  detectVariantSuffix,
   findIconNameConflicts,
   isGithubAdminEnabled,
   isGithubRepoConfigured,
@@ -13,6 +15,7 @@ import {
   stageIcons,
   unstageRemoval,
   type IconColorMode,
+  type IconVariant,
   type ImageFormat,
   type StagedIcon,
   type StagedRemoval,
@@ -36,6 +39,7 @@ import { conflictMessagesForItems } from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 import { ApplyAllCategory, CategorySelect } from './CategorySelect'
+import { ApplyAllVariant, VariantSelect, variantLabel } from './VariantSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -51,6 +55,7 @@ interface UploadItem {
   colorMode: IconColorMode
   format?: ImageFormat
   category: string
+  variant: IconVariant
 }
 
 interface UploadPanelProps {
@@ -70,6 +75,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     kind: 'svg',
     colorMode: icon.colorMode || detectSvgColorMode(icon.content),
     category: '',
+    variant: detectVariantFromName(name),
   }
 }
 
@@ -133,6 +139,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
             colorMode: 'mono',
             format: imageFormat,
             category: '',
+            variant: detectVariantFromName(name),
           },
         ])
       }
@@ -164,6 +171,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           kind: 'svg',
           colorMode: detectSvgColorMode(content),
           category: '',
+          variant: detectVariantFromName(name),
         },
       ])
     }
@@ -180,7 +188,7 @@ function revokePreviewUrls(items: UploadItem[]): void {
 
 function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
-    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)}`
+    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)}`
   }
   const mode =
     icon.colorMode === 'preserved'
@@ -188,7 +196,7 @@ function stagedAssetLabel(icon: StagedIcon): string {
       : icon.colorMode === 'gradient'
         ? 'gradient'
         : 'mono'
-  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)}`
+  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)}`
 }
 
 function colorModeLabel(mode: IconColorMode | undefined): string {
@@ -448,6 +456,7 @@ export function UploadPanel({
                 kind: 'image' as const,
                 format: item.format!,
                 category: item.category,
+                variant: item.variant,
               }
             : {
                 name: item.name,
@@ -455,6 +464,7 @@ export function UploadPanel({
                 kind: 'svg' as const,
                 colorMode: item.colorMode,
                 category: item.category,
+                variant: item.variant,
               },
         ),
       )
@@ -558,6 +568,7 @@ export function UploadPanel({
             kind: item.kind,
             format: item.format,
             category: item.category,
+            variant: item.variant,
           }),
         })
         const data = (await res.json()) as {
@@ -664,6 +675,13 @@ export function UploadPanel({
                         )
                       }
                     />
+                    <ApplyAllVariant
+                      onApplyAll={(variant) =>
+                        setItems((prev) =>
+                          prev.map((row) => ({ ...row, variant })),
+                        )
+                      }
+                    />
                   <ul className="upload-list">
                     {items.map((item, index) => {
                       const conflictMsg = nameConflictMsgs[index] ?? ''
@@ -708,9 +726,15 @@ export function UploadPanel({
                             onChange={(e) => {
                               const value = e.target.value
                               setItems((prev) =>
-                                prev.map((row, i) =>
-                                  i === index ? { ...row, name: value } : row,
-                                ),
+                                prev.map((row, i) => {
+                                  if (i !== index) return row
+                                  const suffix = detectVariantSuffix(value)
+                                  return {
+                                    ...row,
+                                    name: value,
+                                    variant: suffix ?? row.variant,
+                                  }
+                                }),
                               )
                             }}
                           />
@@ -764,6 +788,17 @@ export function UploadPanel({
                             )
                           }
                           ariaLabel={`Category for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                        />
+                        <VariantSelect
+                          value={item.variant}
+                          onChange={(variant) =>
+                            setItems((prev) =>
+                              prev.map((row, i) =>
+                                i === index ? { ...row, variant } : row,
+                              ),
+                            )
+                          }
+                          ariaLabel={`Variant for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
                         />
                         <button
                           type="button"

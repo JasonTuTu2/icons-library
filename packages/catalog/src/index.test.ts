@@ -45,4 +45,15 @@ describe('catalog', () => {
       ).toBe(true)
     }
   })
+
+  it('filters by variant', () => {
+    const filled = searchIcons({ variant: 'filled', limit: 20 })
+    expect(filled.every((icon) => (icon.variant ?? 'regular') === 'filled')).toBe(
+      true,
+    )
+    const regular = searchIcons({ variant: 'regular', limit: 20 })
+    expect(
+      regular.every((icon) => (icon.variant ?? 'regular') === 'regular'),
+    ).toBe(true)
+  })
 })

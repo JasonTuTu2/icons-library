@@ -7,6 +7,7 @@ import {
   categoryForIcon,
   loadCustomMetadata,
   metadataPathFromCustomRoot,
+  variantForIcon,
 } from './metadata.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -47,6 +48,7 @@ interface IconMeta {
   format?: 'png' | 'jpg' | 'jpeg'
   assetPath?: string
   category?: string
+  variant?: 'regular' | 'filled'
 }
 
 const customLicense: IconLicense = {
@@ -105,6 +107,7 @@ function collectCustomIcons(): IconMeta[] {
 
   return icons.map((item) => {
     const category = categoryForIcon(customMetadata, item.name)
+    const variant = variantForIcon(customMetadata, item.name)
     return {
       id: `ci:${item.name}`,
       title: item.title,
@@ -118,6 +121,7 @@ function collectCustomIcons(): IconMeta[] {
             ? 'gradient'
             : 'mono',
         item.colorMode,
+        variant,
         ...(category ? [category] : []),
       ],
       set: 'custom',
@@ -127,6 +131,7 @@ function collectCustomIcons(): IconMeta[] {
       colorMode: item.colorMode,
       assetKind: 'icon' as const,
       category,
+      variant,
     }
   })
 }
@@ -143,6 +148,7 @@ function collectBrandImages(): IconMeta[] {
 
   return images.map((item) => {
     const category = categoryForIcon(customMetadata, item.name)
+    const variant = variantForIcon(customMetadata, item.name)
     return {
       id: `img:${item.name}`,
       title: item.title,
@@ -153,6 +159,7 @@ function collectBrandImages(): IconMeta[] {
         'custom',
         item.format,
         'brand-image',
+        variant,
         ...(category ? [category] : []),
       ],
       set: 'custom-images',
@@ -163,6 +170,7 @@ function collectBrandImages(): IconMeta[] {
       format: item.format,
       assetPath: item.publicPath,
       category,
+      variant,
     }
   })
 }

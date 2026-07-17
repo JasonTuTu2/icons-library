@@ -35,12 +35,22 @@ export interface SearchOptions {
    * - non-empty string: exact category match
    */
   category?: string | null
+  /** Filter by variant (custom assets). */
+  variant?: 'regular' | 'filled'
   limit?: number
 }
 
 export function searchIcons(options: SearchOptions = {}): IconMeta[] {
-  const { query = '', set, source, colorMode, assetKind, category, limit } =
-    options
+  const {
+    query = '',
+    set,
+    source,
+    colorMode,
+    assetKind,
+    category,
+    variant,
+    limit,
+  } = options
   const q = query.trim().toLowerCase()
   const hasCategoryFilter = Object.prototype.hasOwnProperty.call(
     options,
@@ -69,6 +79,11 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
       const current = (icon.category ?? '').trim()
       return current === wanted
     })
+  }
+  if (variant) {
+    results = results.filter(
+      (icon) => (icon.variant ?? 'regular') === variant,
+    )
   }
   if (q) {
     results = results.filter((icon) => {
