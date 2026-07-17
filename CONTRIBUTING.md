@@ -25,15 +25,25 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 1. Build once: `pnpm --filter @JasonTuTu2/icons-figma build` (or `… dev` while iterating).
 2. In Figma Desktop: **Plugins → Development → Import plugin from manifest…** → select `apps/figma-plugin/manifest.json`.
 3. The plugin panel loads the live icon browser. Select icon frame(s)/component(s) → **Load selection** → edit kebab names / Mono·Multi → **Stage**.
-4. In the same UI: **Apply staged to library** (via Upload SVG) → **Publish** when releasing packages.
+4. Open the full icon browser with a magic-URL PAT (see below) → **Apply staged to library** → **Publish** when releasing packages.
 
 The plugin never talks to GitHub — it only exports SVGs from the canvas into the embedded browser, which stages with the baked Pages token. Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
+
+### Dev: Apply & Publish (magic URL)
+
+Designers can **Stage** without a personal token. **Apply** and **Publish** only appear after a developer opens the icon browser with a session PAT in the URL hash (no Connect UI):
+
+```
+https://JasonTuTu2.github.io/icons-library/#gv-github-token=ghp_YOUR_PAT
+```
+
+The app stores the token in `sessionStorage` for that tab and strips it from the address bar. Create a classic PAT with **`contents: write`** + **`actions: write`**. Locally, `VITE_GITHUB_TOKEN` in `.env.local` also unlocks Apply/Publish during `pnpm dev`.
 
 ### Pages icon browser
 
 1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage). From Figma: **Load selection** → **Stage**.
-2. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
-3. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
+2. **Apply staged to library** (dev magic URL) — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
+3. **Publish** (dev magic URL) — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
 To **remove** a custom icon: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes the SVG from the library.
 
@@ -76,7 +86,7 @@ Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token wi
 
 `@JasonTuTu2/icons-web`, `@JasonTuTu2/icons-figma`, `@JasonTuTu2/github-admin`, and `@JasonTuTu2/catalog-gen` stay private and are not published.
 
-**Security:** The Pages build embeds `ICON_BROWSER_TOKEN` so anyone on the icon browser can stage, apply, and publish (temporary open access). Apply/Publish Action jobs also use that secret. Ensure the PAT has `contents: write` + `actions: write`. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
+**Security:** The Pages build embeds `ICON_BROWSER_TOKEN` so anyone on the icon browser can **stage**. Apply/Publish require a personal PAT via the magic URL (or local `.env`). Action jobs still use the repo secret for the actual push/publish. Ensure both the baked secret and personal PATs have `contents: write` + `actions: write`. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
 
 ## Guidelines
 

@@ -3,11 +3,10 @@ import {
   actionsWorkflowUrl,
   dispatchPublish,
   getPublishReadiness,
-  isGithubAdminEnabled,
-  isGithubRepoConfigured,
   listUnpublishedIcons,
   listUnpublishedRemovals,
   packagesUrl,
+  useGithubDevEnabled,
   type StagedRemoval,
 } from '../lib/github'
 import {
@@ -58,8 +57,7 @@ function stagedWaitingSummary(addCount: number, removalCount: number): string {
 }
 
 export function PublishButton() {
-  const repoConfigured = isGithubRepoConfigured()
-  const enabled = isGithubAdminEnabled()
+  const enabled = useGithubDevEnabled()
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<ReactNode>(null)
 
@@ -138,11 +136,8 @@ export function PublishButton() {
     }
   }, [])
 
-  if (!repoConfigured) return null
-
-  if (!enabled) {
-    return <p className="admin-hint">GitHub token required to publish</p>
-  }
+  // Hidden unless a session PAT is present (magic URL) or local .env in DEV.
+  if (!enabled) return null
 
   return (
     <div className="upload-wrap">

@@ -5,6 +5,7 @@ import {
   findIconNameConflicts,
   isGithubAdminEnabled,
   isGithubRepoConfigured,
+  useGithubDevEnabled,
   listStagedIcons,
   listStagedRemovals,
   listUnpublishedIcons,
@@ -149,6 +150,7 @@ export function UploadPanel({
 }: UploadPanelProps) {
   const githubRepoConfigured = isGithubRepoConfigured()
   const githubAuthed = isGithubAdminEnabled()
+  const canApplyPublish = useGithubDevEnabled()
   const uploadEnabled = localUploadEnabled || githubRepoConfigured
   const mode: 'local' | 'github' | 'none' = localUploadEnabled
     ? 'local'
@@ -622,16 +624,19 @@ export function UploadPanel({
                           ))}
                         </ul>
                       )}
-                      <button
-                        type="button"
-                        className="ghost accent"
-                        disabled={busy || !hasStagedWork}
-                        onClick={() => void handleApplyStaged()}
-                      >
-                        {busy ? 'Working…' : 'Apply staged to library'}
-                      </button>
+                      {canApplyPublish ? (
+                        <button
+                          type="button"
+                          className="ghost accent"
+                          disabled={busy || !hasStagedWork}
+                          onClick={() => void handleApplyStaged()}
+                        >
+                          {busy ? 'Working…' : 'Apply staged to library'}
+                        </button>
+                      ) : null}
                     </div>
 
+                    {canApplyPublish ? (
                     <div className="staged-block">
                       <div className="staged-header">
                         <strong>In library (unpublished)</strong>
@@ -682,6 +687,7 @@ export function UploadPanel({
                         </>
                       )}
                     </div>
+                    ) : null}
                   </>
                 ) : (
                   <button

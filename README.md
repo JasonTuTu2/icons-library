@@ -228,13 +228,13 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 ### Upload & publish from Pages
 
-On the live icon browser (no personal PAT required — the Pages build embeds the repo write token for open collaboration):
+On the live icon browser, **staging** uses the embedded Pages token (no personal PAT). **Apply** and **Publish** only appear for developers who open the site with a session PAT (see CONTRIBUTING — magic URL `#gv-github-token=`).
 
 1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (same Contents API, via the embedded browser).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
 3. **Publish** — check unpublished icons to include; unchecked icons are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
-The Figma plugin loads this same Pages UI inside the plugin panel (`?gv-figma=1`).
+The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage; Apply/Publish happen in the full icon browser after a magic-URL PAT.
 
 **Remove a custom icon:** select `gv:…` in the browser → **Stage removal** → **Apply staged** (deletes the SVG + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
 
@@ -242,17 +242,17 @@ The Figma plugin loads this same Pages UI inside the plugin panel (`?gv-figma=1`
 
 | Kind | Name | Purpose |
 |------|------|---------|
-| Secret | `ICON_BROWSER_TOKEN` | PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and baked into the Pages site so anyone can stage / dispatch from the browser |
+| Secret | `ICON_BROWSER_TOKEN` | PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and baked into Pages so anyone can **stage** |
 | Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-Anyone with the Pages URL can stage, apply, and publish while this open access is enabled. Rotate or revoke the PAT if you need to lock it down later.
+Anyone with the Pages URL can stage. Apply/Publish need a personal PAT via `#gv-github-token=…` (stored in sessionStorage for that tab). Note: a determined user can still extract the baked token from the JS bundle and call the API — rotate the PAT or narrow scopes if you need a harder lock.
 
 | Action | What happens |
 |--------|----------------|
 | Add to staging | Embedded token → Contents API → `staging/mono` or `staging/color` |
 | Stage removal | Embedded token → Contents API → `staging/remove/{name}.remove` |
-| Apply staged | Browser dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
-| Publish | Browser dispatches (unchecked held aside for this package, then restored) → Action publishes with package permissions |
+| Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
+| Publish | Session PAT dispatches → Action publishes with package permissions |
 
 Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging. For local GitHub staging, set `VITE_GITHUB_TOKEN` in `.env.local`.
 

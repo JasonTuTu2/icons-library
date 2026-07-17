@@ -144,7 +144,7 @@ export function BrowserPage() {
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
               {isGithubRepoConfigured()
-                ? ' Use Upload to stage SVGs, stage removals, Apply, or Publish.'
+                ? ' Use Upload to stage SVGs or stage removals. Maintainers Apply and Publish.'
                 : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
             </p>
           </aside>

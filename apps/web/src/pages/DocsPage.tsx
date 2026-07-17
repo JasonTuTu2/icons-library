@@ -64,9 +64,9 @@ import { Icon } from '@JasonTuTu2/icons-vue'
             calls in the plugin).
           </li>
           <li>
-            Then <strong>Apply staged to library</strong>, wait ~1–2 minutes on
-            Actions, hard-refresh, then check unpublished icons and{' '}
-            <strong>Publish</strong>. Or commit to{' '}
+            Then a maintainer runs <strong>Apply staged to library</strong>, wait
+            ~1–2 minutes on Actions, hard-refresh, then check unpublished icons
+            and <strong>Publish</strong>. Or commit to{' '}
             <code>packages/custom-icons/svg/</code> (mono) /{' '}
             <code>svg/color/</code> (multi-color) and run{' '}
             <code>pnpm catalog:gen</code>. Local <code>pnpm dev</code> upload
@@ -94,11 +94,12 @@ import { Icon } from '@JasonTuTu2/icons-vue'
             (shared marker on GitHub).
           </li>
           <li>
-            <strong>Apply staged to library</strong> — deletes the SVG and
-            regenerates the catalog.
+            A maintainer runs <strong>Apply staged to library</strong> — deletes
+            the SVG and regenerates the catalog.
           </li>
           <li>
-            <strong>Publish</strong> so consumer packages no longer include it.
+            Then <strong>Publish</strong> so consumer packages no longer include
+            it.
           </li>
         </ol>
       </section>
@@ -107,8 +108,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>First publish (happy path)</h2>
         <ol>
           <li>
-            Stage (Figma Load selection → Stage, or Upload SVG) → Apply staged
-            to library.
+            Stage (Figma Load selection → Stage, or Upload SVG). A maintainer
+            Applies staged to library.
           </li>
           <li>
             Track the Apply workflow on Actions (~1–2 min), then hard-refresh
