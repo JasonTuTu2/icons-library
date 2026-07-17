@@ -5,6 +5,7 @@ import { packagesUrl } from './lib/github'
 
 const packageVersion = import.meta.env.VITE_PACKAGE_VERSION
 
+/** Full icon browser (not used inside the Figma plugin panel). */
 export function App() {
   return (
     <div className="shell">

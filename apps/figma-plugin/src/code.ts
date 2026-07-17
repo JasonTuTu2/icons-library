@@ -3,15 +3,16 @@ import type { PluginToUiMessage, UiToPluginMessage } from './messages'
 declare const __ICON_BROWSER_URL__: string
 
 const browserBase = __ICON_BROWSER_URL__.replace(/\/?$/, '/')
-const uiUrl = `${browserBase}?gv-figma=1`
+// Dedicated minimal panel page — not the full icon browser.
+const uiUrl = `${browserBase}figma.html`
 
-// Navigate the plugin iframe to the live icon browser (non-null origin UI).
+// Navigate the plugin iframe to the Figma-only Pages entry.
 figma.showUI(
   `<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>
 <script>window.location.href = ${JSON.stringify(uiUrl)};</script>
-<p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading icon browser…</p>
+<p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading…</p>
 </body></html>`,
-  { width: 920, height: 640, themeColors: true },
+  { width: 360, height: 220, themeColors: true },
 )
 
 function post(msg: PluginToUiMessage): void {

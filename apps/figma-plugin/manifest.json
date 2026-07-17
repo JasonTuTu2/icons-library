@@ -6,12 +6,18 @@
   "editorType": ["figma"],
   "networkAccess": {
     "allowedDomains": [
-      "https://JasonTuTu2.github.io",
+      "https://*.github.io",
+      "https://JasonTuTu2.github.io/icons-library/",
+      "https://JasonTuTu2.github.io/icons-library/figma.html",
+      "https://github.com",
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
     ],
-    "devAllowedDomains": ["http://localhost:5173", "http://127.0.0.1:5173"],
-    "reasoning": "The plugin UI is the live icon browser (Pages). GitHub staging/apply/publish run in that page; the plugin only exports SVGs from the canvas."
+    "devAllowedDomains": [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173"
+    ],
+    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Staging uses the Pages GitHub token; the plugin only exports SVGs."
   },
   "documentAccess": "dynamic-page"
 }

@@ -243,17 +243,73 @@ export function createGithubAdminClient(
     content: string,
     message: string,
   ): Promise<void> {
-    const sha = await getFileSha(path)
     const body: Record<string, string> = {
       message,
       content: toBase64Utf8(content),
       branch: 'main',
     }
-    if (sha) body.sha = sha
-    await githubJson(`/contents/${path}`, {
+
+    // Prefer create-without-sha to avoid a noisy 404 GET for new files.
+    let res = await githubFetch(`/contents/${path}`, {
       method: 'PUT',
       body: JSON.stringify(body),
     })
+
+    // File already exists — retry with sha.
+    if (res.status === 422) {
+      const sha = await getFileSha(path)
+      if (sha) {
+        body.sha = sha
+        res = await githubFetch(`/contents/${path}`, {
+          method: 'PUT',
+          body: JSON.stringify(body),
+        })
+      }
+    }
+
+    if (!res.ok) {
+      let detail = res.statusText
+      try {
+        const errBody = (await res.json()) as { message?: string }
+        if (errBody.message) detail = errBody.message
+      } catch {
+        // ignore
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new GithubAuthError(res.status, detail)
+      }
+      throw new Error(`GitHub API ${res.status}: ${detail}`)
+    }
+  }
+
+  async function listContentFileNames(dirPath: string): Promise<Set<string>> {
+    const res = await githubFetch(`/contents/${dirPath}`)
+    if (res.status === 404) return new Set()
+    if (!res.ok) {
+      let detail = res.statusText
+      try {
+        const body = (await res.json()) as { message?: string }
+        if (body.message) detail = body.message
+      } catch {
+        // ignore
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new GithubAuthError(res.status, detail)
+      }
+      throw new Error(`GitHub API ${res.status}: ${detail}`)
+    }
+
+    const entries = (await res.json()) as Array<{
+      name: string
+      type: string
+    }>
+    if (!Array.isArray(entries)) return new Set()
+
+    return new Set(
+      entries
+        .filter((entry) => entry.type === 'file' && !entry.name.startsWith('.'))
+        .map((entry) => entry.name.toLowerCase()),
+    )
   }
 
   async function listStagingDir(
@@ -480,37 +536,34 @@ export function createGithubAdminClient(
             .filter((n): n is string => Boolean(n)),
         ),
       ]
-      const conflicts: IconNameConflict[] = []
+      if (unique.length === 0) return []
 
+      // List directories once — avoid per-path GET 404s for names that are new.
+      const [libraryMono, libraryColor, stagingMono, stagingColor, stagingRemove] =
+        await Promise.all([
+          listContentFileNames('packages/custom-icons/svg'),
+          listContentFileNames('packages/custom-icons/svg/color'),
+          listContentFileNames(`${STAGING_BASE}/mono`),
+          listContentFileNames(`${STAGING_BASE}/color`),
+          listContentFileNames(`${STAGING_BASE}/remove`),
+        ])
+
+      const conflicts: IconNameConflict[] = []
       for (const name of unique) {
-        const checks: Array<{
-          path: string
-          location: IconNameConflict['location']
-        }> = [
-          {
-            path: `packages/custom-icons/svg/${name}.svg`,
-            location: 'library-mono',
-          },
-          {
-            path: `packages/custom-icons/svg/color/${name}.svg`,
-            location: 'library-color',
-          },
-          {
-            path: `${STAGING_BASE}/mono/${name}.svg`,
-            location: 'staging-mono',
-          },
-          {
-            path: `${STAGING_BASE}/color/${name}.svg`,
-            location: 'staging-color',
-          },
-          {
-            path: removalMarkerPath(name),
-            location: 'staging-remove',
-          },
-        ]
-        for (const check of checks) {
-          const sha = await getFileSha(check.path)
-          if (sha) conflicts.push({ name, location: check.location })
+        if (libraryMono.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'library-mono' })
+        }
+        if (libraryColor.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'library-color' })
+        }
+        if (stagingMono.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'staging-mono' })
+        }
+        if (stagingColor.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'staging-color' })
+        }
+        if (stagingRemove.has(`${name}.remove`)) {
+          conflicts.push({ name, location: 'staging-remove' })
         }
       }
 

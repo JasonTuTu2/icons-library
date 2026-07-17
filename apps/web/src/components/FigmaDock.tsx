@@ -4,7 +4,6 @@ import {
   isGithubAdminEnabled,
   sanitizeIconName,
   stageIcons,
-  type IconColorMode,
 } from '../lib/github'
 import {
   notifyFigmaUiReady,
@@ -12,34 +11,16 @@ import {
   subscribeFigmaPluginMessages,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
-import {
-  storePendingFigmaUploads,
-  storeOpenUploadPanel,
-} from '../lib/figmaHandoff'
 
 interface PendingIcon {
-  id: string
   name: string
   content: string
-  previewUrl: string
-  colorMode: IconColorMode
 }
 
-function toPending(icon: FigmaExportIcon): PendingIcon {
-  const name = sanitizeIconName(icon.name) ?? icon.name
-  return {
-    id: icon.id,
-    name,
-    content: icon.content,
-    previewUrl: URL.createObjectURL(
-      new Blob([icon.content], { type: 'image/svg+xml' }),
-    ),
-    colorMode: 'mono',
-  }
-}
-
-function revokeAll(icons: PendingIcon[]): void {
-  for (const icon of icons) URL.revokeObjectURL(icon.previewUrl)
+function toPending(icon: FigmaExportIcon): PendingIcon | null {
+  const name = sanitizeIconName(icon.name)
+  if (!name) return null
+  return { name, content: icon.content }
 }
 
 function formatConflicts(
@@ -50,9 +31,7 @@ function formatConflicts(
     .join('\n')
 }
 
-/**
- * Figma-only dock: Load selection (export) + Stage (GitHub via browser token).
- */
+/** Figma plugin UI: Load selection + Stage only. */
 export function FigmaDock() {
   const [pending, setPending] = useState<PendingIcon[]>([])
   const [busy, setBusy] = useState(false)
@@ -64,29 +43,24 @@ export function FigmaDock() {
     return subscribeFigmaPluginMessages((msg) => {
       if (msg.type !== 'export-result') return
       setBusy(false)
-      setPending((prev) => {
-        revokeAll(prev)
-        return msg.icons.map(toPending)
-      })
+      const next = msg.icons
+        .map(toPending)
+        .filter((icon): icon is PendingIcon => icon !== null)
+      setPending(next)
       if (msg.error) {
         setMessage(msg.error)
-      } else if (msg.icons.length === 0) {
-        setMessage('No exportable nodes in selection.')
+      } else if (next.length === 0) {
+        setMessage(
+          msg.icons.length === 0
+            ? 'No exportable nodes in selection.'
+            : 'Loaded icons had invalid names (use kebab-case layer names).',
+        )
       } else {
         setMessage(
-          `Loaded ${msg.icons.length} icon(s). Review names, then Stage.`,
+          `Loaded ${next.length} icon(s): ${next.map((i) => `gv:${i.name}`).join(', ')}`,
         )
       }
     })
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      setPending((prev) => {
-        revokeAll(prev)
-        return []
-      })
-    }
   }, [])
 
   function handleLoad(): void {
@@ -100,19 +74,11 @@ export function FigmaDock() {
     setBusy(true)
     setMessage(null)
     try {
-      const payloads = pending.map((icon) => {
-        const name = sanitizeIconName(icon.name)
-        if (!name) {
-          throw new Error(
-            `Invalid icon name "${icon.name}". Use kebab-case, e.g. billing-alert.`,
-          )
-        }
-        return {
-          name,
-          content: icon.content,
-          colorMode: icon.colorMode,
-        }
-      })
+      const payloads = pending.map((icon) => ({
+        name: icon.name,
+        content: icon.content,
+        colorMode: 'mono' as const,
+      }))
 
       const conflicts = await findIconNameConflicts(
         payloads.map((p) => p.name),
@@ -126,26 +92,10 @@ export function FigmaDock() {
 
       const count = payloads.length
       await stageIcons(payloads)
-      setPending((prev) => {
-        revokeAll(prev)
-        return []
-      })
-      setMessage(
-        `Staged ${count} icon(s) on GitHub. Open Upload SVG to Apply when ready.`,
-      )
+      setPending([])
+      setMessage(`Staged ${count} icon(s).`)
     } catch (err) {
-      const text = err instanceof Error ? err.message : String(err)
-      setMessage(text)
-      // Offer Upload panel for manual fix / retry.
-      storePendingFigmaUploads(
-        pending.map((icon) => ({
-          name: icon.name,
-          content: icon.content,
-          colorMode: icon.colorMode,
-        })),
-      )
-      storeOpenUploadPanel()
-      window.dispatchEvent(new CustomEvent('gv-figma-open-upload'))
+      setMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setBusy(false)
     }
@@ -153,6 +103,7 @@ export function FigmaDock() {
 
   return (
     <section className="figma-dock" aria-label="Figma export">
+      <h1 className="figma-dock-title">GenVoice Icons</h1>
       <div className="figma-dock-actions">
         <button
           type="button"
@@ -173,68 +124,14 @@ export function FigmaDock() {
       </div>
       {!githubOk ? (
         <p className="figma-dock-hint">
-          GitHub write token is not available in this build. Redeploy Pages with{' '}
+          GitHub write token missing — redeploy Pages with{' '}
           <code>ICON_BROWSER_TOKEN</code>.
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, then Stage. Staging uses this page’s GitHub
-          token — the plugin never talks to GitHub.
+          Select frames on the canvas, Load, then Stage.
         </p>
       )}
-      {pending.length > 0 ? (
-        <ul className="figma-dock-list">
-          {pending.map((icon, index) => (
-            <li key={icon.id}>
-              <img src={icon.previewUrl} alt="" width={24} height={24} />
-              <label>
-                <span>gv:</span>
-                <input
-                  type="text"
-                  value={icon.name}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setPending((prev) =>
-                      prev.map((row, i) =>
-                        i === index ? { ...row, name: value } : row,
-                      ),
-                    )
-                  }}
-                />
-              </label>
-              <select
-                aria-label={`Color mode for gv:${icon.name || 'icon'}`}
-                value={icon.colorMode}
-                onChange={(e) => {
-                  const colorMode =
-                    e.target.value === 'preserved' ? 'preserved' : 'mono'
-                  setPending((prev) =>
-                    prev.map((row, i) =>
-                      i === index ? { ...row, colorMode } : row,
-                    ),
-                  )
-                }}
-              >
-                <option value="mono">Mono</option>
-                <option value="preserved">Multi</option>
-              </select>
-              <button
-                type="button"
-                className="ghost"
-                onClick={() => {
-                  setPending((prev) => {
-                    const target = prev[index]
-                    if (target) URL.revokeObjectURL(target.previewUrl)
-                    return prev.filter((_, i) => i !== index)
-                  })
-                }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
       {message ? (
         <p className="figma-dock-message" role="status">
           {message}
