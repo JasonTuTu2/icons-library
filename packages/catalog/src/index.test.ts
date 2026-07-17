@@ -31,4 +31,18 @@ describe('catalog', () => {
   it('lists custom categories from catalog metadata', () => {
     expect(Array.isArray(getCustomCategories())).toBe(true)
   })
+
+  it('filters by category including no category', () => {
+    const uncategorized = searchIcons({ category: '', limit: 5 })
+    expect(uncategorized.every((icon) => !(icon.category ?? '').trim())).toBe(
+      true,
+    )
+    const named = getCustomCategories()[0]
+    if (named) {
+      const filtered = searchIcons({ category: named, limit: 5 })
+      expect(
+        filtered.every((icon) => (icon.category ?? '').trim() === named),
+      ).toBe(true)
+    }
+  })
 })

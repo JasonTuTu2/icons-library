@@ -28,12 +28,24 @@ export interface SearchOptions {
   colorMode?: 'mono' | 'preserved' | 'gradient'
   /** Filter custom brand images vs vector icons. */
   assetKind?: 'icon' | 'image'
+  /**
+   * Filter by category.
+   * - omit / `undefined`: all categories
+   * - `null` or `''`: No category only
+   * - non-empty string: exact category match
+   */
+  category?: string | null
   limit?: number
 }
 
 export function searchIcons(options: SearchOptions = {}): IconMeta[] {
-  const { query = '', set, source, colorMode, assetKind, limit } = options
+  const { query = '', set, source, colorMode, assetKind, category, limit } =
+    options
   const q = query.trim().toLowerCase()
+  const hasCategoryFilter = Object.prototype.hasOwnProperty.call(
+    options,
+    'category',
+  )
 
   let results = catalog.icons
 
@@ -50,6 +62,13 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
     results = results.filter((icon) => icon.assetKind === 'image')
   } else if (assetKind === 'icon') {
     results = results.filter((icon) => icon.assetKind !== 'image')
+  }
+  if (hasCategoryFilter) {
+    const wanted = (category ?? '').trim()
+    results = results.filter((icon) => {
+      const current = (icon.category ?? '').trim()
+      return current === wanted
+    })
   }
   if (q) {
     results = results.filter((icon) => {

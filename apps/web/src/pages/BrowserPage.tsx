@@ -1,5 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
+  getCustomCategories,
   getIconById,
   reactSnippet,
   searchIcons,
@@ -12,8 +13,15 @@ import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
 import { isGithubRepoConfigured } from '../lib/github'
 
+/** Toolbar sentinel: show all categories. */
+const CATEGORY_ALL = ''
+/** Toolbar sentinel: icons with no category assigned. */
+const CATEGORY_NONE = '__none__'
+
 export function BrowserPage() {
+  const categories = useMemo(() => getCustomCategories(), [])
   const [query, setQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -34,13 +42,17 @@ export function BrowserPage() {
     }
   }, [])
 
-  const icons = useMemo(
-    () =>
-      searchIcons({
-        query: deferredQuery,
-      }),
-    [deferredQuery],
-  )
+  const icons = useMemo(() => {
+    const options: Parameters<typeof searchIcons>[0] = {
+      query: deferredQuery,
+    }
+    if (categoryFilter === CATEGORY_NONE) {
+      options.category = ''
+    } else if (categoryFilter !== CATEGORY_ALL) {
+      options.category = categoryFilter
+    }
+    return searchIcons(options)
+  }, [deferredQuery, categoryFilter])
 
   return (
     <div className="browser">
@@ -54,6 +66,21 @@ export function BrowserPage() {
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
           />
+        </label>
+        <label className="field">
+          <span>Category</span>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value={CATEGORY_ALL}>All categories</option>
+            <option value={CATEGORY_NONE}>No category</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
