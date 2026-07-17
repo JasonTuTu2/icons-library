@@ -1,4 +1,10 @@
 {
-  "categories": [],
-  "icons": {}
+  "categories": [
+    "dogs"
+  ],
+  "icons": {
+    "jason": {
+      "category": "dogs"
+    }
+  }
 }
