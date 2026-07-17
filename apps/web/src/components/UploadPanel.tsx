@@ -608,9 +608,6 @@ export function UploadPanel({
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
                     <code>ci:kebab-name</code> Images become <code>img:kebab-name</code> (not
                     usable with <code>&lt;Icon /&gt;</code>).
-                    {mode === 'github'
-                      ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged assets in one Action."
-                      : ' Writes to disk and regenerates the catalog locally.'}
                   </p>
                 )}
                 <label className="upload-drop">
