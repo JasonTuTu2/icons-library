@@ -2,10 +2,14 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export type IconVariant = 'regular' | 'filled'
+export type IconSource = 'iconify' | 'custom' | 'modified'
 
 export interface CustomIconMetadata {
   categories: string[]
-  icons: Record<string, { category?: string; variant?: IconVariant }>
+  icons: Record<
+    string,
+    { category?: string; variant?: IconVariant; source?: IconSource }
+  >
 }
 
 function normalizeCategory(raw: string | undefined | null): string {
@@ -14,6 +18,11 @@ function normalizeCategory(raw: string | undefined | null): string {
 
 function normalizeVariant(raw: string | undefined | null): IconVariant {
   return raw === 'filled' ? 'filled' : 'regular'
+}
+
+function normalizeSource(raw: string | undefined | null): IconSource {
+  if (raw === 'iconify' || raw === 'modified') return raw
+  return 'custom'
 }
 
 export function detectVariantFromName(name: string): IconVariant {
@@ -38,20 +47,29 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
       : []
     const icons: Record<
       string,
-      { category?: string; variant?: IconVariant }
+      { category?: string; variant?: IconVariant; source?: IconSource }
     > = {}
     if (parsed.icons && typeof parsed.icons === 'object') {
       for (const [name, value] of Object.entries(parsed.icons)) {
         if (!value || typeof value !== 'object') continue
-        const entry = value as { category?: unknown; variant?: unknown }
+        const entry = value as {
+          category?: unknown
+          variant?: unknown
+          source?: unknown
+        }
         const variantRaw =
           typeof entry.variant === 'string' ? entry.variant : undefined
+        const sourceRaw =
+          typeof entry.source === 'string' ? entry.source : undefined
         icons[name] = {
           category: normalizeCategory(
             typeof entry.category === 'string' ? entry.category : '',
           ),
           ...(variantRaw !== undefined
             ? { variant: normalizeVariant(variantRaw) }
+            : {}),
+          ...(sourceRaw !== undefined
+            ? { source: normalizeSource(sourceRaw) }
             : {}),
         }
       }
@@ -80,6 +98,13 @@ export function variantForIcon(
   const stored = metadata.icons[name]?.variant
   if (stored === 'filled' || stored === 'regular') return stored
   return detectVariantFromName(name)
+}
+
+export function sourceForIcon(
+  metadata: CustomIconMetadata,
+  name: string,
+): IconSource {
+  return normalizeSource(metadata.icons[name]?.source)
 }
 
 export function metadataPathFromCustomRoot(customRoot: string): string {

@@ -6,11 +6,13 @@ import {
   isGithubRepoConfigured,
   stageRemovals,
   updateIconMetadata,
+  type IconSource,
   type IconVariant,
 } from '../lib/github'
 import { customImagePublicUrl } from '../lib/customImageUrl'
 import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
+import { SourceSelect, sourceLabel } from './SourceSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -24,6 +26,7 @@ interface IconDetailProps {
   onRemovalStaged?: (name: string) => void
   onCategoryUpdated?: (category: string) => void
   onVariantUpdated?: (variant: IconVariant) => void
+  onSourceUpdated?: (source: IconSource) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -43,6 +46,7 @@ export function IconDetail({
   onRemovalStaged,
   onCategoryUpdated,
   onVariantUpdated,
+  onSourceUpdated,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -56,10 +60,16 @@ export function IconDetail({
   const [variantValue, setVariantValue] = useState<IconVariant>(
     icon.variant === 'filled' ? 'filled' : 'regular',
   )
+  const [sourceBusy, setSourceBusy] = useState(false)
+  const [sourceMessage, setSourceMessage] = useState<string | null>(null)
+  const [sourceValue, setSourceValue] = useState<IconSource>(
+    icon.source === 'iconify' || icon.source === 'modified'
+      ? icon.source
+      : 'custom',
+  )
 
   const isCustomAsset =
-    icon.source === 'custom' &&
-    (icon.id.startsWith('ci:') || icon.id.startsWith('img:'))
+    icon.id.startsWith('ci:') || icon.id.startsWith('img:')
 
   const canStageRemoval =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
@@ -70,7 +80,12 @@ export function IconDetail({
   useEffect(() => {
     setCategoryValue(icon.category ?? '')
     setVariantValue(icon.variant === 'filled' ? 'filled' : 'regular')
-  }, [icon.id, icon.category, icon.variant])
+    setSourceValue(
+      icon.source === 'iconify' || icon.source === 'modified'
+        ? icon.source
+        : 'custom',
+    )
+  }, [icon.id, icon.category, icon.variant, icon.source])
 
   useEffect(() => {
     if (!isCustomAsset) return
@@ -122,6 +137,29 @@ export function IconDetail({
       setVariantMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setVariantBusy(false)
+    }
+  }
+
+  async function handleSourceChange(nextSource: IconSource) {
+    const name = icon.name
+    setSourceValue(nextSource)
+    if (!canEditMeta) return
+
+    setSourceBusy(true)
+    setSourceMessage(null)
+    try {
+      await updateIconMetadata(name, { source: nextSource })
+      onSourceUpdated?.(nextSource)
+      setSourceMessage('Source saved.')
+    } catch (err) {
+      setSourceValue(
+        icon.source === 'iconify' || icon.source === 'modified'
+          ? icon.source
+          : 'custom',
+      )
+      setSourceMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSourceBusy(false)
     }
   }
 
@@ -191,9 +229,9 @@ export function IconDetail({
           </dd>
         </div>
         <div>
-          <dt>Set / source</dt>
+          <dt>Set</dt>
           <dd>
-            {icon.set} · {icon.source}
+            {icon.set}
             {isImage ? ' · brand image' : ''}
           </dd>
         </div>
@@ -271,6 +309,30 @@ export function IconDetail({
               {variantMessage ? (
                 <p className="meta-note" role="status">
                   {variantMessage}
+                </p>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset ? (
+          <div>
+            <dt>Source</dt>
+            <dd>
+              {canEditMeta ? (
+                <SourceSelect
+                  value={sourceValue}
+                  onChange={(source) => void handleSourceChange(source)}
+                  ariaLabel={`Source for ${icon.id}`}
+                />
+              ) : (
+                sourceLabel(icon.source)
+              )}
+              {sourceBusy ? (
+                <span className="meta-note"> Saving…</span>
+              ) : null}
+              {sourceMessage ? (
+                <p className="meta-note" role="status">
+                  {sourceMessage}
                 </p>
               ) : null}
             </dd>

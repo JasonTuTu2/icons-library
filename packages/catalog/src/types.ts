@@ -1,4 +1,6 @@
-export type IconSource = 'custom'
+export type IconSetSource = 'custom'
+/** Designer-assigned origin for a custom asset. */
+export type IconSource = 'iconify' | 'custom' | 'modified'
 
 export interface IconLicense {
   /** SPDX or short name */
@@ -10,7 +12,7 @@ export interface IconLicense {
 export interface IconSetInfo {
   id: string
   name: string
-  source: IconSource
+  source: IconSetSource
   license: IconLicense
   prefix: string
   homepage?: string
@@ -24,6 +26,7 @@ export interface IconMeta {
   /** Search tags / aliases */
   tags: string[]
   set: string
+  /** Designer-assigned source (iconify / custom / modified). */
   source: IconSource
   license: IconLicense
   /** Body name without prefix */

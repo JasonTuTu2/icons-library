@@ -7,6 +7,7 @@ import {
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
+  type IconSource,
   type IconVariant,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
@@ -19,8 +20,10 @@ import {
   subscribeFigmaPluginMessages,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
-import { ApplyAllCategory, CategorySelect } from './CategorySelect'
-import { ApplyAllVariant, VariantSelect } from './VariantSelect'
+import { ApplyAllFields } from './ApplyAllFields'
+import { CategorySelect } from './CategorySelect'
+import { VariantSelect } from './VariantSelect'
+import { SourceSelect } from './SourceSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -34,6 +37,7 @@ interface PendingIcon {
   colorMode: IconColorMode
   category: string
   variant: IconVariant
+  source: IconSource
 }
 
 function toPending(icon: FigmaExportIcon): PendingIcon {
@@ -48,6 +52,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
     colorMode: detectSvgColorMode(icon.content),
     category: '',
     variant: detectVariantFromName(name),
+    source: 'custom',
   }
 }
 
@@ -194,6 +199,7 @@ export function FigmaDock() {
           colorMode: icon.colorMode,
           category: icon.category,
           variant: icon.variant,
+          source: icon.source,
         }
       })
 
@@ -255,25 +261,26 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi, category, variant, and names,
-          then Stage. Names already in the library or staging must be changed
-          first.
+          Load from the canvas, set Mono/Multi, category, variant, source, and
+          names, then Stage. Names already in the library or staging must be
+          changed first.
         </p>
       )}
       {pending.length > 0 ? (
         <>
-          <ApplyAllCategory
+          <ApplyAllFields
             categories={categoryRegistry}
             onCreateCategory={(name) =>
               setCategoryRegistry((prev) => mergeCategoryIntoRegistry(prev, name))
             }
-            onApplyAll={(category) =>
+            onApplyCategory={(category) =>
               setPending((prev) => prev.map((row) => ({ ...row, category })))
             }
-          />
-          <ApplyAllVariant
-            onApplyAll={(variant) =>
+            onApplyVariant={(variant) =>
               setPending((prev) => prev.map((row) => ({ ...row, variant })))
+            }
+            onApplySource={(source) =>
+              setPending((prev) => prev.map((row) => ({ ...row, source })))
             }
           />
           <ul className="figma-dock-list">
@@ -355,6 +362,17 @@ export function FigmaDock() {
                     )
                   }
                   ariaLabel={`Variant for ci:${icon.name || 'icon'}`}
+                />
+                <SourceSelect
+                  value={icon.source}
+                  onChange={(source) =>
+                    setPending((prev) =>
+                      prev.map((row, i) =>
+                        i === index ? { ...row, source } : row,
+                      ),
+                    )
+                  }
+                  ariaLabel={`Source for ci:${icon.name || 'icon'}`}
                 />
                 <button
                   type="button"

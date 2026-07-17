@@ -733,7 +733,10 @@ pre {
 .figma-dock-list .category-select,
 .variant-select,
 .upload-list .variant-select,
-.figma-dock-list .variant-select {
+.figma-dock-list .variant-select,
+.source-select,
+.upload-list .source-select,
+.figma-dock-list .source-select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.3rem 0.35rem;
@@ -769,24 +772,12 @@ pre {
   color: var(--ink);
 }
 
-.apply-all-category {
+.apply-all-fields {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
   margin: 0.75rem 0 0.35rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.apply-all-variant {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0 0 0.35rem;
   padding: 0.65rem 0.75rem;
   border: 1px dashed var(--line);
   border-radius: var(--radius-sm);

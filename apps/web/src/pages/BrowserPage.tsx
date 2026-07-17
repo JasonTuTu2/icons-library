@@ -11,7 +11,11 @@ import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
-import { isGithubRepoConfigured, type IconVariant } from '../lib/github'
+import {
+  isGithubRepoConfigured,
+  type IconSource,
+  type IconVariant,
+} from '../lib/github'
 
 /** Toolbar sentinel: show all categories. */
 const CATEGORY_ALL = ''
@@ -19,12 +23,14 @@ const CATEGORY_ALL = ''
 const CATEGORY_NONE = '__none__'
 
 const VARIANT_ALL = ''
+const SOURCE_ALL = ''
 
 export function BrowserPage() {
   const categories = useMemo(() => getCustomCategories(), [])
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
+  const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -57,8 +63,15 @@ export function BrowserPage() {
     if (variantFilter === 'regular' || variantFilter === 'filled') {
       options.variant = variantFilter
     }
+    if (
+      sourceFilter === 'iconify' ||
+      sourceFilter === 'custom' ||
+      sourceFilter === 'modified'
+    ) {
+      options.source = sourceFilter
+    }
     return searchIcons(options)
-  }, [deferredQuery, categoryFilter, variantFilter])
+  }, [deferredQuery, categoryFilter, variantFilter, sourceFilter])
 
   return (
     <div className="browser">
@@ -99,6 +112,18 @@ export function BrowserPage() {
             <option value="filled">Filled</option>
           </select>
         </label>
+        <label className="field">
+          <span>Source</span>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
+            <option value={SOURCE_ALL}>All sources</option>
+            <option value="custom">Custom</option>
+            <option value="iconify">Iconify</option>
+            <option value="modified">Modified</option>
+          </select>
+        </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -133,6 +158,11 @@ export function BrowserPage() {
             onVariantUpdated={(variant: IconVariant) =>
               setSelected((current) =>
                 current ? { ...current, variant } : current,
+              )
+            }
+            onSourceUpdated={(source: IconSource) =>
+              setSelected((current) =>
+                current ? { ...current, source } : current,
               )
             }
           />

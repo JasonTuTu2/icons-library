@@ -28,23 +28,6 @@ export function VariantSelect({
   )
 }
 
-interface ApplyAllVariantProps {
-  onApplyAll: (variant: IconVariant) => void
-}
-
-export function ApplyAllVariant({ onApplyAll }: ApplyAllVariantProps) {
-  return (
-    <div className="apply-all-variant">
-      <span className="apply-all-label">Apply variant to all</span>
-      <VariantSelect
-        value="regular"
-        onChange={onApplyAll}
-        ariaLabel="Apply variant to all pending assets"
-      />
-    </div>
-  )
-}
-
 export function variantLabel(variant: IconVariant | undefined): string {
   return variant === 'filled' ? 'Filled' : 'Regular'
 }

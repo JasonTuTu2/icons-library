@@ -96,6 +96,12 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           <code>-filled</code> are detected automatically; you can override
           before Stage or in the detail sidebar.
         </p>
+        <p>
+          <strong>Source</strong> marks origin as <code>iconify</code>,{' '}
+          <code>custom</code>, or <code>modified</code> (default{' '}
+          <code>custom</code>). Set it before Stage or in the detail sidebar;
+          filter the grid with the Source toolbar control.
+        </p>
       </section>
 
       <section>

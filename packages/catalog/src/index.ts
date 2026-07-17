@@ -1,7 +1,14 @@
 import type { IconCatalog, IconMeta, IconSetInfo } from './types.js'
 import catalogData from './data/icons.json'
 
-export type { IconCatalog, IconMeta, IconSetInfo, IconLicense, IconSource } from './types.js'
+export type {
+  IconCatalog,
+  IconMeta,
+  IconSetInfo,
+  IconLicense,
+  IconSetSource,
+  IconSource,
+} from './types.js'
 
 export const catalog = catalogData as IconCatalog
 
@@ -24,7 +31,8 @@ export function getIconsBySet(setId: string): IconMeta[] {
 export interface SearchOptions {
   query?: string
   set?: string
-  source?: 'custom'
+  /** Filter by designer-assigned source. */
+  source?: 'iconify' | 'custom' | 'modified'
   colorMode?: 'mono' | 'preserved' | 'gradient'
   /** Filter custom brand images vs vector icons. */
   assetKind?: 'icon' | 'image'
@@ -63,7 +71,9 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
     results = results.filter((icon) => icon.set === set)
   }
   if (source) {
-    results = results.filter((icon) => icon.source === source)
+    results = results.filter(
+      (icon) => (icon.source ?? 'custom') === source,
+    )
   }
   if (colorMode) {
     results = results.filter((icon) => icon.colorMode === colorMode)
@@ -128,7 +138,7 @@ export function vueSnippet(
 export function getCustomCategories(): string[] {
   const categories = new Set<string>()
   for (const icon of catalog.icons) {
-    if (icon.source !== 'custom') continue
+    if (!icon.id.startsWith('ci:') && !icon.id.startsWith('img:')) continue
     const category = icon.category?.trim()
     if (category) categories.add(category)
   }

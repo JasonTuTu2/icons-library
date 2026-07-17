@@ -8,11 +8,15 @@ import {
 } from '../src/index.js'
 
 describe('catalog', () => {
-  it('has custom-only icons and sets', () => {
+  it('has brand catalog sets and valid icon sources', () => {
     expect(catalog.sets.length).toBeGreaterThan(0)
     expect(catalog.icons.length).toBeGreaterThan(0)
     expect(catalog.sets.every((set) => set.source === 'custom')).toBe(true)
-    expect(catalog.icons.every((icon) => icon.source === 'custom')).toBe(true)
+    expect(
+      catalog.icons.every((icon) =>
+        ['iconify', 'custom', 'modified'].includes(icon.source ?? 'custom'),
+      ),
+    ).toBe(true)
     expect(catalog.icons.some((icon) => icon.id.startsWith('mdi:'))).toBe(false)
   })
 
@@ -54,6 +58,17 @@ describe('catalog', () => {
     const regular = searchIcons({ variant: 'regular', limit: 20 })
     expect(
       regular.every((icon) => (icon.variant ?? 'regular') === 'regular'),
+    ).toBe(true)
+  })
+
+  it('filters by source', () => {
+    const custom = searchIcons({ source: 'custom', limit: 20 })
+    expect(custom.every((icon) => (icon.source ?? 'custom') === 'custom')).toBe(
+      true,
+    )
+    const iconify = searchIcons({ source: 'iconify', limit: 20 })
+    expect(
+      iconify.every((icon) => (icon.source ?? 'custom') === 'iconify'),
     ).toBe(true)
   })
 })

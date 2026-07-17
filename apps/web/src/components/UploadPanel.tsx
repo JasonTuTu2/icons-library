@@ -15,6 +15,7 @@ import {
   stageIcons,
   unstageRemoval,
   type IconColorMode,
+  type IconSource,
   type IconVariant,
   type ImageFormat,
   type StagedIcon,
@@ -38,13 +39,14 @@ import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { conflictMessagesForItems } from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
-import { ApplyAllCategory, CategorySelect } from './CategorySelect'
-import { ApplyAllVariant, VariantSelect, variantLabel } from './VariantSelect'
+import { ApplyAllFields } from './ApplyAllFields'
+import { CategorySelect, categoryLabel } from './CategorySelect'
+import { VariantSelect, variantLabel } from './VariantSelect'
+import { SourceSelect, sourceLabel } from './SourceSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
 } from '../lib/categories'
-import { categoryLabel } from './CategorySelect'
 
 interface UploadItem {
   fileName: string
@@ -56,6 +58,7 @@ interface UploadItem {
   format?: ImageFormat
   category: string
   variant: IconVariant
+  source: IconSource
 }
 
 interface UploadPanelProps {
@@ -76,6 +79,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     colorMode: icon.colorMode || detectSvgColorMode(icon.content),
     category: '',
     variant: detectVariantFromName(name),
+    source: 'custom',
   }
 }
 
@@ -140,6 +144,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
             format: imageFormat,
             category: '',
             variant: detectVariantFromName(name),
+            source: 'custom',
           },
         ])
       }
@@ -172,6 +177,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           colorMode: detectSvgColorMode(content),
           category: '',
           variant: detectVariantFromName(name),
+          source: 'custom',
         },
       ])
     }
@@ -188,7 +194,7 @@ function revokePreviewUrls(items: UploadItem[]): void {
 
 function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
-    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)}`
+    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)}`
   }
   const mode =
     icon.colorMode === 'preserved'
@@ -196,7 +202,7 @@ function stagedAssetLabel(icon: StagedIcon): string {
       : icon.colorMode === 'gradient'
         ? 'gradient'
         : 'mono'
-  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)}`
+  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)}`
 }
 
 function colorModeLabel(mode: IconColorMode | undefined): string {
@@ -457,6 +463,7 @@ export function UploadPanel({
                 format: item.format!,
                 category: item.category,
                 variant: item.variant,
+                source: item.source,
               }
             : {
                 name: item.name,
@@ -465,6 +472,7 @@ export function UploadPanel({
                 colorMode: item.colorMode,
                 category: item.category,
                 variant: item.variant,
+                source: item.source,
               },
         ),
       )
@@ -569,6 +577,7 @@ export function UploadPanel({
             format: item.format,
             category: item.category,
             variant: item.variant,
+            source: item.source,
           }),
         })
         const data = (await res.json()) as {
@@ -662,23 +671,26 @@ export function UploadPanel({
 
                 {items.length > 0 ? (
                   <>
-                    <ApplyAllCategory
+                    <ApplyAllFields
                       categories={categoryRegistry}
                       onCreateCategory={(name) =>
                         setCategoryRegistry((prev) =>
                           mergeCategoryIntoRegistry(prev, name),
                         )
                       }
-                      onApplyAll={(category) =>
+                      onApplyCategory={(category) =>
                         setItems((prev) =>
                           prev.map((row) => ({ ...row, category })),
                         )
                       }
-                    />
-                    <ApplyAllVariant
-                      onApplyAll={(variant) =>
+                      onApplyVariant={(variant) =>
                         setItems((prev) =>
                           prev.map((row) => ({ ...row, variant })),
+                        )
+                      }
+                      onApplySource={(source) =>
+                        setItems((prev) =>
+                          prev.map((row) => ({ ...row, source })),
                         )
                       }
                     />
@@ -799,6 +811,17 @@ export function UploadPanel({
                             )
                           }
                           ariaLabel={`Variant for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                        />
+                        <SourceSelect
+                          value={item.source}
+                          onChange={(source) =>
+                            setItems((prev) =>
+                              prev.map((row, i) =>
+                                i === index ? { ...row, source } : row,
+                              ),
+                            )
+                          }
+                          ariaLabel={`Source for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
                         />
                         <button
                           type="button"

@@ -95,40 +95,6 @@ export function CategorySelect({
   )
 }
 
-interface ApplyAllCategoryProps {
-  categories: string[]
-  onCreateCategory: (name: string) => void
-  onApplyAll: (category: string) => void
-}
-
-export function ApplyAllCategory({
-  categories,
-  onCreateCategory,
-  onApplyAll,
-}: ApplyAllCategoryProps) {
-  const [value, setValue] = useState('')
-
-  return (
-    <div className="apply-all-category">
-      <span className="apply-all-label">Apply category to all</span>
-      <CategorySelect
-        value={value}
-        onChange={(category) => {
-          setValue(category)
-          onApplyAll(category)
-        }}
-        categories={categories}
-        onCreateCategory={(name) => {
-          onCreateCategory(name)
-          setValue(name)
-          onApplyAll(name)
-        }}
-        ariaLabel="Apply category to all pending assets"
-      />
-    </div>
-  )
-}
-
 export function categoryLabel(category: string | undefined): string {
   const trimmed = (category ?? '').trim()
   return trimmed || 'No category'

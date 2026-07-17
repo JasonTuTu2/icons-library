@@ -10,7 +10,14 @@ const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
 interface CustomIconMetadata {
   categories: string[]
-  icons: Record<string, { category?: string; variant?: 'regular' | 'filled' }>
+  icons: Record<
+    string,
+    {
+      category?: string
+      variant?: 'regular' | 'filled'
+      source?: 'iconify' | 'custom' | 'modified'
+    }
+  >
 }
 
 function normalizeCategory(raw: string | undefined | null): string {
@@ -21,6 +28,13 @@ function normalizeVariant(
   raw: string | undefined | null,
 ): 'regular' | 'filled' {
   return raw === 'filled' ? 'filled' : 'regular'
+}
+
+function normalizeSource(
+  raw: string | undefined | null,
+): 'iconify' | 'custom' | 'modified' {
+  if (raw === 'iconify' || raw === 'modified') return raw
+  return 'custom'
 }
 
 function readMetadata(metadataPath: string): CustomIconMetadata {
@@ -39,7 +53,11 @@ function writeMetadata(metadataPath: string, metadata: CustomIconMetadata): void
 function setIconMetadataLocal(
   metadataPath: string,
   name: string,
-  patch: { category?: string; variant?: 'regular' | 'filled' },
+  patch: {
+    category?: string
+    variant?: 'regular' | 'filled'
+    source?: 'iconify' | 'custom' | 'modified'
+  },
 ): void {
   const metadata = readMetadata(metadataPath)
   const current = metadata.icons[name] ?? {}
@@ -51,7 +69,11 @@ function setIconMetadataLocal(
     patch.variant !== undefined
       ? normalizeVariant(patch.variant)
       : normalizeVariant(current.variant)
-  metadata.icons[name] = { category: cat, variant }
+  const source =
+    patch.source !== undefined
+      ? normalizeSource(patch.source)
+      : normalizeSource(current.source)
+  metadata.icons[name] = { category: cat, variant, source }
   if (cat && !metadata.categories.includes(cat)) {
     metadata.categories.push(cat)
     metadata.categories.sort((a, b) => a.localeCompare(b))
@@ -152,6 +174,7 @@ export function customIconUploadPlugin(): Plugin {
             format?: 'png' | 'jpg' | 'jpeg'
             category?: string
             variant?: 'regular' | 'filled'
+            source?: 'iconify' | 'custom' | 'modified'
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -195,6 +218,7 @@ export function customIconUploadPlugin(): Plugin {
             setIconMetadataLocal(metadataFile, name, {
               category: body.category ?? '',
               variant: normalizeVariant(body.variant),
+              source: normalizeSource(body.source),
             })
 
             await runCatalogGen(repoRoot)
@@ -239,6 +263,7 @@ export function customIconUploadPlugin(): Plugin {
           setIconMetadataLocal(metadataFile, name, {
             category: body.category ?? '',
             variant: normalizeVariant(body.variant),
+            source: normalizeSource(body.source),
           })
 
           await runCatalogGen(repoRoot)
