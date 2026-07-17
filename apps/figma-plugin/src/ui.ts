@@ -2,8 +2,8 @@ import {
   buildBrowserHandoffUrl,
   buildOpenUploadUrl,
   downloadHandoffJson,
-  encodeHandoffHash,
-  MAX_HASH_PAYLOAD_CHARS,
+  encodeHandoffPayload,
+  MAX_HANDOFF_CHARS,
   type IconColorMode,
 } from './handoff'
 import { ICON_BROWSER_URL, type PluginToUiMessage, type UiToPluginMessage } from './messages'
@@ -38,6 +38,18 @@ function setMessage(text: string, isError = false): void {
 
 function updateActionButtons(): void {
   ;($('btn-send') as HTMLButtonElement).disabled = icons.length === 0 || busy
+}
+
+function openBrowser(url: string): void {
+  // Anchor click is more reliable than openExternal alone for query strings.
+  const a = document.createElement('a')
+  a.href = url
+  a.target = '_blank'
+  a.rel = 'noreferrer'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  post({ type: 'open-url', url })
 }
 
 function renderIcons(): void {
@@ -134,23 +146,22 @@ $('btn-export').onclick = () => {
   post({ type: 'export-selection' })
 }
 
-$('btn-send').onclick = async () => {
+$('btn-send').onclick = () => {
   if (icons.length === 0) return
   busy = true
   updateActionButtons()
   setMessage('')
   try {
     const payload = buildPayload()
-    const encoded = await encodeHandoffHash(payload)
-    if (encoded.length <= MAX_HASH_PAYLOAD_CHARS) {
-      const url = buildBrowserHandoffUrl(ICON_BROWSER_URL, encoded)
-      post({ type: 'open-url', url })
+    const encoded = encodeHandoffPayload(payload)
+    if (encoded.length <= MAX_HANDOFF_CHARS) {
+      openBrowser(buildBrowserHandoffUrl(ICON_BROWSER_URL, encoded))
       setMessage(
         `Opened icon browser with ${payload.length} icon(s). Connect GitHub there to stage, apply, and publish.`,
       )
     } else {
       downloadHandoffJson(payload)
-      post({ type: 'open-url', url: buildOpenUploadUrl(ICON_BROWSER_URL) })
+      openBrowser(buildOpenUploadUrl(ICON_BROWSER_URL))
       setMessage(
         `Payload too large for a URL. Downloaded gv-icons-handoff.json — drop it into Upload SVG in the browser.`,
       )

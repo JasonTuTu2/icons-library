@@ -11,11 +11,11 @@ export interface HandoffPayload {
   icons: HandoffIcon[]
 }
 
-/** Conservative cap for `#gv-icons=` (encoded) before ZIP/JSON fallback. */
-export const MAX_HASH_PAYLOAD_CHARS = 12_000
+/** Conservative cap for encoded payload before JSON download fallback. */
+export const MAX_HANDOFF_CHARS = 12_000
 
-export const HASH_ICONS_KEY = 'gv-icons'
-export const HASH_UPLOAD_KEY = 'gv-upload'
+export const HANDOFF_PARAM = 'gv-icons'
+export const UPLOAD_PARAM = 'gv-upload'
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = ''
@@ -25,37 +25,39 @@ function bytesToBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-async function deflateRaw(bytes: Uint8Array): Promise<Uint8Array> {
-  const cs = new CompressionStream('deflate-raw')
-  const writer = cs.writable.getWriter()
-  await writer.write(bytes as BufferSource)
-  await writer.close()
-  return new Uint8Array(await new Response(cs.readable).arrayBuffer())
-}
-
-/** Compress + base64url-encode the handoff envelope for a URL hash. */
-export async function encodeHandoffHash(icons: HandoffIcon[]): Promise<string> {
+/**
+ * Encode handoff as raw base64url JSON (prefix `r.`).
+ * Avoids CompressionStream so decode is reliable across browsers.
+ */
+export function encodeHandoffPayload(icons: HandoffIcon[]): string {
   const payload: HandoffPayload = { v: 1, icons }
   const json = new TextEncoder().encode(JSON.stringify(payload))
-  const compressed = await deflateRaw(json)
-  return bytesToBase64Url(compressed)
+  return `r.${bytesToBase64Url(json)}`
 }
 
 export function buildBrowserHandoffUrl(
   browserBase: string,
   encodedPayload: string,
 ): string {
-  const base = browserBase.replace(/\/?$/, '/')
-  const params = new URLSearchParams()
-  params.set(HASH_ICONS_KEY, encodedPayload)
-  return `${base}#${params.toString()}`
+  const normalized = browserBase.match(/^https?:\/\//)
+    ? browserBase
+    : `https://${browserBase}`
+  const url = new URL(normalized)
+  // Prefer query string — Figma openExternal is unreliable with long hashes.
+  url.searchParams.set(HANDOFF_PARAM, encodedPayload)
+  url.searchParams.set(UPLOAD_PARAM, '1')
+  url.hash = ''
+  return url.toString()
 }
 
 export function buildOpenUploadUrl(browserBase: string): string {
-  const base = browserBase.replace(/\/?$/, '/')
-  const params = new URLSearchParams()
-  params.set(HASH_UPLOAD_KEY, '1')
-  return `${base}#${params.toString()}`
+  const normalized = browserBase.match(/^https?:\/\//)
+    ? browserBase
+    : `https://${browserBase}`
+  const url = new URL(normalized)
+  url.searchParams.set(UPLOAD_PARAM, '1')
+  url.hash = ''
+  return url.toString()
 }
 
 export function downloadHandoffJson(icons: HandoffIcon[]): void {
@@ -63,10 +65,10 @@ export function downloadHandoffJson(icons: HandoffIcon[]): void {
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: 'application/json',
   })
-  const url = URL.createObjectURL(blob)
+  const objectUrl = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url
+  a.href = objectUrl
   a.download = 'gv-icons-handoff.json'
   a.click()
-  URL.revokeObjectURL(url)
+  URL.revokeObjectURL(objectUrl)
 }

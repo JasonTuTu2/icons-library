@@ -9,18 +9,14 @@ import { consumeGithubTokenFromUrl } from './lib/githubAuth'
 import './styles.css'
 
 consumeGithubTokenFromUrl()
+consumeFigmaHandoffFromUrl()
 
 registerAntIcons(AntIcons as never)
 
-async function boot(): Promise<void> {
-  await consumeFigmaHandoffFromUrl()
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <App />
-      </BrowserRouter>
-    </StrictMode>,
-  )
-}
-
-void boot()
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+)

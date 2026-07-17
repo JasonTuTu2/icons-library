@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   actionsWorkflowUrl,
   dispatchApplyStaged,
@@ -18,6 +18,7 @@ import {
 } from '../lib/github'
 import {
   parseFigmaHandoffFile,
+  takeFigmaHandoffError,
   takeOpenUploadPanelFlag,
   takePendingFigmaUploads,
   type FigmaHandoffIcon,
@@ -56,6 +57,36 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     ),
     colorMode: icon.colorMode,
   }
+}
+
+function readInitialHandoff(): {
+  open: boolean
+  items: UploadItem[]
+  message: ReactNode
+} {
+  const pending = takePendingFigmaUploads()
+  const openPanel = takeOpenUploadPanelFlag()
+  const handoffError = takeFigmaHandoffError()
+
+  if (pending && pending.length > 0) {
+    return {
+      open: true,
+      items: pending.map(handoffToUploadItem),
+      message: `Loaded ${pending.length} icon(s) from Figma.`,
+    }
+  }
+  if (handoffError) {
+    return { open: true, items: [], message: handoffError }
+  }
+  if (openPanel) {
+    return {
+      open: true,
+      items: [],
+      message:
+        'Drop gv-icons-handoff.json (or SVGs) here, then stage after connecting GitHub.',
+    }
+  }
+  return { open: false, items: [], message: null }
 }
 
 function fileToUploadItem(file: File): Promise<UploadItem[]> {
@@ -127,14 +158,16 @@ export function UploadPanel({
       ? 'github'
       : 'none'
 
-  const [open, setOpen] = useState(false)
-  const [items, setItems] = useState<UploadItem[]>([])
+  const [handoffBoot] = useState(readInitialHandoff)
+  const [open, setOpen] = useState(handoffBoot.open)
+  const [items, setItems] = useState<UploadItem[]>(handoffBoot.items)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<ReactNode>(null)
+  const [message, setMessage] = useState<ReactNode>(handoffBoot.message)
   const [staged, setStaged] = useState<StagedIcon[]>([])
   const [stagedRemovals, setStagedRemovals] = useState<StagedRemoval[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
+  const wasOpenRef = useRef(open)
 
   const close = useCallback(() => {
     setOpen(false)
@@ -170,32 +203,17 @@ export function UploadPanel({
     }
   }, [mode, githubAuthed])
 
+  // Only clear when the dialog closes — not on the initial mount (handoff opens it).
   useEffect(() => {
-    if (!open) {
+    if (wasOpenRef.current && !open) {
       setItems((prev) => {
         if (prev.length > 0) revokePreviewUrls(prev)
         return []
       })
       setMessage(null)
     }
+    wasOpenRef.current = open
   }, [open])
-
-  useEffect(() => {
-    const pending = takePendingFigmaUploads()
-    const openPanel = takeOpenUploadPanelFlag()
-    if (pending && pending.length > 0) {
-      setItems(pending.map(handoffToUploadItem))
-      setOpen(true)
-      setMessage(`Loaded ${pending.length} icon(s) from Figma.`)
-      return
-    }
-    if (openPanel) {
-      setOpen(true)
-      setMessage(
-        'Drop gv-icons-handoff.json (or SVGs) here, then stage after connecting GitHub.',
-      )
-    }
-  }, [])
 
   useEffect(() => {
     if (open && mode === 'github' && githubAuthed) {
@@ -412,23 +430,26 @@ export function UploadPanel({
                 GitHub Pages, ensure <code>VITE_GITHUB_REPO</code> is set at
                 build time and use <strong>Connect GitHub</strong> with a PAT.
               </p>
-            ) : mode === 'github' && !githubAuthed ? (
-              <p>
-                Connect with a GitHub PAT (<code>contents: write</code> +{' '}
-                <code>actions: write</code>) using the toolbar button. Tokens
-                stay in this browser tab only — Actions use the{' '}
-                <code>ICON_BROWSER_TOKEN</code> secret for apply/publish pushes.
-              </p>
             ) : (
               <>
-                <p>
-                  Drop Figma-exported SVGs. Names become{' '}
-                  <code>gv:kebab-name</code>. Set each icon to monochrome
-                  (recolorable) or multi-color (preserved fills).
-                  {mode === 'github'
-                    ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
-                    : ' Writes to disk and regenerates the catalog locally.'}
-                </p>
+                {mode === 'github' && !githubAuthed ? (
+                  <p>
+                    Connect with a GitHub PAT (<code>contents: write</code> +{' '}
+                    <code>actions: write</code>) using the toolbar button, then
+                    stage below. Tokens stay in this browser tab only — Actions
+                    use the <code>ICON_BROWSER_TOKEN</code> secret for
+                    apply/publish pushes.
+                  </p>
+                ) : (
+                  <p>
+                    Drop Figma-exported SVGs. Names become{' '}
+                    <code>gv:kebab-name</code>. Set each icon to monochrome
+                    (recolorable) or multi-color (preserved fills).
+                    {mode === 'github'
+                      ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged icons in one Action."
+                      : ' Writes to disk and regenerates the catalog locally.'}
+                  </p>
+                )}
                 <label className="upload-drop">
                   <input
                     type="file"
@@ -517,10 +538,14 @@ export function UploadPanel({
                     <button
                       type="button"
                       className="ghost accent"
-                      disabled={!canSubmit || busy}
+                      disabled={!canSubmit || busy || !githubAuthed}
                       onClick={() => void handleStage()}
                     >
-                      {busy ? 'Working…' : 'Add to staging'}
+                      {busy
+                        ? 'Working…'
+                        : githubAuthed
+                          ? 'Add to staging'
+                          : 'Connect GitHub to stage'}
                     </button>
 
                     <div className="staged-block">
