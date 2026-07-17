@@ -37,9 +37,7 @@ function formatPublishIconList(
 }
 
 function formatRemovalList(removals: StagedRemoval[]): string {
-  return removals
-    .map((icon) => `• ${icon.kind === 'image' ? 'img' : 'ci'}:${icon.name}`)
-    .join('\n')
+  return removals.map((icon) => `• ${icon.name}`).join('\n')
 }
 
 function addsNote(
