@@ -12,7 +12,7 @@ figma.showUI(
 <script>window.location.href = ${JSON.stringify(uiUrl)};</script>
 <p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading…</p>
 </body></html>`,
-  { width: 360, height: 220, themeColors: true },
+  { width: 380, height: 440, themeColors: true },
 )
 
 function post(msg: PluginToUiMessage): void {
@@ -76,6 +76,10 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'export-selection': {
       await exportSelection()
+      break
+    }
+    case 'open-url': {
+      figma.openExternal(msg.url)
       break
     }
     case 'close': {

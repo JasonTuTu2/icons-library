@@ -86,6 +86,28 @@ export function notifyFigmaUiReady(): void {
   )
 }
 
+/** Open a URL in the system browser (via Figma when embedded). */
+export function openExternalUrl(url: string): void {
+  if (typeof window === 'undefined') return
+  if (window.parent === window) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+    return
+  }
+  parent.postMessage(
+    {
+      pluginMessage: { type: 'open-url', url },
+      pluginId: FIGMA_PLUGIN_ID,
+    },
+    'https://www.figma.com',
+  )
+}
+
+/** Full icon browser URL (main Pages app, not figma.html). */
+export function fullIconBrowserUrl(): string {
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+  return `${window.location.origin}${base}`
+}
+
 export function subscribeFigmaPluginMessages(
   listener: (msg: FigmaPluginMessage) => void,
 ): () => void {

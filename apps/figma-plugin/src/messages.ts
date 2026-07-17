@@ -9,6 +9,7 @@ export type PluginToUiMessage =
 export type UiToPluginMessage =
   | { type: 'ui-ready' }
   | { type: 'export-selection' }
+  | { type: 'open-url'; url: string }
   | { type: 'close' }
 
 /** Manifest `id` — required when the UI is a non-null origin (Pages). */
