@@ -606,11 +606,8 @@ export function UploadPanel({
                 ) : (
                   <p>
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
-                    <code>ci:kebab-name</code> (set mono / multi-color /
-                    gradient). Images become <code>img:kebab-name</code> (not
-                    usable with <code>&lt;Icon /&gt;</code>). Names already in
-                    the library or staging (same kind) must be changed before
-                    staging — overwrites are not allowed.
+                    <code>ci:kebab-name</code> Images become <code>img:kebab-name</code> (not
+                    usable with <code>&lt;Icon /&gt;</code>).
                     {mode === 'github'
                       ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged assets in one Action."
                       : ' Writes to disk and regenerates the catalog locally.'}
