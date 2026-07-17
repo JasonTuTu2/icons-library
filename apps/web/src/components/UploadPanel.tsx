@@ -32,6 +32,7 @@ import {
   useUnpublishedSelection,
 } from '../lib/unpublishedSelection'
 import { useDialogAccessibility } from '../lib/useDialogAccessibility'
+import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 
 interface UploadItem {
@@ -59,7 +60,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
       new Blob([icon.content], { type: 'image/svg+xml' }),
     ),
     kind: 'svg',
-    colorMode: icon.colorMode,
+    colorMode: icon.colorMode || detectSvgColorMode(icon.content),
   }
 }
 
@@ -151,7 +152,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           content,
           previewUrl: URL.createObjectURL(file),
           kind: 'svg',
-          colorMode: 'mono',
+          colorMode: detectSvgColorMode(content),
         },
       ])
     }

@@ -1,4 +1,5 @@
 import type { IconColorMode } from './github'
+import { detectSvgColorMode } from './detectSvgColorMode'
 
 const HANDOFF_PARAM = 'gv-icons'
 const UPLOAD_PARAM = 'gv-upload'
@@ -52,7 +53,9 @@ function parseHandoffPayload(raw: unknown): FigmaHandoffIcon[] | null {
     icons.push({
       name,
       content,
-      colorMode: isColorMode(item.colorMode) ? item.colorMode : 'mono',
+      colorMode: isColorMode(item.colorMode)
+        ? item.colorMode
+        : detectSvgColorMode(content),
     })
   }
   return icons.length > 0 ? icons : null

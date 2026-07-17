@@ -6,6 +6,7 @@ import {
   stageIcons,
   type IconColorMode,
 } from '../lib/github'
+import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import {
   fullIconBrowserUrl,
   notifyFigmaUiReady,
@@ -32,7 +33,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
     previewUrl: URL.createObjectURL(
       new Blob([icon.content], { type: 'image/svg+xml' }),
     ),
-    colorMode: 'mono',
+    colorMode: detectSvgColorMode(icon.content),
   }
 }
 
