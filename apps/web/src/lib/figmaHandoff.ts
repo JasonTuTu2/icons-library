@@ -76,7 +76,7 @@ function decodeHandoffParam(encoded: string): FigmaHandoffIcon[] | null {
   return null
 }
 
-function storePending(icons: FigmaHandoffIcon[]): void {
+export function storePendingFigmaUploads(icons: FigmaHandoffIcon[]): void {
   pendingMemory = icons
   try {
     sessionStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(icons))
@@ -85,7 +85,7 @@ function storePending(icons: FigmaHandoffIcon[]): void {
   }
 }
 
-function storeOpenUpload(): void {
+export function storeOpenUploadPanel(): void {
   openUploadMemory = true
   try {
     sessionStorage.setItem(OPEN_UPLOAD_KEY, '1')
@@ -159,18 +159,18 @@ export function consumeFigmaHandoffFromUrl(): boolean {
   if (encoded) {
     const icons = decodeHandoffParam(encoded)
     if (icons) {
-      storePending(icons)
-      storeOpenUpload()
+      storePendingFigmaUploads(icons)
+      storeOpenUploadPanel()
       consumed = true
     } else {
       storeError(
-        'Could not read icons from the Figma handoff link. Try Send again, or drop gv-icons-handoff.json into Upload SVG.',
+        'Could not read icons from the Figma handoff link. Drop gv-icons-handoff.json into Upload SVG, or use Load selection in the plugin.',
       )
-      storeOpenUpload()
+      storeOpenUploadPanel()
       consumed = true
     }
   } else if (openUpload) {
-    storeOpenUpload()
+    storeOpenUploadPanel()
     consumed = true
   }
 

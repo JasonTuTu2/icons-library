@@ -2,7 +2,7 @@
   "name": "@JasonTuTu2/icons-figma",
   "version": "0.0.0",
   "private": true,
-  "description": "Figma plugin — export GenVoice custom icons to the icon browser",
+  "description": "Figma plugin — icon browser shell; exports canvas SVGs for staging in the embedded Pages UI",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",

@@ -9,9 +9,7 @@ export type PluginToUiMessage =
 export type UiToPluginMessage =
   | { type: 'ui-ready' }
   | { type: 'export-selection' }
-  | { type: 'open-url'; url: string }
   | { type: 'close' }
 
-declare const __ICON_BROWSER_URL__: string
-
-export const ICON_BROWSER_URL: string = __ICON_BROWSER_URL__
+/** Manifest `id` — required when the UI is a non-null origin (Pages). */
+export const FIGMA_PLUGIN_ID = 'genvoice-icons-library'

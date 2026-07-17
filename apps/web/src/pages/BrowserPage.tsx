@@ -11,10 +11,13 @@ import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
+import { FigmaDock } from '../components/FigmaDock'
 import { isGithubRepoConfigured } from '../lib/github'
+import { isFigmaHost } from '../lib/figmaHost'
 
 export function BrowserPage() {
   const sets = useMemo(() => getSets(), [])
+  const figmaHost = isFigmaHost()
   const [query, setQuery] = useState('')
   const [setFilter, setSetFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState<
@@ -56,6 +59,7 @@ export function BrowserPage() {
 
   return (
     <div className="browser">
+      {figmaHost ? <FigmaDock /> : null}
       <section className="browser-toolbar">
         <label className="field grow">
           <span>Search</span>
@@ -64,7 +68,7 @@ export function BrowserPage() {
             placeholder="Search icons by name or tag…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            autoFocus
+            autoFocus={!figmaHost}
           />
         </label>
         <label className="field">
@@ -143,9 +147,11 @@ export function BrowserPage() {
             <p>
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
-              {isGithubRepoConfigured()
-                ? ' Use Upload to stage SVGs (including Figma plugin handoffs), stage removals, Apply, or Publish.'
-                : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
+              {figmaHost
+                ? ' Use Load selection + Stage above to add icons from the canvas.'
+                : isGithubRepoConfigured()
+                  ? ' Use Upload to stage SVGs, stage removals, Apply, or Publish.'
+                  : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
             </p>
           </aside>
         )}

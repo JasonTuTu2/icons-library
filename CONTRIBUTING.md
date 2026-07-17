@@ -24,14 +24,14 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 
 1. Build once: `pnpm --filter @JasonTuTu2/icons-figma build` (or `… dev` while iterating).
 2. In Figma Desktop: **Plugins → Development → Import plugin from manifest…** → select `apps/figma-plugin/manifest.json`.
-3. Select icon frame(s)/component(s) → **Load selection** → edit kebab names → choose **Mono** or **Multi** → **Send to icon browser**.
-4. In the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Add to staging** → **Apply staged to library** → **Publish** when releasing packages.
+3. The plugin panel loads the live icon browser. Select icon frame(s)/component(s) → **Load selection** → edit kebab names / Mono·Multi → **Stage**.
+4. In the same UI: **Apply staged to library** (via Upload SVG) → **Publish** when releasing packages.
 
-The plugin never talks to GitHub — it only opens the browser with your SVGs (or downloads `gv-icons-handoff.json` if the payload is too large for a URL). Override the browser URL at build time with `ICON_BROWSER_URL=…`.
+The plugin never talks to GitHub — it only exports SVGs from the canvas into the embedded browser, which stages with the baked Pages token. Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
 
 ### Pages icon browser
 
-1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
+1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage). From Figma: **Load selection** → **Stage**.
 2. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
 3. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
@@ -39,7 +39,7 @@ To **remove** a custom icon: open it in the browser → **Stage removal** → **
 
 ### First publish (happy path)
 
-1. **Add to staging** (from Upload SVG, or via the Figma plugin handoff) → **Apply staged to library**.
+1. **Stage** (Figma **Load selection** → **Stage**, or Upload SVG) → **Apply staged to library**.
 2. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
 3. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
 4. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.

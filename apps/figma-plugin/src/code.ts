@@ -1,6 +1,18 @@
 import type { PluginToUiMessage, UiToPluginMessage } from './messages'
 
-figma.showUI(__html__, { width: 360, height: 480, themeColors: true })
+declare const __ICON_BROWSER_URL__: string
+
+const browserBase = __ICON_BROWSER_URL__.replace(/\/?$/, '/')
+const uiUrl = `${browserBase}?gv-figma=1`
+
+// Navigate the plugin iframe to the live icon browser (non-null origin UI).
+figma.showUI(
+  `<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>
+<script>window.location.href = ${JSON.stringify(uiUrl)};</script>
+<p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading icon browser…</p>
+</body></html>`,
+  { width: 920, height: 640, themeColors: true },
+)
 
 function post(msg: PluginToUiMessage): void {
   figma.ui.postMessage(msg)
@@ -63,10 +75,6 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'export-selection': {
       await exportSelection()
-      break
-    }
-    case 'open-url': {
-      figma.openExternal(msg.url)
       break
     }
     case 'close': {

@@ -82,7 +82,7 @@ function readInitialHandoff(): {
       open: true,
       items: [],
       message:
-        'Drop gv-icons-handoff.json (or SVGs) here, then stage after connecting GitHub.',
+        'Drop gv-icons-handoff.json (or SVGs) here, then Stage.',
     }
   }
   return { open: false, items: [], message: null }
@@ -218,6 +218,29 @@ export function UploadPanel({
       void refreshStaged()
     }
   }, [open, mode, githubAuthed, refreshStaged])
+
+  useEffect(() => {
+    function onFigmaOpenUpload(): void {
+      const pending = takePendingFigmaUploads()
+      const handoffError = takeFigmaHandoffError()
+      if (pending && pending.length > 0) {
+        setItems((prev) => {
+          revokePreviewUrls(prev)
+          return pending.map(handoffToUploadItem)
+        })
+        setMessage(
+          handoffError ??
+            `Loaded ${pending.length} icon(s) from Figma for manual fix.`,
+        )
+      } else if (handoffError) {
+        setMessage(handoffError)
+      }
+      setOpen(true)
+    }
+    window.addEventListener('gv-figma-open-upload', onFigmaOpenUpload)
+    return () =>
+      window.removeEventListener('gv-figma-open-upload', onFigmaOpenUpload)
+  }, [])
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
