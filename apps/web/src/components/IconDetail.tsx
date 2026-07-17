@@ -127,8 +127,11 @@ export function IconDetail({
             <dd>
               {icon.colorMode === 'preserved'
                 ? 'Multi-color (preserved)'
-                : 'Monochrome'}
-              {icon.colorMode === 'preserved' ? (
+                : icon.colorMode === 'gradient'
+                  ? 'Gradient (preserved paints)'
+                  : 'Monochrome'}
+              {icon.colorMode === 'preserved' ||
+              icon.colorMode === 'gradient' ? (
                 <span className="meta-note">
                   {' '}
                   The <code>color</code> prop may not recolor this icon.

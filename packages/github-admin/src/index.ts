@@ -1,4 +1,4 @@
-export type IconColorMode = 'mono' | 'preserved'
+export type IconColorMode = 'mono' | 'preserved' | 'gradient'
 export type AssetKind = 'svg' | 'image'
 export type ImageFormat = 'png' | 'jpg' | 'jpeg'
 
@@ -49,9 +49,11 @@ export interface IconNameConflict {
   location:
     | 'library-mono'
     | 'library-color'
+    | 'library-gradient'
     | 'library-image'
     | 'staging-mono'
     | 'staging-color'
+    | 'staging-gradient'
     | 'staging-image'
     | 'staging-remove'
 }
@@ -163,7 +165,20 @@ export function packagesUrl(repo: string): string {
 }
 
 function stagingDir(colorMode: IconColorMode): string {
-  return colorMode === 'preserved' ? 'color' : 'mono'
+  if (colorMode === 'preserved') return 'color'
+  if (colorMode === 'gradient') return 'gradient'
+  return 'mono'
+}
+
+function normalizeColorMode(value: IconColorMode | undefined): IconColorMode {
+  if (value === 'preserved' || value === 'gradient') return value
+  return 'mono'
+}
+
+function colorModeFromLibraryPath(path: string): IconColorMode {
+  if (path.includes('/svg/gradient/')) return 'gradient'
+  if (path.includes('/svg/color/')) return 'preserved'
+  return 'mono'
 }
 
 function toBase64Utf8(text: string): string {
@@ -210,7 +225,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       name,
       content,
       kind: 'svg' as const,
-      colorMode: icon.colorMode === 'preserved' ? 'preserved' : 'mono',
+      colorMode: normalizeColorMode(icon.colorMode),
     }
   })
 }
@@ -251,7 +266,7 @@ function stagedFromLibraryPath(path: string): StagedIcon | null {
     name: base.replace(/\.svg$/i, ''),
     path: p,
     kind: 'svg',
-    colorMode: p.includes('/svg/color/') ? 'preserved' : 'mono',
+    colorMode: colorModeFromLibraryPath(p),
   }
 }
 
@@ -418,7 +433,7 @@ export function createGithubAdminClient(
   }
 
   async function listStagingDir(
-    dir: 'mono' | 'color' | 'remove' | 'images',
+    dir: 'mono' | 'color' | 'gradient' | 'remove' | 'images',
     colorMode?: IconColorMode,
   ): Promise<StagedIcon[] | StagedRemoval[]> {
     const res = await githubFetch(`/contents/${STAGING_BASE}/${dir}`)
@@ -549,6 +564,14 @@ export function createGithubAdminClient(
         }
 
         const dir = stagingDir(icon.colorMode ?? 'mono')
+        // Keep a single staged SVG per name across mono/color/gradient.
+        for (const other of ['mono', 'color', 'gradient'] as const) {
+          if (other === dir) continue
+          await deletePath(
+            `${STAGING_BASE}/${other}/${icon.name}.svg`,
+            `Cancel staged add gv:${icon.name} (${other})`,
+          )
+        }
         const path = `${STAGING_BASE}/${dir}/${icon.name}.svg`
         await putTextFile(
           path,
@@ -575,14 +598,16 @@ export function createGithubAdminClient(
       for (const name of unique) {
         const monoPath = `packages/custom-icons/svg/${name}.svg`
         const colorPath = `packages/custom-icons/svg/color/${name}.svg`
+        const gradientPath = `packages/custom-icons/svg/gradient/${name}.svg`
         const imageFile = findImageFileName(libraryImages, name)
         const imagePath = imageFile ? `${IMAGES_DIR}/${imageFile}` : undefined
-        const [monoSha, colorSha, imageSha] = await Promise.all([
+        const [monoSha, colorSha, gradientSha, imageSha] = await Promise.all([
           getFileSha(monoPath),
           getFileSha(colorPath),
+          getFileSha(gradientPath),
           imagePath ? getFileSha(imagePath) : Promise.resolve(undefined),
         ])
-        if (!monoSha && !colorSha && !imageSha) {
+        if (!monoSha && !colorSha && !gradientSha && !imageSha) {
           throw new Error(
             `${name} is not in the library (gv: or img:) — nothing to stage for removal.`,
           )
@@ -596,6 +621,10 @@ export function createGithubAdminClient(
         await deletePath(
           `${STAGING_BASE}/color/${name}.svg`,
           `Cancel staged add gv:${name} (color)`,
+        )
+        await deletePath(
+          `${STAGING_BASE}/gradient/${name}.svg`,
+          `Cancel staged add gv:${name} (gradient)`,
         )
         for (const ext of IMAGE_EXTS) {
           await deletePath(
@@ -627,12 +656,13 @@ export function createGithubAdminClient(
     },
 
     async listStagedIcons(): Promise<StagedIcon[]> {
-      const [mono, color, images] = await Promise.all([
+      const [mono, color, gradient, images] = await Promise.all([
         listStagingDir('mono', 'mono') as Promise<StagedIcon[]>,
         listStagingDir('color', 'preserved') as Promise<StagedIcon[]>,
+        listStagingDir('gradient', 'gradient') as Promise<StagedIcon[]>,
         listStagingDir('images') as Promise<StagedIcon[]>,
       ])
-      return [...mono, ...color, ...images].sort((a, b) =>
+      return [...mono, ...color, ...gradient, ...images].sort((a, b) =>
         a.name.localeCompare(b.name),
       )
     },
@@ -685,17 +715,21 @@ export function createGithubAdminClient(
       const [
         libraryMono,
         libraryColor,
+        libraryGradient,
         libraryImages,
         stagingMono,
         stagingColor,
+        stagingGradient,
         stagingImages,
         stagingRemove,
       ] = await Promise.all([
         listContentFileNames('packages/custom-icons/svg'),
         listContentFileNames('packages/custom-icons/svg/color'),
+        listContentFileNames('packages/custom-icons/svg/gradient'),
         listContentFileNames(IMAGES_DIR),
         listContentFileNames(`${STAGING_BASE}/mono`),
         listContentFileNames(`${STAGING_BASE}/color`),
+        listContentFileNames(`${STAGING_BASE}/gradient`),
         listContentFileNames(STAGING_IMAGES),
         listContentFileNames(`${STAGING_BASE}/remove`),
       ])
@@ -708,6 +742,9 @@ export function createGithubAdminClient(
         if (libraryColor.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'library-color' })
         }
+        if (libraryGradient.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'library-gradient' })
+        }
         if (findImageFileName(libraryImages, name)) {
           conflicts.push({ name, location: 'library-image' })
         }
@@ -716,6 +753,9 @@ export function createGithubAdminClient(
         }
         if (stagingColor.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'staging-color' })
+        }
+        if (stagingGradient.has(`${name}.svg`)) {
+          conflicts.push({ name, location: 'staging-gradient' })
         }
         if (findImageFileName(stagingImages, name)) {
           conflicts.push({ name, location: 'staging-image' })

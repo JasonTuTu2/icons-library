@@ -21,7 +21,7 @@ export function BrowserPage() {
     '' | 'ant' | 'iconify' | 'custom'
   >('')
   const [colorModeFilter, setColorModeFilter] = useState<
-    '' | 'mono' | 'preserved'
+    '' | 'mono' | 'preserved' | 'gradient'
   >('')
   const [assetKindFilter, setAssetKindFilter] = useState<
     '' | 'icon' | 'image'
@@ -106,12 +106,15 @@ export function BrowserPage() {
           <select
             value={colorModeFilter}
             onChange={(e) =>
-              setColorModeFilter(e.target.value as '' | 'mono' | 'preserved')
+              setColorModeFilter(
+                e.target.value as '' | 'mono' | 'preserved' | 'gradient',
+              )
             }
           >
             <option value="">All modes</option>
             <option value="mono">Monochrome</option>
             <option value="preserved">Multi-color</option>
+            <option value="gradient">Gradient</option>
           </select>
         </label>
         <label className="field">

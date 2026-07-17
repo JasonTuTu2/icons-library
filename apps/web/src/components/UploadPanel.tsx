@@ -174,15 +174,19 @@ function formatConflicts(conflicts: IconNameConflict[]): string {
           ? 'library (mono SVG)'
           : c.location === 'library-color'
             ? 'library (multi-color SVG)'
-            : c.location === 'library-image'
-              ? 'library (brand image)'
-              : c.location === 'staging-mono'
-                ? 'staging (mono SVG)'
-                : c.location === 'staging-color'
-                  ? 'staging (multi-color SVG)'
-                  : c.location === 'staging-image'
-                    ? 'staging (brand image)'
-                    : 'staged removals'
+            : c.location === 'library-gradient'
+              ? 'library (gradient SVG)'
+              : c.location === 'library-image'
+                ? 'library (brand image)'
+                : c.location === 'staging-mono'
+                  ? 'staging (mono SVG)'
+                  : c.location === 'staging-color'
+                    ? 'staging (multi-color SVG)'
+                    : c.location === 'staging-gradient'
+                      ? 'staging (gradient SVG)'
+                      : c.location === 'staging-image'
+                        ? 'staging (brand image)'
+                        : 'staged removals'
       return `• ${c.name} — already in ${where}`
     })
     .join('\n')
@@ -192,7 +196,19 @@ function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
     return `img:${icon.name} (${icon.format ?? 'image'})`
   }
-  return `gv:${icon.name} (${icon.colorMode === 'preserved' ? 'multi-color' : 'mono'})`
+  const mode =
+    icon.colorMode === 'preserved'
+      ? 'multi-color'
+      : icon.colorMode === 'gradient'
+        ? 'gradient'
+        : 'mono'
+  return `gv:${icon.name} (${mode})`
+}
+
+function colorModeLabel(mode: IconColorMode | undefined): string {
+  if (mode === 'preserved') return 'multi-color'
+  if (mode === 'gradient') return 'gradient'
+  return 'mono'
 }
 
 export function UploadPanel({
@@ -539,9 +555,9 @@ export function UploadPanel({
                 ) : (
                   <p>
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
-                    <code>gv:kebab-name</code> (set mono / multi-color). Images
-                    become <code>img:kebab-name</code> (not usable with{' '}
-                    <code>&lt;Icon /&gt;</code>).
+                    <code>gv:kebab-name</code> (set mono / multi-color /
+                    gradient). Images become <code>img:kebab-name</code> (not
+                    usable with <code>&lt;Icon /&gt;</code>).
                     {mode === 'github'
                       ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged assets in one Action."
                       : ' Writes to disk and regenerates the catalog locally.'}
@@ -565,7 +581,8 @@ export function UploadPanel({
                           className={
                             item.kind === 'image'
                               ? 'upload-preview upload-preview-image'
-                              : item.colorMode === 'preserved'
+                              : item.colorMode === 'preserved' ||
+                                  item.colorMode === 'gradient'
                                 ? 'upload-preview upload-preview-color'
                                 : 'upload-preview upload-preview-mono'
                           }
@@ -574,7 +591,9 @@ export function UploadPanel({
                               ? `Brand image (${item.format})`
                               : item.colorMode === 'preserved'
                                 ? 'Multi-color preview'
-                                : 'Monochrome preview (tinted)'
+                                : item.colorMode === 'gradient'
+                                  ? 'Gradient preview'
+                                  : 'Monochrome preview (tinted)'
                           }
                         >
                           <img
@@ -613,7 +632,9 @@ export function UploadPanel({
                                         colorMode:
                                           value === 'preserved'
                                             ? 'preserved'
-                                            : 'mono',
+                                            : value === 'gradient'
+                                              ? 'gradient'
+                                              : 'mono',
                                       }
                                     : row,
                                 ),
@@ -622,6 +643,7 @@ export function UploadPanel({
                           >
                             <option value="mono">Monochrome</option>
                             <option value="preserved">Multi-color</option>
+                            <option value="gradient">Gradient</option>
                           </select>
                         ) : (
                           <span className="upload-format-tag">
@@ -681,9 +703,7 @@ export function UploadPanel({
                               <span>
                                 {icon.kind === 'image'
                                   ? (icon.format ?? 'image').toUpperCase()
-                                  : icon.colorMode === 'preserved'
-                                    ? 'multi-color'
-                                    : 'mono'}
+                                  : colorModeLabel(icon.colorMode)}
                               </span>
                             </li>
                           ))}
@@ -772,9 +792,7 @@ export function UploadPanel({
                                   <span>
                                     {icon.kind === 'image'
                                       ? (icon.format ?? 'image').toUpperCase()
-                                      : icon.colorMode === 'preserved'
-                                        ? 'multi-color'
-                                        : 'mono'}
+                                      : colorModeLabel(icon.colorMode)}
                                   </span>
                                 </label>
                               </li>

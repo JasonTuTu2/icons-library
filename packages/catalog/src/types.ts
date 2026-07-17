@@ -28,8 +28,8 @@ export interface IconMeta {
   license: IconLicense
   /** Iconify/custom body name without prefix, or Ant export name */
   name: string
-  /** Custom SVG icons only: mono (currentColor) or preserved multi-color */
-  colorMode?: 'mono' | 'preserved'
+  /** Custom SVG icons only: mono (currentColor), preserved multi-color, or gradient */
+  colorMode?: 'mono' | 'preserved' | 'gradient'
   /** Custom assets: vector icon (default) or brand image (png/jpg). */
   assetKind?: 'icon' | 'image'
   /** Brand images only: file format. */

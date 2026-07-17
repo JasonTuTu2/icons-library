@@ -8,3 +8,4 @@ Place multi-color / illustrative SVGs here.
 - Do not reuse a name that already exists in the parent `svg/` folder.
 
 Monochrome UI icons belong in `../` (the parent `svg/` folder).
+Gradient icons belong in `../gradient/`.

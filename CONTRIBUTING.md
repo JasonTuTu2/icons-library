@@ -77,7 +77,13 @@ Parallel to SVG icons — same stage → apply → publish flow, but **not** Ico
 2. Save as `packages/custom-icons/svg/color/kebab-name.svg` (or stage/apply with Multi-color mode).
 3. Run `pnpm catalog:gen` if via git.
 
-Do not reuse a kebab name that already exists as mono SVG, color SVG, or brand image.
+### Gradient
+
+1. Export an SVG that uses linear/radial gradients (plugin / browser **Gradient** mode).
+2. Save as `packages/custom-icons/svg/gradient/kebab-name.svg` (or stage/apply with Gradient).
+3. Run `pnpm catalog:gen` if via git. Gradient defs and `url(#…)` fills are kept; `<Icon color>` will not recolor them.
+
+Do not reuse a kebab name that already exists as mono SVG, color SVG, gradient SVG, or brand image.
 
 
 ## Releases

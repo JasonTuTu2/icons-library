@@ -25,8 +25,9 @@ jobs:
           STAGING=packages/custom-icons/staging
           MONO_DST=packages/custom-icons/svg
           COLOR_DST=packages/custom-icons/svg/color
+          GRAD_DST=packages/custom-icons/svg/gradient
           IMG_DST=packages/custom-icons/images
-          mkdir -p "$MONO_DST" "$COLOR_DST" "$IMG_DST" "$STAGING/remove" "$STAGING/images"
+          mkdir -p "$MONO_DST" "$COLOR_DST" "$GRAD_DST" "$IMG_DST" "$STAGING/remove" "$STAGING/images" "$STAGING/gradient"
           names=()
 
           shopt -s nullglob
@@ -41,6 +42,12 @@ jobs:
             mv -f "$f" "$COLOR_DST/$base"
             names+=("gv:${base%.svg}")
             echo "Promoted color/$base"
+          done
+          for f in "$STAGING"/gradient/*.svg; do
+            base=$(basename "$f")
+            mv -f "$f" "$GRAD_DST/$base"
+            names+=("gv:${base%.svg}")
+            echo "Promoted gradient/$base"
           done
           for f in "$STAGING"/images/*.{png,jpg,jpeg}; do
             [[ -e "$f" ]] || continue
@@ -62,6 +69,11 @@ jobs:
               rm -f "$COLOR_DST/$name.svg"
               removed=1
               echo "Removed color/$name.svg"
+            fi
+            if [[ -f "$GRAD_DST/$name.svg" ]]; then
+              rm -f "$GRAD_DST/$name.svg"
+              removed=1
+              echo "Removed gradient/$name.svg"
             fi
             for ext in png jpg jpeg; do
               if [[ -f "$IMG_DST/$name.$ext" ]]; then

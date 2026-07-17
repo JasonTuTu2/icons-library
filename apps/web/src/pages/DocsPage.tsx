@@ -80,9 +80,9 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         </ol>
         <p>
           Monochrome icons are normalized to <code>currentColor</code> so{' '}
-          <code>color</code> / CSS inheritance works. Multi-color icons preserve
-          their fills; the <code>color</code> prop may not recolor them. Filter
-          by color mode in the browser to separate the two.
+          <code>color</code> / CSS inheritance works. Multi-color and gradient
+          icons preserve their fills / paint servers; the <code>color</code>{' '}
+          prop may not recolor them. Filter by color mode in the browser.
         </p>
       </section>
 

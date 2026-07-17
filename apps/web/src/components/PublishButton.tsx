@@ -25,7 +25,13 @@ function formatPublishIconList(
       if (icon.kind === 'image') {
         return `• img:${icon.name} (${(icon.format ?? 'image').toUpperCase()})`
       }
-      return `• gv:${icon.name} (${icon.colorMode === 'preserved' ? 'multi-color' : 'mono'})`
+      return `• gv:${icon.name} (${
+        icon.colorMode === 'preserved'
+          ? 'multi-color'
+          : icon.colorMode === 'gradient'
+            ? 'gradient'
+            : 'mono'
+      })`
     })
     .join('\n')
 }

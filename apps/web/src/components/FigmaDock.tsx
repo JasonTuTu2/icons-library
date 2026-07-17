@@ -194,7 +194,11 @@ export function FigmaDock() {
                 value={icon.colorMode}
                 onChange={(e) => {
                   const colorMode =
-                    e.target.value === 'preserved' ? 'preserved' : 'mono'
+                    e.target.value === 'preserved'
+                      ? 'preserved'
+                      : e.target.value === 'gradient'
+                        ? 'gradient'
+                        : 'mono'
                   setPending((prev) =>
                     prev.map((row, i) =>
                       i === index ? { ...row, colorMode } : row,
@@ -204,6 +208,7 @@ export function FigmaDock() {
               >
                 <option value="mono">Mono</option>
                 <option value="preserved">Multi</option>
+                <option value="gradient">Gradient</option>
               </select>
               <button
                 type="button"

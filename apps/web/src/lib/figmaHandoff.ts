@@ -35,7 +35,7 @@ function base64UrlToBytes(value: string): Uint8Array {
 }
 
 function isColorMode(value: unknown): value is IconColorMode {
-  return value === 'mono' || value === 'preserved'
+  return value === 'mono' || value === 'preserved' || value === 'gradient'
 }
 
 function parseHandoffPayload(raw: unknown): FigmaHandoffIcon[] | null {

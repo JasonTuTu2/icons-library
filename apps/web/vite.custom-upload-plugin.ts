@@ -61,6 +61,7 @@ export function customIconUploadPlugin(): Plugin {
   const repoRoot = resolve(pluginDir, '../..')
   const svgDir = join(repoRoot, 'packages/custom-icons/svg')
   const colorDir = join(svgDir, 'color')
+  const gradientDir = join(svgDir, 'gradient')
   const imagesDir = join(repoRoot, 'packages/custom-icons/images')
 
   return {
@@ -86,7 +87,7 @@ export function customIconUploadPlugin(): Plugin {
           const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
             name?: string
             content?: string
-            colorMode?: 'mono' | 'preserved'
+            colorMode?: 'mono' | 'preserved' | 'gradient'
             kind?: 'svg' | 'image'
             format?: 'png' | 'jpg' | 'jpeg'
           }
@@ -154,8 +155,18 @@ export function customIconUploadPlugin(): Plugin {
             return
           }
 
-          const colorMode = body.colorMode === 'preserved' ? 'preserved' : 'mono'
-          const targetDir = colorMode === 'preserved' ? colorDir : svgDir
+          const colorMode =
+            body.colorMode === 'preserved'
+              ? 'preserved'
+              : body.colorMode === 'gradient'
+                ? 'gradient'
+                : 'mono'
+          const targetDir =
+            colorMode === 'preserved'
+              ? colorDir
+              : colorMode === 'gradient'
+                ? gradientDir
+                : svgDir
           mkdirSync(targetDir, { recursive: true })
           const filePath = join(targetDir, `${name}.svg`)
           writeFileSync(filePath, `${content}\n`, 'utf8')
@@ -167,7 +178,9 @@ export function customIconUploadPlugin(): Plugin {
           const relativePath =
             colorMode === 'preserved'
               ? `packages/custom-icons/svg/color/${name}.svg`
-              : `packages/custom-icons/svg/${name}.svg`
+              : colorMode === 'gradient'
+                ? `packages/custom-icons/svg/gradient/${name}.svg`
+                : `packages/custom-icons/svg/${name}.svg`
 
           res.setHeader('Content-Type', 'application/json')
           res.end(

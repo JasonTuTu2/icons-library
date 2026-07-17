@@ -4,7 +4,7 @@ import { optimize } from 'svgo'
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 
-export type ColorMode = 'mono' | 'preserved'
+export type ColorMode = 'mono' | 'preserved' | 'gradient'
 
 export interface IconifyIconBody {
   body: string
@@ -44,12 +44,13 @@ function titleFromName(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+/** Rewrite solid fills/strokes to currentColor; keep none and url(#…) (gradients). */
 function toCurrentColor(svg: string): string {
   return svg
-    .replace(/\sfill="(?!none)([^"]*)"/gi, ' fill="currentColor"')
-    .replace(/\sstroke="(?!none)([^"]*)"/gi, ' stroke="currentColor"')
-    .replace(/fill:\s*(?!none)([^;"']+)/gi, 'fill:currentColor')
-    .replace(/stroke:\s*(?!none)([^;"']+)/gi, 'stroke:currentColor')
+    .replace(/\sfill="(?!none|url\()([^"]*)"/gi, ' fill="currentColor"')
+    .replace(/\sstroke="(?!none|url\()([^"]*)"/gi, ' stroke="currentColor"')
+    .replace(/fill:\s*(?!none|url\()([^;"']+)/gi, 'fill:currentColor')
+    .replace(/stroke:\s*(?!none|url\()([^;"']+)/gi, 'stroke:currentColor')
 }
 
 function extractViewBox(svg: string): { width: number; height: number; viewBox: string } {
@@ -101,6 +102,8 @@ export function processSvgContent(
         params: {
           overrides: {
             removeViewBox: false,
+            // Keep gradient / pattern IDs stable so url(#…) refs survive.
+            ...(!monochrome ? { cleanupIds: false } : {}),
           },
         },
       },
@@ -115,7 +118,8 @@ export function processSvgContent(
   let svg = optimized.data
   if (monochrome) {
     svg = toCurrentColor(svg)
-    // SVGO may drop default black fills; force monochrome inheritance.
+    // SVGO may drop default black fills; force monochrome inheritance
+    // except shapes that already use a paint server (gradient/pattern).
     svg = svg.replace(
       /<(path|circle|rect|polygon|polyline|ellipse)\b(?![^>]*\bfill=)/gi,
       '<$1 fill="currentColor"',
@@ -152,7 +156,7 @@ function collectFromDir(
   }
 
   for (const entry of entries) {
-    if (entry === 'color' || entry.startsWith('.')) continue
+    if (entry === 'color' || entry === 'gradient' || entry.startsWith('.')) continue
     if (entry.startsWith('_')) continue
     if (entry.toLowerCase() === 'readme.md') continue
     if (extname(entry).toLowerCase() !== '.svg') continue
@@ -183,9 +187,30 @@ function collectFromDir(
   return { icons, warnings }
 }
 
+function mergeIcons(
+  byName: Map<string, ProcessedCustomIcon>,
+  batch: { icons: ProcessedCustomIcon[]; warnings: string[] },
+  folderLabel: string,
+  warnings: string[],
+): void {
+  warnings.push(...batch.warnings)
+  for (const icon of batch.icons) {
+    if (byName.has(icon.name)) {
+      warnings.push(
+        `Skipped ${folderLabel}/${icon.name}.svg: name already used by ${byName.get(icon.name)!.colorMode} icon "${icon.name}"`,
+      )
+      continue
+    }
+    byName.set(icon.name, icon)
+  }
+}
+
 /**
- * Collect custom icons from `svg/*.svg` (mono) and `svg/color/*.svg` (preserved).
- * Shared `gv:` namespace — first wins on name collision.
+ * Collect custom icons from:
+ * - `svg/*.svg` (mono)
+ * - `svg/color/*.svg` (preserved multi-color)
+ * - `svg/gradient/*.svg` (gradients / paint servers preserved)
+ * Shared `gv:` namespace — first wins on name collision (mono > color > gradient).
  */
 export function collectAllCustomIcons(
   svgRootDir: string,
@@ -193,24 +218,19 @@ export function collectAllCustomIcons(
   const warnings: string[] = []
   const byName = new Map<string, ProcessedCustomIcon>()
 
-  const mono = collectFromDir(svgRootDir, 'mono')
-  warnings.push(...mono.warnings)
-  for (const icon of mono.icons) {
-    byName.set(icon.name, icon)
-  }
-
-  const colorDir = join(svgRootDir, 'color')
-  const color = collectFromDir(colorDir, 'preserved')
-  warnings.push(...color.warnings)
-  for (const icon of color.icons) {
-    if (byName.has(icon.name)) {
-      warnings.push(
-        `Skipped color/${icon.name}.svg: name already used by mono icon "${icon.name}"`,
-      )
-      continue
-    }
-    byName.set(icon.name, icon)
-  }
+  mergeIcons(byName, collectFromDir(svgRootDir, 'mono'), 'svg', warnings)
+  mergeIcons(
+    byName,
+    collectFromDir(join(svgRootDir, 'color'), 'preserved'),
+    'color',
+    warnings,
+  )
+  mergeIcons(
+    byName,
+    collectFromDir(join(svgRootDir, 'gradient'), 'gradient'),
+    'gradient',
+    warnings,
+  )
 
   const icons = [...byName.values()].sort((a, b) => a.name.localeCompare(b.name))
   return { icons, warnings }

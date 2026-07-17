@@ -40,7 +40,7 @@ interface IconMeta {
   source: 'ant' | 'iconify' | 'custom'
   license: IconLicense
   name: string
-  colorMode?: 'mono' | 'preserved'
+  colorMode?: 'mono' | 'preserved' | 'gradient'
   assetKind?: 'icon' | 'image'
   format?: 'png' | 'jpg' | 'jpeg'
   assetPath?: string
@@ -226,7 +226,11 @@ function collectCustomIcons(): IconMeta[] {
       'gv',
       'genvoice',
       'custom',
-      item.colorMode === 'preserved' ? 'multicolor' : 'mono',
+      item.colorMode === 'preserved'
+        ? 'multicolor'
+        : item.colorMode === 'gradient'
+          ? 'gradient'
+          : 'mono',
       item.colorMode,
     ],
     set: 'genvoice',

@@ -221,17 +221,18 @@ From Figma / git:
 2. Or commit files / use Upload in the browser (Pages or `pnpm dev`):
    - Monochrome SVG: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color SVG: `packages/custom-icons/svg/color/kebab-name.svg`
+   - Gradient SVG: `packages/custom-icons/svg/gradient/kebab-name.svg`
    - Brand image: `packages/custom-icons/images/kebab-name.png` (or `.jpg` / `.jpeg`)
 3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
 4. Use `gv:kebab-name` with `<Icon />` for SVGs. Brand images use `img:kebab-name` and ship as files — import from `@JasonTuTu2/icons-custom/images/…` (not `<Icon />`).
 
-Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color SVGs keep their fills; `color` may not recolor them. Do not reuse the same kebab name across mono SVG, color SVG, and images.
+Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color and gradient SVGs keep their fills / paint servers; `color` may not recolor them. Do not reuse the same kebab name across mono, color, gradient, and images.
 
 ### Upload & publish from Pages
 
 On the live icon browser, **staging** uses the embedded Pages token (no personal PAT). **Apply** and **Publish** only appear for developers who open the site with a session PAT (see CONTRIBUTING — magic URL `#gv-github-token=`).
 
-1. **Add to staging** — writes SVGs into `staging/mono|color/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (SVG only).
+1. **Add to staging** — writes SVGs into `staging/mono|color|gradient/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (SVG only; choose Mono / Multi / Gradient).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
 3. **Publish** — check unpublished icons/images to include; unchecked assets are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
@@ -250,7 +251,7 @@ Anyone with the Pages URL can stage. Apply/Publish need a personal PAT via `#gv-
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Embedded token → Contents API → `staging/mono`, `staging/color`, or `staging/images` |
+| Add to staging | Embedded token → Contents API → `staging/mono`, `staging/color`, `staging/gradient`, or `staging/images` |
 | Stage removal | Embedded token → Contents API → `staging/remove/{name}.remove` |
 | Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
 | Publish | Session PAT dispatches → Action publishes with package permissions |

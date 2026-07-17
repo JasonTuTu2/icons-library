@@ -25,7 +25,7 @@ export interface SearchOptions {
   query?: string
   set?: string
   source?: 'ant' | 'iconify' | 'custom'
-  colorMode?: 'mono' | 'preserved'
+  colorMode?: 'mono' | 'preserved' | 'gradient'
   /** Filter custom brand images vs vector icons. */
   assetKind?: 'icon' | 'image'
   limit?: number

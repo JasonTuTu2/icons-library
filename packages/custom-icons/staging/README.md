@@ -4,8 +4,9 @@ Pending GenVoice SVG / brand-image **adds** and **removals** shared by the icon 
 
 - `mono/*.svg` → applied to `packages/custom-icons/svg/`
 - `color/*.svg` → applied to `packages/custom-icons/svg/color/`
+- `gradient/*.svg` → applied to `packages/custom-icons/svg/gradient/`
 - `images/*.{png,jpg,jpeg}` → applied to `packages/custom-icons/images/`
-- `remove/*.remove` → Apply deletes matching `svg/{name}.svg`, `svg/color/{name}.svg`, and/or `images/{name}.*`
+- `remove/*.remove` → Apply deletes matching `svg/{name}.svg`, `svg/color/{name}.svg`, `svg/gradient/{name}.svg`, and/or `images/{name}.*`
 
 **Add to staging** / **Stage removal** write here via the GitHub Contents API (no Action).
 **Apply staged to library** runs one workflow that promotes adds, applies removals, regenerates the catalog, and clears these folders.

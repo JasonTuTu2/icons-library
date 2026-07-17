@@ -67,9 +67,12 @@ jobs:
                   continue
               if is_img:
                   dst_dir = hold / "images"
+              elif "/svg/gradient/" in rel:
+                  dst_dir = hold / "gradient"
+              elif "/svg/color/" in rel:
+                  dst_dir = hold / "color"
               else:
-                  color = "color" if "/svg/color/" in rel else "mono"
-                  dst_dir = hold / color
+                  dst_dir = hold / "mono"
               dst_dir.mkdir(parents=True, exist_ok=True)
               dst = dst_dir / src.name
               shutil.move(str(src), str(dst))
@@ -143,9 +146,11 @@ jobs:
           hold = Path("packages/custom-icons/.publish-hold")
           mono_dst = Path("packages/custom-icons/svg")
           color_dst = Path("packages/custom-icons/svg/color")
+          grad_dst = Path("packages/custom-icons/svg/gradient")
           img_dst = Path("packages/custom-icons/images")
           mono_dst.mkdir(parents=True, exist_ok=True)
           color_dst.mkdir(parents=True, exist_ok=True)
+          grad_dst.mkdir(parents=True, exist_ok=True)
           img_dst.mkdir(parents=True, exist_ok=True)
 
           restored = 0
@@ -156,6 +161,11 @@ jobs:
               restored += 1
           for src in sorted((hold / "color").glob("*.svg")) if (hold / "color").is_dir() else []:
               dst = color_dst / src.name
+              shutil.move(str(src), str(dst))
+              print(f"Restored {dst.as_posix()}")
+              restored += 1
+          for src in sorted((hold / "gradient").glob("*.svg")) if (hold / "gradient").is_dir() else []:
+              dst = grad_dst / src.name
               shutil.move(str(src), str(dst))
               print(f"Restored {dst.as_posix()}")
               restored += 1
