@@ -6,11 +6,13 @@ import lucide from '@iconify-json/lucide/icons.json'
 import heroicons from '@iconify-json/heroicons/icons.json'
 import { collectAllCustomIcons } from './customSvg.js'
 import { collectCustomImages } from './customImages.js'
+import { categoryForIcon, loadCustomMetadata, metadataPathFromCustomRoot } from './metadata.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = join(__dirname, '../../../packages/catalog/src/data/icons.json')
-const customSvgDir = join(__dirname, '../../../packages/custom-icons/svg')
-const customImagesDir = join(__dirname, '../../../packages/custom-icons/images')
+const customRootDir = join(__dirname, '../../../packages/custom-icons')
+const customSvgDir = join(customRootDir, 'svg')
+const customImagesDir = join(customRootDir, 'images')
 const customCollectionPath = join(
   __dirname,
   '../../../packages/custom-icons/src/collection.json',
@@ -148,6 +150,7 @@ function collectIconify(
 }
 
 function collectCustomIcons(): IconMeta[] {
+  const customMetadata = loadCustomMetadata(metadataPathFromCustomRoot(customRootDir))
   const { icons, warnings } = collectAllCustomIcons(customSvgDir)
   for (const warning of warnings) {
     console.warn(`[catalog-gen] ${warning}`)
@@ -188,6 +191,9 @@ function collectCustomIcons(): IconMeta[] {
           ? 'gradient'
           : 'mono',
       item.colorMode,
+      ...(categoryForIcon(customMetadata, item.name)
+        ? [categoryForIcon(customMetadata, item.name)!]
+        : []),
     ],
     set: 'custom',
     source: 'custom' as const,
@@ -195,10 +201,12 @@ function collectCustomIcons(): IconMeta[] {
     name: item.name,
     colorMode: item.colorMode,
     assetKind: 'icon' as const,
+    category: categoryForIcon(customMetadata, item.name),
   }))
 }
 
 function collectBrandImages(): IconMeta[] {
+  const customMetadata = loadCustomMetadata(metadataPathFromCustomRoot(customRootDir))
   const { images, warnings } = collectCustomImages(customImagesDir)
   for (const warning of warnings) {
     console.warn(`[catalog-gen] ${warning}`)
@@ -215,6 +223,9 @@ function collectBrandImages(): IconMeta[] {
       'custom',
       item.format,
       'brand-image',
+      ...(categoryForIcon(customMetadata, item.name)
+        ? [categoryForIcon(customMetadata, item.name)!]
+        : []),
     ],
     set: 'custom-images',
     source: 'custom' as const,
@@ -223,6 +234,7 @@ function collectBrandImages(): IconMeta[] {
     assetKind: 'image' as const,
     format: item.format,
     assetPath: item.publicPath,
+    category: categoryForIcon(customMetadata, item.name),
   }))
 }
 

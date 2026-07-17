@@ -1,3 +1,14 @@
+import {
+  createEmptyMetadata,
+  getIconCategory,
+  normalizeCategory,
+  parseMetadataJson,
+  parseStagingMetaFile,
+  serializeMetadata,
+  setIconCategory,
+  type CustomIconMetadata,
+} from './metadata.js'
+
 export type IconColorMode = 'mono' | 'preserved' | 'gradient'
 export type AssetKind = 'svg' | 'image'
 export type ImageFormat = 'png' | 'jpg' | 'jpeg'
@@ -8,6 +19,8 @@ export interface IconUploadPayload {
   content: string
   /** Required for SVG; ignored for images. */
   colorMode?: IconColorMode
+  /** Custom asset category; empty string means no category. */
+  category?: string
   /** Defaults to svg. */
   kind?: AssetKind
   /** Required when kind is image. */
@@ -22,6 +35,8 @@ export interface StagedIcon {
   colorMode?: IconColorMode
   /** Image only. */
   format?: ImageFormat
+  /** Custom asset category; empty string means no category. */
+  category?: string
 }
 
 /** Tombstone in staging/remove — Apply deletes matching library SVG(s) and/or image. */
@@ -90,6 +105,8 @@ export interface GithubAdminClient {
   getPublishReadiness(): Promise<PublishReadiness>
   dispatchApplyStaged(): Promise<void>
   dispatchPublish(options?: DispatchPublishOptions): Promise<void>
+  getCustomMetadata(): Promise<CustomIconMetadata>
+  updateIconCategory(name: string, category: string): Promise<void>
 }
 
 /** Thrown when GitHub rejects credentials (401/403). Callers should clear stored tokens. */
@@ -105,11 +122,33 @@ export class GithubAuthError extends Error {
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 const STAGING_BASE = 'packages/custom-icons/staging'
+const STAGING_META = `${STAGING_BASE}/meta`
 const REMOVE_DIR = `${STAGING_BASE}/remove`
 const IMAGES_DIR = 'packages/custom-icons/images'
 const STAGING_IMAGES = `${STAGING_BASE}/images`
+const METADATA_FILE = 'packages/custom-icons/metadata.json'
 const DEFAULT_REPO = 'JasonTuTu2/icons-library'
 const IMAGE_EXTS = ['png', 'jpg', 'jpeg'] as const
+
+export type { CustomIconMetadata, CustomIconEntryMeta } from './metadata.js'
+export {
+  METADATA_PATH,
+  STAGING_META_DIR,
+  categoryLabel,
+  createEmptyMetadata,
+  getIconCategory,
+  mergeStagingMetaIntoMetadata,
+  normalizeCategory,
+  parseMetadataJson,
+  parseStagingMetaFile,
+  removeIconMetadata,
+  serializeMetadata,
+  setIconCategory,
+} from './metadata.js'
+
+function stagingMetaPath(name: string): string {
+  return `${STAGING_META}/${name}.json`
+}
 
 function removalMarkerPath(name: string): string {
   return `${REMOVE_DIR}/${name}.remove`
@@ -223,7 +262,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       if (!content) {
         throw new Error(`"${icon.name}" image content is empty.`)
       }
-      return { name, content, kind, format }
+      return { name, content, kind, format, category: normalizeCategory(icon.category) }
     }
 
     const content = icon.content.trim()
@@ -235,6 +274,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       content,
       kind: 'svg' as const,
       colorMode: normalizeColorMode(icon.colorMode),
+      category: normalizeCategory(icon.category),
     }
   })
 }
@@ -449,6 +489,87 @@ export function createGithubAdminClient(
     return putBase64File(path, toBase64Utf8(content), message)
   }
 
+  async function readMetadataFile(): Promise<CustomIconMetadata> {
+    const file = await readContentFile(METADATA_FILE)
+    if (!file) return createEmptyMetadata()
+    return parseMetadataJson(decodeBase64Utf8(file.contentBase64))
+  }
+
+  async function writeMetadataFile(
+    metadata: CustomIconMetadata,
+    message: string,
+  ): Promise<void> {
+    await putTextFile(METADATA_FILE, serializeMetadata(metadata), message)
+  }
+
+  async function writeStagingMeta(
+    name: string,
+    category: string,
+  ): Promise<void> {
+    await putTextFile(
+      stagingMetaPath(name),
+      `${JSON.stringify({ category: normalizeCategory(category) })}\n`,
+      `Stage category for ${name}`,
+    )
+  }
+
+  async function deleteStagingMeta(name: string, message: string): Promise<void> {
+    await deletePath(stagingMetaPath(name), message)
+  }
+
+  async function readStagingMetaMap(): Promise<Map<string, string>> {
+    const res = await githubFetch(`/contents/${STAGING_META}`)
+    if (res.status === 404) return new Map()
+    if (!res.ok) {
+      let detail = res.statusText
+      try {
+        const body = (await res.json()) as { message?: string }
+        if (body.message) detail = body.message
+      } catch {
+        // ignore
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new GithubAuthError(res.status, detail)
+      }
+      throw new Error(`GitHub API ${res.status}: ${detail}`)
+    }
+
+    const entries = (await res.json()) as Array<{
+      name: string
+      type: string
+    }>
+    if (!Array.isArray(entries)) return new Map()
+
+    const map = new Map<string, string>()
+    for (const entry of entries) {
+      if (entry.type !== 'file' || !entry.name.endsWith('.json')) continue
+      const name = entry.name.replace(/\.json$/i, '')
+      const file = await readContentFile(`${STAGING_META}/${entry.name}`)
+      if (!file) continue
+      const { category } = parseStagingMetaFile(
+        decodeBase64Utf8(file.contentBase64),
+      )
+      map.set(name, category)
+    }
+    return map
+  }
+
+  function attachCategories(
+    icons: StagedIcon[],
+    categories: Map<string, string>,
+    libraryMetadata?: CustomIconMetadata,
+  ): StagedIcon[] {
+    return icons.map((icon) => ({
+      ...icon,
+      category:
+        categories.get(icon.name) ??
+        (libraryMetadata
+          ? getIconCategory(libraryMetadata, icon.name)
+          : undefined) ??
+        '',
+    }))
+  }
+
   async function listContentFileNames(dirPath: string): Promise<Set<string>> {
     const res = await githubFetch(`/contents/${dirPath}`)
     if (res.status === 404) return new Set()
@@ -607,6 +728,7 @@ export function createGithubAdminClient(
             icon.content,
             `Stage image img:${icon.name}`,
           )
+          await writeStagingMeta(icon.name, icon.category ?? '')
           continue
         }
 
@@ -625,6 +747,7 @@ export function createGithubAdminClient(
           `${icon.content}\n`,
           `Stage icon ci:${icon.name}`,
         )
+        await writeStagingMeta(icon.name, icon.category ?? '')
       }
     },
 
@@ -679,6 +802,7 @@ export function createGithubAdminClient(
             `Cancel staged image img:${name}`,
           )
         }
+        await deleteStagingMeta(name, `Cancel staged category for ${name}`)
 
         await putTextFile(
           removalMarkerPath(name),
@@ -703,14 +827,21 @@ export function createGithubAdminClient(
     },
 
     async listStagedIcons(): Promise<StagedIcon[]> {
-      const [mono, color, gradient, images] = await Promise.all([
-        listStagingDir('mono', 'mono') as Promise<StagedIcon[]>,
-        listStagingDir('color', 'preserved') as Promise<StagedIcon[]>,
-        listStagingDir('gradient', 'gradient') as Promise<StagedIcon[]>,
-        listStagingDir('images') as Promise<StagedIcon[]>,
-      ])
-      return [...mono, ...color, ...gradient, ...images].sort((a, b) =>
-        a.name.localeCompare(b.name),
+      const [mono, color, gradient, images, stagingMeta, libraryMetadata] =
+        await Promise.all([
+          listStagingDir('mono', 'mono') as Promise<StagedIcon[]>,
+          listStagingDir('color', 'preserved') as Promise<StagedIcon[]>,
+          listStagingDir('gradient', 'gradient') as Promise<StagedIcon[]>,
+          listStagingDir('images') as Promise<StagedIcon[]>,
+          readStagingMetaMap(),
+          readMetadataFile(),
+        ])
+      return attachCategories(
+        [...mono, ...color, ...gradient, ...images].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
+        stagingMeta,
+        libraryMetadata,
       )
     },
 
@@ -722,6 +853,7 @@ export function createGithubAdminClient(
       const compare = await compareSinceLastPublish()
       if (!compare) return []
 
+      const libraryMetadata = await readMetadataFile()
       const icons: StagedIcon[] = []
       for (const file of compare.files ?? []) {
         if (file.status === 'removed') continue
@@ -729,7 +861,11 @@ export function createGithubAdminClient(
         if (staged) icons.push(staged)
       }
 
-      return icons.sort((a, b) => a.name.localeCompare(b.name))
+      return attachCategories(
+        icons.sort((a, b) => a.name.localeCompare(b.name)),
+        new Map(),
+        libraryMetadata,
+      )
     },
 
     async listUnpublishedRemovals(): Promise<StagedRemoval[]> {
@@ -931,6 +1067,26 @@ export function createGithubAdminClient(
           },
         }),
       })
+    },
+
+    async getCustomMetadata(): Promise<CustomIconMetadata> {
+      return readMetadataFile()
+    },
+
+    async updateIconCategory(name: string, category: string): Promise<void> {
+      const sanitized = sanitizeIconName(name)
+      if (!sanitized) {
+        throw new Error(`Invalid icon name "${name}".`)
+      }
+      const metadata = setIconCategory(
+        await readMetadataFile(),
+        sanitized,
+        category,
+      )
+      await writeMetadataFile(
+        metadata,
+        `Update category for ${sanitized}`,
+      )
     },
   }
 }

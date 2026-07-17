@@ -727,7 +727,10 @@ pre {
   box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
 }
 
-.upload-list .color-mode-select {
+.upload-list .color-mode-select,
+.category-select,
+.upload-list .category-select,
+.figma-dock-list .category-select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.3rem 0.35rem;
@@ -736,6 +739,61 @@ pre {
   font-weight: 500;
   background: var(--bg-elevated);
   color: var(--ink);
+}
+
+.category-select-wrap {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 8rem;
+}
+
+.category-create-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.category-create-row input {
+  flex: 1 1 7rem;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  font-size: 0.75rem;
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.apply-all-category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.75rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.apply-all-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .staged-block {

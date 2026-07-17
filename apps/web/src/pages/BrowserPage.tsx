@@ -155,6 +155,11 @@ export function BrowserPage() {
             vueCode={vueSnippet(selected.id, { format: selected.format })}
             onClose={() => setSelected(null)}
             onRemovalStaged={() => setSourceFilter('custom')}
+            onCategoryUpdated={(category) =>
+              setSelected((current) =>
+                current ? { ...current, category: category || undefined } : current,
+              )
+            }
           />
         ) : (
           <aside className="detail empty-detail">

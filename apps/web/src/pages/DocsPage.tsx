@@ -83,6 +83,11 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           icons preserve their fills / paint servers; the <code>color</code>{' '}
           prop may not recolor them. Filter by color mode in the browser.
         </p>
+        <p>
+          Assign a <strong>Category</strong> before Stage (apply to all or per
+          asset). Default is <em>No category</em>. Edit category later in the
+          detail sidebar for custom <code>ci:</code> / <code>img:</code> assets.
+        </p>
       </section>
 
       <section>

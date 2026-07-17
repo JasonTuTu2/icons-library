@@ -1,11 +1,49 @@
 import type { Plugin, ViteDevServer } from 'vite'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 
 const UPLOAD_PATH = '/__gv/icons/upload'
+const METADATA_PATH = '/__gv/icons/metadata'
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
+
+interface CustomIconMetadata {
+  categories: string[]
+  icons: Record<string, { category?: string }>
+}
+
+function normalizeCategory(raw: string | undefined | null): string {
+  return (raw ?? '').trim()
+}
+
+function readMetadata(metadataPath: string): CustomIconMetadata {
+  try {
+    return JSON.parse(readFileSync(metadataPath, 'utf8')) as CustomIconMetadata
+  } catch {
+    return { categories: [], icons: {} }
+  }
+}
+
+function writeMetadata(metadataPath: string, metadata: CustomIconMetadata): void {
+  mkdirSync(dirname(metadataPath), { recursive: true })
+  writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, 'utf8')
+}
+
+function setIconCategoryMetadata(
+  metadataPath: string,
+  name: string,
+  category: string,
+): void {
+  const metadata = readMetadata(metadataPath)
+  const cat = normalizeCategory(category)
+  metadata.icons[name] = { category: cat }
+  if (cat && !metadata.categories.includes(cat)) {
+    metadata.categories.push(cat)
+    metadata.categories.sort((a, b) => a.localeCompare(b))
+  }
+  writeMetadata(metadataPath, metadata)
+}
 
 function sanitizeIconName(raw: string): string | null {
   const base = raw
@@ -46,6 +84,7 @@ function reloadDevCatalog(server: ViteDevServer, repoRoot: string) {
     join(repoRoot, 'packages/catalog/src/data/icons.json'),
     join(repoRoot, 'packages/custom-icons/src/react.ts'),
     join(repoRoot, 'packages/custom-icons/src/collection.json'),
+    join(repoRoot, 'packages/custom-icons/metadata.json'),
   ]
 
   for (const file of paths) {
@@ -63,6 +102,7 @@ export function customIconUploadPlugin(): Plugin {
   const colorDir = join(svgDir, 'color')
   const gradientDir = join(svgDir, 'gradient')
   const imagesDir = join(repoRoot, 'packages/custom-icons/images')
+  const metadataFile = join(repoRoot, 'packages/custom-icons/metadata.json')
 
   return {
     name: 'genvoice-custom-icon-upload',
@@ -71,6 +111,12 @@ export function customIconUploadPlugin(): Plugin {
         if (req.method === 'GET' && req.url === '/__gv/icons/status') {
           res.setHeader('Content-Type', 'application/json')
           res.end(JSON.stringify({ uploadEnabled: true }))
+          return
+        }
+
+        if (req.method === 'GET' && req.url === METADATA_PATH) {
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(readMetadata(metadataFile)))
           return
         }
 
@@ -90,6 +136,7 @@ export function customIconUploadPlugin(): Plugin {
             colorMode?: 'mono' | 'preserved' | 'gradient'
             kind?: 'svg' | 'image'
             format?: 'png' | 'jpg' | 'jpeg'
+            category?: string
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -130,6 +177,7 @@ export function customIconUploadPlugin(): Plugin {
             mkdirSync(imagesDir, { recursive: true })
             const filePath = join(imagesDir, `${name}.${format}`)
             writeFileSync(filePath, Buffer.from(base64, 'base64'))
+            setIconCategoryMetadata(metadataFile, name, body.category ?? '')
 
             await runCatalogGen(repoRoot)
             reloadDevCatalog(server, repoRoot)
@@ -170,6 +218,7 @@ export function customIconUploadPlugin(): Plugin {
           mkdirSync(targetDir, { recursive: true })
           const filePath = join(targetDir, `${name}.svg`)
           writeFileSync(filePath, `${content}\n`, 'utf8')
+          setIconCategoryMetadata(metadataFile, name, body.category ?? '')
 
           await runCatalogGen(repoRoot)
 

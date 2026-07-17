@@ -89,3 +89,14 @@ export function vueSnippet(
   }
   return `<script setup>\nimport { Icon } from '@JasonTuTu2/icons-vue'\n</script>\n\n<template>\n  <Icon name="${id}" :size="24" label="…" />\n</template>`
 }
+
+/** Distinct non-empty custom asset categories from the catalog. */
+export function getCustomCategories(): string[] {
+  const categories = new Set<string>()
+  for (const icon of catalog.icons) {
+    if (icon.source !== 'custom') continue
+    const category = icon.category?.trim()
+    if (category) categories.add(category)
+  }
+  return [...categories].sort((a, b) => a.localeCompare(b))
+}

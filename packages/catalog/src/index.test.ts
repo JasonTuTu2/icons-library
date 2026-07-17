@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { searchIcons, reactSnippet, vueSnippet, catalog } from '../src/index.js'
+import { searchIcons, reactSnippet, vueSnippet, getCustomCategories, catalog } from '../src/index.js'
 
 describe('catalog', () => {
   it('has icons and sets', () => {
@@ -19,5 +19,9 @@ describe('catalog', () => {
     expect(reactSnippet('ci:billing-alert')).not.toContain('registerCustomIcons')
     expect(vueSnippet('ci:billing-alert')).toContain('ci:billing-alert')
     expect(vueSnippet('ci:billing-alert')).not.toContain('registerCustomIcons')
+  })
+
+  it('lists custom categories from catalog metadata', () => {
+    expect(Array.isArray(getCustomCategories())).toBe(true)
   })
 })

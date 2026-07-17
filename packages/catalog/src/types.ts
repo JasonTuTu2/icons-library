@@ -34,11 +34,12 @@ export interface IconMeta {
   assetKind?: 'icon' | 'image'
   /** Brand images only: file format. */
   format?: 'png' | 'jpg' | 'jpeg'
-  /**
-   * Brand images: path under the icon browser public root
+  /** Brand images: path under the icon browser public root
    * (e.g. custom-images/logo.png).
    */
   assetPath?: string
+  /** Custom assets only: designer-assigned category (empty = no category). */
+  category?: string
 }
 
 export interface IconCatalog {

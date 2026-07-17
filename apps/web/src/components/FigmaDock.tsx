@@ -16,6 +16,11 @@ import {
   subscribeFigmaPluginMessages,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
+import { ApplyAllCategory, CategorySelect } from './CategorySelect'
+import {
+  loadCategoryRegistry,
+  mergeCategoryIntoRegistry,
+} from '../lib/categories'
 
 interface PendingIcon {
   id: string
@@ -23,6 +28,7 @@ interface PendingIcon {
   content: string
   previewUrl: string
   colorMode: IconColorMode
+  category: string
 }
 
 function toPending(icon: FigmaExportIcon): PendingIcon {
@@ -35,6 +41,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
       new Blob([icon.content], { type: 'image/svg+xml' }),
     ),
     colorMode: detectSvgColorMode(icon.content),
+    category: '',
   }
 }
 
@@ -43,7 +50,7 @@ function revokeAll(icons: PendingIcon[]): void {
 }
 
 /**
- * Figma plugin panel: Load, rename/color, Stage, link to full browser.
+ * Figma plugin panel: Load, rename/color/category, Stage, link to full browser.
  * No catalog browse UI.
  */
 export function FigmaDock() {
@@ -52,6 +59,7 @@ export function FigmaDock() {
   const [message, setMessage] = useState<ReactNode>(null)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
+  const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const githubOk = isGithubAdminEnabled()
   const browserUrl = fullIconBrowserUrl()
 
@@ -83,6 +91,21 @@ export function FigmaDock() {
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (!githubOk) return
+    let cancelled = false
+    void loadCategoryRegistry()
+      .then(({ categories }) => {
+        if (!cancelled) setCategoryRegistry(categories)
+      })
+      .catch(() => {
+        if (!cancelled) setCategoryRegistry([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [githubOk])
 
   useEffect(() => {
     return () => {
@@ -163,6 +186,7 @@ export function FigmaDock() {
           name,
           content: icon.content,
           colorMode: icon.colorMode,
+          category: icon.category,
         }
       })
 
@@ -224,12 +248,22 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi and names, then Stage. Names
-          already in the library or staging must be changed first.
+          Load from the canvas, set Mono/Multi, category, and names, then Stage.
+          Names already in the library or staging must be changed first.
         </p>
       )}
       {pending.length > 0 ? (
-        <ul className="figma-dock-list">
+        <>
+          <ApplyAllCategory
+            categories={categoryRegistry}
+            onCreateCategory={(name) =>
+              setCategoryRegistry((prev) => mergeCategoryIntoRegistry(prev, name))
+            }
+            onApplyAll={(category) =>
+              setPending((prev) => prev.map((row) => ({ ...row, category })))
+            }
+          />
+          <ul className="figma-dock-list">
           {pending.map((icon, index) => {
             const conflictMsg = nameConflictMsgs[index] ?? ''
             return (
@@ -275,6 +309,23 @@ export function FigmaDock() {
                   <option value="preserved">Multi</option>
                   <option value="gradient">Gradient</option>
                 </select>
+                <CategorySelect
+                  value={icon.category}
+                  onChange={(category) =>
+                    setPending((prev) =>
+                      prev.map((row, i) =>
+                        i === index ? { ...row, category } : row,
+                      ),
+                    )
+                  }
+                  categories={categoryRegistry}
+                  onCreateCategory={(name) =>
+                    setCategoryRegistry((prev) =>
+                      mergeCategoryIntoRegistry(prev, name),
+                    )
+                  }
+                  ariaLabel={`Category for ci:${icon.name || 'icon'}`}
+                />
                 <button
                   type="button"
                   className="figma-btn figma-btn-quiet"
@@ -296,7 +347,8 @@ export function FigmaDock() {
               </li>
             )
           })}
-        </ul>
+          </ul>
+        </>
       ) : null}
       {message ? (
         <p className="figma-dock-message" role="status">

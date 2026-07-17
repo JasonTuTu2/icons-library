@@ -1,12 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { Icon } from '@JasonTuTu2/icons-react'
 import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   stageRemovals,
+  updateIconCategory,
 } from '../lib/github'
 import { customImagePublicUrl } from '../lib/customImageUrl'
+import { CategorySelect, categoryLabel } from './CategorySelect'
+import {
+  loadCategoryRegistry,
+  mergeCategoryIntoRegistry,
+} from '../lib/categories'
 
 interface IconDetailProps {
   icon: IconMeta
@@ -14,6 +20,7 @@ interface IconDetailProps {
   vueCode: string
   onClose: () => void
   onRemovalStaged?: (name: string) => void
+  onCategoryUpdated?: (category: string) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -31,10 +38,15 @@ export function IconDetail({
   vueCode,
   onClose,
   onRemovalStaged,
+  onCategoryUpdated,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [removeMessage, setRemoveMessage] = useState<string | null>(null)
+  const [categoryBusy, setCategoryBusy] = useState(false)
+  const [categoryMessage, setCategoryMessage] = useState<string | null>(null)
+  const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
+  const [categoryValue, setCategoryValue] = useState(icon.category ?? '')
 
   const isCustomAsset =
     icon.source === 'custom' &&
@@ -42,6 +54,47 @@ export function IconDetail({
 
   const canStageRemoval =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
+
+  const canEditCategory =
+    isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
+
+  useEffect(() => {
+    setCategoryValue(icon.category ?? '')
+  }, [icon.id, icon.category])
+
+  useEffect(() => {
+    if (!isCustomAsset) return
+    let cancelled = false
+    void loadCategoryRegistry()
+      .then(({ categories }) => {
+        if (!cancelled) setCategoryRegistry(categories)
+      })
+      .catch(() => {
+        if (!cancelled) setCategoryRegistry([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [isCustomAsset])
+
+  async function handleCategoryChange(nextCategory: string) {
+    const name = icon.name
+    setCategoryValue(nextCategory)
+    if (!canEditCategory) return
+
+    setCategoryBusy(true)
+    setCategoryMessage(null)
+    try {
+      await updateIconCategory(name, nextCategory)
+      onCategoryUpdated?.(nextCategory)
+      setCategoryMessage('Category saved.')
+    } catch (err) {
+      setCategoryValue(icon.category ?? '')
+      setCategoryMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setCategoryBusy(false)
+    }
+  }
 
   async function handleCopy(label: string, text: string) {
     const ok = await copyText(text)
@@ -136,6 +189,36 @@ export function IconDetail({
                   {' '}
                   The <code>color</code> prop may not recolor this icon.
                 </span>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset ? (
+          <div>
+            <dt>Category</dt>
+            <dd>
+              {canEditCategory ? (
+                <CategorySelect
+                  value={categoryValue}
+                  onChange={(category) => void handleCategoryChange(category)}
+                  categories={categoryRegistry}
+                  onCreateCategory={(name) =>
+                    setCategoryRegistry((prev) =>
+                      mergeCategoryIntoRegistry(prev, name),
+                    )
+                  }
+                  ariaLabel={`Category for ${icon.id}`}
+                />
+              ) : (
+                categoryLabel(icon.category)
+              )}
+              {categoryBusy ? (
+                <span className="meta-note"> Saving…</span>
+              ) : null}
+              {categoryMessage ? (
+                <p className="meta-note" role="status">
+                  {categoryMessage}
+                </p>
               ) : null}
             </dd>
           </div>

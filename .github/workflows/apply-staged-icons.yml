@@ -27,8 +27,9 @@ jobs:
           COLOR_DST=packages/custom-icons/svg/color
           GRAD_DST=packages/custom-icons/svg/gradient
           IMG_DST=packages/custom-icons/images
-          mkdir -p "$MONO_DST" "$COLOR_DST" "$GRAD_DST" "$IMG_DST" "$STAGING/remove" "$STAGING/images" "$STAGING/gradient"
+          mkdir -p "$MONO_DST" "$COLOR_DST" "$GRAD_DST" "$IMG_DST" "$STAGING/remove" "$STAGING/images" "$STAGING/gradient" "$STAGING/meta"
           names=()
+          removed_names=()
 
           shopt -s nullglob
           for f in "$STAGING"/mono/*.svg; do
@@ -85,6 +86,7 @@ jobs:
             rm -f "$f"
             if [[ "$removed" -eq 1 ]]; then
               names+=("-${name}")
+              removed_names+=("$name")
             else
               echo "Removal marker for $name had no library asset"
             fi
@@ -101,6 +103,7 @@ jobs:
           IFS=', '
           echo "count=${#names[@]}" >> "$GITHUB_OUTPUT"
           echo "names=${names[*]}" >> "$GITHUB_OUTPUT"
+          echo "removed_names=${removed_names[*]}" >> "$GITHUB_OUTPUT"
 
       - uses: pnpm/action-setup@v4
         if: steps.promote.outputs.count != '0'
@@ -115,6 +118,12 @@ jobs:
 
       - if: steps.promote.outputs.count != '0'
         run: pnpm install --frozen-lockfile
+
+      - name: Merge staged category metadata
+        if: steps.promote.outputs.count != '0'
+        env:
+          REMOVED_NAMES: ${{ steps.promote.outputs.removed_names }}
+        run: pnpm --filter @JasonTuTu2/catalog-gen exec tsx ../../tooling/apply-staged-metadata.ts
 
       # Source JSON only — Pages builds package dist/ from the committed files.
       - if: steps.promote.outputs.count != '0'

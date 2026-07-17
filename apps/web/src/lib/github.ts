@@ -16,6 +16,7 @@ import {
   type PublishReadiness,
   type StagedIcon,
   type StagedRemoval,
+  type CustomIconMetadata,
 } from '@JasonTuTu2/github-admin'
 import {
   clearGithubSessionToken,
@@ -34,6 +35,7 @@ export type {
   PublishReadiness,
   StagedIcon,
   StagedRemoval,
+  CustomIconMetadata,
 }
 export { sanitizeIconName }
 
@@ -193,4 +195,15 @@ export async function dispatchPublish(
   options?: DispatchPublishOptions,
 ): Promise<void> {
   return withAuthClear(() => getDevClient().dispatchPublish(options))
+}
+
+export async function getCustomMetadata(): Promise<CustomIconMetadata> {
+  return withAuthClear(() => getStagingClient().getCustomMetadata())
+}
+
+export async function updateIconCategory(
+  name: string,
+  category: string,
+): Promise<void> {
+  return withAuthClear(() => getStagingClient().updateIconCategory(name, category))
 }

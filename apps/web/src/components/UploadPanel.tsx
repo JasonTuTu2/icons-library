@@ -35,6 +35,12 @@ import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { conflictMessagesForItems } from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
+import { ApplyAllCategory, CategorySelect } from './CategorySelect'
+import {
+  loadCategoryRegistry,
+  mergeCategoryIntoRegistry,
+} from '../lib/categories'
+import { categoryLabel } from './CategorySelect'
 
 interface UploadItem {
   fileName: string
@@ -44,6 +50,7 @@ interface UploadItem {
   kind: 'svg' | 'image'
   colorMode: IconColorMode
   format?: ImageFormat
+  category: string
 }
 
 interface UploadPanelProps {
@@ -62,6 +69,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     ),
     kind: 'svg',
     colorMode: icon.colorMode || detectSvgColorMode(icon.content),
+    category: '',
   }
 }
 
@@ -124,6 +132,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
             kind: 'image',
             colorMode: 'mono',
             format: imageFormat,
+            category: '',
           },
         ])
       }
@@ -154,6 +163,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           previewUrl: URL.createObjectURL(file),
           kind: 'svg',
           colorMode: detectSvgColorMode(content),
+          category: '',
         },
       ])
     }
@@ -170,7 +180,7 @@ function revokePreviewUrls(items: UploadItem[]): void {
 
 function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
-    return `img:${icon.name} (${icon.format ?? 'image'})`
+    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)}`
   }
   const mode =
     icon.colorMode === 'preserved'
@@ -178,7 +188,7 @@ function stagedAssetLabel(icon: StagedIcon): string {
       : icon.colorMode === 'gradient'
         ? 'gradient'
         : 'mono'
-  return `ci:${icon.name} (${mode})`
+  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)}`
 }
 
 function colorModeLabel(mode: IconColorMode | undefined): string {
@@ -211,6 +221,7 @@ export function UploadPanel({
   const [stagedLoading, setStagedLoading] = useState(false)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
+  const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
   const wasOpenRef = useRef(open)
 
@@ -331,6 +342,21 @@ export function UploadPanel({
   }, [items, mode, githubAuthed])
 
   useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    void loadCategoryRegistry()
+      .then(({ categories }) => {
+        if (!cancelled) setCategoryRegistry(categories)
+      })
+      .catch(() => {
+        if (!cancelled) setCategoryRegistry([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open])
+
+  useEffect(() => {
     function onFigmaOpenUpload(): void {
       const pending = takePendingFigmaUploads()
       const handoffError = takeFigmaHandoffError()
@@ -421,12 +447,14 @@ export function UploadPanel({
                 content: item.content,
                 kind: 'image' as const,
                 format: item.format!,
+                category: item.category,
               }
             : {
                 name: item.name,
                 content: item.content,
                 kind: 'svg' as const,
                 colorMode: item.colorMode,
+                category: item.category,
               },
         ),
       )
@@ -529,6 +557,7 @@ export function UploadPanel({
             colorMode: item.colorMode,
             kind: item.kind,
             format: item.format,
+            category: item.category,
           }),
         })
         const data = (await res.json()) as {
@@ -621,6 +650,20 @@ export function UploadPanel({
                 </label>
 
                 {items.length > 0 ? (
+                  <>
+                    <ApplyAllCategory
+                      categories={categoryRegistry}
+                      onCreateCategory={(name) =>
+                        setCategoryRegistry((prev) =>
+                          mergeCategoryIntoRegistry(prev, name),
+                        )
+                      }
+                      onApplyAll={(category) =>
+                        setItems((prev) =>
+                          prev.map((row) => ({ ...row, category })),
+                        )
+                      }
+                    />
                   <ul className="upload-list">
                     {items.map((item, index) => {
                       const conflictMsg = nameConflictMsgs[index] ?? ''
@@ -705,6 +748,23 @@ export function UploadPanel({
                             {(item.format ?? 'image').toUpperCase()}
                           </span>
                         )}
+                        <CategorySelect
+                          value={item.category}
+                          onChange={(category) =>
+                            setItems((prev) =>
+                              prev.map((row, i) =>
+                                i === index ? { ...row, category } : row,
+                              ),
+                            )
+                          }
+                          categories={categoryRegistry}
+                          onCreateCategory={(name) =>
+                            setCategoryRegistry((prev) =>
+                              mergeCategoryIntoRegistry(prev, name),
+                            )
+                          }
+                          ariaLabel={`Category for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                        />
                         <button
                           type="button"
                           className="ghost"
@@ -721,6 +781,7 @@ export function UploadPanel({
                       )
                     })}
                   </ul>
+                  </>
                 ) : null}
 
                 {mode === 'github' ? (

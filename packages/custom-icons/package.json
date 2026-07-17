@@ -35,6 +35,7 @@
   "files": [
     "dist",
     "src/collection.json",
+    "metadata.json",
     "svg",
     "images"
   ],
