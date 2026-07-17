@@ -34,6 +34,7 @@ import {
 import { useDialogAccessibility } from '../lib/useDialogAccessibility'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
+import { GithubAssetPreview } from './GithubAssetPreview'
 
 interface UploadItem {
   fileName: string
@@ -695,7 +696,17 @@ export function UploadPanel({
                       ) : (
                         <ul className="staged-list">
                           {staged.map((icon) => (
-                            <li key={icon.path}>
+                            <li key={icon.path} className="staged-asset-row">
+                              <GithubAssetPreview
+                                path={icon.path}
+                                colorMode={icon.colorMode}
+                                isImage={icon.kind === 'image'}
+                                title={
+                                  icon.kind === 'image'
+                                    ? `img:${icon.name}`
+                                    : `gv:${icon.name}`
+                                }
+                              />
                               <code>
                                 {icon.kind === 'image'
                                   ? `img:${icon.name}`
@@ -719,7 +730,14 @@ export function UploadPanel({
                       ) : (
                         <ul className="staged-list">
                           {stagedRemovals.map((icon) => (
-                            <li key={icon.path} className="staged-removal-row">
+                            <li
+                              key={icon.path}
+                              className="staged-removal-row staged-asset-row"
+                            >
+                              <GithubAssetPreview
+                                libraryName={icon.name}
+                                title={icon.name}
+                              />
                               <code>{icon.name}</code>
                               <button
                                 type="button"
@@ -774,7 +792,7 @@ export function UploadPanel({
                           <ul className="staged-list check-list">
                             {unpublished.map((icon) => (
                               <li key={icon.path}>
-                                <label className="check-row">
+                                <label className="check-row staged-asset-row">
                                   <input
                                     type="checkbox"
                                     checked={checkedPaths.has(icon.path)}
@@ -783,6 +801,16 @@ export function UploadPanel({
                                         icon.path,
                                         e.target.checked,
                                       )
+                                    }
+                                  />
+                                  <GithubAssetPreview
+                                    path={icon.path}
+                                    colorMode={icon.colorMode}
+                                    isImage={icon.kind === 'image'}
+                                    title={
+                                      icon.kind === 'image'
+                                        ? `img:${icon.name}`
+                                        : `gv:${icon.name}`
                                     }
                                   />
                                   <code>

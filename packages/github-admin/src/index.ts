@@ -30,6 +30,11 @@ export interface StagedRemoval {
   path: string
 }
 
+/** Thumbnail payload from Contents API (SVG text or image base64). */
+export type AssetPreview =
+  | { kind: 'svg'; text: string }
+  | { kind: 'image'; base64: string; mime: 'image/png' | 'image/jpeg' }
+
 export interface GithubAdminConfig {
   token: string
   repo: string
@@ -78,6 +83,10 @@ export interface GithubAdminClient {
   listUnpublishedRemovals(): Promise<StagedRemoval[]>
   /** Existing library / staging files that collide with these kebab names. */
   findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
+  /** Load SVG text or image bytes for a library/staging path (thumbnails). */
+  getAssetPreview(path: string): Promise<AssetPreview | null>
+  /** First library path for a kebab name (svg / color / gradient / images). */
+  findLibraryAssetPath(name: string): Promise<string | null>
   getPublishReadiness(): Promise<PublishReadiness>
   dispatchApplyStaged(): Promise<void>
   dispatchPublish(options?: DispatchPublishOptions): Promise<void>
@@ -338,6 +347,44 @@ export function createGithubAdminClient(
     }
     const body = (await res.json()) as { sha?: string }
     return body.sha
+  }
+
+  function decodeBase64Utf8(base64: string): string {
+    const binary = atob(base64.replace(/\s+/g, ''))
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    return new TextDecoder().decode(bytes)
+  }
+
+  async function readContentFile(
+    path: string,
+  ): Promise<{ name: string; contentBase64: string } | null> {
+    const res = await githubFetch(`/contents/${path}`)
+    if (res.status === 404) return null
+    if (!res.ok) {
+      let detail = res.statusText
+      try {
+        const body = (await res.json()) as { message?: string }
+        if (body.message) detail = body.message
+      } catch {
+        // ignore
+      }
+      if (res.status === 401 || res.status === 403) {
+        throw new GithubAuthError(res.status, detail)
+      }
+      throw new Error(`GitHub API ${res.status}: ${detail}`)
+    }
+    const body = (await res.json()) as {
+      type?: string
+      name?: string
+      content?: string
+      encoding?: string
+    }
+    if (body.type !== 'file' || !body.content) return null
+    return {
+      name: body.name ?? path.split('/').pop() ?? path,
+      contentBase64: body.content.replace(/\s+/g, ''),
+    }
   }
 
   async function deletePath(path: string, message: string): Promise<boolean> {
@@ -766,6 +813,48 @@ export function createGithubAdminClient(
       }
 
       return conflicts
+    },
+
+    async getAssetPreview(path: string): Promise<AssetPreview | null> {
+      const file = await readContentFile(path)
+      if (!file) return null
+      const lower = file.name.toLowerCase()
+      if (lower.endsWith('.svg')) {
+        return { kind: 'svg', text: decodeBase64Utf8(file.contentBase64) }
+      }
+      if (lower.endsWith('.png')) {
+        return {
+          kind: 'image',
+          base64: file.contentBase64,
+          mime: 'image/png',
+        }
+      }
+      if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+        return {
+          kind: 'image',
+          base64: file.contentBase64,
+          mime: 'image/jpeg',
+        }
+      }
+      return null
+    },
+
+    async findLibraryAssetPath(name: string): Promise<string | null> {
+      const sanitized = sanitizeIconName(name)
+      if (!sanitized) return null
+      const candidates = [
+        `packages/custom-icons/svg/${sanitized}.svg`,
+        `packages/custom-icons/svg/color/${sanitized}.svg`,
+        `packages/custom-icons/svg/gradient/${sanitized}.svg`,
+        ...IMAGE_EXTS.map(
+          (ext) => `${IMAGES_DIR}/${sanitized}.${ext}`,
+        ),
+      ]
+      for (const candidate of candidates) {
+        const sha = await getFileSha(candidate)
+        if (sha) return candidate
+      }
+      return null
     },
 
     async getPublishReadiness(): Promise<PublishReadiness> {

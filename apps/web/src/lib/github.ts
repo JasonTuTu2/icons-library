@@ -7,6 +7,7 @@ import {
   packagesUrl as sharedPackagesUrl,
   sanitizeIconName,
   type AssetKind,
+  type AssetPreview,
   type DispatchPublishOptions,
   type IconColorMode,
   type IconNameConflict,
@@ -24,6 +25,7 @@ import {
 
 export type {
   AssetKind,
+  AssetPreview,
   DispatchPublishOptions,
   IconColorMode,
   IconNameConflict,
@@ -164,6 +166,18 @@ export async function findIconNameConflicts(
   names: string[],
 ): Promise<IconNameConflict[]> {
   return withAuthClear(() => getStagingClient().findIconNameConflicts(names))
+}
+
+export async function getAssetPreview(
+  path: string,
+): Promise<AssetPreview | null> {
+  return withAuthClear(() => getStagingClient().getAssetPreview(path))
+}
+
+export async function findLibraryAssetPath(
+  name: string,
+): Promise<string | null> {
+  return withAuthClear(() => getStagingClient().findLibraryAssetPath(name))
 }
 
 /** Promote whatever is staged now into the library (one Action). */

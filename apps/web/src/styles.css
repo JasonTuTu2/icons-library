@@ -753,7 +753,7 @@ pre {
   padding: 0;
   display: grid;
   gap: 0.35rem;
-  max-height: 9rem;
+  max-height: 14rem;
   overflow: auto;
 }
 
@@ -766,6 +766,24 @@ pre {
   border-radius: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
+  align-items: center;
+}
+
+.staged-asset-row {
+  justify-content: flex-start;
+}
+
+.staged-asset-row code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staged-asset-row > span:last-child,
+.staged-asset-row .ghost {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .staged-list span {
