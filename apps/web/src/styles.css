@@ -913,90 +913,200 @@ pre {
   }
 }
 
-/* Compact Figma plugin shell — Load / Stage only */
+/* Figma plugin panel — native plugin chrome (not the marketing site) */
+html.figma-host {
+  --plugin-bg: var(--figma-color-bg, #ffffff);
+  --plugin-bg-secondary: var(--figma-color-bg-secondary, #f5f5f5);
+  --plugin-bg-tertiary: var(--figma-color-bg-tertiary, #e6e6e6);
+  --plugin-bg-hover: var(--figma-color-bg-hover, #f0f0f0);
+  --plugin-bg-brand: var(--figma-color-bg-brand, #0d99ff);
+  --plugin-bg-brand-hover: var(--figma-color-bg-brand-hover, #007be5);
+  --plugin-text: var(--figma-color-text, rgba(0, 0, 0, 0.9));
+  --plugin-text-secondary: var(
+    --figma-color-text-secondary,
+    rgba(0, 0, 0, 0.5)
+  );
+  --plugin-text-onbrand: var(--figma-color-text-onbrand, #ffffff);
+  --plugin-border: var(--figma-color-border, #e6e6e6);
+  --plugin-border-strong: var(--figma-color-border-strong, #b3b3b3);
+  --plugin-icon: var(--figma-color-icon, rgba(0, 0, 0, 0.9));
+}
+
 html.figma-host,
 html.figma-host body,
 html.figma-host #root {
   height: 100%;
-  overflow: auto;
+  margin: 0;
 }
 
 html.figma-host body {
-  background: var(--bg);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 11px;
+  line-height: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow: auto;
+}
+
+html.figma-host code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 10px;
 }
 
 .figma-dock {
   padding: 12px;
+  box-sizing: border-box;
 }
 
 .figma-dock-title {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--navy);
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--plugin-text);
+  line-height: 16px;
 }
 
 .figma-dock-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 8px;
   align-items: center;
 }
 
+.figma-btn {
+  appearance: none;
+  border: 1px solid var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.figma-btn:hover:not(:disabled) {
+  background: var(--plugin-bg-hover);
+  border-color: var(--plugin-border-strong);
+  color: var(--plugin-text);
+  transform: none;
+  box-shadow: none;
+}
+
+.figma-btn:active:not(:disabled) {
+  background: var(--plugin-bg-tertiary);
+  transform: none;
+}
+
+.figma-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.figma-btn-primary {
+  background: var(--plugin-bg-brand);
+  border-color: transparent;
+  color: var(--plugin-text-onbrand);
+}
+
+.figma-btn-primary:hover:not(:disabled) {
+  background: var(--plugin-bg-brand-hover);
+  border-color: transparent;
+  color: var(--plugin-text-onbrand);
+  box-shadow: none;
+}
+
+.figma-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  padding-inline: 6px;
+  color: var(--plugin-text-secondary);
+}
+
+.figma-btn-quiet:hover:not(:disabled) {
+  background: var(--plugin-bg-hover);
+  border-color: transparent;
+  color: var(--plugin-text);
+}
+
 .figma-dock-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  color: var(--muted);
-  line-height: 1.4;
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--plugin-text-secondary);
+  line-height: 16px;
 }
 
 .figma-dock-list {
   list-style: none;
-  margin: 0.65rem 0 0;
+  margin: 8px 0 0;
   padding: 0;
   display: grid;
-  gap: 0.4rem;
-  max-height: 14rem;
+  gap: 4px;
+  max-height: 200px;
   overflow: auto;
 }
 
 .figma-dock-list li {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 5rem auto;
-  gap: 0.4rem;
+  grid-template-columns: 24px minmax(0, 1fr) 4.5rem auto;
+  gap: 6px;
   align-items: center;
-  padding: 0.35rem;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--bg-elevated);
+  padding: 4px;
+  border: 1px solid var(--plugin-border);
+  border-radius: 6px;
+  background: var(--plugin-bg-secondary);
+  box-shadow: none;
 }
 
 .figma-dock-list img {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  background: var(--plugin-bg);
+  border-radius: 2px;
 }
 
 .figma-dock-list label {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
-  font-family: var(--mono);
-  font-size: 0.75rem;
+  gap: 2px;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
   margin: 0;
   min-width: 0;
+  color: var(--plugin-text-secondary);
 }
 
 .figma-dock-list input,
 .figma-dock-list select {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--plugin-border);
+  border-radius: 2px;
+  padding: 3px 6px;
   font: inherit;
-  background: var(--bg-elevated);
-  color: var(--ink);
+  font-size: 11px;
+  line-height: 16px;
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
   min-width: 0;
+  box-shadow: none;
+}
+
+.figma-dock-list input:focus,
+.figma-dock-list select:focus {
+  outline: none;
+  border-color: var(--plugin-bg-brand);
 }
 
 .figma-dock-list input {
@@ -1004,14 +1114,26 @@ html.figma-host body {
 }
 
 .figma-dock-message {
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--blue);
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--plugin-text);
   word-break: break-word;
+  line-height: 16px;
 }
 
 .figma-dock-link {
   margin: 12px 0 0;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.figma-dock-link a {
+  color: var(--plugin-bg-brand);
+  text-decoration: none;
+}
+
+.figma-dock-link a:hover {
+  text-decoration: underline;
+  color: var(--plugin-bg-brand-hover);
 }

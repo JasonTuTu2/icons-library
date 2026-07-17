@@ -144,7 +144,7 @@ export function FigmaDock() {
       <div className="figma-dock-actions">
         <button
           type="button"
-          className="ghost"
+          className="figma-btn"
           disabled={busy}
           onClick={handleLoad}
         >
@@ -152,7 +152,7 @@ export function FigmaDock() {
         </button>
         <button
           type="button"
-          className="ghost accent"
+          className="figma-btn figma-btn-primary"
           disabled={busy || pending.length === 0 || !githubOk}
           onClick={() => void handleStage()}
         >
@@ -207,7 +207,7 @@ export function FigmaDock() {
               </select>
               <button
                 type="button"
-                className="ghost"
+                className="figma-btn figma-btn-quiet"
                 onClick={() => {
                   setPending((prev) => {
                     const target = prev[index]
