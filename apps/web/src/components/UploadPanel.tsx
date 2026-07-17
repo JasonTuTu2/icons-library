@@ -13,7 +13,6 @@ import {
   stageIcons,
   unstageRemoval,
   type IconColorMode,
-  type IconNameConflict,
   type ImageFormat,
   type StagedIcon,
   type StagedRemoval,
@@ -33,6 +32,7 @@ import {
 } from '../lib/unpublishedSelection'
 import { useDialogAccessibility } from '../lib/useDialogAccessibility'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
+import { conflictMessagesForItems } from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 
@@ -168,32 +168,6 @@ function revokePreviewUrls(items: UploadItem[]): void {
   }
 }
 
-function formatConflicts(conflicts: IconNameConflict[]): string {
-  return conflicts
-    .map((c) => {
-      const where =
-        c.location === 'library-mono'
-          ? 'library (mono SVG)'
-          : c.location === 'library-color'
-            ? 'library (multi-color SVG)'
-            : c.location === 'library-gradient'
-              ? 'library (gradient SVG)'
-              : c.location === 'library-image'
-                ? 'library (brand image)'
-                : c.location === 'staging-mono'
-                  ? 'staging (mono SVG)'
-                  : c.location === 'staging-color'
-                    ? 'staging (multi-color SVG)'
-                    : c.location === 'staging-gradient'
-                      ? 'staging (gradient SVG)'
-                      : c.location === 'staging-image'
-                        ? 'staging (brand image)'
-                        : 'staged removals'
-      return `• ${c.name} — already in ${where}`
-    })
-    .join('\n')
-}
-
 function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
     return `img:${icon.name} (${icon.format ?? 'image'})`
@@ -235,6 +209,8 @@ export function UploadPanel({
   const [staged, setStaged] = useState<StagedIcon[]>([])
   const [stagedRemovals, setStagedRemovals] = useState<StagedRemoval[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
+  const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
+  const [conflictsChecking, setConflictsChecking] = useState(false)
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
   const wasOpenRef = useRef(open)
 
@@ -244,12 +220,16 @@ export function UploadPanel({
 
   const panelRef = useDialogAccessibility(open, close)
 
-  const canSubmit = useMemo(
+  const namesValid = useMemo(
     () =>
       items.length > 0 &&
       items.every((item) => sanitizeIconName(item.name) !== null),
     [items],
   )
+
+  const hasNameConflicts = nameConflictMsgs.some((msg) => msg.length > 0)
+
+  const canSubmit = namesValid && !hasNameConflicts && !conflictsChecking
 
   const hasStagedWork = staged.length > 0 || stagedRemovals.length > 0
 
@@ -289,6 +269,66 @@ export function UploadPanel({
       void refreshStaged()
     }
   }, [open, mode, githubAuthed, refreshStaged])
+
+  // Strict live name checks — Stage stays disabled until every name is free.
+  useEffect(() => {
+    if (mode !== 'github' || !githubAuthed || items.length === 0) {
+      setNameConflictMsgs([])
+      setConflictsChecking(false)
+      return
+    }
+
+    const batchDupes = conflictMessagesForItems(
+      items.map((item) => ({
+        name: item.name,
+        kind: item.kind === 'image' ? 'image' : 'svg',
+      })),
+      [],
+    )
+    setNameConflictMsgs(batchDupes)
+
+    const names = [
+      ...new Set(
+        items
+          .map((item) => sanitizeIconName(item.name))
+          .filter((n): n is string => Boolean(n)),
+      ),
+    ]
+    if (names.length === 0) {
+      setConflictsChecking(false)
+      return
+    }
+
+    let cancelled = false
+    setConflictsChecking(true)
+    const timer = window.setTimeout(() => {
+      void findIconNameConflicts(names)
+        .then((remote) => {
+          if (cancelled) return
+          setNameConflictMsgs(
+            conflictMessagesForItems(
+              items.map((item) => ({
+                name: item.name,
+                kind: item.kind === 'image' ? 'image' : 'svg',
+              })),
+              remote,
+            ),
+          )
+        })
+        .catch((err) => {
+          if (cancelled) return
+          setMessage(err instanceof Error ? err.message : String(err))
+        })
+        .finally(() => {
+          if (!cancelled) setConflictsChecking(false)
+        })
+    }, 280)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [items, mode, githubAuthed])
 
   useEffect(() => {
     function onFigmaOpenUpload(): void {
@@ -344,24 +384,33 @@ export function UploadPanel({
     })
   }
 
-  async function confirmNameConflicts(
-    names: string[],
-  ): Promise<boolean> {
-    if (mode !== 'github' || !githubAuthed) return true
-    const conflicts = await findIconNameConflicts(names)
-    if (conflicts.length === 0) return true
-    return window.confirm(
-      `Name conflict(s) found — staging will overwrite existing files:\n\n${formatConflicts(conflicts)}\n\nContinue?`,
-    )
-  }
-
   async function handleStage() {
     if (mode !== 'github' || !canSubmit || !githubAuthed) return
     setBusy(true)
     setMessage(null)
     try {
-      const names = items.map((item) => item.name)
-      if (!(await confirmNameConflicts(names))) return
+      const names = [
+        ...new Set(
+          items
+            .map((item) => sanitizeIconName(item.name))
+            .filter((n): n is string => Boolean(n)),
+        ),
+      ]
+      const remote = await findIconNameConflicts(names)
+      const blocking = conflictMessagesForItems(
+        items.map((item) => ({
+          name: item.name,
+          kind: item.kind === 'image' ? 'image' : 'svg',
+        })),
+        remote,
+      )
+      if (blocking.some((msg) => msg.length > 0)) {
+        setNameConflictMsgs(blocking)
+        setMessage(
+          'Rename assets that already exist in the library or staging before adding.',
+        )
+        return
+      }
 
       const count = items.length
       await stageIcons(
@@ -559,7 +608,9 @@ export function UploadPanel({
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
                     <code>ci:kebab-name</code> (set mono / multi-color /
                     gradient). Images become <code>img:kebab-name</code> (not
-                    usable with <code>&lt;Icon /&gt;</code>).
+                    usable with <code>&lt;Icon /&gt;</code>). Names already in
+                    the library or staging (same kind) must be changed before
+                    staging — overwrites are not allowed.
                     {mode === 'github'
                       ? " On Pages, files go to a shared staging folder first; Apply promotes everyone's staged assets in one Action."
                       : ' Writes to disk and regenerates the catalog locally.'}
@@ -577,8 +628,15 @@ export function UploadPanel({
 
                 {items.length > 0 ? (
                   <ul className="upload-list">
-                    {items.map((item, index) => (
-                      <li key={`${item.fileName}-${index}`}>
+                    {items.map((item, index) => {
+                      const conflictMsg = nameConflictMsgs[index] ?? ''
+                      return (
+                      <li
+                        key={`${item.fileName}-${index}`}
+                        className={
+                          conflictMsg ? 'has-name-conflict' : undefined
+                        }
+                      >
                         <span
                           className={
                             item.kind === 'image'
@@ -609,6 +667,7 @@ export function UploadPanel({
                           <span>{item.kind === 'image' ? 'img:' : 'ci:'}</span>
                           <input
                             value={item.name}
+                            aria-invalid={Boolean(conflictMsg)}
                             onChange={(e) => {
                               const value = e.target.value
                               setItems((prev) =>
@@ -659,8 +718,14 @@ export function UploadPanel({
                         >
                           Remove
                         </button>
+                        {conflictMsg ? (
+                          <p className="name-conflict-msg" role="alert">
+                            {conflictMsg}
+                          </p>
+                        ) : null}
                       </li>
-                    ))}
+                      )
+                    })}
                   </ul>
                 ) : null}
 

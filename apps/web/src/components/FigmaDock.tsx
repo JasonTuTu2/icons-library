@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   findIconNameConflicts,
   isGithubAdminEnabled,
@@ -7,6 +7,7 @@ import {
   type IconColorMode,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
+import { conflictMessagesForItems } from '../lib/nameConflicts'
 import {
   fullIconBrowserUrl,
   notifyFigmaUiReady,
@@ -41,14 +42,6 @@ function revokeAll(icons: PendingIcon[]): void {
   for (const icon of icons) URL.revokeObjectURL(icon.previewUrl)
 }
 
-function formatConflicts(
-  conflicts: Array<{ name: string; location: string }>,
-): string {
-  return conflicts
-    .map((c) => `• ci:${c.name} (${c.location})`)
-    .join('\n')
-}
-
 /**
  * Figma plugin panel: Load, rename/color, Stage, link to full browser.
  * No catalog browse UI.
@@ -57,8 +50,20 @@ export function FigmaDock() {
   const [pending, setPending] = useState<PendingIcon[]>([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<ReactNode>(null)
+  const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
+  const [conflictsChecking, setConflictsChecking] = useState(false)
   const githubOk = isGithubAdminEnabled()
   const browserUrl = fullIconBrowserUrl()
+
+  const namesValid = useMemo(
+    () =>
+      pending.length > 0 &&
+      pending.every((icon) => sanitizeIconName(icon.name) !== null),
+    [pending],
+  )
+  const hasNameConflicts = nameConflictMsgs.some((msg) => msg.length > 0)
+  const canStage =
+    githubOk && namesValid && !hasNameConflicts && !conflictsChecking && !busy
 
   useEffect(() => {
     notifyFigmaUiReady()
@@ -88,6 +93,54 @@ export function FigmaDock() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!githubOk || pending.length === 0) {
+      setNameConflictMsgs([])
+      setConflictsChecking(false)
+      return
+    }
+
+    const asSvg = pending.map((icon) => ({
+      name: icon.name,
+      kind: 'svg' as const,
+    }))
+    setNameConflictMsgs(conflictMessagesForItems(asSvg, []))
+
+    const names = [
+      ...new Set(
+        pending
+          .map((icon) => sanitizeIconName(icon.name))
+          .filter((n): n is string => Boolean(n)),
+      ),
+    ]
+    if (names.length === 0) {
+      setConflictsChecking(false)
+      return
+    }
+
+    let cancelled = false
+    setConflictsChecking(true)
+    const timer = window.setTimeout(() => {
+      void findIconNameConflicts(names)
+        .then((remote) => {
+          if (cancelled) return
+          setNameConflictMsgs(conflictMessagesForItems(asSvg, remote))
+        })
+        .catch((err) => {
+          if (cancelled) return
+          setMessage(err instanceof Error ? err.message : String(err))
+        })
+        .finally(() => {
+          if (!cancelled) setConflictsChecking(false)
+        })
+    }, 280)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [pending, githubOk])
+
   function handleLoad(): void {
     setMessage(null)
     setBusy(true)
@@ -95,7 +148,7 @@ export function FigmaDock() {
   }
 
   async function handleStage(): Promise<void> {
-    if (pending.length === 0 || !githubOk) return
+    if (!canStage || pending.length === 0) return
     setBusy(true)
     setMessage(null)
     try {
@@ -113,14 +166,17 @@ export function FigmaDock() {
         }
       })
 
-      const conflicts = await findIconNameConflicts(
-        payloads.map((p) => p.name),
+      const remote = await findIconNameConflicts(payloads.map((p) => p.name))
+      const blocking = conflictMessagesForItems(
+        payloads.map((p) => ({ name: p.name, kind: 'svg' as const })),
+        remote,
       )
-      if (conflicts.length > 0) {
-        const ok = window.confirm(
-          `Name conflict(s) found — staging will overwrite existing files:\n\n${formatConflicts(conflicts)}\n\nContinue?`,
+      if (blocking.some((msg) => msg.length > 0)) {
+        setNameConflictMsgs(blocking)
+        setMessage(
+          'Rename icons that already exist in the library or staging before staging.',
         )
-        if (!ok) return
+        return
       }
 
       const count = payloads.length
@@ -129,6 +185,7 @@ export function FigmaDock() {
         revokeAll(prev)
         return []
       })
+      setNameConflictMsgs([])
       setMessage(
         `Staged ${count} icon(s). Open the icon browser to Apply or Publish.`,
       )
@@ -154,7 +211,7 @@ export function FigmaDock() {
         <button
           type="button"
           className="figma-btn figma-btn-primary"
-          disabled={busy || pending.length === 0 || !githubOk}
+          disabled={!canStage}
           onClick={() => void handleStage()}
         >
           Stage
@@ -167,65 +224,78 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi and names, then Stage.
+          Load from the canvas, set Mono/Multi and names, then Stage. Names
+          already in the library or staging must be changed first.
         </p>
       )}
       {pending.length > 0 ? (
         <ul className="figma-dock-list">
-          {pending.map((icon, index) => (
-            <li key={icon.id}>
-              <img src={icon.previewUrl} alt="" width={24} height={24} />
-              <label>
-                <span>ci:</span>
-                <input
-                  type="text"
-                  value={icon.name}
+          {pending.map((icon, index) => {
+            const conflictMsg = nameConflictMsgs[index] ?? ''
+            return (
+              <li
+                key={icon.id}
+                className={conflictMsg ? 'has-name-conflict' : undefined}
+              >
+                <img src={icon.previewUrl} alt="" width={24} height={24} />
+                <label>
+                  <span>ci:</span>
+                  <input
+                    type="text"
+                    value={icon.name}
+                    aria-invalid={Boolean(conflictMsg)}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setPending((prev) =>
+                        prev.map((row, i) =>
+                          i === index ? { ...row, name: value } : row,
+                        ),
+                      )
+                    }}
+                  />
+                </label>
+                <select
+                  aria-label={`Color mode for ci:${icon.name || 'icon'}`}
+                  value={icon.colorMode}
                   onChange={(e) => {
-                    const value = e.target.value
+                    const colorMode =
+                      e.target.value === 'preserved'
+                        ? 'preserved'
+                        : e.target.value === 'gradient'
+                          ? 'gradient'
+                          : 'mono'
                     setPending((prev) =>
                       prev.map((row, i) =>
-                        i === index ? { ...row, name: value } : row,
+                        i === index ? { ...row, colorMode } : row,
                       ),
                     )
                   }}
-                />
-              </label>
-              <select
-                aria-label={`Color mode for ci:${icon.name || 'icon'}`}
-                value={icon.colorMode}
-                onChange={(e) => {
-                  const colorMode =
-                    e.target.value === 'preserved'
-                      ? 'preserved'
-                      : e.target.value === 'gradient'
-                        ? 'gradient'
-                        : 'mono'
-                  setPending((prev) =>
-                    prev.map((row, i) =>
-                      i === index ? { ...row, colorMode } : row,
-                    ),
-                  )
-                }}
-              >
-                <option value="mono">Mono</option>
-                <option value="preserved">Multi</option>
-                <option value="gradient">Gradient</option>
-              </select>
-              <button
-                type="button"
-                className="figma-btn figma-btn-quiet"
-                onClick={() => {
-                  setPending((prev) => {
-                    const target = prev[index]
-                    if (target) URL.revokeObjectURL(target.previewUrl)
-                    return prev.filter((_, i) => i !== index)
-                  })
-                }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
+                >
+                  <option value="mono">Mono</option>
+                  <option value="preserved">Multi</option>
+                  <option value="gradient">Gradient</option>
+                </select>
+                <button
+                  type="button"
+                  className="figma-btn figma-btn-quiet"
+                  onClick={() => {
+                    setPending((prev) => {
+                      const target = prev[index]
+                      if (target) URL.revokeObjectURL(target.previewUrl)
+                      return prev.filter((_, i) => i !== index)
+                    })
+                  }}
+                >
+                  Remove
+                </button>
+                {conflictMsg ? (
+                  <p className="name-conflict-msg" role="alert">
+                    {conflictMsg}
+                  </p>
+                ) : null}
+              </li>
+            )
+          })}
         </ul>
       ) : null}
       {message ? (

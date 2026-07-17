@@ -682,6 +682,26 @@ pre {
   border: 1px solid var(--line);
 }
 
+.upload-list li.has-name-conflict,
+.figma-dock-list li.has-name-conflict {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.upload-list li.has-name-conflict input,
+.figma-dock-list li.has-name-conflict input {
+  border-color: var(--danger);
+}
+
+.name-conflict-msg {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--danger);
+  font-family: var(--font);
+}
+
 .upload-list label {
   display: flex;
   align-items: center;
