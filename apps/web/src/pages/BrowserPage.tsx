@@ -146,7 +146,7 @@ export function BrowserPage() {
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
               {isGithubRepoConfigured()
-                ? ' Connect GitHub with a PAT to stage SVGs, stage removals, Apply, or Publish. Write tokens never ship in the Pages build.'
+                ? ' Connect GitHub with a PAT to stage SVGs (including handoffs from the Figma plugin), stage removals, Apply, or Publish. Write tokens never ship in the Pages build.'
                 : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
             </p>
           </aside>

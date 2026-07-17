@@ -22,10 +22,6 @@ importers:
         version: 5.9.3
 
   apps/figma-plugin:
-    dependencies:
-      '@JasonTuTu2/github-admin':
-        specifier: workspace:*
-        version: link:../../packages/github-admin
     devDependencies:
       '@figma/plugin-typings':
         specifier: ^1.109.0

@@ -18,17 +18,16 @@
 
 ## Adding a custom icon
 
-Preferred for designers: the **GenVoice Icons Figma plugin** (stage / apply / publish from the canvas). Alternative: the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/).
+Preferred for designers: the **GenVoice Icons Figma plugin** (export from the canvas into the icon browser). Alternative: upload SVGs directly in the [GitHub Pages icon browser](https://JasonTuTu2.github.io/icons-library/).
 
 ### Figma plugin
 
 1. Build once: `pnpm --filter @JasonTuTu2/icons-figma build` (or `… dev` while iterating).
 2. In Figma Desktop: **Plugins → Development → Import plugin from manifest…** → select `apps/figma-plugin/manifest.json`.
-3. **Connect GitHub** — paste a PAT with `contents:write` and `actions:write` (stored in Figma `clientStorage` on this machine).
-4. Select icon frame(s)/component(s) → **Load selection** → edit kebab names → choose **Mono** or **Multi-color** → **Stage**.
-5. Finish in the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Apply staged to library**, then **Publish** when releasing packages. (The plugin stages only; Apply/Publish live in the browser.)
+3. Select icon frame(s)/component(s) → **Load selection** → edit kebab names → choose **Mono** or **Multi** → **Send to icon browser**.
+4. In the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Connect GitHub** (session PAT) → **Add to staging** → **Apply staged to library** → **Publish** when releasing packages.
 
-Repo target defaults to `JasonTuTu2/icons-library`; override at build time with `GITHUB_REPO=owner/repo`.
+The plugin never talks to GitHub — it only opens the browser with your SVGs (or downloads `gv-icons-handoff.json` if the payload is too large for a URL). Override the browser URL at build time with `ICON_BROWSER_URL=…`.
 
 ### Pages icon browser
 
@@ -41,8 +40,8 @@ To **remove** a custom icon: open it in the browser → **Stage removal** → **
 
 ### First publish (happy path)
 
-1. **Connect GitHub** in the icon browser (or stage from the Figma plugin first).
-2. **Add to staging** → **Apply staged to library**.
+1. **Connect GitHub** in the icon browser.
+2. **Add to staging** (from Upload SVG, or via the Figma plugin handoff) → **Apply staged to library**.
 3. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
 4. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
 5. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.
@@ -52,7 +51,7 @@ To **remove** a custom icon: open it in the browser → **Stage removal** → **
 1. Export a monochrome SVG from Figma (or use the plugin / browser to stage).
 2. Save as `packages/custom-icons/svg/kebab-name.svg` (or stage/apply / `pnpm dev` upload).
 3. Run `pnpm catalog:gen` if you added files via git.
-4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json` (Pages/Figma Apply does this in CI).
+4. Commit the SVG, `packages/custom-icons/src/collection.json`, and `packages/catalog/src/data/icons.json` (Pages Apply does this in CI).
 
 ### Multi-color (preserved fills)
 
@@ -65,7 +64,7 @@ Do not reuse a kebab name that already exists in the other folder.
 
 ## Releases
 
-Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. The Figma plugin stages icons only — Apply and Publish are done in the browser. Staging and Apply do not publish packages by themselves.
+Packages publish to **GitHub Packages** under the `@JasonTuTu2` scope when someone clicks **Publish** in the icon browser (`.github/workflows/publish-packages.yml`), or via manual workflow dispatch. The Figma plugin only exports into the browser — staging, Apply, and Publish happen there. Staging and Apply do not publish packages by themselves.
 
 Manual publish (local):
 
@@ -79,7 +78,7 @@ Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token wi
 
 `@JasonTuTu2/icons-web`, `@JasonTuTu2/icons-figma`, `@JasonTuTu2/github-admin`, and `@JasonTuTu2/catalog-gen` stay private and are not published.
 
-**Security:** Pages and the Figma plugin do **not** embed write tokens. Maintainers connect a PAT (browser session or Figma `clientStorage`); Apply/Publish Action jobs use the `ICON_BROWSER_TOKEN` repo secret. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
+**Security:** Pages and the Figma plugin do **not** embed write tokens. Maintainers connect a PAT in the icon browser session; Apply/Publish Action jobs use the `ICON_BROWSER_TOKEN` repo secret. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
 
 ## Guidelines
 

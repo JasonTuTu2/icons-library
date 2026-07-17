@@ -59,12 +59,14 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Custom icons from Figma</h2>
         <ol>
           <li>
-            Prefer the Figma Development plugin: Connect GitHub → Load selection
-            → Stage. Then finish in the icon browser.
+            Prefer the Figma Development plugin: Load selection → Send to icon
+            browser (no GitHub PAT in the plugin).
           </li>
           <li>
-            In the browser: <strong>Apply staged to library</strong>, wait ~1–2
-            minutes on Actions, hard-refresh, then check unpublished icons and{' '}
+            In the browser: <strong>Connect GitHub</strong> →{' '}
+            <strong>Add to staging</strong> →{' '}
+            <strong>Apply staged to library</strong>, wait ~1–2 minutes on
+            Actions, hard-refresh, then check unpublished icons and{' '}
             <strong>Publish</strong>. Or commit to{' '}
             <code>packages/custom-icons/svg/</code> (mono) /{' '}
             <code>svg/color/</code> (multi-color) and run{' '}
@@ -105,8 +107,11 @@ import { Icon } from '@JasonTuTu2/icons-vue'
       <section>
         <h2>First publish (happy path)</h2>
         <ol>
-          <li>Connect GitHub in the icon browser (or Stage from Figma first).</li>
-          <li>Add to staging → Apply staged to library.</li>
+          <li>Connect GitHub in the icon browser.</li>
+          <li>
+            Add to staging (Upload SVG or Figma handoff) → Apply staged to
+            library.
+          </li>
           <li>
             Track the Apply workflow on Actions (~1–2 min), then hard-refresh
             Pages.

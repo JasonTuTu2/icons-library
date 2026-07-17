@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
 const STORAGE_KEY = 'gv-icons-github-token'
-/** Hash key used by the Figma plugin to hand off a PAT into the browser. */
+/** Hash key formerly used by the Figma plugin to hand off a PAT (legacy). */
 const HASH_TOKEN_KEY = 'gv-github-token'
 
 type Listener = () => void
@@ -43,7 +43,7 @@ export function clearGithubSessionToken(): void {
 }
 
 /**
- * If the Figma plugin opened the browser with `#gv-github-token=…`, store it in
+ * If the URL has `#gv-github-token=…` (legacy plugin handoff), store it in
  * sessionStorage and strip the token from the URL.
  */
 export function consumeGithubTokenFromUrl(): boolean {

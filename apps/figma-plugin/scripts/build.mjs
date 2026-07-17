@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 const watch = process.argv.includes('--watch')
-const githubRepo =
-  process.env.GITHUB_REPO?.trim() || 'JasonTuTu2/icons-library'
+const iconBrowserUrl =
+  process.env.ICON_BROWSER_URL?.trim() ||
+  'https://JasonTuTu2.github.io/icons-library/'
 
 mkdirSync(join(root, 'dist'), { recursive: true })
 
@@ -16,7 +17,7 @@ const shared = {
   target: 'es2017',
   logLevel: 'info',
   define: {
-    __GITHUB_REPO__: JSON.stringify(githubRepo),
+    __ICON_BROWSER_URL__: JSON.stringify(iconBrowserUrl),
   },
 }
 
@@ -290,28 +291,8 @@ async function writeUiHtml() {
       font-size: 12px;
       color: var(--muted);
     }
-    .staged-list {
-      list-style: none;
-      margin: 0 0 8px;
-      padding: 0;
-      display: grid;
-      gap: 4px;
-      max-height: 7rem;
-      overflow: auto;
-    }
-    .staged-list li {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 11px;
-      padding: 4px 6px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface);
-    }
-    .staged-list span { color: var(--muted); font-weight: 500; }
     .links {
-      margin: 0;
+      margin: 12px 0 0;
       font-size: 11px;
       color: var(--muted);
       line-height: 1.5;
@@ -329,36 +310,21 @@ async function writeUiHtml() {
 </head>
 <body>
   <h1>GenVoice Icons</h1>
-  <p class="sub">Stage icons from Figma</p>
-
-  <div class="toolbar" id="auth-toolbar"></div>
-  <div class="panel hidden" id="auth-panel"></div>
+  <p class="sub">Export to icon browser</p>
 
   <div class="panel">
-    <p class="lede">Load a selection, set Mono or Multi per icon, then stage. Apply and publish in the icon browser.</p>
+    <p class="lede">Load a selection, set Mono or Multi per icon, then send to the icon browser to stage, apply, and publish.</p>
     <p class="hint" id="selection-hint">Select frames, then load selection.</p>
     <div class="row">
       <button type="button" class="ghost" id="btn-export">Load selection</button>
-      <button type="button" class="ghost accent" id="btn-stage" disabled>Add to staging</button>
+      <button type="button" class="ghost accent" id="btn-send" disabled>Send to icon browser</button>
     </div>
     <ul class="upload-list" id="icon-list"></ul>
-
-    <div class="section">
-      <div class="section-head">
-        <strong>Staged on GitHub</strong>
-        <button type="button" class="ghost" id="btn-refresh" disabled>Refresh</button>
-      </div>
-      <div id="staged-body"></div>
-      <p class="links">
-        Continue in the
-        <a id="link-browser" href="https://JasonTuTu2.github.io/icons-library/" target="_blank" rel="noreferrer">icon browser</a>
-        to apply and publish.
-        <br />
-        <a id="link-actions" href="#" target="_blank" rel="noreferrer">Actions</a>
-        ·
-        <a id="link-packages" href="#" target="_blank" rel="noreferrer">Packages</a>
-      </p>
-    </div>
+    <p class="links">
+      Opens the
+      <a id="link-browser" href="https://JasonTuTu2.github.io/icons-library/" target="_blank" rel="noreferrer">icon browser</a>
+      with your SVGs. GitHub connect stays in the browser — no PAT in the plugin.
+    </p>
   </div>
 
   <p class="toast" id="message"></p>

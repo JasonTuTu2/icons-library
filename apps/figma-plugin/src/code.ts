@@ -1,22 +1,9 @@
-import {
-  TOKEN_STORAGE_KEY,
-  type PluginToUiMessage,
-  type UiToPluginMessage,
-} from './messages'
+import type { PluginToUiMessage, UiToPluginMessage } from './messages'
 
-figma.showUI(__html__, { width: 360, height: 520, themeColors: true })
+figma.showUI(__html__, { width: 360, height: 480, themeColors: true })
 
 function post(msg: PluginToUiMessage): void {
   figma.ui.postMessage(msg)
-}
-
-async function getStoredToken(): Promise<string> {
-  try {
-    const value = await figma.clientStorage.getAsync(TOKEN_STORAGE_KEY)
-    return typeof value === 'string' ? value.trim() : ''
-  } catch {
-    return ''
-  }
 }
 
 function sanitizeLayerName(raw: string): string {
@@ -71,23 +58,15 @@ async function exportSelection(): Promise<void> {
 figma.ui.onmessage = async (msg: UiToPluginMessage) => {
   switch (msg.type) {
     case 'ui-ready': {
-      const token = await getStoredToken()
-      post({ type: 'ready', token })
+      post({ type: 'ready' })
       break
     }
     case 'export-selection': {
       await exportSelection()
       break
     }
-    case 'set-token': {
-      const token = msg.token.trim()
-      await figma.clientStorage.setAsync(TOKEN_STORAGE_KEY, token)
-      post({ type: 'token', token })
-      break
-    }
-    case 'clear-token': {
-      await figma.clientStorage.setAsync(TOKEN_STORAGE_KEY, '')
-      post({ type: 'token', token: '' })
+    case 'open-url': {
+      figma.openExternal(msg.url)
       break
     }
     case 'close': {

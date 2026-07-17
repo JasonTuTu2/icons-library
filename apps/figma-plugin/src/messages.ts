@@ -1,6 +1,5 @@
 export type PluginToUiMessage =
-  | { type: 'ready'; token: string }
-  | { type: 'token'; token: string }
+  | { type: 'ready' }
   | {
       type: 'export-result'
       icons: Array<{ id: string; name: string; content: string }>
@@ -10,11 +9,9 @@ export type PluginToUiMessage =
 export type UiToPluginMessage =
   | { type: 'ui-ready' }
   | { type: 'export-selection' }
-  | { type: 'set-token'; token: string }
-  | { type: 'clear-token' }
+  | { type: 'open-url'; url: string }
   | { type: 'close' }
 
-declare const __GITHUB_REPO__: string
+declare const __ICON_BROWSER_URL__: string
 
-export const GITHUB_REPO: string = __GITHUB_REPO__
-export const TOKEN_STORAGE_KEY = 'gv-icons-github-token'
+export const ICON_BROWSER_URL: string = __ICON_BROWSER_URL__

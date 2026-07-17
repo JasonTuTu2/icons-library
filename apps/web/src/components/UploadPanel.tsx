@@ -16,6 +16,12 @@ import {
   type StagedIcon,
   type StagedRemoval,
 } from '../lib/github'
+import {
+  parseFigmaHandoffFile,
+  takeOpenUploadPanelFlag,
+  takePendingFigmaUploads,
+  type FigmaHandoffIcon,
+} from '../lib/figmaHandoff'
 import { useGithubSessionToken } from '../lib/githubAuth'
 import {
   setAllUnpublishedChecked,
@@ -39,20 +45,44 @@ interface UploadPanelProps {
   onUploaded: (id: string) => void
 }
 
-function fileToUploadItem(file: File): Promise<UploadItem> {
+function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
+  const name = sanitizeIconName(icon.name) ?? icon.name
+  return {
+    fileName: `${name}.svg`,
+    name,
+    content: icon.content,
+    previewUrl: URL.createObjectURL(
+      new Blob([icon.content], { type: 'image/svg+xml' }),
+    ),
+    colorMode: icon.colorMode,
+  }
+}
+
+function fileToUploadItem(file: File): Promise<UploadItem[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => {
       const content = String(reader.result ?? '')
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const handoff = parseFigmaHandoffFile(content)
+        if (!handoff) {
+          reject(new Error(`Not a valid Figma handoff JSON: ${file.name}`))
+          return
+        }
+        resolve(handoff.map(handoffToUploadItem))
+        return
+      }
       const base = file.name.replace(/\.svg$/i, '')
       const name = sanitizeIconName(base) ?? ''
-      resolve({
-        fileName: file.name,
-        name,
-        content,
-        previewUrl: URL.createObjectURL(file),
-        colorMode: 'mono',
-      })
+      resolve([
+        {
+          fileName: file.name,
+          name,
+          content,
+          previewUrl: URL.createObjectURL(file),
+          colorMode: 'mono',
+        },
+      ])
     }
     reader.onerror = () => reject(reader.error)
     reader.readAsText(file)
@@ -151,6 +181,23 @@ export function UploadPanel({
   }, [open])
 
   useEffect(() => {
+    const pending = takePendingFigmaUploads()
+    const openPanel = takeOpenUploadPanelFlag()
+    if (pending && pending.length > 0) {
+      setItems(pending.map(handoffToUploadItem))
+      setOpen(true)
+      setMessage(`Loaded ${pending.length} icon(s) from Figma.`)
+      return
+    }
+    if (openPanel) {
+      setOpen(true)
+      setMessage(
+        'Drop gv-icons-handoff.json (or SVGs) here, then stage after connecting GitHub.',
+      )
+    }
+  }, [])
+
+  useEffect(() => {
     if (open && mode === 'github' && githubAuthed) {
       void refreshStaged()
     }
@@ -158,12 +205,19 @@ export function UploadPanel({
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
-    const svgs = Array.from(fileList).filter((f) =>
-      f.name.toLowerCase().endsWith('.svg'),
-    )
-    const next = await Promise.all(svgs.map(fileToUploadItem))
-    setItems((prev) => [...prev, ...next])
-    setMessage(null)
+    const files = Array.from(fileList).filter((f) => {
+      const lower = f.name.toLowerCase()
+      return lower.endsWith('.svg') || lower.endsWith('.json')
+    })
+    if (files.length === 0) return
+    try {
+      const batches = await Promise.all(files.map(fileToUploadItem))
+      const next = batches.flat()
+      setItems((prev) => [...prev, ...next])
+      setMessage(null)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    }
   }
 
   function removeItem(index: number) {
@@ -378,7 +432,7 @@ export function UploadPanel({
                 <label className="upload-drop">
                   <input
                     type="file"
-                    accept=".svg,image/svg+xml"
+                    accept=".svg,.json,image/svg+xml,application/json"
                     multiple
                     onChange={(e) => void handleFiles(e.target.files)}
                   />
