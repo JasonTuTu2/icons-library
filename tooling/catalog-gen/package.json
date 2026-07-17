@@ -12,9 +12,6 @@
     "clean": "echo \"ok\""
   },
   "devDependencies": {
-    "@iconify-json/heroicons": "^1.2.2",
-    "@iconify-json/lucide": "^1.2.25",
-    "@iconify-json/mdi": "^1.2.3",
     "@types/node": "^22.10.2",
     "svgo": "^3.3.2",
     "tsx": "^4.19.2",

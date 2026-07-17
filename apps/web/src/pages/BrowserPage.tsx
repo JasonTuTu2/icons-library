@@ -1,7 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
   getIconById,
-  getSets,
   reactSnippet,
   searchIcons,
   vueSnippet,
@@ -14,18 +13,7 @@ import { PublishButton } from '../components/PublishButton'
 import { isGithubRepoConfigured } from '../lib/github'
 
 export function BrowserPage() {
-  const sets = useMemo(() => getSets(), [])
   const [query, setQuery] = useState('')
-  const [setFilter, setSetFilter] = useState('')
-  const [sourceFilter, setSourceFilter] = useState<
-    '' | 'iconify' | 'custom'
-  >('')
-  const [colorModeFilter, setColorModeFilter] = useState<
-    '' | 'mono' | 'preserved' | 'gradient'
-  >('')
-  const [assetKindFilter, setAssetKindFilter] = useState<
-    '' | 'icon' | 'image'
-  >('')
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -50,12 +38,8 @@ export function BrowserPage() {
     () =>
       searchIcons({
         query: deferredQuery,
-        set: setFilter || undefined,
-        source: sourceFilter || undefined,
-        colorMode: colorModeFilter || undefined,
-        assetKind: assetKindFilter || undefined,
       }),
-    [deferredQuery, setFilter, sourceFilter, colorModeFilter, assetKindFilter],
+    [deferredQuery],
   )
 
   return (
@@ -65,77 +49,18 @@ export function BrowserPage() {
           <span>Search</span>
           <input
             type="search"
-            placeholder="Search icons by name or tag…"
+            placeholder="Search brand icons by name or tag…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
           />
-        </label>
-        <label className="field">
-          <span>Set</span>
-          <select
-            value={setFilter}
-            onChange={(e) => setSetFilter(e.target.value)}
-          >
-            <option value="">All sets</option>
-            {sets.map((set) => (
-              <option key={set.id} value={set.id}>
-                {set.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>Source</span>
-          <select
-            value={sourceFilter}
-            onChange={(e) =>
-              setSourceFilter(
-                e.target.value as '' | 'iconify' | 'custom',
-              )
-            }
-          >
-            <option value="">All sources</option>
-            <option value="iconify">Iconify</option>
-            <option value="custom">Custom</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>Color mode</span>
-          <select
-            value={colorModeFilter}
-            onChange={(e) =>
-              setColorModeFilter(
-                e.target.value as '' | 'mono' | 'preserved' | 'gradient',
-              )
-            }
-          >
-            <option value="">All modes</option>
-            <option value="mono">Monochrome</option>
-            <option value="preserved">Multi-color</option>
-            <option value="gradient">Gradient</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>Asset</span>
-          <select
-            value={assetKindFilter}
-            onChange={(e) =>
-              setAssetKindFilter(e.target.value as '' | 'icon' | 'image')
-            }
-          >
-            <option value="">Icons + images</option>
-            <option value="icon">Vector icons</option>
-            <option value="image">Brand images</option>
-          </select>
         </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
             const icon = getIconById(id)
             if (icon) setSelected(icon)
-            setSourceFilter('custom')
-            setQuery(id.replace(/^(gv|img):/, ''))
+            setQuery(id.replace(/^(ci|img):/, ''))
           }}
         />
         <PublishButton />
@@ -154,10 +79,11 @@ export function BrowserPage() {
             reactCode={reactSnippet(selected.id, { format: selected.format })}
             vueCode={vueSnippet(selected.id, { format: selected.format })}
             onClose={() => setSelected(null)}
-            onRemovalStaged={() => setSourceFilter('custom')}
             onCategoryUpdated={(category) =>
               setSelected((current) =>
-                current ? { ...current, category: category || undefined } : current,
+                current
+                  ? { ...current, category: category || undefined }
+                  : current,
               )
             }
           />
@@ -165,7 +91,7 @@ export function BrowserPage() {
           <aside className="detail empty-detail">
             <h2>Select an icon</h2>
             <p>
-              Browse the grid to preview icons and brand images, copy snippets,
+              Browse the grid to preview brand icons and images, copy snippets,
               and review license details.
               {isGithubRepoConfigured()
                 ? ' Use Upload for SVG / PNG / JPG. Maintainers Apply and Publish.'

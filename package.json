@@ -2,7 +2,7 @@
   "name": "genvoice-icons-library",
   "private": true,
   "version": "0.0.0",
-  "description": "Unified Iconify + custom icons for React and Vue",
+  "description": "Brand icon library for React and Vue",
   "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=18"

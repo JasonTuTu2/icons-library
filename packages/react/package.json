@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-react",
   "version": "0.3.17",
-  "description": "React Icon component (Iconify + custom)",
+  "description": "React Icon component for brand SVGs",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

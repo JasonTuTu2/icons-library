@@ -24,7 +24,7 @@ export function getIconsBySet(setId: string): IconMeta[] {
 export interface SearchOptions {
   query?: string
   set?: string
-  source?: 'iconify' | 'custom'
+  source?: 'custom'
   colorMode?: 'mono' | 'preserved' | 'gradient'
   /** Filter custom brand images vs vector icons. */
   assetKind?: 'icon' | 'image'

@@ -3,16 +3,16 @@ import { mount } from '@vue/test-utils'
 import { Icon } from '../src/index.js'
 
 describe('Icon', () => {
-  it('renders an iconify icon with label', () => {
+  it('renders a brand icon with label', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'mdi:home', label: 'Home' },
+      props: { name: 'ci:v1-call-filled', label: 'Call' },
     })
-    expect(wrapper.attributes('aria-label')).toBe('Home')
+    expect(wrapper.attributes('aria-label')).toBe('Call')
   })
 
   it('marks decorative icons', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'mdi:home', decorative: true },
+      props: { name: 'ci:v1-call-filled', decorative: true },
     })
     expect(wrapper.attributes('aria-hidden')).toBe('true')
   })

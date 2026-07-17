@@ -1,6 +1,6 @@
 # Icons Library
 
-Unified icon library for **Iconify** and **custom brand SVGs**, with a consistent API for **React** and **Vue**.
+Unified icon library for **custom brand SVGs and images**, with a consistent API for **React** and **Vue**.
 
 Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=packages) (not the public npm registry). You need access to this [repo](https://github.com/JasonTuTu2/icons-library) (or the packages) and a GitHub token with `read:packages`.
 
@@ -78,7 +78,6 @@ Optional:
 
 ```bash
 pnpm add @JasonTuTu2/icons-catalog
-pnpm add @iconify-json/mdi   # offline Iconify set example
 ```
 
 ## Usage
@@ -90,9 +89,8 @@ pnpm add @iconify-json/mdi   # offline Iconify set example
 ```tsx
 import { Icon } from '@JasonTuTu2/icons-react'
 
-<Icon name="mdi:home" size={24} label="Home" />
-<Icon name="lucide:settings" size="1.5em" decorative />
 <Icon name="ci:billing-alert" size={24} label="Billing" />
+<Icon name="ci:cart" size="1.5em" decorative />
 ```
 
 ### Vue
@@ -103,9 +101,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 </script>
 
 <template>
-  <Icon name="mdi:home" :size="24" label="Home" />
-  <Icon name="lucide:settings" size="1.5em" decorative />
-  <Icon name="ci:cart" :size="24" label="Cart" />
+  <Icon name="ci:billing-alert" :size="24" label="Billing" />
+  <Icon name="ci:cart" size="1.5em" decorative />
 </template>
 ```
 
@@ -113,14 +110,14 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 
 | Source | Format | Example |
 |--------|--------|---------|
-| Iconify | `set:name` | `mdi:home`, `lucide:settings` |
-| Custom | `ci:kebab-name` | `ci:billing-alert` |
+| Custom SVG | `ci:kebab-name` | `ci:billing-alert` |
+| Brand image | `img:kebab-name` | `img:logo` (file import, not `<Icon />`) |
 
 ### Props
 
 | Prop | Type | Default | Notes |
 |------|------|---------|--------|
-| `name` | `string` | — | Required. Canonical id (`ci:…`, or Iconify `prefix:name`) |
+| `name` | `string` | — | Required. Canonical id (`ci:…`) |
 | `size` | `number \| string` | `1em` | Number = px; string = CSS length |
 | `color` | `string` | `currentColor` | Monochrome `ci:` icons follow this; multi-color `ci:` icons keep baked fills |
 | `label` | `string` | — | Accessible name for meaningful icons |
@@ -140,20 +137,11 @@ searchIcons({ query: 'billing', source: 'custom', limit: 20 })
 getIconById('ci:billing-alert')
 ```
 
-### Offline Iconify (optional)
-
-```ts
-import { addCollection } from '@iconify/react' // or @iconify/vue
-import mdi from '@iconify-json/mdi/icons.json'
-
-addCollection(mdi)
-```
-
 ## Compatibility
 
 | Package | Peers |
 |---------|--------|
-| React | `react` 18+, `@iconify/react` ^5–6 |
+| React | `react` 18+, `@iconify/react` ^5–6 (render backend for brand SVGs) |
 | Vue | `vue` 3.3+, `@iconify/vue` ^4–5 |
 | Custom | `@iconify/react` and/or `@iconify/vue` |
 
@@ -181,7 +169,7 @@ Product apps still install packages from GitHub Packages — the browser is a ca
 
 ## Licensing
 
-Published packages are **MIT**. Icon artwork remains under upstream licenses (Iconify collections vary). Custom `ci:` icons are proprietary / internal unless noted.
+Published packages are **MIT**. Brand `ci:` / `img:` assets are proprietary / internal unless noted.
 
 ## Development (contributors)
 
@@ -200,7 +188,7 @@ pnpm changeset
 
 ### Adding custom icons
 
-**App consumers** do not add icons to this library — they install packages and use names (`ci:…`, `mdi:…`). New brand SVGs are added here, then published.
+**App consumers** do not add icons to this library — they install packages and use names (`ci:…`, `img:…`). New brand SVGs are added here, then published.
 
 **Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). The plugin panel loads SVGs only (**Load selection** → **Stage**). Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers). PNG/JPG brand images are uploaded in the full browser, not the plugin.
 

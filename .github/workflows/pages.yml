@@ -29,24 +29,22 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Rebuild catalog JSON from generator so Pages never ships a stale ant set
-      # (or other removed sources) if icons.json was forgotten in a commit.
+      # Rebuild catalog JSON from generator so Pages never ships stale
+      # Ant/Iconify sets if icons.json was forgotten in a commit.
       - name: Regenerate catalog source
         run: pnpm catalog:gen:src
-      - name: Assert catalog has no Ant Design assets
+      - name: Assert catalog is brand-only
         run: |
           node <<'NODE'
           const fs = require('node:fs')
           const catalog = JSON.parse(
             fs.readFileSync('packages/catalog/src/data/icons.json', 'utf8'),
           )
-          const antIcons = catalog.icons.filter((i) => i.source === 'ant')
-          const antSets = catalog.sets.filter(
-            (s) => s.id === 'ant' || s.source === 'ant',
-          )
-          if (antSets.length || antIcons.length) {
+          const badIcons = catalog.icons.filter((i) => i.source !== 'custom')
+          const badSets = catalog.sets.filter((s) => s.source !== 'custom')
+          if (badSets.length || badIcons.length) {
             console.error(
-              `Catalog still contains Ant Design: ${antSets.length} set(s), ${antIcons.length} icon(s)`,
+              `Catalog must be brand-only: ${badSets.length} bad set(s), ${badIcons.length} bad icon(s)`,
             )
             process.exit(1)
           }

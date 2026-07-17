@@ -14,7 +14,7 @@ export function App() {
           <span className="brand-mark" aria-hidden />
           <div>
             <strong>GenVoice Icons</strong>
-            <p>Iconify + custom icons for React &amp; Vue</p>
+            <p>Brand icons for React &amp; Vue</p>
           </div>
         </div>
         <div className="topbar-end">

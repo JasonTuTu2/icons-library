@@ -3,8 +3,9 @@ export function DocsPage() {
     <article className="docs">
       <h1>Documentation</h1>
       <p className="lede">
-        Icons unifies Iconify and custom brand SVGs behind one API for React and
-        Vue, with a searchable browser for designers and developers.
+        GenVoice Icons is the brand icon library for React and Vue — custom{' '}
+        <code>ci:</code> SVGs and <code>img:</code> brand images, with a
+        searchable browser for designers and developers.
       </p>
 
       <section>
@@ -23,11 +24,13 @@ export function DocsPage() {
 pnpm add @JasonTuTu2/icons-react @iconify/react
 
 # Vue
-pnpm add @JasonTuTu2/icons-vue @iconify/vue
-
-# Optional offline Iconify sets
-pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
+pnpm add @JasonTuTu2/icons-vue @iconify/vue`}</code>
         </pre>
+        <p>
+          <code>@iconify/react</code> / <code>@iconify/vue</code> are peers used
+          to render registered brand SVGs — they are not a third-party icon set
+          in this library.
+        </p>
       </section>
 
       <section>
@@ -36,9 +39,8 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         <pre>
           <code>{`import { Icon } from '@JasonTuTu2/icons-react'
 
-<Icon name="mdi:home" size={24} label="Home" />
-<Icon name="lucide:settings" size="1.5em" decorative />
-<Icon name="ci:billing-alert" size={24} label="Billing" />`}</code>
+<Icon name="ci:billing-alert" size={24} label="Billing" />
+<Icon name="ci:cart" size="1.5em" decorative />`}</code>
         </pre>
         <h3>Vue</h3>
         <pre>
@@ -47,9 +49,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 </script>
 
 <template>
-  <Icon name="mdi:home" :size="24" label="Home" />
-  <Icon name="lucide:settings" size="1.5em" decorative />
-  <Icon name="ci:cart" :size="24" label="Cart" />
+  <Icon name="ci:billing-alert" :size="24" label="Billing" />
+  <Icon name="ci:cart" size="1.5em" decorative />
 </template>`}</code>
         </pre>
       </section>
@@ -81,7 +82,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           Monochrome icons are normalized to <code>currentColor</code> so{' '}
           <code>color</code> / CSS inheritance works. Multi-color and gradient
           icons preserve their fills / paint servers; the <code>color</code>{' '}
-          prop may not recolor them. Filter by color mode in the browser.
+          prop may not recolor them.
         </p>
         <p>
           Assign a <strong>Category</strong> before Stage (apply to all or per
@@ -131,8 +132,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Props</h2>
         <ul>
           <li>
-            <code>name</code> — required canonical id (<code>ci:billing-alert</code>
-            , or Iconify <code>prefix:name</code>)
+            <code>name</code> — required canonical id (
+            <code>ci:billing-alert</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}
@@ -170,26 +171,11 @@ import { Icon } from '@JasonTuTu2/icons-vue'
       </section>
 
       <section>
-        <h2>Offline Iconify</h2>
-        <p>
-          For production apps, register icon data so icons do not depend on the
-          Iconify API:
-        </p>
-        <pre>
-          <code>{`import { addCollection } from '@iconify/react'
-import mdi from '@iconify-json/mdi/icons.json'
-
-addCollection(mdi)`}</code>
-        </pre>
-      </section>
-
-      <section>
         <h2>Licensing</h2>
         <p>
-          Published packages are MIT. Icon artwork remains under upstream
-          licenses (Iconify collections vary). Custom <code>ci:</code> icons are
-          proprietary / internal unless noted otherwise. Check each icon&apos;s
-          detail panel before shipping.
+          Published packages are MIT. Brand <code>ci:</code> / <code>img:</code>{' '}
+          assets are proprietary / internal unless noted otherwise. Check each
+          icon&apos;s detail panel before shipping.
         </p>
       </section>
 
@@ -198,7 +184,8 @@ addCollection(mdi)`}</code>
         <ul>
           <li>React 18+ / Vue 3</li>
           <li>
-            Peers: <code>@iconify/react</code> / <code>@iconify/vue</code>
+            Peers: <code>@iconify/react</code> / <code>@iconify/vue</code>{' '}
+            (render backend for brand SVGs)
           </li>
         </ul>
       </section>

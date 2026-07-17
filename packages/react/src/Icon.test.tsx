@@ -3,17 +3,17 @@ import { render, waitFor } from '@testing-library/react'
 import { Icon } from '../src/index.js'
 
 describe('Icon', () => {
-  it('mounts an iconify icon without throwing', () => {
+  it('mounts a brand icon without throwing', () => {
     const { container } = render(
-      <Icon name="mdi:home" label="Home" />,
+      <Icon name="ci:v1-call-filled" label="Call" />,
     )
     // Iconify may render svg asynchronously; at least mount without throw
     expect(container.firstChild).toBeTruthy()
   })
 
-  it('renders decorative iconify icon', async () => {
+  it('renders decorative brand icon', async () => {
     const { container } = render(
-      <Icon name="mdi:home" decorative />,
+      <Icon name="ci:v1-call-filled" decorative />,
     )
     expect(container.firstChild).toBeTruthy()
     await waitFor(() => {

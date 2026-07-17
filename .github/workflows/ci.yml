@@ -27,43 +27,37 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Assert catalog has no Ant Design assets
+      - name: Assert catalog is brand-only (no Ant / Iconify sets)
         run: |
           node <<'NODE'
           const fs = require('node:fs')
           const catalog = JSON.parse(
             fs.readFileSync('packages/catalog/src/data/icons.json', 'utf8'),
           )
-          const antSets = catalog.sets.filter(
-            (s) => s.id === 'ant' || s.source === 'ant',
+          const badSets = catalog.sets.filter(
+            (s) =>
+              s.source !== 'custom' ||
+              s.id === 'ant' ||
+              s.id === 'mdi' ||
+              s.id === 'lucide' ||
+              s.id === 'heroicons',
           )
-          const antIcons = catalog.icons.filter((i) => i.source === 'ant')
-          if (antSets.length || antIcons.length) {
+          const badIcons = catalog.icons.filter((i) => i.source !== 'custom')
+          if (badSets.length || badIcons.length) {
             console.error(
-              `Catalog still contains Ant Design: ${antSets.length} set(s), ${antIcons.length} icon(s)`,
+              `Catalog must be brand-only: ${badSets.length} bad set(s), ${badIcons.length} bad icon(s)`,
             )
             process.exit(1)
           }
-          const unexpected = [
-            ...new Set(
-              catalog.icons
-                .map((i) => i.source)
-                .filter((s) => s !== 'iconify' && s !== 'custom'),
-            ),
-          ]
-          if (unexpected.length) {
-            console.error('Unexpected catalog sources:', unexpected.join(', '))
-            process.exit(1)
-          }
           console.log(
-            `Catalog OK: ${catalog.icons.length} icons across ${catalog.sets.length} sets`,
+            `Catalog OK: ${catalog.icons.length} brand icons across ${catalog.sets.length} sets`,
           )
           NODE
-          if grep -R --include='*.json' --include='*.yaml' --include='*.ts' --include='*.tsx' --include='*.mjs' -n '@ant-design' \
+          if grep -R --include='*.json' --include='*.yaml' --include='*.ts' --include='*.tsx' --include='*.mjs' -nE '@ant-design|@iconify-json/' \
             pnpm-lock.yaml packages apps/web tooling/catalog-gen 2>/dev/null \
             | grep -v '/node_modules/' | grep -v '/CHANGELOG.md' | grep -q .; then
-            echo 'Found leftover @ant-design references'
-            grep -R --include='*.json' --include='*.yaml' --include='*.ts' --include='*.tsx' --include='*.mjs' -n '@ant-design' \
+            echo 'Found leftover @ant-design or @iconify-json references'
+            grep -R --include='*.json' --include='*.yaml' --include='*.ts' --include='*.tsx' --include='*.mjs' -nE '@ant-design|@iconify-json/' \
               pnpm-lock.yaml packages apps/web tooling/catalog-gen 2>/dev/null \
               | grep -v '/node_modules/' | grep -v '/CHANGELOG.md' || true
             exit 1

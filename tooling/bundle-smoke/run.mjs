@@ -17,7 +17,7 @@ writeFileSync(
   `
 import { Icon } from '@JasonTuTu2/icons-react'
 export function Demo() {
-  return <Icon name="mdi:home" decorative size={24} />
+  return <Icon name="ci:billing-alert" decorative size={24} />
 }
 `,
 )
@@ -49,7 +49,7 @@ const bytes = result.outputFiles[0]?.contents.byteLength ?? 0
 const kb = bytes / 1024
 const budgetKb = 200
 
-console.log(`Iconify-only smoke bundle: ${kb.toFixed(1)} KB (budget ${budgetKb} KB)`)
+console.log(`Brand-icon smoke bundle: ${kb.toFixed(1)} KB (budget ${budgetKb} KB)`)
 
 if (kb > budgetKb) {
   console.error('Bundle exceeded size budget')

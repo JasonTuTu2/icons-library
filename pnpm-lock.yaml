@@ -230,15 +230,6 @@ importers:
 
   tooling/catalog-gen:
     devDependencies:
-      '@iconify-json/heroicons':
-        specifier: ^1.2.2
-        version: 1.2.3
-      '@iconify-json/lucide':
-        specifier: ^1.2.25
-        version: 1.2.117
-      '@iconify-json/mdi':
-        specifier: ^1.2.3
-        version: 1.2.3
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
@@ -1188,15 +1179,6 @@ packages:
 
   '@figma/plugin-typings@1.130.0':
     resolution: {integrity: sha512-kz+eU4TXBr99YrMyF2/WtcsdS6K4Ksy3datZZtuCUUSDPRknJAVLZpjhBESCd0tCtHRWKeo4l/I7Aze6lHB52A==}
-
-  '@iconify-json/heroicons@1.2.3':
-    resolution: {integrity: sha512-n+vmCEgTesRsOpp5AB5ILB6srsgsYK+bieoQBNlafvoEhjVXLq8nIGN4B0v/s4DUfa0dOrjwE/cKJgIKdJXOEg==}
-
-  '@iconify-json/lucide@1.2.117':
-    resolution: {integrity: sha512-7isYKJKWRZ8NfLNSY8pIYmRWiMBkopL4/X22gZfFmePFhc7az0hQ5biqBLG6vdDEvMctFu2suZB3yQ29RL+8tA==}
-
-  '@iconify-json/mdi@1.2.3':
-    resolution: {integrity: sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg==}
 
   '@iconify/react@5.2.1':
     resolution: {integrity: sha512-37GDR3fYDZmnmUn9RagyaX+zca24jfVOMY8E1IXTqJuE8pxNtN51KWPQe3VODOWvuUurq7q9uUu3CFrpqj5Iqg==}
@@ -3478,18 +3460,6 @@ snapshots:
     optional: true
 
   '@figma/plugin-typings@1.130.0': {}
-
-  '@iconify-json/heroicons@1.2.3':
-    dependencies:
-      '@iconify/types': 2.0.0
-
-  '@iconify-json/lucide@1.2.117':
-    dependencies:
-      '@iconify/types': 2.0.0
-
-  '@iconify-json/mdi@1.2.3':
-    dependencies:
-      '@iconify/types': 2.0.0
 
   '@iconify/react@5.2.1(react@18.3.1)':
     dependencies:

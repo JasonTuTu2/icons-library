@@ -107,7 +107,6 @@ Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token wi
 ## Guidelines
 
 - Keep React and Vue `<Icon>` prop semantics aligned via `@JasonTuTu2/icons-core`.
-- Do not vendor upstream Iconify SVG artwork into published packages.
+- Do not vendor third-party icon set artwork into published packages.
 - Custom brand SVGs belong in `@JasonTuTu2/icons-custom` only.
-- Prefer ESM, `sideEffects: false` (except custom register entry points), and peer dependencies for Iconify.
-- Update the catalog generator when adding Iconify collections.
+- Prefer ESM, `sideEffects: false` (except custom register entry points), and peer dependencies for the Iconify render packages used by brand SVGs.
