@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-react",
   "version": "0.3.15",
-  "description": "React Icon component (Ant Design + Iconify + custom)",
+  "description": "React Icon component (Iconify + custom)",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -19,7 +19,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --external react --external @ant-design/icons --external @iconify/react --external @JasonTuTu2/icons-core --external @JasonTuTu2/icons-custom --clean",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react --external @iconify/react --external @JasonTuTu2/icons-core --external @JasonTuTu2/icons-custom --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "tsc --noEmit",
@@ -30,20 +30,15 @@
     "@JasonTuTu2/icons-custom": "workspace:*"
   },
   "peerDependencies": {
-    "@ant-design/icons": "^5.0.0 || ^6.0.0",
     "@iconify/react": "^5.0.0 || ^6.0.0",
     "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@ant-design/icons": {
-      "optional": true
-    },
     "@iconify/react": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@ant-design/icons": "^5.5.2",
     "@iconify/react": "^5.1.0",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^18.3.18",

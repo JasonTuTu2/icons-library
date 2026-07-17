@@ -3,9 +3,8 @@ export function DocsPage() {
     <article className="docs">
       <h1>Documentation</h1>
       <p className="lede">
-        Icons unifies Ant Design Icons, Iconify, and custom brand SVGs behind
-        one API for React and Vue, with a searchable browser for designers and
-        developers.
+        Icons unifies Iconify and custom brand SVGs behind one API for React and
+        Vue, with a searchable browser for designers and developers.
       </p>
 
       <section>
@@ -21,10 +20,10 @@ export function DocsPage() {
         </pre>
         <pre>
           <code>{`# React
-pnpm add @JasonTuTu2/icons-react @ant-design/icons @iconify/react
+pnpm add @JasonTuTu2/icons-react @iconify/react
 
 # Vue
-pnpm add @JasonTuTu2/icons-vue @ant-design/icons-vue @iconify/vue
+pnpm add @JasonTuTu2/icons-vue @iconify/vue
 
 # Optional offline Iconify sets
 pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
@@ -37,8 +36,8 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
         <pre>
           <code>{`import { Icon } from '@JasonTuTu2/icons-react'
 
-<Icon name="ant:HomeOutlined" size={24} label="Home" />
-<Icon name="mdi:home" size="1.5em" decorative />
+<Icon name="mdi:home" size={24} label="Home" />
+<Icon name="lucide:settings" size="1.5em" decorative />
 <Icon name="ci:billing-alert" size={24} label="Billing" />`}</code>
         </pre>
         <h3>Vue</h3>
@@ -48,8 +47,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 </script>
 
 <template>
-  <Icon name="ant:HomeOutlined" :size="24" label="Home" />
-  <Icon name="mdi:home" size="1.5em" decorative />
+  <Icon name="mdi:home" :size="24" label="Home" />
+  <Icon name="lucide:settings" size="1.5em" decorative />
   <Icon name="ci:cart" :size="24" label="Cart" />
 </template>`}</code>
         </pre>
@@ -127,8 +126,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Props</h2>
         <ul>
           <li>
-            <code>name</code> — required canonical id (<code>ant:HomeOutlined</code>
-            , <code>ci:billing-alert</code>, or Iconify <code>prefix:name</code>)
+            <code>name</code> — required canonical id (<code>ci:billing-alert</code>
+            , or Iconify <code>prefix:name</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}
@@ -151,10 +150,6 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           </li>
           <li>
             <code>rotate</code> — degrees (CSS transform)
-          </li>
-          <li>
-            <code>spin</code> — Ant icons only; ignored for Iconify and{' '}
-            <code>ci:</code>
           </li>
         </ul>
       </section>
@@ -187,9 +182,9 @@ addCollection(mdi)`}</code>
         <h2>Licensing</h2>
         <p>
           Published packages are MIT. Icon artwork remains under upstream
-          licenses (Ant Design Icons MIT; Iconify collections vary). Custom{' '}
-          <code>ci:</code> icons are proprietary / internal unless noted
-          otherwise. Check each icon&apos;s detail panel before shipping.
+          licenses (Iconify collections vary). Custom <code>ci:</code> icons are
+          proprietary / internal unless noted otherwise. Check each icon&apos;s
+          detail panel before shipping.
         </p>
       </section>
 
@@ -198,9 +193,7 @@ addCollection(mdi)`}</code>
         <ul>
           <li>React 18+ / Vue 3</li>
           <li>
-            Peers: <code>@ant-design/icons</code> ^5–6,{' '}
-            <code>@ant-design/icons-vue</code> ^7,{' '}
-            <code>@iconify/react</code> / <code>@iconify/vue</code>
+            Peers: <code>@iconify/react</code> / <code>@iconify/vue</code>
           </li>
         </ul>
       </section>

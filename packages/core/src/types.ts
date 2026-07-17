@@ -1,8 +1,8 @@
-export type IconProvider = 'ant' | 'iconify' | 'custom'
+export type IconProvider = 'iconify' | 'custom'
 
 export interface ParsedIconName {
   provider: IconProvider
-  /** Ant: PascalCase export name. Iconify/custom: full id like mdi:home or ci:star */
+  /** Iconify/custom: full id like mdi:home or ci:star */
   id: string
   /** Canonical name as provided, normalized */
   canonical: string
@@ -28,12 +28,10 @@ export interface BaseIconProps {
   label?: string
   decorative?: boolean
   style?: Record<string, string | number | undefined>
-  spin?: boolean
   rotate?: number
 }
 
 export const DEFAULT_ICON_SIZE: IconSize = '1em'
 export const DEFAULT_ICON_COLOR = 'currentColor'
 
-export const ANT_PREFIX = 'ant'
 export const CUSTOM_PREFIX = 'ci'

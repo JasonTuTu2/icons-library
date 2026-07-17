@@ -4,14 +4,6 @@ import { getA11yAttributes } from '../src/a11y.js'
 import { normalizeSize, buildIconStyle } from '../src/size.js'
 
 describe('parseName', () => {
-  it('parses ant names', () => {
-    expect(parseName('ant:HomeOutlined')).toEqual({
-      provider: 'ant',
-      id: 'HomeOutlined',
-      canonical: 'ant:HomeOutlined',
-    })
-  })
-
   it('parses iconify names', () => {
     expect(parseName('mdi:home')).toEqual({
       provider: 'iconify',
@@ -35,8 +27,7 @@ describe('parseName', () => {
 
   it('rejects invalid names', () => {
     expect(() => parseName('HomeOutlined')).toThrow()
-    expect(() => parseName('ant:')).toThrow()
-    expect(() => parseName('ant:homeOutlined')).toThrow()
+    expect(() => parseName('mdi:')).toThrow()
   })
 })
 

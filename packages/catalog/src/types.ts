@@ -1,4 +1,4 @@
-export type IconSource = 'ant' | 'iconify' | 'custom'
+export type IconSource = 'iconify' | 'custom'
 
 export interface IconLicense {
   /** SPDX or short name */
@@ -17,7 +17,7 @@ export interface IconSetInfo {
 }
 
 export interface IconMeta {
-  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, ci:star, or img:logo */
+  /** Canonical name, e.g. mdi:home, ci:star, or img:logo */
   id: string
   /** Display title */
   title: string
@@ -26,7 +26,7 @@ export interface IconMeta {
   set: string
   source: IconSource
   license: IconLicense
-  /** Iconify/custom body name without prefix, or Ant export name */
+  /** Iconify/custom body name without prefix */
   name: string
   /** Custom SVG icons only: mono (currentColor), preserved multi-color, or gradient */
   colorMode?: 'mono' | 'preserved' | 'gradient'

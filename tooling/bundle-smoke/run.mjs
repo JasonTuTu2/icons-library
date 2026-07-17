@@ -40,7 +40,6 @@ const result = await build({
     'react',
     'react-dom',
     'react/jsx-runtime',
-    '@ant-design/icons',
     '@iconify/react',
   ],
   logLevel: 'silent',

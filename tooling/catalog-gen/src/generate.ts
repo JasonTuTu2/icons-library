@@ -1,7 +1,6 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import * as AntIcons from '@ant-design/icons'
 import mdi from '@iconify-json/mdi/icons.json'
 import lucide from '@iconify-json/lucide/icons.json'
 import heroicons from '@iconify-json/heroicons/icons.json'
@@ -26,7 +25,7 @@ interface IconLicense {
 interface IconSetInfo {
   id: string
   name: string
-  source: 'ant' | 'iconify' | 'custom'
+  source: 'iconify' | 'custom'
   license: IconLicense
   prefix: string
   homepage?: string
@@ -37,7 +36,7 @@ interface IconMeta {
   title: string
   tags: string[]
   set: string
-  source: 'ant' | 'iconify' | 'custom'
+  source: 'iconify' | 'custom'
   license: IconLicense
   name: string
   colorMode?: 'mono' | 'preserved' | 'gradient'
@@ -46,26 +45,12 @@ interface IconMeta {
   assetPath?: string
 }
 
-const antLicense: IconLicense = {
-  spdx: 'MIT',
-  title: 'MIT License',
-  url: 'https://github.com/ant-design/ant-design-icons/blob/master/LICENSE',
-}
-
 const customLicense: IconLicense = {
   spdx: 'LicenseRef-Custom',
   title: 'Custom / proprietary — internal use',
 }
 
 const sets: IconSetInfo[] = [
-  {
-    id: 'ant',
-    name: 'Ant Design Icons',
-    source: 'ant',
-    license: antLicense,
-    prefix: 'ant',
-    homepage: 'https://ant.design/components/icon',
-  },
   {
     id: 'mdi',
     name: 'Material Design Icons',
@@ -125,34 +110,6 @@ function titleFromName(name: string): string {
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function collectAntIcons(): IconMeta[] {
-  const skip = new Set([
-    'default',
-    'createFromIconfontCN',
-    'getTwoToneColor',
-    'setTwoToneColor',
-    'IconProvider',
-  ])
-
-  const icons: IconMeta[] = []
-  for (const [key, value] of Object.entries(AntIcons)) {
-    if (skip.has(key)) continue
-    if (typeof value !== 'object' && typeof value !== 'function') continue
-    if (!/^[A-Z]/.test(key)) continue
-
-    icons.push({
-      id: `ant:${key}`,
-      title: titleFromName(key),
-      tags: [key.toLowerCase(), 'ant', 'antd'],
-      set: 'ant',
-      source: 'ant',
-      license: antLicense,
-      name: key,
-    })
-  }
-  return icons.sort((a, b) => a.id.localeCompare(b.id))
 }
 
 function collectIconify(
@@ -271,13 +228,12 @@ function collectBrandImages(): IconMeta[] {
 
 function main() {
   const iconifySets = [
-    { data: mdi as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[1]! },
-    { data: lucide as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[2]! },
-    { data: heroicons as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[3]! },
+    { data: mdi as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[0]! },
+    { data: lucide as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[1]! },
+    { data: heroicons as { prefix: string; icons: Record<string, unknown>; categories?: Record<string, string[]> }, set: sets[2]! },
   ]
 
   const icons: IconMeta[] = [
-    ...collectAntIcons(),
     ...iconifySets.flatMap(({ data, set }) => collectIconify(data, set)),
     ...collectCustomIcons(),
     ...collectBrandImages(),

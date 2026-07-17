@@ -18,7 +18,7 @@ export function BrowserPage() {
   const [query, setQuery] = useState('')
   const [setFilter, setSetFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState<
-    '' | 'ant' | 'iconify' | 'custom'
+    '' | 'iconify' | 'custom'
   >('')
   const [colorModeFilter, setColorModeFilter] = useState<
     '' | 'mono' | 'preserved' | 'gradient'
@@ -91,12 +91,11 @@ export function BrowserPage() {
             value={sourceFilter}
             onChange={(e) =>
               setSourceFilter(
-                e.target.value as '' | 'ant' | 'iconify' | 'custom',
+                e.target.value as '' | 'iconify' | 'custom',
               )
             }
           >
             <option value="">All sources</option>
-            <option value="ant">Ant Design</option>
             <option value="iconify">Iconify</option>
             <option value="custom">Custom</option>
           </select>

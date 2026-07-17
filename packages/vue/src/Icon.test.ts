@@ -1,27 +1,19 @@
-import { describe, expect, it, beforeAll } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
-import * as AntIcons from '@ant-design/icons-vue'
-import { Icon, registerAntIcons } from '../src/index.js'
-
-beforeAll(() => {
-  registerAntIcons(AntIcons as never)
-})
+import { describe, expect, it } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { Icon } from '../src/index.js'
 
 describe('Icon', () => {
-  it('renders an ant icon with label', async () => {
+  it('renders an iconify icon with label', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'ant:HomeOutlined', label: 'Home' },
+      props: { name: 'mdi:home', label: 'Home' },
     })
-    await flushPromises()
-    expect(wrapper.find('svg').exists()).toBe(true)
     expect(wrapper.attributes('aria-label')).toBe('Home')
   })
 
-  it('marks decorative icons', async () => {
+  it('marks decorative icons', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'ant:UserOutlined', decorative: true },
+      props: { name: 'mdi:home', decorative: true },
     })
-    await flushPromises()
     expect(wrapper.attributes('aria-hidden')).toBe('true')
   })
 })

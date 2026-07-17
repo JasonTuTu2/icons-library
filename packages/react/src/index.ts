@@ -1,6 +1,5 @@
 export { Icon } from './Icon.js'
-export type { IconProps, AntIconComponent } from './types.js'
-export { registerAntIcons, resolveAntIcon, loadAntModule } from './antRegistry.js'
+export type { IconProps } from './types.js'
 export {
   parseName,
   getA11yAttributes,

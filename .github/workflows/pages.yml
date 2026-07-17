@@ -29,7 +29,31 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Apply already commits icons.json + collection.json; do not re-run catalog-gen.
+      # Rebuild catalog JSON from generator so Pages never ships a stale ant set
+      # (or other removed sources) if icons.json was forgotten in a commit.
+      - name: Regenerate catalog source
+        run: pnpm catalog:gen:src
+      - name: Assert catalog has no Ant Design assets
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs')
+          const catalog = JSON.parse(
+            fs.readFileSync('packages/catalog/src/data/icons.json', 'utf8'),
+          )
+          const antIcons = catalog.icons.filter((i) => i.source === 'ant')
+          const antSets = catalog.sets.filter(
+            (s) => s.id === 'ant' || s.source === 'ant',
+          )
+          if (antSets.length || antIcons.length) {
+            console.error(
+              `Catalog still contains Ant Design: ${antSets.length} set(s), ${antIcons.length} icon(s)`,
+            )
+            process.exit(1)
+          }
+          console.log(
+            `Catalog OK for Pages: ${catalog.icons.length} icons across ${catalog.sets.length} sets`,
+          )
+          NODE
       - name: Build icon browser
         run: pnpm --filter @JasonTuTu2/icons-web... build
         env:

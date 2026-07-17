@@ -14,7 +14,7 @@ describe('catalog', () => {
 
   it('builds snippets', () => {
     expect(reactSnippet('mdi:home')).toContain('mdi:home')
-    expect(vueSnippet('ant:HomeOutlined')).toContain('ant:HomeOutlined')
+    expect(vueSnippet('mdi:home')).toContain('mdi:home')
     expect(reactSnippet('ci:billing-alert')).toContain('ci:billing-alert')
     expect(reactSnippet('ci:billing-alert')).not.toContain('registerCustomIcons')
     expect(vueSnippet('ci:billing-alert')).toContain('ci:billing-alert')

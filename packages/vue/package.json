@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-vue",
   "version": "0.3.15",
-  "description": "Vue 3 Icon component (Ant Design + Iconify + custom)",
+  "description": "Vue 3 Icon component (Iconify + custom)",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -19,7 +19,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @ant-design/icons-vue --external @iconify/vue --external @JasonTuTu2/icons-core --external @JasonTuTu2/icons-custom --clean",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external vue --external @iconify/vue --external @JasonTuTu2/icons-core --external @JasonTuTu2/icons-custom --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "tsc --noEmit",
@@ -30,20 +30,15 @@
     "@JasonTuTu2/icons-custom": "workspace:*"
   },
   "peerDependencies": {
-    "@ant-design/icons-vue": "^7.0.0",
     "@iconify/vue": "^4.0.0 || ^5.0.0",
     "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
-    "@ant-design/icons-vue": {
-      "optional": true
-    },
     "@iconify/vue": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@ant-design/icons-vue": "^7.0.1",
     "@iconify/vue": "^4.3.0",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^25.0.1",

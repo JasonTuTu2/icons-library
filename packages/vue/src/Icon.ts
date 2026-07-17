@@ -1,4 +1,4 @@
-import { computed, defineComponent, h, onMounted, ref, watch, type PropType, type CSSProperties } from 'vue'
+import { computed, defineComponent, h, onMounted, type PropType, type CSSProperties } from 'vue'
 import * as IconifyVue from '@iconify/vue'
 import { registerCustomIcons } from '@JasonTuTu2/icons-custom/vue'
 import {
@@ -8,9 +8,7 @@ import {
   parseName,
   warnMissingA11y,
 } from '@JasonTuTu2/icons-core'
-import { getAntIconSync, resolveAntIcon } from './antRegistry.js'
 import { iconifyIconExists } from './iconifyCompat.js'
-import type { AntIconComponent } from './types.js'
 
 registerCustomIcons()
 
@@ -26,13 +24,9 @@ export const Icon = defineComponent({
     decorative: { type: Boolean, default: false },
     class: { type: String, default: undefined },
     style: { type: Object as PropType<CSSProperties>, default: undefined },
-    spin: { type: Boolean, default: false },
     rotate: { type: Number, default: undefined },
   },
   setup(props) {
-    const antComp = ref<AntIconComponent | null>(null)
-    const antTried = ref(false)
-
     const parsed = computed(() => {
       try {
         return parseName(props.name)
@@ -58,38 +52,12 @@ export const Icon = defineComponent({
         }) as CSSProperties,
     )
 
-    async function loadAnt() {
-      const p = parsed.value
-      if (!p || p.provider !== 'ant') {
-        antComp.value = null
-        antTried.value = true
-        return
-      }
-      const sync = getAntIconSync(p.id)
-      if (sync) {
-        antComp.value = sync
-        antTried.value = true
-        return
-      }
-      antTried.value = false
-      antComp.value = await resolveAntIcon(p.id)
-      antTried.value = true
-    }
-
     onMounted(() => {
       warnMissingA11y(props.name, {
         label: props.label,
         decorative: props.decorative,
       })
-      void loadAnt()
     })
-
-    watch(
-      () => props.name,
-      () => {
-        void loadAnt()
-      },
-    )
 
     return () => {
       const p = parsed.value
@@ -99,35 +67,6 @@ export const Icon = defineComponent({
           style: mergedStyle.value,
           'data-icon-missing': props.name,
           'aria-hidden': true,
-        })
-      }
-
-      if (p.provider === 'ant') {
-        if (!antTried.value) {
-          return h('span', {
-            class: props.class,
-            style: mergedStyle.value,
-            'data-icon-loading': props.name,
-            'aria-hidden': true,
-          })
-        }
-        if (!antComp.value) {
-          if (isDev()) {
-            console.warn(`[Icons] Icon not found: "${props.name}"`)
-          }
-          return h('span', {
-            class: props.class,
-            style: mergedStyle.value,
-            'data-icon-missing': props.name,
-            'aria-hidden': true,
-          })
-        }
-        return h(antComp.value, {
-          class: props.class,
-          style: mergedStyle.value,
-          spin: props.spin,
-          rotate: props.rotate,
-          ...a11y.value,
         })
       }
 
