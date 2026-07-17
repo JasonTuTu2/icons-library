@@ -7,15 +7,9 @@
   "networkAccess": {
     "allowedDomains": [
       "https://*.github.io",
-      "https://JasonTuTu2.github.io/icons-library/",
-      "https://JasonTuTu2.github.io/icons-library/figma.html",
       "https://github.com",
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
-    ],
-    "devAllowedDomains": [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173"
     ],
     "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Staging uses the Pages GitHub token; the plugin only exports SVGs."
   },

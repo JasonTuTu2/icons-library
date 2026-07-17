@@ -235,7 +235,7 @@ export function FigmaDock() {
             openExternalUrl(browserUrl)
           }}
         >
-          Open full icon browser
+          Open icon browser
         </a>
       </p>
     </section>
