@@ -210,7 +210,7 @@ function mergeIcons(
  * - `svg/*.svg` (mono)
  * - `svg/color/*.svg` (preserved multi-color)
  * - `svg/gradient/*.svg` (gradients / paint servers preserved)
- * Shared `gv:` namespace — first wins on name collision (mono > color > gradient).
+ * Shared `ci:` namespace — first wins on name collision (mono > color > gradient).
  */
 export function collectAllCustomIcons(
   svgRootDir: string,

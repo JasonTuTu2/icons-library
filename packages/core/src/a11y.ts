@@ -24,7 +24,7 @@ export function getA11yAttributes(input: IconA11yInput): IconA11yAttributes {
 export function warnMissingA11y(name: string, input: IconA11yInput): void {
   if (isDev() && !input.decorative && !input.label) {
     console.warn(
-      `[GenVoice Icons] Icon "${name}" has neither \`label\` nor \`decorative\`. ` +
+      `[Icons] Icon "${name}" has neither \`label\` nor \`decorative\`. ` +
         'Pass \`label\` for meaningful icons or \`decorative\` for presentational ones.',
     )
   }

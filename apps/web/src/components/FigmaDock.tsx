@@ -45,7 +45,7 @@ function formatConflicts(
   conflicts: Array<{ name: string; location: string }>,
 ): string {
   return conflicts
-    .map((c) => `• gv:${c.name} (${c.location})`)
+    .map((c) => `• ci:${c.name} (${c.location})`)
     .join('\n')
 }
 
@@ -176,7 +176,7 @@ export function FigmaDock() {
             <li key={icon.id}>
               <img src={icon.previewUrl} alt="" width={24} height={24} />
               <label>
-                <span>gv:</span>
+                <span>ci:</span>
                 <input
                   type="text"
                   value={icon.name}
@@ -191,7 +191,7 @@ export function FigmaDock() {
                 />
               </label>
               <select
-                aria-label={`Color mode for gv:${icon.name || 'icon'}`}
+                aria-label={`Color mode for ci:${icon.name || 'icon'}`}
                 value={icon.colorMode}
                 onChange={(e) => {
                   const colorMode =

@@ -38,7 +38,7 @@ export function IconDetail({
 
   const isCustomAsset =
     icon.source === 'custom' &&
-    (icon.id.startsWith('gv:') || icon.id.startsWith('img:'))
+    (icon.id.startsWith('ci:') || icon.id.startsWith('img:'))
 
   const canStageRemoval =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()

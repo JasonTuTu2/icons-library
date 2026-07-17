@@ -17,7 +17,7 @@ export interface IconSetInfo {
 }
 
 export interface IconMeta {
-  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, gv:star, or img:logo */
+  /** Canonical name, e.g. ant:HomeOutlined, mdi:home, ci:star, or img:logo */
   id: string
   /** Display title */
   title: string

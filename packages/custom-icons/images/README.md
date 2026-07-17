@@ -1,6 +1,6 @@
 # Brand images
 
-PNG / JPG assets shipped alongside GenVoice SVG icons.
+PNG / JPG assets shipped alongside custom SVG icons.
 
 - Stage via the icon browser Upload panel → `staging/images/`
 - Apply promotes files here

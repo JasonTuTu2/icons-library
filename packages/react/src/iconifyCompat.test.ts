@@ -5,20 +5,20 @@ describe('iconifyIconExists', () => {
   it('uses iconLoaded when present (Iconify v6)', () => {
     expect(
       iconifyIconExists(
-        { iconLoaded: (n) => n === 'gv:billing-alert' },
-        'gv:billing-alert',
+        { iconLoaded: (n) => n === 'ci:billing-alert' },
+        'ci:billing-alert',
       ),
     ).toBe(true)
     expect(
-      iconifyIconExists({ iconLoaded: () => false }, 'gv:missing'),
+      iconifyIconExists({ iconLoaded: () => false }, 'ci:missing'),
     ).toBe(false)
   })
 
   it('falls back to iconExists (Iconify v5 alias)', () => {
     expect(
       iconifyIconExists(
-        { iconExists: (n) => n === 'gv:cart' },
-        'gv:cart',
+        { iconExists: (n) => n === 'ci:cart' },
+        'ci:cart',
       ),
     ).toBe(true)
   })
@@ -30,12 +30,12 @@ describe('iconifyIconExists', () => {
           iconLoaded: () => true,
           iconExists: () => false,
         },
-        'gv:x',
+        'ci:x',
       ),
     ).toBe(true)
   })
 
   it('returns false when neither API exists', () => {
-    expect(iconifyIconExists({}, 'gv:x')).toBe(false)
+    expect(iconifyIconExists({}, 'ci:x')).toBe(false)
   })
 })

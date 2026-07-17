@@ -186,7 +186,7 @@ export function customIconUploadPlugin(): Plugin {
           res.end(
             JSON.stringify({
               ok: true,
-              id: `gv:${name}`,
+              id: `ci:${name}`,
               path: relativePath,
               colorMode,
               kind: 'svg',

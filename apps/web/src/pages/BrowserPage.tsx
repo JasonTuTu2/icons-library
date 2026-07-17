@@ -98,7 +98,7 @@ export function BrowserPage() {
             <option value="">All sources</option>
             <option value="ant">Ant Design</option>
             <option value="iconify">Iconify</option>
-            <option value="custom">Custom (GenVoice)</option>
+            <option value="custom">Custom</option>
           </select>
         </label>
         <label className="field">

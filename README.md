@@ -1,6 +1,6 @@
-# GenVoice Icons
+# Icons Library
 
-Unified icon library for **Ant Design Icons**, **Iconify**, and **GenVoice custom SVGs**, with a consistent API for **React** and **Vue**.
+Unified icon library for **Ant Design Icons**, **Iconify**, and **custom brand SVGs**, with a consistent API for **React** and **Vue**.
 
 Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=packages) (not the public npm registry). You need access to this [repo](https://github.com/JasonTuTu2/icons-library) (or the packages) and a GitHub token with `read:packages`.
 
@@ -10,7 +10,7 @@ Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=pa
 |---------|-------------|
 | `@JasonTuTu2/icons-react` | React `<Icon>` component |
 | `@JasonTuTu2/icons-vue` | Vue 3 `<Icon>` component |
-| `@JasonTuTu2/icons-custom` | GenVoice brand SVGs (pulled in by react/vue) |
+| `@JasonTuTu2/icons-custom` | Custom brand SVGs (pulled in by react/vue) |
 | `@JasonTuTu2/icons-core` | Shared types & helpers (usually transitive) |
 | `@JasonTuTu2/icons-catalog` | Icon metadata + search helpers |
 | `@JasonTuTu2/icons-web` | Icon browser + docs (private app, not published) |
@@ -83,7 +83,7 @@ pnpm add @iconify-json/mdi   # offline Iconify set example
 
 ## Usage
 
-`gv:` icons register automatically when you import `Icon` (via `@JasonTuTu2/icons-custom`). No bootstrap call needed.
+`ci:` icons register automatically when you import `Icon` (via `@JasonTuTu2/icons-custom`). No bootstrap call needed.
 
 ### React
 
@@ -92,7 +92,7 @@ import { Icon } from '@JasonTuTu2/icons-react'
 
 <Icon name="ant:HomeOutlined" size={24} label="Home" />
 <Icon name="mdi:home" size="1.5em" decorative />
-<Icon name="gv:billing-alert" size={24} label="Billing" />
+<Icon name="ci:billing-alert" size={24} label="Billing" />
 ```
 
 ### Vue
@@ -105,7 +105,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 <template>
   <Icon name="ant:HomeOutlined" :size="24" label="Home" />
   <Icon name="mdi:home" size="1.5em" decorative />
-  <Icon name="gv:cart" :size="24" label="Cart" />
+  <Icon name="ci:cart" :size="24" label="Cart" />
 </template>
 ```
 
@@ -115,21 +115,21 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 |--------|--------|---------|
 | Ant Design | `ant:IconName` | `ant:HomeOutlined` |
 | Iconify | `set:name` | `mdi:home`, `lucide:settings` |
-| GenVoice custom | `gv:kebab-name` | `gv:billing-alert` |
+| Custom | `ci:kebab-name` | `ci:billing-alert` |
 
 ### Props
 
 | Prop | Type | Default | Notes |
 |------|------|---------|--------|
-| `name` | `string` | — | Required. Canonical id (`ant:…`, `gv:…`, or Iconify `prefix:name`) |
+| `name` | `string` | — | Required. Canonical id (`ant:…`, `ci:…`, or Iconify `prefix:name`) |
 | `size` | `number \| string` | `1em` | Number = px; string = CSS length |
-| `color` | `string` | `currentColor` | Monochrome `gv:` icons follow this; multi-color `gv:` icons keep baked fills |
+| `color` | `string` | `currentColor` | Monochrome `ci:` icons follow this; multi-color `ci:` icons keep baked fills |
 | `label` | `string` | — | Accessible name for meaningful icons |
 | `decorative` | `boolean` | `false` | Presentational; sets `aria-hidden` |
 | `className` / `class` | `string` | — | React / Vue |
 | `style` | CSS object | — | Merged with size/color/rotate |
 | `rotate` | `number` | — | Degrees (CSS `transform`) |
-| `spin` | `boolean` | `false` | **Ant icons only** — ignored for Iconify and `gv:` |
+| `spin` | `boolean` | `false` | **Ant icons only** — ignored for Iconify and `ci:` |
 
 Use **`label`** for meaningful icons, or **`decorative`** for pure decoration. Prefer wrapping interactive icons in a button or link rather than putting click handlers on the icon alone.
 
@@ -139,7 +139,7 @@ Use **`label`** for meaningful icons, or **`decorative`** for pure decoration. P
 import { searchIcons, getIconById } from '@JasonTuTu2/icons-catalog'
 
 searchIcons({ query: 'billing', source: 'custom', limit: 20 })
-getIconById('gv:billing-alert')
+getIconById('ci:billing-alert')
 ```
 
 ### Offline Iconify (optional)
@@ -167,9 +167,9 @@ Changelogs: [`packages/react`](packages/react/CHANGELOG.md), [`packages/vue`](pa
 |---------|-----|
 | `401 Unauthorized` | Token missing/expired; needs `read:packages` |
 | `404 Not Found` | No access to the repo/package, or wrong package name |
-| `gv:` icons missing | Upgrade `@JasonTuTu2/icons-react` / `icons-vue` (and transitive `icons-custom`); confirm the SVG was published |
+| `ci:` icons missing | Upgrade `@JasonTuTu2/icons-react` / `icons-vue` (and transitive `icons-custom`); confirm the SVG was published |
 | `iconExists` / build error with Iconify React 6 | Fixed in latest packages — upgrade `@JasonTuTu2/icons-react` (uses `iconLoaded` with v5 fallback) |
-| `color` does nothing on a `gv:` icon | Multi-color icons preserve fills; use a monochrome SVG if you need recoloring |
+| `color` does nothing on a `ci:` icon | Multi-color icons preserve fills; use a monochrome SVG if you need recoloring |
 | Works locally, fails in CI | Set `NODE_AUTH_TOKEN` and `packages: read` in the workflow |
 
 ## Icon browser
@@ -183,7 +183,7 @@ Product apps still install packages from GitHub Packages — the browser is a ca
 
 ## Licensing
 
-GenVoice packages are **MIT**. Icon artwork remains under upstream licenses (Ant Design Icons MIT; Iconify collections vary). Custom `gv:` icons are GenVoice proprietary / internal unless noted.
+Published packages are **MIT**. Icon artwork remains under upstream licenses (Ant Design Icons MIT; Iconify collections vary). Custom `ci:` icons are proprietary / internal unless noted.
 
 ## Development (contributors)
 
@@ -202,7 +202,7 @@ pnpm changeset
 
 ### Adding custom icons
 
-**App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
+**App consumers** do not add icons to this library — they install packages and use names (`ci:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
 **Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). The plugin panel loads SVGs only (**Load selection** → **Stage**). Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers). PNG/JPG brand images are uploaded in the full browser, not the plugin.
 
@@ -224,7 +224,7 @@ From Figma / git:
    - Gradient SVG: `packages/custom-icons/svg/gradient/kebab-name.svg`
    - Brand image: `packages/custom-icons/images/kebab-name.png` (or `.jpg` / `.jpeg`)
 3. Local git adds: run `pnpm catalog:gen` (Pages **Apply** regenerates in CI).
-4. Use `gv:kebab-name` with `<Icon />` for SVGs. Brand images use `img:kebab-name` and ship as files — import from `@JasonTuTu2/icons-custom/images/…` (not `<Icon />`).
+4. Use `ci:kebab-name` with `<Icon />` for SVGs. Brand images use `img:kebab-name` and ship as files — import from `@JasonTuTu2/icons-custom/images/…` (not `<Icon />`).
 
 Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-color and gradient SVGs keep their fills / paint servers; `color` may not recolor them. Do not reuse the same kebab name across mono, color, gradient, and images.
 
@@ -238,7 +238,7 @@ On the live icon browser, **staging** uses the embedded Pages token (no personal
 
 The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SVG); Apply/Publish and PNG/JPG upload happen in the full icon browser.
 
-**Remove a custom asset:** select `gv:…` or `img:…` in the browser → **Stage removal** → **Apply staged** (deletes the file + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
+**Remove a custom asset:** select `ci:…` or `img:…` in the browser → **Stage removal** → **Apply staged** (deletes the file + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
 
 **Repo setup (secrets & variables):**
 

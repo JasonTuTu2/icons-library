@@ -1,7 +1,7 @@
 import { addCollection } from '@iconify/react'
 import collection from './collection.json'
 
-/** Register GenVoice custom icons with @iconify/react. Idempotent; safe to call again. */
+/** Register custom icons with @iconify/react. Idempotent; safe to call again. */
 export function registerCustomIcons(): void {
   addCollection(collection)
 }

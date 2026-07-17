@@ -589,7 +589,7 @@ export function createGithubAdminClient(
         // An add cancels a pending removal for the same name.
         await deletePath(
           removalMarkerPath(icon.name),
-          `Cancel staged removal ${icon.kind === 'image' ? 'img' : 'gv'}:${icon.name}`,
+          `Cancel staged removal ${icon.kind === 'image' ? 'img' : 'ci'}:${icon.name}`,
         )
 
         if (icon.kind === 'image') {
@@ -616,14 +616,14 @@ export function createGithubAdminClient(
           if (other === dir) continue
           await deletePath(
             `${STAGING_BASE}/${other}/${icon.name}.svg`,
-            `Cancel staged add gv:${icon.name} (${other})`,
+            `Cancel staged add ci:${icon.name} (${other})`,
           )
         }
         const path = `${STAGING_BASE}/${dir}/${icon.name}.svg`
         await putTextFile(
           path,
           `${icon.content}\n`,
-          `Stage icon gv:${icon.name}`,
+          `Stage icon ci:${icon.name}`,
         )
       }
     },
@@ -656,22 +656,22 @@ export function createGithubAdminClient(
         ])
         if (!monoSha && !colorSha && !gradientSha && !imageSha) {
           throw new Error(
-            `${name} is not in the library (gv: or img:) — nothing to stage for removal.`,
+            `${name} is not in the library (ci: or img:) — nothing to stage for removal.`,
           )
         }
 
         // A removal cancels a pending add for the same name.
         await deletePath(
           `${STAGING_BASE}/mono/${name}.svg`,
-          `Cancel staged add gv:${name} (mono)`,
+          `Cancel staged add ci:${name} (mono)`,
         )
         await deletePath(
           `${STAGING_BASE}/color/${name}.svg`,
-          `Cancel staged add gv:${name} (color)`,
+          `Cancel staged add ci:${name} (color)`,
         )
         await deletePath(
           `${STAGING_BASE}/gradient/${name}.svg`,
-          `Cancel staged add gv:${name} (gradient)`,
+          `Cancel staged add ci:${name} (gradient)`,
         )
         for (const ext of IMAGE_EXTS) {
           await deletePath(

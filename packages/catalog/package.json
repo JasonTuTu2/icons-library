@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-catalog",
   "version": "0.3.12",
-  "description": "Icon metadata catalog for GenVoice Icons browser",
+  "description": "Icon metadata catalog for the icons browser",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

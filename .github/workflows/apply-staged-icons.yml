@@ -34,19 +34,19 @@ jobs:
           for f in "$STAGING"/mono/*.svg; do
             base=$(basename "$f")
             mv -f "$f" "$MONO_DST/$base"
-            names+=("gv:${base%.svg}")
+            names+=("ci:${base%.svg}")
             echo "Promoted mono/$base"
           done
           for f in "$STAGING"/color/*.svg; do
             base=$(basename "$f")
             mv -f "$f" "$COLOR_DST/$base"
-            names+=("gv:${base%.svg}")
+            names+=("ci:${base%.svg}")
             echo "Promoted color/$base"
           done
           for f in "$STAGING"/gradient/*.svg; do
             base=$(basename "$f")
             mv -f "$f" "$GRAD_DST/$base"
-            names+=("gv:${base%.svg}")
+            names+=("ci:${base%.svg}")
             echo "Promoted gradient/$base"
           done
           for f in "$STAGING"/images/*.{png,jpg,jpeg}; do

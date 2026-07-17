@@ -25,7 +25,7 @@ function formatPublishIconList(
       if (icon.kind === 'image') {
         return `• img:${icon.name} (${(icon.format ?? 'image').toUpperCase()})`
       }
-      return `• gv:${icon.name} (${
+      return `• ci:${icon.name} (${
         icon.colorMode === 'preserved'
           ? 'multi-color'
           : icon.colorMode === 'gradient'
@@ -37,7 +37,9 @@ function formatPublishIconList(
 }
 
 function formatRemovalList(removals: StagedRemoval[]): string {
-  return removals.map((icon) => `• gv:${icon.name}`).join('\n')
+  return removals
+    .map((icon) => `• ${icon.kind === 'image' ? 'img' : 'ci'}:${icon.name}`)
+    .join('\n')
 }
 
 function addsNote(

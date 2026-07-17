@@ -28,7 +28,7 @@ function MissingIcon({ name, style, className }: {
   className?: string
 }): ReactElement {
   if (isDev()) {
-    console.warn(`[GenVoice Icons] Icon not found: "${name}"`)
+    console.warn(`[Icons] Icon not found: "${name}"`)
   }
   return (
     <span
@@ -139,7 +139,7 @@ export function Icon({
   if (parsed.provider === 'custom' && !iconifyIconExists(IconifyReact, parsed.id)) {
     if (isDev()) {
       console.warn(
-        `[GenVoice Icons] Custom icon "${name}" was not found in @JasonTuTu2/icons-custom. ` +
+        `[Icons] Custom icon "${name}" was not found in the custom icons package. ` +
           'Publish/upgrade the package after adding the SVG, or check the kebab name.',
       )
     }

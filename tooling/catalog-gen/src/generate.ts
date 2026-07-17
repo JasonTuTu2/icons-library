@@ -53,8 +53,8 @@ const antLicense: IconLicense = {
 }
 
 const customLicense: IconLicense = {
-  spdx: 'LicenseRef-GenVoice',
-  title: 'GenVoice proprietary / internal use',
+  spdx: 'LicenseRef-Custom',
+  title: 'Custom / proprietary — internal use',
 }
 
 const sets: IconSetInfo[] = [
@@ -103,15 +103,15 @@ const sets: IconSetInfo[] = [
     homepage: 'https://heroicons.com/',
   },
   {
-    id: 'genvoice',
-    name: 'GenVoice Custom',
+    id: 'custom',
+    name: 'Custom Icons',
     source: 'custom',
     license: customLicense,
-    prefix: 'gv',
+    prefix: 'ci',
   },
   {
-    id: 'genvoice-images',
-    name: 'GenVoice Brand Images',
+    id: 'custom-images',
+    name: 'Brand Images',
     source: 'custom',
     license: customLicense,
     prefix: 'img',
@@ -197,7 +197,7 @@ function collectCustomIcons(): IconMeta[] {
   }
 
   const collection = {
-    prefix: 'gv',
+    prefix: 'ci',
     width: 24,
     height: 24,
     icons: Object.fromEntries(
@@ -219,12 +219,11 @@ function collectCustomIcons(): IconMeta[] {
   )
 
   return icons.map((item) => ({
-    id: `gv:${item.name}`,
+    id: `ci:${item.name}`,
     title: item.title,
     tags: [
       item.name,
-      'gv',
-      'genvoice',
+      'ci',
       'custom',
       item.colorMode === 'preserved'
         ? 'multicolor'
@@ -233,7 +232,7 @@ function collectCustomIcons(): IconMeta[] {
           : 'mono',
       item.colorMode,
     ],
-    set: 'genvoice',
+    set: 'custom',
     source: 'custom' as const,
     license: customLicense,
     name: item.name,
@@ -256,12 +255,11 @@ function collectBrandImages(): IconMeta[] {
       item.name,
       'img',
       'image',
-      'genvoice',
       'custom',
       item.format,
       'brand-image',
     ],
-    set: 'genvoice-images',
+    set: 'custom-images',
     source: 'custom' as const,
     license: customLicense,
     name: item.name,

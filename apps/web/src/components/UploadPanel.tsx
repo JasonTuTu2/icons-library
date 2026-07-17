@@ -204,7 +204,7 @@ function stagedAssetLabel(icon: StagedIcon): string {
       : icon.colorMode === 'gradient'
         ? 'gradient'
         : 'mono'
-  return `gv:${icon.name} (${mode})`
+  return `ci:${icon.name} (${mode})`
 }
 
 function colorModeLabel(mode: IconColorMode | undefined): string {
@@ -432,7 +432,7 @@ export function UploadPanel({
       const first = current[0]
       if (first) {
         onUploaded(
-          first.kind === 'image' ? `img:${first.name}` : `gv:${first.name}`,
+          first.kind === 'image' ? `img:${first.name}` : `ci:${first.name}`,
         )
       }
       setMessage(
@@ -557,7 +557,7 @@ export function UploadPanel({
                 ) : (
                   <p>
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
-                    <code>gv:kebab-name</code> (set mono / multi-color /
+                    <code>ci:kebab-name</code> (set mono / multi-color /
                     gradient). Images become <code>img:kebab-name</code> (not
                     usable with <code>&lt;Icon /&gt;</code>).
                     {mode === 'github'
@@ -606,7 +606,7 @@ export function UploadPanel({
                           />
                         </span>
                         <label>
-                          <span>{item.kind === 'image' ? 'img:' : 'gv:'}</span>
+                          <span>{item.kind === 'image' ? 'img:' : 'ci:'}</span>
                           <input
                             value={item.name}
                             onChange={(e) => {
@@ -622,7 +622,7 @@ export function UploadPanel({
                         {item.kind === 'svg' ? (
                           <select
                             className="color-mode-select"
-                            aria-label={`Color mode for gv:${item.name || 'icon'}`}
+                            aria-label={`Color mode for ci:${item.name || 'icon'}`}
                             value={item.colorMode}
                             onChange={(e) => {
                               const value = e.target.value as IconColorMode
@@ -704,13 +704,13 @@ export function UploadPanel({
                                 title={
                                   icon.kind === 'image'
                                     ? `img:${icon.name}`
-                                    : `gv:${icon.name}`
+                                    : `ci:${icon.name}`
                                 }
                               />
                               <code>
                                 {icon.kind === 'image'
                                   ? `img:${icon.name}`
-                                  : `gv:${icon.name}`}
+                                  : `ci:${icon.name}`}
                               </code>
                               <span>
                                 {icon.kind === 'image'
@@ -810,13 +810,13 @@ export function UploadPanel({
                                     title={
                                       icon.kind === 'image'
                                         ? `img:${icon.name}`
-                                        : `gv:${icon.name}`
+                                        : `ci:${icon.name}`
                                     }
                                   />
                                   <code>
                                     {icon.kind === 'image'
                                       ? `img:${icon.name}`
-                                      : `gv:${icon.name}`}
+                                      : `ci:${icon.name}`}
                                   </code>
                                   <span>
                                     {icon.kind === 'image'

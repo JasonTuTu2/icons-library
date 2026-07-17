@@ -113,7 +113,7 @@ export const Icon = defineComponent({
         }
         if (!antComp.value) {
           if (isDev()) {
-            console.warn(`[GenVoice Icons] Icon not found: "${props.name}"`)
+            console.warn(`[Icons] Icon not found: "${props.name}"`)
           }
           return h('span', {
             class: props.class,
@@ -134,7 +134,7 @@ export const Icon = defineComponent({
       if (p.provider === 'custom' && !iconifyIconExists(IconifyVue, p.id)) {
         if (isDev()) {
           console.warn(
-            `[GenVoice Icons] Custom icon "${props.name}" was not found in @JasonTuTu2/icons-custom. ` +
+            `[Icons] Custom icon "${props.name}" was not found in the custom icons package. ` +
               'Publish/upgrade the package after adding the SVG, or check the kebab name.',
           )
         }

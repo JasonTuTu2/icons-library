@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-core",
   "version": "0.3.12",
-  "description": "Shared types, naming, and a11y helpers for GenVoice Icons",
+  "description": "Shared types, naming, and a11y helpers for the icons library",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

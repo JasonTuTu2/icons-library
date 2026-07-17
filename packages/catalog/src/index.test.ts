@@ -15,9 +15,9 @@ describe('catalog', () => {
   it('builds snippets', () => {
     expect(reactSnippet('mdi:home')).toContain('mdi:home')
     expect(vueSnippet('ant:HomeOutlined')).toContain('ant:HomeOutlined')
-    expect(reactSnippet('gv:billing-alert')).toContain('gv:billing-alert')
-    expect(reactSnippet('gv:billing-alert')).not.toContain('registerCustomIcons')
-    expect(vueSnippet('gv:billing-alert')).toContain('gv:billing-alert')
-    expect(vueSnippet('gv:billing-alert')).not.toContain('registerCustomIcons')
+    expect(reactSnippet('ci:billing-alert')).toContain('ci:billing-alert')
+    expect(reactSnippet('ci:billing-alert')).not.toContain('registerCustomIcons')
+    expect(vueSnippet('ci:billing-alert')).toContain('ci:billing-alert')
+    expect(vueSnippet('ci:billing-alert')).not.toContain('registerCustomIcons')
   })
 })

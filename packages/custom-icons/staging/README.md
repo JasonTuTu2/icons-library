@@ -1,6 +1,6 @@
 # Custom icon staging
 
-Pending GenVoice SVG / brand-image **adds** and **removals** shared by the icon browser **before** they enter / leave the library.
+Pending custom SVG / brand-image **adds** and **removals** shared by the icon browser **before** they enter / leave the library.
 
 - `mono/*.svg` → applied to `packages/custom-icons/svg/`
 - `color/*.svg` → applied to `packages/custom-icons/svg/color/`

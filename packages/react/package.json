@@ -1,7 +1,7 @@
 {
   "name": "@JasonTuTu2/icons-react",
   "version": "0.3.12",
-  "description": "React Icon component for GenVoice Icons (Ant Design + Iconify)",
+  "description": "React Icon component (Ant Design + Iconify + custom)",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

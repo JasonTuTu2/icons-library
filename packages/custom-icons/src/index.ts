@@ -5,7 +5,7 @@ export type CustomIconCollection = typeof collection
 export { collection }
 
 export function getCustomIconNames(): string[] {
-  return Object.keys(collection.icons).map((name) => `gv:${name}`)
+  return Object.keys(collection.icons).map((name) => `ci:${name}`)
 }
 
 /** Relative package path for a brand image file, e.g. `images/logo.png`. */

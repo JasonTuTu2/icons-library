@@ -3,9 +3,9 @@ export function DocsPage() {
     <article className="docs">
       <h1>Documentation</h1>
       <p className="lede">
-        GenVoice Icons unifies Ant Design Icons, Iconify, and GenVoice custom
-        SVGs behind one API for React and Vue, with a searchable browser for
-        designers and developers.
+        Icons unifies Ant Design Icons, Iconify, and custom brand SVGs behind
+        one API for React and Vue, with a searchable browser for designers and
+        developers.
       </p>
 
       <section>
@@ -39,7 +39,7 @@ pnpm add @iconify-json/mdi @iconify-json/lucide @iconify-json/heroicons`}</code>
 
 <Icon name="ant:HomeOutlined" size={24} label="Home" />
 <Icon name="mdi:home" size="1.5em" decorative />
-<Icon name="gv:billing-alert" size={24} label="Billing" />`}</code>
+<Icon name="ci:billing-alert" size={24} label="Billing" />`}</code>
         </pre>
         <h3>Vue</h3>
         <pre>
@@ -50,7 +50,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
 <template>
   <Icon name="ant:HomeOutlined" :size="24" label="Home" />
   <Icon name="mdi:home" size="1.5em" decorative />
-  <Icon name="gv:cart" :size="24" label="Cart" />
+  <Icon name="ci:cart" :size="24" label="Cart" />
 </template>`}</code>
         </pre>
       </section>
@@ -73,7 +73,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
             writes to disk without GitHub staging.
           </li>
           <li>
-            Use <code>gv:kebab-name</code> with <code>Icon</code> for SVGs.
+            Use <code>ci:kebab-name</code> with <code>Icon</code> for SVGs.
             Brand images use <code>img:kebab-name</code> and file imports from{' '}
             <code>@JasonTuTu2/icons-custom/images/…</code>.
           </li>
@@ -90,7 +90,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Removing a custom icon</h2>
         <ol>
           <li>
-            Select a <code>gv:</code> or <code>img:</code> asset →{' '}
+            Select a <code>ci:</code> or <code>img:</code> asset →{' '}
             <strong>Stage removal</strong> (shared marker on GitHub).
           </li>
           <li>
@@ -128,7 +128,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <ul>
           <li>
             <code>name</code> — required canonical id (<code>ant:HomeOutlined</code>
-            , <code>gv:billing-alert</code>, or Iconify <code>prefix:name</code>)
+            , <code>ci:billing-alert</code>, or Iconify <code>prefix:name</code>)
           </li>
           <li>
             <code>size</code> — number (px) or CSS length (default{' '}
@@ -136,7 +136,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           </li>
           <li>
             <code>color</code> — CSS color (default <code>currentColor</code>).
-            Works for monochrome <code>gv:</code> icons; multi-color <code>gv:</code>{' '}
+            Works for monochrome <code>ci:</code> icons; multi-color <code>ci:</code>{' '}
             icons keep baked fills
           </li>
           <li>
@@ -154,7 +154,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           </li>
           <li>
             <code>spin</code> — Ant icons only; ignored for Iconify and{' '}
-            <code>gv:</code>
+            <code>ci:</code>
           </li>
         </ul>
       </section>
@@ -186,10 +186,10 @@ addCollection(mdi)`}</code>
       <section>
         <h2>Licensing</h2>
         <p>
-          GenVoice packages are MIT. Icon artwork remains under upstream
+          Published packages are MIT. Icon artwork remains under upstream
           licenses (Ant Design Icons MIT; Iconify collections vary). Custom{' '}
-          <code>gv:</code> icons are GenVoice proprietary / internal unless
-          noted otherwise. Check each icon&apos;s detail panel before shipping.
+          <code>ci:</code> icons are proprietary / internal unless noted
+          otherwise. Check each icon&apos;s detail panel before shipping.
         </p>
       </section>
 
