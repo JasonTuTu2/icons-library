@@ -2,5 +2,21 @@
   "prefix": "ci",
   "width": 24,
   "height": 24,
-  "icons": {}
+  "icons": {
+    "box": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6.54 13.92 24 24.02l17.46-10.1M24 44.16V24m18 8V16a4 4 0 0 0-2-3.46l-14-8a4 4 0 0 0-4 0l-14 8A4 4 0 0 0 6 16v16a4 4 0 0 0 2 3.46l14 8a4 4 0 0 0 4 0l14-8A4 4 0 0 0 42 32\"/>",
+      "width": 48,
+      "height": 48
+    },
+    "headphones": {
+      "body": "<path fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M6 36V24a18 18 0 1 1 36 0v12m0 2a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4h6zM6 38a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6a4 4 0 0 0-4-4H6z\"/>",
+      "width": 48,
+      "height": 48
+    },
+    "indeterminate-check-box": {
+      "body": "<path fill=\"currentColor\" d=\"M7 26h10v-4H7zM5 42q-.824 0-1.412-1.175T3 38V10q0-1.65.587-2.825Q4.176 6 5 6h14q.824 0 1.413 1.175Q21 8.35 21 10v28q0 1.65-.587 2.825Q19.825 42 19 42zm0-4h14V10H5z\"/>",
+      "width": 24,
+      "height": 48
+    }
+  }
 }
