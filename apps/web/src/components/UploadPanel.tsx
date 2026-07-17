@@ -23,7 +23,6 @@ import {
   takePendingFigmaUploads,
   type FigmaHandoffIcon,
 } from '../lib/figmaHandoff'
-import { useGithubSessionToken } from '../lib/githubAuth'
 import {
   setAllUnpublishedChecked,
   setUnpublishedChecked,
@@ -148,7 +147,6 @@ export function UploadPanel({
   localUploadEnabled,
   onUploaded,
 }: UploadPanelProps) {
-  const sessionToken = useGithubSessionToken()
   const githubRepoConfigured = isGithubRepoConfigured()
   const githubAuthed = isGithubAdminEnabled()
   const uploadEnabled = localUploadEnabled || githubRepoConfigured
@@ -219,7 +217,7 @@ export function UploadPanel({
     if (open && mode === 'github' && githubAuthed) {
       void refreshStaged()
     }
-  }, [open, mode, githubAuthed, refreshStaged, sessionToken])
+  }, [open, mode, githubAuthed, refreshStaged])
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return
@@ -427,18 +425,18 @@ export function UploadPanel({
             {!uploadEnabled ? (
               <p>
                 Upload is not configured. Locally, run <code>pnpm dev</code>. On
-                GitHub Pages, ensure <code>VITE_GITHUB_REPO</code> is set at
-                build time and use <strong>Connect GitHub</strong> with a PAT.
+                GitHub Pages, ensure <code>ICON_BROWSER_TOKEN</code> and{' '}
+                <code>VITE_GITHUB_REPO</code> are set for the Pages build.
               </p>
             ) : (
               <>
                 {mode === 'github' && !githubAuthed ? (
                   <p>
-                    Connect with a GitHub PAT (<code>contents: write</code> +{' '}
-                    <code>actions: write</code>) using the toolbar button, then
-                    stage below. Tokens stay in this browser tab only — Actions
-                    use the <code>ICON_BROWSER_TOKEN</code> secret for
-                    apply/publish pushes.
+                    GitHub write access is not configured. Redeploy Pages with
+                    the <code>ICON_BROWSER_TOKEN</code> secret (
+                    <code>contents: write</code> + <code>actions: write</code>
+                    ), or set <code>VITE_GITHUB_TOKEN</code> in local{' '}
+                    <code>.env.local</code>.
                   </p>
                 ) : (
                   <p>
@@ -545,7 +543,7 @@ export function UploadPanel({
                         ? 'Working…'
                         : githubAuthed
                           ? 'Add to staging'
-                          : 'Connect GitHub to stage'}
+                          : 'GitHub token required'}
                     </button>
 
                     <div className="staged-block">

@@ -173,7 +173,7 @@ export function createGithubAdminClient(
     }
     if (!token) {
       throw new Error(
-        'Connect with a GitHub PAT first (contents:write + actions:write).',
+        'GitHub write token is not configured (need contents:write + actions:write).',
       )
     }
 

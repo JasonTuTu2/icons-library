@@ -6,7 +6,6 @@ import {
   isGithubRepoConfigured,
   stageRemovals,
 } from '../lib/github'
-import { useGithubSessionToken } from '../lib/githubAuth'
 
 interface IconDetailProps {
   icon: IconMeta
@@ -32,7 +31,6 @@ export function IconDetail({
   onClose,
   onRemovalStaged,
 }: IconDetailProps) {
-  useGithubSessionToken()
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [removeMessage, setRemoveMessage] = useState<string | null>(null)
@@ -194,7 +192,7 @@ export function IconDetail({
         isGithubRepoConfigured() &&
         !isGithubAdminEnabled() ? (
         <p className="meta-note">
-          Connect GitHub to stage removal of this custom icon.
+          GitHub write access is not configured — cannot stage removal.
         </p>
       ) : null}
 

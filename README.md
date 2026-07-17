@@ -204,17 +204,16 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`gv:…`, `ant:…`, `mdi:…`). New brand SVGs are added here, then published.
 
-**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)), select icons, **Send to icon browser**. In the [icon browser](https://JasonTuTu2.github.io/icons-library/) **Connect GitHub**, **Add to staging**, **Apply staged**, and **Publish** when releasing. The plugin only exports SVGs — it does not call GitHub.
+**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)), select icons, **Send to icon browser**. In the [icon browser](https://JasonTuTu2.github.io/icons-library/) **Add to staging**, **Apply staged**, and **Publish** when releasing. The plugin only exports SVGs — it does not call GitHub.
 
 **Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Add to staging** (multi-file OK), then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
 ### First publish (happy path)
 
-1. **Connect GitHub** in the browser.
-2. **Add to staging** (Upload SVG, or Figma plugin handoff) → **Apply staged to library**.
-3. Open the linked **Actions** run — wait ~1–2 minutes, then hard-refresh Pages.
-4. In **Upload SVG**, under **In library (unpublished)**, check icons to ship (unchecked stay out of this package, then return to the library).
-5. **Publish** → wait for the publish Action → confirm versions under GitHub Packages.
+1. **Add to staging** (Upload SVG, or Figma plugin handoff) → **Apply staged to library**.
+2. Open the linked **Actions** run — wait ~1–2 minutes, then hard-refresh Pages.
+3. In **Upload SVG**, under **In library (unpublished)**, check icons to ship (unchecked stay out of this package, then return to the library).
+4. **Publish** → wait for the publish Action → confirm versions under GitHub Packages.
 
 From Figma / git:
 
@@ -229,12 +228,11 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 ### Upload & publish from Pages
 
-On the live icon browser:
+On the live icon browser (no personal PAT required — the Pages build embeds the repo write token for open collaboration):
 
-1. **Connect GitHub** — paste a PAT into the browser (tab `sessionStorage`). Needs `contents: write` + `actions: write` on this repo.
-2. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages.
-3. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret (not the browser session).
-4. **Publish** — check unpublished icons to include; unchecked icons are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
+1. **Add to staging** — writes SVGs into the shared `packages/custom-icons/staging/` folder via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages.
+2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
+3. **Publish** — check unpublished icons to include; unchecked icons are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
 The Figma plugin opens this same browser flow with your selection prefilled (or downloads `gv-icons-handoff.json` when the payload is too large for a URL).
 
@@ -244,19 +242,19 @@ The Figma plugin opens this same browser flow with your selection prefilled (or 
 
 | Kind | Name | Purpose |
 |------|------|---------|
-| Secret | `ICON_BROWSER_TOKEN` | PAT used **only in Actions** for apply/publish git pushes (`contents: write`; include `actions: write` if the same token is also used by maintainers in the browser) |
+| Secret | `ICON_BROWSER_TOKEN` | PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and baked into the Pages site so anyone can stage / dispatch from the browser |
 | Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-The Pages build and Figma plugin **do not** embed a write token. Anonymous visitors cannot stage/apply/publish.
+Anyone with the Pages URL can stage, apply, and publish while this open access is enabled. Rotate or revoke the PAT if you need to lock it down later.
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Session PAT → Contents API → `staging/mono` or `staging/color` |
-| Stage removal | Session PAT → Contents API → `staging/remove/{name}.remove` |
-| Apply staged | Browser PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
-| Publish | Browser PAT dispatches (unchecked held aside for this package, then restored) → Action publishes with package permissions |
+| Add to staging | Embedded token → Contents API → `staging/mono` or `staging/color` |
+| Stage removal | Embedded token → Contents API → `staging/remove/{name}.remove` |
+| Apply staged | Browser dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
+| Publish | Browser dispatches (unchecked held aside for this package, then restored) → Action publishes with package permissions |
 
-Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging.
+Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging. For local GitHub staging, set `VITE_GITHUB_TOKEN` in `.env.local`.
 
 ### Publishing
 

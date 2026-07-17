@@ -25,26 +25,24 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 1. Build once: `pnpm --filter @JasonTuTu2/icons-figma build` (or `… dev` while iterating).
 2. In Figma Desktop: **Plugins → Development → Import plugin from manifest…** → select `apps/figma-plugin/manifest.json`.
 3. Select icon frame(s)/component(s) → **Load selection** → edit kebab names → choose **Mono** or **Multi** → **Send to icon browser**.
-4. In the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Connect GitHub** (session PAT) → **Add to staging** → **Apply staged to library** → **Publish** when releasing packages.
+4. In the [icon browser](https://JasonTuTu2.github.io/icons-library/): **Add to staging** → **Apply staged to library** → **Publish** when releasing packages.
 
 The plugin never talks to GitHub — it only opens the browser with your SVGs (or downloads `gv-icons-handoff.json` if the payload is too large for a URL). Override the browser URL at build time with `ICON_BROWSER_URL=…`.
 
 ### Pages icon browser
 
-1. **Connect GitHub** — session PAT (`contents: write` + `actions: write`); not embedded in the site.
-2. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
-3. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
-4. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
+1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage).
+2. **Apply staged to library** — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
+3. **Publish** — check unpublished icons to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
 To **remove** a custom icon: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes the SVG from the library.
 
 ### First publish (happy path)
 
-1. **Connect GitHub** in the icon browser.
-2. **Add to staging** (from Upload SVG, or via the Figma plugin handoff) → **Apply staged to library**.
-3. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
-4. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
-5. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.
+1. **Add to staging** (from Upload SVG, or via the Figma plugin handoff) → **Apply staged to library**.
+2. Open [Actions](https://github.com/JasonTuTu2/icons-library/actions) — wait ~1–2 minutes for Apply + Pages, then hard-refresh the browser.
+3. Open **Upload SVG**, review **In library (unpublished)**, leave checked what should ship.
+4. Click **Publish** → wait for the publish workflow → packages appear under GitHub Packages.
 
 ### Monochrome (recolorable) — local / git
 
@@ -78,7 +76,7 @@ Consumers need `.npmrc` pointing `@JasonTuTu2` at GitHub Packages and a token wi
 
 `@JasonTuTu2/icons-web`, `@JasonTuTu2/icons-figma`, `@JasonTuTu2/github-admin`, and `@JasonTuTu2/catalog-gen` stay private and are not published.
 
-**Security:** Pages and the Figma plugin do **not** embed write tokens. Maintainers connect a PAT in the icon browser session; Apply/Publish Action jobs use the `ICON_BROWSER_TOKEN` repo secret. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
+**Security:** The Pages build embeds `ICON_BROWSER_TOKEN` so anyone on the icon browser can stage, apply, and publish (temporary open access). Apply/Publish Action jobs also use that secret. Ensure the PAT has `contents: write` + `actions: write`. Optional variable `ICON_BROWSER_REPO` overrides the baked `owner/repo` for Pages.
 
 ## Guidelines
 

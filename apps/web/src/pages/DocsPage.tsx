@@ -63,8 +63,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
             browser (no GitHub PAT in the plugin).
           </li>
           <li>
-            In the browser: <strong>Connect GitHub</strong> →{' '}
-            <strong>Add to staging</strong> →{' '}
+            In the browser: <strong>Add to staging</strong> →{' '}
             <strong>Apply staged to library</strong>, wait ~1–2 minutes on
             Actions, hard-refresh, then check unpublished icons and{' '}
             <strong>Publish</strong>. Or commit to{' '}
@@ -107,7 +106,6 @@ import { Icon } from '@JasonTuTu2/icons-vue'
       <section>
         <h2>First publish (happy path)</h2>
         <ol>
-          <li>Connect GitHub in the icon browser.</li>
           <li>
             Add to staging (Upload SVG or Figma handoff) → Apply staged to
             library.

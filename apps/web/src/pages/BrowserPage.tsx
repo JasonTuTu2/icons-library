@@ -11,7 +11,6 @@ import { IconGrid } from '../components/IconGrid'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
-import { GithubConnect } from '../components/GithubConnect'
 import { isGithubRepoConfigured } from '../lib/github'
 
 export function BrowserPage() {
@@ -111,7 +110,6 @@ export function BrowserPage() {
             <option value="preserved">Multi-color</option>
           </select>
         </label>
-        <GithubConnect />
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -146,7 +144,7 @@ export function BrowserPage() {
               Browse the grid to preview icons, copy React or Vue snippets, and
               review license details.
               {isGithubRepoConfigured()
-                ? ' Connect GitHub with a PAT to stage SVGs (including handoffs from the Figma plugin), stage removals, Apply, or Publish. Write tokens never ship in the Pages build.'
+                ? ' Use Upload to stage SVGs (including Figma plugin handoffs), stage removals, Apply, or Publish.'
                 : ' Upload custom Figma SVGs with Upload (local `pnpm dev`).'}
             </p>
           </aside>

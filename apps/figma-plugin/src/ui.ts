@@ -157,7 +157,7 @@ $('btn-send').onclick = () => {
     if (encoded.length <= MAX_HANDOFF_CHARS) {
       openBrowser(buildBrowserHandoffUrl(ICON_BROWSER_URL, encoded))
       setMessage(
-        `Opened icon browser with ${payload.length} icon(s). Connect GitHub there to stage, apply, and publish.`,
+        `Opened icon browser with ${payload.length} icon(s). Stage, apply, and publish from there.`,
       )
     } else {
       downloadHandoffJson(payload)

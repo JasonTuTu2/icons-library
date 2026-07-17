@@ -2,8 +2,8 @@
 
 interface ImportMetaEnv {
   /**
-   * Optional local-only write token (`.env.local`). Must never be set in the
-   * Pages CI build — browser admin uses a session PAT instead.
+   * Write token for browser → GitHub API (stage / dispatch).
+   * Pages CI injects `ICON_BROWSER_TOKEN`; local optional via `.env.local`.
    */
   readonly VITE_GITHUB_TOKEN?: string
   /** owner/repo baked at build time (public). */

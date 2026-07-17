@@ -36,8 +36,8 @@ function getRepo(): string {
 
 /**
  * Token used for browser → GitHub API calls.
- * Prefer a session PAT (Connect button). Optional VITE_GITHUB_TOKEN is for local
- * .env only — Pages builds must NOT inject a write token.
+ * Pages CI bakes ICON_BROWSER_TOKEN into VITE_GITHUB_TOKEN so anyone can
+ * stage / apply / publish. Optional session override or local .env for dev.
  */
 function getToken(): string {
   return (

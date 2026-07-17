@@ -10,7 +10,6 @@ import {
   packagesUrl,
   type StagedRemoval,
 } from '../lib/github'
-import { useGithubSessionToken } from '../lib/githubAuth'
 import {
   getCheckedUnpublishedIcons,
   getUncheckedUnpublishedIcons,
@@ -59,7 +58,6 @@ function stagedWaitingSummary(addCount: number, removalCount: number): string {
 }
 
 export function PublishButton() {
-  useGithubSessionToken()
   const repoConfigured = isGithubRepoConfigured()
   const enabled = isGithubAdminEnabled()
   const [busy, setBusy] = useState(false)
@@ -143,7 +141,7 @@ export function PublishButton() {
   if (!repoConfigured) return null
 
   if (!enabled) {
-    return <p className="admin-hint">Connect GitHub to publish</p>
+    return <p className="admin-hint">GitHub token required to publish</p>
   }
 
   return (
