@@ -1,6 +1,6 @@
 {
   "name": "@JasonTuTu2/icons-vue",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "Vue 3 Icon component (Iconify + custom)",
   "license": "MIT",
   "type": "module",
