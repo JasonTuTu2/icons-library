@@ -41,7 +41,8 @@ interface IconMeta {
   title: string
   tags: string[]
   set: string
-  source: 'custom'
+  /** Designer-assigned source (iconify / custom / modified). */
+  source: 'iconify' | 'custom' | 'modified'
   license: IconLicense
   name: string
   colorMode?: 'mono' | 'preserved' | 'gradient'
@@ -50,7 +51,6 @@ interface IconMeta {
   assetPath?: string
   category?: string
   variant?: 'regular' | 'filled'
-  source: 'iconify' | 'custom' | 'modified'
 }
 
 const customLicense: IconLicense = {
