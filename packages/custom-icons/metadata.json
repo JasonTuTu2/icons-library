@@ -1,4 +1,255 @@
 {
-  "categories": [],
-  "icons": {}
+  "categories": [
+    "Messagining",
+    "Phone & Calling",
+    "Recording & Audio"
+  ],
+  "icons": {
+    "v1-call-answered-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-connecting-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-end-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-hold-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-hold-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-inbound-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-missed-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-outbound-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-outbound-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-call-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-campaign-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-campaign-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-dialpad-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-dialpad-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-email-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-email-read-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-email-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-emoji-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-emoji-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-message-add-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-message-add-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-message-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-message-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-mic-off-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-mic-off-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-number-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-number-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-pause-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-play-circle-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-play-circle-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-play-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-record-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-record-stop-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-send-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-speaker-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-speaker-mute-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-speaker-mute-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-speaker-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-speed-1x-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-voicemail-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    }
+  }
 }
