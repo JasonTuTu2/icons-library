@@ -9,6 +9,8 @@ export interface CustomIconEntryMeta {
   variant?: IconVariant
   source?: IconSource
   usage?: IconUsage
+  /** Free-form designer note (empty = none). */
+  note?: string
 }
 
 export interface CustomIconMetadata {
@@ -76,6 +78,16 @@ export function usageLabel(usage: IconUsage | undefined | null): string {
   return normalizeUsage(usage) === 'unused' ? 'Unused' : 'In use'
 }
 
+/** Trim; empty string means no note. Cap length for Contents API commits. */
+export function normalizeNote(raw: string | undefined | null): string {
+  return (raw ?? '').trim().slice(0, 500)
+}
+
+export function noteLabel(note: string | undefined | null): string {
+  const value = normalizeNote(note)
+  return value || 'No note'
+}
+
 export function parseMetadataJson(raw: string): CustomIconMetadata {
   let parsed: unknown
   try {
@@ -105,6 +117,7 @@ export function parseMetadataJson(raw: string): CustomIconMetadata {
         variant?: unknown
         source?: unknown
         usage?: unknown
+        note?: unknown
       }
       const variantRaw =
         typeof entry.variant === 'string' ? entry.variant : undefined
@@ -112,6 +125,7 @@ export function parseMetadataJson(raw: string): CustomIconMetadata {
         typeof entry.source === 'string' ? entry.source : undefined
       const usageRaw =
         typeof entry.usage === 'string' ? entry.usage : undefined
+      const noteRaw = typeof entry.note === 'string' ? entry.note : undefined
       icons[name] = {
         category: normalizeCategory(
           typeof entry.category === 'string' ? entry.category : '',
@@ -125,6 +139,7 @@ export function parseMetadataJson(raw: string): CustomIconMetadata {
         ...(usageRaw !== undefined
           ? { usage: normalizeUsage(usageRaw) }
           : {}),
+        ...(noteRaw !== undefined ? { note: normalizeNote(noteRaw) } : {}),
       }
     }
   }
@@ -148,6 +163,7 @@ export function serializeMetadata(metadata: CustomIconMetadata): string {
       variant: normalizeVariant(entry.variant),
       source: normalizeSource(entry.source),
       usage: normalizeUsage(entry.usage),
+      note: normalizeNote(entry.note),
     }
   }
   return `${JSON.stringify(normalized, null, 2)}\n`
@@ -158,6 +174,7 @@ export function parseStagingMetaFile(raw: string): {
   variant: IconVariant
   source: IconSource
   usage: IconUsage
+  note: string
 } {
   try {
     const parsed = JSON.parse(raw) as {
@@ -165,6 +182,7 @@ export function parseStagingMetaFile(raw: string): {
       variant?: unknown
       source?: unknown
       usage?: unknown
+      note?: unknown
     }
     return {
       category: normalizeCategory(String(parsed.category ?? '')),
@@ -177,6 +195,9 @@ export function parseStagingMetaFile(raw: string): {
       usage: normalizeUsage(
         typeof parsed.usage === 'string' ? parsed.usage : undefined,
       ),
+      note: normalizeNote(
+        typeof parsed.note === 'string' ? parsed.note : undefined,
+      ),
     }
   } catch {
     return {
@@ -184,6 +205,7 @@ export function parseStagingMetaFile(raw: string): {
       variant: 'regular',
       source: 'custom',
       usage: 'in-use',
+      note: '',
     }
   }
 }
@@ -196,13 +218,14 @@ export function mergeStagingMetaIntoMetadata(
     variant?: IconVariant
     source?: IconSource
     usage?: IconUsage
+    note?: string
   }>,
 ): CustomIconMetadata {
   const next: CustomIconMetadata = {
     categories: [...metadata.categories],
     icons: { ...metadata.icons },
   }
-  for (const { name, category, variant, source, usage } of stagingEntries) {
+  for (const { name, category, variant, source, usage, note } of stagingEntries) {
     const cat = normalizeCategory(category)
     next.icons[name] = {
       ...next.icons[name],
@@ -210,6 +233,7 @@ export function mergeStagingMetaIntoMetadata(
       variant: normalizeVariant(variant),
       source: normalizeSource(source),
       usage: normalizeUsage(usage),
+      note: normalizeNote(note),
     }
     if (cat && !next.categories.includes(cat)) {
       next.categories.push(cat)
@@ -235,6 +259,7 @@ export function setIconMetadata(
     variant?: IconVariant
     source?: IconSource
     usage?: IconUsage
+    note?: string
   },
 ): CustomIconMetadata {
   const current = metadata.icons[name] ?? {}
@@ -254,12 +279,16 @@ export function setIconMetadata(
     patch.usage !== undefined
       ? normalizeUsage(patch.usage)
       : normalizeUsage(current.usage)
+  const note =
+    patch.note !== undefined
+      ? normalizeNote(patch.note)
+      : normalizeNote(current.note)
 
   const next: CustomIconMetadata = {
     categories: [...metadata.categories],
     icons: {
       ...metadata.icons,
-      [name]: { category: cat, variant, source, usage },
+      [name]: { category: cat, variant, source, usage, note },
     },
   }
   if (cat && !next.categories.includes(cat)) {
@@ -311,4 +340,11 @@ export function getIconUsage(
   name: string,
 ): IconUsage {
   return normalizeUsage(metadata.icons[name]?.usage)
+}
+
+export function getIconNote(
+  metadata: CustomIconMetadata,
+  name: string,
+): string {
+  return normalizeNote(metadata.icons[name]?.note)
 }

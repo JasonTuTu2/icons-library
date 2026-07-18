@@ -783,6 +783,54 @@ pre {
   width: 5.5rem;
 }
 
+.upload-list .asset-note-input,
+.figma-dock-list .asset-note-input {
+  flex: 1 1 100%;
+  min-width: 8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  font-size: 0.75rem;
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.figma-dock-list .asset-note-input {
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 6px;
+}
+
+.meta-note-row dd {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.detail-note-input {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.detail-note-input:focus {
+  outline: none;
+  border-color: rgba(30, 167, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
+}
+
 .category-select-wrap {
   display: grid;
   gap: 0.35rem;
@@ -827,7 +875,8 @@ pre {
 }
 
 .apply-all-format,
-.apply-all-color-mode {
+.apply-all-color-mode,
+.apply-all-note {
   font: inherit;
   font-size: 0.75rem;
   padding: 0.35rem 0.45rem;
@@ -835,6 +884,11 @@ pre {
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   color: var(--ink);
+}
+
+.apply-all-note {
+  min-width: 8rem;
+  flex: 1 1 10rem;
 }
 
 .sr-only {
@@ -1230,7 +1284,7 @@ html.figma-host code {
   padding: 0;
   display: grid;
   gap: 4px;
-  max-height: 200px;
+  max-height: 280px;
   overflow: auto;
 }
 

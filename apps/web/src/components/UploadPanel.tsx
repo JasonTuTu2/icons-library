@@ -63,6 +63,7 @@ interface UploadItem {
   variant: IconVariant
   source: IconSource
   usage: IconUsage
+  note: string
 }
 
 interface UploadPanelProps {
@@ -85,6 +86,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     variant: detectVariantFromName(name),
     source: 'custom',
     usage: 'in-use',
+    note: '',
   }
 }
 
@@ -151,6 +153,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
             variant: detectVariantFromName(name),
             source: 'custom',
             usage: 'in-use',
+            note: '',
           },
         ])
       }
@@ -185,6 +188,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           variant: detectVariantFromName(name),
           source: 'custom',
           usage: 'in-use',
+          note: '',
         },
       ])
     }
@@ -472,6 +476,7 @@ export function UploadPanel({
                 variant: item.variant,
                 source: item.source,
                 usage: item.usage,
+                note: item.note,
               }
             : {
                 name: item.name,
@@ -482,6 +487,7 @@ export function UploadPanel({
                 variant: item.variant,
                 source: item.source,
                 usage: item.usage,
+                note: item.note,
               },
         ),
       )
@@ -588,6 +594,7 @@ export function UploadPanel({
             variant: item.variant,
             source: item.source,
             usage: item.usage,
+            note: item.note,
           }),
         })
         const data = (await res.json()) as {
@@ -707,6 +714,11 @@ export function UploadPanel({
                       onApplyUsage={(usage) =>
                         setItems((prev) =>
                           prev.map((row) => ({ ...row, usage })),
+                        )
+                      }
+                      onApplyNote={(note) =>
+                        setItems((prev) =>
+                          prev.map((row) => ({ ...row, note })),
                         )
                       }
                       onApplyFormat={(format) => {
@@ -878,6 +890,22 @@ export function UploadPanel({
                             )
                           }
                           ariaLabel={`Usage for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                        />
+                        <input
+                          type="text"
+                          className="asset-note-input"
+                          placeholder="Note…"
+                          maxLength={500}
+                          value={item.note}
+                          aria-label={`Note for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                          onChange={(e) => {
+                            const note = e.target.value
+                            setItems((prev) =>
+                              prev.map((row, i) =>
+                                i === index ? { ...row, note } : row,
+                              ),
+                            )
+                          }}
                         />
                         <button
                           type="button"

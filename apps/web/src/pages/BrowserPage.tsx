@@ -90,7 +90,8 @@ export function BrowserPage() {
       next.category === selected.category &&
       next.variant === selected.variant &&
       next.source === selected.source &&
-      next.usage === selected.usage
+      next.usage === selected.usage &&
+      next.note === selected.note
     ) {
       return
     }
@@ -104,6 +105,7 @@ export function BrowserPage() {
       variant?: IconVariant
       source?: IconSource
       usage?: IconUsage
+      note?: string
     },
   ) {
     patchIcon(name, patch)
@@ -113,12 +115,17 @@ export function BrowserPage() {
         patch.category !== undefined
           ? patch.category.trim() || undefined
           : current.category
+      const note =
+        patch.note !== undefined
+          ? patch.note.trim() || undefined
+          : current.note
       return {
         ...current,
         ...(patch.category !== undefined ? { category } : {}),
         ...(patch.variant !== undefined ? { variant: patch.variant } : {}),
         ...(patch.source !== undefined ? { source: patch.source } : {}),
         ...(patch.usage !== undefined ? { usage: patch.usage } : {}),
+        ...(patch.note !== undefined ? { note } : {}),
       }
     })
   }
@@ -222,6 +229,7 @@ export function BrowserPage() {
             onUsageUpdated={(usage: IconUsage) =>
               patchSelected(selected.name, { usage })
             }
+            onNoteUpdated={(note) => patchSelected(selected.name, { note })}
           />
         ) : (
           <aside className="detail empty-detail">

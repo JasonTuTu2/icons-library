@@ -43,6 +43,7 @@ function readStagingMetaEntries(): Array<{
   variant: IconVariant
   source: IconSource
   usage: IconUsage
+  note: string
 }> {
   const dir = join(repoRoot, STAGING_META_DIR)
   if (!existsSync(dir)) return []
@@ -52,13 +53,14 @@ function readStagingMetaEntries(): Array<{
     variant: IconVariant
     source: IconSource
     usage: IconUsage
+    note: string
   }> = []
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.json') || file.startsWith('.')) continue
     const name = file.replace(/\.json$/i, '')
     const raw = readFileSync(join(dir, file), 'utf8')
-    const { category, variant, source, usage } = parseStagingMetaFile(raw)
-    entries.push({ name, category, variant, source, usage })
+    const { category, variant, source, usage, note } = parseStagingMetaFile(raw)
+    entries.push({ name, category, variant, source, usage, note })
     unlinkSync(join(dir, file))
   }
   return entries

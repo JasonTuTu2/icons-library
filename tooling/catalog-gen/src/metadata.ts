@@ -14,6 +14,7 @@ export interface CustomIconMetadata {
       variant?: IconVariant
       source?: IconSource
       usage?: IconUsage
+      note?: string
     }
   >
 }
@@ -33,6 +34,10 @@ function normalizeSource(raw: string | undefined | null): IconSource {
 
 function normalizeUsage(raw: string | undefined | null): IconUsage {
   return raw === 'unused' ? 'unused' : 'in-use'
+}
+
+function normalizeNote(raw: string | undefined | null): string {
+  return (raw ?? '').trim().slice(0, 500)
 }
 
 export function detectVariantFromName(name: string): IconVariant {
@@ -62,6 +67,7 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
         variant?: IconVariant
         source?: IconSource
         usage?: IconUsage
+        note?: string
       }
     > = {}
     if (parsed.icons && typeof parsed.icons === 'object') {
@@ -72,6 +78,7 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
           variant?: unknown
           source?: unknown
           usage?: unknown
+          note?: unknown
         }
         const variantRaw =
           typeof entry.variant === 'string' ? entry.variant : undefined
@@ -79,6 +86,7 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
           typeof entry.source === 'string' ? entry.source : undefined
         const usageRaw =
           typeof entry.usage === 'string' ? entry.usage : undefined
+        const noteRaw = typeof entry.note === 'string' ? entry.note : undefined
         icons[name] = {
           category: normalizeCategory(
             typeof entry.category === 'string' ? entry.category : '',
@@ -92,6 +100,7 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
           ...(usageRaw !== undefined
             ? { usage: normalizeUsage(usageRaw) }
             : {}),
+          ...(noteRaw !== undefined ? { note: normalizeNote(noteRaw) } : {}),
         }
       }
     }
@@ -133,6 +142,14 @@ export function usageForIcon(
   name: string,
 ): IconUsage {
   return normalizeUsage(metadata.icons[name]?.usage)
+}
+
+export function noteForIcon(
+  metadata: CustomIconMetadata,
+  name: string,
+): string | undefined {
+  const note = normalizeNote(metadata.icons[name]?.note)
+  return note || undefined
 }
 
 export function metadataPathFromCustomRoot(customRoot: string): string {

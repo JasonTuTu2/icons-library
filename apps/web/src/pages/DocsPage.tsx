@@ -113,6 +113,11 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           (default in use). Change it in Upload, Figma, or the detail sidebar;
           filter with the Usage toolbar control.
         </p>
+        <p>
+          <strong>Note</strong> is an optional free-form comment (up to 500
+          characters) that stays with the asset. Set it in Upload, the Figma
+          plugin, or the detail sidebar; edit anytime. Notes are not a filter.
+        </p>
       </section>
 
       <section>

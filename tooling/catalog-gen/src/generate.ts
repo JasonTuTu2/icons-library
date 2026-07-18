@@ -7,6 +7,7 @@ import {
   categoryForIcon,
   loadCustomMetadata,
   metadataPathFromCustomRoot,
+  noteForIcon,
   sourceForIcon,
   usageForIcon,
   variantForIcon,
@@ -53,6 +54,7 @@ interface IconMeta {
   category?: string
   variant?: 'regular' | 'filled'
   usage?: 'in-use' | 'unused'
+  note?: string
 }
 
 const customLicense: IconLicense = {
@@ -114,6 +116,7 @@ function collectCustomIcons(): IconMeta[] {
     const variant = variantForIcon(customMetadata, item.name)
     const source = sourceForIcon(customMetadata, item.name)
     const usage = usageForIcon(customMetadata, item.name)
+    const note = noteForIcon(customMetadata, item.name)
     return {
       id: `ci:${item.name}`,
       title: item.title,
@@ -141,6 +144,7 @@ function collectCustomIcons(): IconMeta[] {
       category,
       variant,
       usage,
+      ...(note ? { note } : {}),
     }
   })
 }
@@ -160,6 +164,7 @@ function collectBrandImages(): IconMeta[] {
     const variant = variantForIcon(customMetadata, item.name)
     const source = sourceForIcon(customMetadata, item.name)
     const usage = usageForIcon(customMetadata, item.name)
+    const note = noteForIcon(customMetadata, item.name)
     return {
       id: `img:${item.name}`,
       title: item.title,
@@ -185,6 +190,7 @@ function collectBrandImages(): IconMeta[] {
       category,
       variant,
       usage,
+      ...(note ? { note } : {}),
     }
   })
 }

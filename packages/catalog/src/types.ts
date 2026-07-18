@@ -47,6 +47,8 @@ export interface IconMeta {
   variant?: 'regular' | 'filled'
   /** Whether the asset is currently in use (default in-use). */
   usage?: 'in-use' | 'unused'
+  /** Free-form designer note. */
+  note?: string
 }
 
 export interface IconCatalog {

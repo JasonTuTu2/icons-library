@@ -49,6 +49,7 @@ interface PendingIcon {
   variant: IconVariant
   source: IconSource
   usage: IconUsage
+  note: string
 }
 
 function assetFormatFromExport(icon: FigmaExportIcon): FigmaAssetFormat {
@@ -88,6 +89,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
     variant: detectVariantFromName(name),
     source: 'custom',
     usage: 'in-use',
+    note: '',
   }
 }
 
@@ -328,6 +330,7 @@ export function FigmaDock() {
             variant: icon.variant,
             source: icon.source,
             usage: icon.usage,
+            note: icon.note,
           }
         }
         return {
@@ -339,6 +342,7 @@ export function FigmaDock() {
           variant: icon.variant,
           source: icon.source,
           usage: icon.usage,
+          note: icon.note,
         }
       })
 
@@ -427,6 +431,9 @@ export function FigmaDock() {
             }
             onApplyUsage={(usage) =>
               setPending((prev) => prev.map((row) => ({ ...row, usage })))
+            }
+            onApplyNote={(note) =>
+              setPending((prev) => prev.map((row) => ({ ...row, note })))
             }
             onApplyFormat={(format) => {
               if (pending.length === 0 || reexportingId || busy) return
@@ -568,6 +575,23 @@ export function FigmaDock() {
                     )
                   }
                   ariaLabel={`Usage for ${prefix}${icon.name || 'asset'}`}
+                />
+                <input
+                  type="text"
+                  className="asset-note-input"
+                  placeholder="Note…"
+                  maxLength={500}
+                  value={icon.note}
+                  disabled={formatBusy}
+                  aria-label={`Note for ${prefix}${icon.name || 'asset'}`}
+                  onChange={(e) => {
+                    const note = e.target.value
+                    setPending((prev) =>
+                      prev.map((row, i) =>
+                        i === index ? { ...row, note } : row,
+                      ),
+                    )
+                  }}
                 />
                 <button
                   type="button"

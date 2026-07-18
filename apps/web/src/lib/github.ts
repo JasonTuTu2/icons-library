@@ -222,6 +222,7 @@ export async function updateIconMetadata(
     variant?: IconVariant
     source?: IconSource
     usage?: IconUsage
+    note?: string
   },
 ): Promise<void> {
   return withAuthClear(() => getStagingClient().updateIconMetadata(name, patch))

@@ -22,6 +22,7 @@ export type LivePropertyPatch = {
   variant?: IconVariant
   source?: IconSource
   usage?: IconUsage
+  note?: string
 }
 
 function getRepo(): string {
@@ -67,12 +68,14 @@ function applyEntry(
 ): IconMeta {
   if (!entry) return icon
   const category = (entry.category ?? '').trim()
+  const note = (entry.note ?? '').trim()
   return {
     ...icon,
     category: category || undefined,
     variant: entry.variant ?? icon.variant ?? 'regular',
     source: entry.source ?? icon.source ?? 'custom',
     usage: entry.usage ?? icon.usage ?? 'in-use',
+    note: note || undefined,
   }
 }
 
@@ -93,12 +96,17 @@ function mergeIcons(
       override.category !== undefined
         ? override.category.trim()
         : (merged.category ?? '')
+    const note =
+      override.note !== undefined
+        ? override.note.trim()
+        : (merged.note ?? '')
     return {
       ...merged,
       category: category || undefined,
       variant: override.variant ?? merged.variant,
       source: override.source ?? merged.source,
       usage: override.usage ?? merged.usage,
+      note: note || undefined,
     }
   })
 }

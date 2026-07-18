@@ -1,10 +1,12 @@
 import {
   createEmptyMetadata,
   getIconCategory,
+  getIconNote,
   getIconSource,
   getIconUsage,
   getIconVariant,
   normalizeCategory,
+  normalizeNote,
   normalizeSource,
   normalizeUsage,
   normalizeVariant,
@@ -37,6 +39,8 @@ export interface IconUploadPayload {
   source?: IconSource
   /** In-use vs unused; defaults to in-use. */
   usage?: IconUsage
+  /** Free-form designer note. */
+  note?: string
   /** Defaults to svg. */
   kind?: AssetKind
   /** Required when kind is image. */
@@ -59,6 +63,8 @@ export interface StagedIcon {
   source?: IconSource
   /** In-use vs unused; defaults to in-use. */
   usage?: IconUsage
+  /** Free-form designer note. */
+  note?: string
 }
 
 /** Tombstone in staging/remove — Apply deletes matching library SVG(s) and/or image. */
@@ -136,6 +142,7 @@ export interface GithubAdminClient {
       variant?: IconVariant
       source?: IconSource
       usage?: IconUsage
+      note?: string
     },
   ): Promise<void>
 }
@@ -170,11 +177,13 @@ export {
   detectVariantFromName,
   detectVariantSuffix,
   getIconCategory,
+  getIconNote,
   getIconSource,
   getIconUsage,
   getIconVariant,
   mergeStagingMetaIntoMetadata,
   normalizeCategory,
+  normalizeNote,
   normalizeSource,
   normalizeUsage,
   normalizeVariant,
@@ -187,6 +196,7 @@ export {
   sourceLabel,
   usageLabel,
   variantLabel,
+  noteLabel,
 } from './metadata.js'
 
 function stagingMetaPath(name: string): string {
@@ -314,6 +324,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
         variant: normalizeVariant(icon.variant),
         source: normalizeSource(icon.source),
         usage: normalizeUsage(icon.usage),
+        note: normalizeNote(icon.note),
       }
     }
 
@@ -330,6 +341,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       variant: normalizeVariant(icon.variant),
       source: normalizeSource(icon.source),
       usage: normalizeUsage(icon.usage),
+      note: normalizeNote(icon.note),
     }
   })
 }
@@ -563,6 +575,7 @@ export function createGithubAdminClient(
     variant: IconVariant = 'regular',
     source: IconSource = 'custom',
     usage: IconUsage = 'in-use',
+    note: string = '',
   ): Promise<void> {
     await putTextFile(
       stagingMetaPath(name),
@@ -571,6 +584,7 @@ export function createGithubAdminClient(
         variant: normalizeVariant(variant),
         source: normalizeSource(source),
         usage: normalizeUsage(usage),
+        note: normalizeNote(note),
       })}\n`,
       `Stage metadata for ${name}`,
     )
@@ -588,6 +602,7 @@ export function createGithubAdminClient(
         variant: IconVariant
         source: IconSource
         usage: IconUsage
+        note: string
       }
     >
   > {
@@ -620,6 +635,7 @@ export function createGithubAdminClient(
         variant: IconVariant
         source: IconSource
         usage: IconUsage
+        note: string
       }
     >()
     for (const entry of entries) {
@@ -642,6 +658,7 @@ export function createGithubAdminClient(
         variant: IconVariant
         source: IconSource
         usage: IconUsage
+        note: string
       }
     >,
     libraryMetadata?: CustomIconMetadata,
@@ -674,6 +691,12 @@ export function createGithubAdminClient(
             ? getIconUsage(libraryMetadata, icon.name)
             : undefined) ??
           'in-use',
+        note:
+          staged?.note ??
+          (libraryMetadata
+            ? getIconNote(libraryMetadata, icon.name)
+            : undefined) ??
+          '',
       }
     })
   }
@@ -970,6 +993,7 @@ export function createGithubAdminClient(
             icon.variant ?? 'regular',
             icon.source ?? 'custom',
             icon.usage ?? 'in-use',
+            icon.note ?? '',
           )
           continue
         }
@@ -995,6 +1019,7 @@ export function createGithubAdminClient(
           icon.variant ?? 'regular',
           icon.source ?? 'custom',
           icon.usage ?? 'in-use',
+          icon.note ?? '',
         )
       }
     },
@@ -1341,6 +1366,7 @@ export function createGithubAdminClient(
         variant?: IconVariant
         source?: IconSource
         usage?: IconUsage
+        note?: string
       },
     ): Promise<void> {
       const sanitized = sanitizeIconName(name)
@@ -1357,6 +1383,7 @@ export function createGithubAdminClient(
       if (patch.variant !== undefined) parts.push('variant')
       if (patch.source !== undefined) parts.push('source')
       if (patch.usage !== undefined) parts.push('usage')
+      if (patch.note !== undefined) parts.push('note')
       await writeMetadataFile(
         metadata,
         `[skip ci] Update ${parts.join(' and ') || 'metadata'} for ${sanitized}`,

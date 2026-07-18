@@ -19,6 +19,8 @@ interface ApplyAllFieldsProps {
   onApplyVariant: (variant: IconVariant) => void
   onApplySource: (source: IconSource) => void
   onApplyUsage: (usage: IconUsage) => void
+  /** Applies a free-form note to all pending assets. */
+  onApplyNote?: (note: string) => void
   /** When set, shows SVG / PNG / JPG and applies to the whole batch. */
   onApplyFormat?: (format: ApplyAllAssetFormat) => void
   /** Shown when format is SVG; applies Mono / Multi / Gradient to all. */
@@ -33,6 +35,7 @@ export function ApplyAllFields({
   onApplyVariant,
   onApplySource,
   onApplyUsage,
+  onApplyNote,
   onApplyFormat,
   onApplyColorMode,
   formatDisabled = false,
@@ -41,6 +44,7 @@ export function ApplyAllFields({
   const [variant, setVariant] = useState<IconVariant>('regular')
   const [source, setSource] = useState<IconSource>('custom')
   const [usage, setUsage] = useState<IconUsage>('in-use')
+  const [note, setNote] = useState('')
   const [format, setFormat] = useState<ApplyAllAssetFormat | ''>('')
   const [colorMode, setColorMode] = useState<IconColorMode>('mono')
 
@@ -128,6 +132,25 @@ export function ApplyAllFields({
         }}
         ariaLabel="Apply usage to all pending assets"
       />
+      {onApplyNote ? (
+        <input
+          type="text"
+          className="apply-all-note"
+          placeholder="Note…"
+          aria-label="Apply note to all pending assets"
+          value={note}
+          disabled={formatDisabled}
+          onChange={(e) => setNote(e.target.value)}
+          onBlur={() => onApplyNote(note)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              onApplyNote(note)
+              ;(e.target as HTMLInputElement).blur()
+            }
+          }}
+        />
+      ) : null}
     </div>
   )
 }

@@ -91,6 +91,7 @@ describe('metadata', () => {
           variant: 'filled',
           source: 'modified',
           usage: 'in-use',
+          note: '',
         },
       },
     })
@@ -106,12 +107,14 @@ describe('metadata', () => {
       variant: 'filled',
       source: 'iconify',
       usage: 'in-use',
+      note: '',
     })
     expect(parseStagingMetaFile('not json')).toEqual({
       category: '',
       variant: 'regular',
       source: 'custom',
       usage: 'in-use',
+      note: '',
     })
   })
 
@@ -143,5 +146,14 @@ describe('metadata', () => {
       usage: 'unused',
     })
     expect(getIconUsage(withUnused, 'foo')).toBe('unused')
+  })
+
+  it('stores and normalizes notes', () => {
+    const withNote = setIconMetadata(createEmptyMetadata(), 'foo', {
+      note: '  keep this asset  ',
+    })
+    expect(withNote.icons.foo?.note).toBe('keep this asset')
+    const cleared = setIconMetadata(withNote, 'foo', { note: '   ' })
+    expect(cleared.icons.foo?.note).toBe('')
   })
 })

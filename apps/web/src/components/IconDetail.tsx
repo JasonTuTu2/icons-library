@@ -30,6 +30,7 @@ interface IconDetailProps {
   onVariantUpdated?: (variant: IconVariant) => void
   onSourceUpdated?: (source: IconSource) => void
   onUsageUpdated?: (usage: IconUsage) => void
+  onNoteUpdated?: (note: string) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -51,6 +52,7 @@ export function IconDetail({
   onVariantUpdated,
   onSourceUpdated,
   onUsageUpdated,
+  onNoteUpdated,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -76,6 +78,9 @@ export function IconDetail({
   const [usageValue, setUsageValue] = useState<IconUsage>(
     icon.usage === 'unused' ? 'unused' : 'in-use',
   )
+  const [noteBusy, setNoteBusy] = useState(false)
+  const [noteMessage, setNoteMessage] = useState<string | null>(null)
+  const [noteValue, setNoteValue] = useState(icon.note ?? '')
 
   const isCustomAsset =
     icon.id.startsWith('ci:') || icon.id.startsWith('img:')
@@ -95,7 +100,8 @@ export function IconDetail({
         : 'custom',
     )
     setUsageValue(icon.usage === 'unused' ? 'unused' : 'in-use')
-  }, [icon.id, icon.category, icon.variant, icon.source, icon.usage])
+    setNoteValue(icon.note ?? '')
+  }, [icon.id, icon.category, icon.variant, icon.source, icon.usage, icon.note])
 
   useEffect(() => {
     if (!isCustomAsset) return
@@ -189,6 +195,27 @@ export function IconDetail({
       setUsageMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setUsageBusy(false)
+    }
+  }
+
+  async function handleNoteSave() {
+    const name = icon.name
+    const nextNote = noteValue.trim().slice(0, 500)
+    setNoteValue(nextNote)
+    if (!canEditMeta) return
+    if (nextNote === (icon.note ?? '').trim()) return
+
+    setNoteBusy(true)
+    setNoteMessage(null)
+    try {
+      await updateIconMetadata(name, { note: nextNote })
+      onNoteUpdated?.(nextNote)
+      setNoteMessage('Note saved.')
+    } catch (err) {
+      setNoteValue(icon.note ?? '')
+      setNoteMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setNoteBusy(false)
     }
   }
 
@@ -387,6 +414,43 @@ export function IconDetail({
               {usageMessage ? (
                 <p className="meta-note" role="status">
                   {usageMessage}
+                </p>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset ? (
+          <div className="meta-note-row">
+            <dt>Note</dt>
+            <dd>
+              {canEditMeta ? (
+                <textarea
+                  className="detail-note-input"
+                  placeholder="Add a note…"
+                  maxLength={500}
+                  rows={3}
+                  value={noteValue}
+                  aria-label={`Note for ${icon.id}`}
+                  onChange={(e) => setNoteValue(e.target.value)}
+                  onBlur={() => void handleNoteSave()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault()
+                      ;(e.target as HTMLTextAreaElement).blur()
+                    }
+                  }}
+                />
+              ) : icon.note?.trim() ? (
+                icon.note
+              ) : (
+                'No note'
+              )}
+              {noteBusy ? (
+                <span className="meta-note"> Saving…</span>
+              ) : null}
+              {noteMessage ? (
+                <p className="meta-note" role="status">
+                  {noteMessage}
                 </p>
               ) : null}
             </dd>

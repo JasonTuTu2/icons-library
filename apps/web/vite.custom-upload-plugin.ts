@@ -17,6 +17,7 @@ interface CustomIconMetadata {
       variant?: 'regular' | 'filled'
       source?: 'iconify' | 'custom' | 'modified'
       usage?: 'in-use' | 'unused'
+      note?: string
     }
   >
 }
@@ -44,6 +45,10 @@ function normalizeUsage(
   return raw === 'unused' ? 'unused' : 'in-use'
 }
 
+function normalizeNote(raw: string | undefined | null): string {
+  return (raw ?? '').trim().slice(0, 500)
+}
+
 function readMetadata(metadataPath: string): CustomIconMetadata {
   try {
     return JSON.parse(readFileSync(metadataPath, 'utf8')) as CustomIconMetadata
@@ -65,6 +70,7 @@ function setIconMetadataLocal(
     variant?: 'regular' | 'filled'
     source?: 'iconify' | 'custom' | 'modified'
     usage?: 'in-use' | 'unused'
+    note?: string
   },
 ): void {
   const metadata = readMetadata(metadataPath)
@@ -85,7 +91,11 @@ function setIconMetadataLocal(
     patch.usage !== undefined
       ? normalizeUsage(patch.usage)
       : normalizeUsage(current.usage)
-  metadata.icons[name] = { category: cat, variant, source, usage }
+  const note =
+    patch.note !== undefined
+      ? normalizeNote(patch.note)
+      : normalizeNote(current.note)
+  metadata.icons[name] = { category: cat, variant, source, usage, note }
   if (cat && !metadata.categories.includes(cat)) {
     metadata.categories.push(cat)
     metadata.categories.sort((a, b) => a.localeCompare(b))
@@ -188,6 +198,7 @@ export function customIconUploadPlugin(): Plugin {
             variant?: 'regular' | 'filled'
             source?: 'iconify' | 'custom' | 'modified'
             usage?: 'in-use' | 'unused'
+            note?: string
           }
 
           const name = sanitizeIconName(body.name ?? '')
@@ -233,6 +244,7 @@ export function customIconUploadPlugin(): Plugin {
               variant: normalizeVariant(body.variant),
               source: normalizeSource(body.source),
               usage: normalizeUsage(body.usage),
+              note: body.note ?? '',
             })
 
             await runCatalogGen(repoRoot)
@@ -279,6 +291,7 @@ export function customIconUploadPlugin(): Plugin {
             variant: normalizeVariant(body.variant),
             source: normalizeSource(body.source),
             usage: normalizeUsage(body.usage),
+            note: body.note ?? '',
           })
 
           await runCatalogGen(repoRoot)
