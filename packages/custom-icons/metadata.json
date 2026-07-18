@@ -22,6 +22,11 @@
       "category": "",
       "variant": "regular",
       "source": "modified"
+    },
+    "v1-call-outbound-filled": {
+      "category": "",
+      "variant": "regular",
+      "source": "modified"
     }
   }
 }
