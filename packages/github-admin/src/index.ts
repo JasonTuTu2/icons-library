@@ -797,9 +797,10 @@ export function createGithubAdminClient(
         `/commits?sha=main&per_page=100&page=${page}`,
       )
       if (!Array.isArray(commits) || commits.length === 0) return null
-      const found = commits.find((entry) =>
-        /Version packages/i.test(entry.commit.message),
-      )
+      const found = commits.find((entry) => {
+        const subject = entry.commit.message.split('\n', 1)[0] ?? ''
+        return /^Version packages\b/i.test(subject)
+      })
       if (found) return found
       if (commits.length < 100) return null
     }

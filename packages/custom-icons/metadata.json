@@ -6,6 +6,24 @@
     "Recording & Audio"
   ],
   "icons": {
+    "box": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "headphones": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "indeterminate-check-box": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
     "v1-call-answered-filled": {
       "category": "Phone & Calling",
       "variant": "filled",
@@ -84,6 +102,24 @@
       "source": "custom",
       "usage": "in-use"
     },
+    "v1-clipboard-edit-regular": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-contact-filled": {
+      "category": "",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-contact-regular": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
     "v1-dialpad-filled": {
       "category": "Phone & Calling",
       "variant": "filled",
@@ -92,6 +128,12 @@
     },
     "v1-dialpad-regular": {
       "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-document-regular": {
+      "category": "",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -122,6 +164,24 @@
     },
     "v1-emoji-regular": {
       "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-feedback-regular": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-image-filled": {
+      "category": "",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-image-regular": {
+      "category": "",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -162,6 +222,18 @@
       "source": "custom",
       "usage": "in-use"
     },
+    "v1-note-filled": {
+      "category": "",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-note-regular": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
     "v1-number-filled": {
       "category": "Phone & Calling",
       "variant": "filled",
@@ -195,6 +267,12 @@
     "v1-play-filled": {
       "category": "Recording & Audio",
       "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-porting-regular": {
+      "category": "",
+      "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
@@ -242,6 +320,18 @@
     },
     "v1-speed-1x-regular": {
       "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-template-filled": {
+      "category": "",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-template-regular": {
+      "category": "",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
