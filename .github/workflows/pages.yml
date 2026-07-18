@@ -40,8 +40,21 @@ jobs:
           const catalog = JSON.parse(
             fs.readFileSync('packages/catalog/src/data/icons.json', 'utf8'),
           )
-          const badIcons = catalog.icons.filter((i) => i.source !== 'custom')
-          const badSets = catalog.sets.filter((s) => s.source !== 'custom')
+          const allowedSetIds = new Set(['custom', 'custom-images'])
+          const allowedDesignSources = new Set([
+            'iconify',
+            'custom',
+            'modified',
+          ])
+          const badSets = catalog.sets.filter(
+            (s) => s.source !== 'custom' || !allowedSetIds.has(s.id),
+          )
+          const badIcons = catalog.icons.filter(
+            (i) =>
+              !(i.id.startsWith('ci:') || i.id.startsWith('img:')) ||
+              !allowedSetIds.has(i.set) ||
+              !allowedDesignSources.has(i.source ?? 'custom'),
+          )
           if (badSets.length || badIcons.length) {
             console.error(
               `Catalog must be brand-only: ${badSets.length} bad set(s), ${badIcons.length} bad icon(s)`,
