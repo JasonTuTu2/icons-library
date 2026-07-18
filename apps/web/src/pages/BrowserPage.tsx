@@ -25,7 +25,6 @@ const CATEGORY_NONE = '__none__'
 
 const VARIANT_ALL = ''
 const SOURCE_ALL = ''
-const USAGE_ALL = ''
 
 export function BrowserPage() {
   const categories = useMemo(() => getCustomCategories(), [])
@@ -33,7 +32,7 @@ export function BrowserPage() {
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
   const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
-  const [usageFilter, setUsageFilter] = useState(USAGE_ALL)
+  const [usageFilter, setUsageFilter] = useState<'in-use' | 'unused'>('in-use')
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -73,9 +72,7 @@ export function BrowserPage() {
     ) {
       options.source = sourceFilter
     }
-    if (usageFilter === 'in-use' || usageFilter === 'unused') {
-      options.usage = usageFilter
-    }
+    options.usage = usageFilter
     return searchIcons(options)
   }, [deferredQuery, categoryFilter, variantFilter, sourceFilter, usageFilter])
 
@@ -134,9 +131,10 @@ export function BrowserPage() {
           <span>Usage</span>
           <select
             value={usageFilter}
-            onChange={(e) => setUsageFilter(e.target.value)}
+            onChange={(e) =>
+              setUsageFilter(e.target.value === 'unused' ? 'unused' : 'in-use')
+            }
           >
-            <option value={USAGE_ALL}>All</option>
             <option value="in-use">In use</option>
             <option value="unused">Unused</option>
           </select>
