@@ -91,6 +91,9 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           Assign a <strong>Category</strong> before Stage (apply to all or per
           asset). Default is <em>No category</em>. Edit category later in the
           detail sidebar for custom <code>ci:</code> / <code>img:</code> assets.
+          Sidebar saves update the live browser filters immediately (and commit
+          metadata without redeploying Pages); Apply still regenerates the
+          packaged catalog.
         </p>
         <p>
           Each custom asset also has a <strong>Variant</strong> (

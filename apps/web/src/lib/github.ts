@@ -26,6 +26,8 @@ import {
 export type {
   AssetKind,
   AssetPreview,
+  CustomIconEntryMeta,
+  CustomIconMetadata,
   DispatchPublishOptions,
   IconColorMode,
   IconNameConflict,
@@ -37,7 +39,6 @@ export type {
   PublishReadiness,
   StagedIcon,
   StagedRemoval,
-  CustomIconMetadata,
 } from '@JasonTuTu2/github-admin'
 export {
   sanitizeIconName,

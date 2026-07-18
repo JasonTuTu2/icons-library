@@ -1,9 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
-  getCustomCategories,
-  getIconById,
   reactSnippet,
-  searchIcons,
   vueSnippet,
   type IconMeta,
 } from '@JasonTuTu2/icons-catalog'
@@ -17,6 +14,7 @@ import {
   type IconUsage,
   type IconVariant,
 } from '../lib/github'
+import { useLiveCatalog } from '../lib/liveCatalog'
 
 /** Toolbar sentinel: show all categories. */
 const CATEGORY_ALL = ''
@@ -27,7 +25,7 @@ const VARIANT_ALL = ''
 const SOURCE_ALL = ''
 
 export function BrowserPage() {
-  const categories = useMemo(() => getCustomCategories(), [])
+  const { categories, search, getById, patchIcon } = useLiveCatalog()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
@@ -54,7 +52,7 @@ export function BrowserPage() {
   }, [])
 
   const icons = useMemo(() => {
-    const options: Parameters<typeof searchIcons>[0] = {
+    const options: Parameters<typeof search>[0] = {
       query: deferredQuery,
     }
     if (categoryFilter === CATEGORY_NONE) {
@@ -73,8 +71,57 @@ export function BrowserPage() {
       options.source = sourceFilter
     }
     options.usage = usageFilter
-    return searchIcons(options)
-  }, [deferredQuery, categoryFilter, variantFilter, sourceFilter, usageFilter])
+    return search(options)
+  }, [
+    search,
+    deferredQuery,
+    categoryFilter,
+    variantFilter,
+    sourceFilter,
+    usageFilter,
+  ])
+
+  // Keep sidebar selection in sync when live metadata / overrides change.
+  useEffect(() => {
+    if (!selected) return
+    const next = getById(selected.id)
+    if (!next) return
+    if (
+      next.category === selected.category &&
+      next.variant === selected.variant &&
+      next.source === selected.source &&
+      next.usage === selected.usage
+    ) {
+      return
+    }
+    setSelected(next)
+  }, [getById, selected])
+
+  function patchSelected(
+    name: string,
+    patch: {
+      category?: string
+      variant?: IconVariant
+      source?: IconSource
+      usage?: IconUsage
+    },
+  ) {
+    patchIcon(name, patch)
+    setSelected((current) => {
+      if (!current || current.name !== name) return current
+      const category =
+        patch.category !== undefined
+          ? patch.category.trim() || undefined
+          : current.category
+      return {
+        ...current,
+        ...(patch.category !== undefined ? { category } : {}),
+        ...(patch.variant !== undefined ? { variant: patch.variant } : {}),
+        ...(patch.source !== undefined ? { source: patch.source } : {}),
+        ...(patch.usage !== undefined ? { usage: patch.usage } : {}),
+      }
+    })
+  }
 
   return (
     <div className="browser">
@@ -142,7 +189,7 @@ export function BrowserPage() {
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
-            const icon = getIconById(id)
+            const icon = getById(id)
             if (icon) setSelected(icon)
             setQuery(id.replace(/^(ci|img):/, ''))
           }}
@@ -164,26 +211,16 @@ export function BrowserPage() {
             vueCode={vueSnippet(selected.id, { format: selected.format })}
             onClose={() => setSelected(null)}
             onCategoryUpdated={(category) =>
-              setSelected((current) =>
-                current
-                  ? { ...current, category: category || undefined }
-                  : current,
-              )
+              patchSelected(selected.name, { category })
             }
             onVariantUpdated={(variant: IconVariant) =>
-              setSelected((current) =>
-                current ? { ...current, variant } : current,
-              )
+              patchSelected(selected.name, { variant })
             }
             onSourceUpdated={(source: IconSource) =>
-              setSelected((current) =>
-                current ? { ...current, source } : current,
-              )
+              patchSelected(selected.name, { source })
             }
             onUsageUpdated={(usage: IconUsage) =>
-              setSelected((current) =>
-                current ? { ...current, usage } : current,
-              )
+              patchSelected(selected.name, { usage })
             }
           />
         ) : (

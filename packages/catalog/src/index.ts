@@ -51,6 +51,14 @@ export interface SearchOptions {
 }
 
 export function searchIcons(options: SearchOptions = {}): IconMeta[] {
+  return filterIcons(catalog.icons, options)
+}
+
+/** Same filters as `searchIcons`, but over an arbitrary icon list (e.g. live-merged). */
+export function filterIcons(
+  icons: IconMeta[],
+  options: SearchOptions = {},
+): IconMeta[] {
   const {
     query = '',
     set,
@@ -68,7 +76,7 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
     'category',
   )
 
-  let results = catalog.icons
+  let results = icons
 
   if (set) {
     results = results.filter((icon) => icon.set === set)
