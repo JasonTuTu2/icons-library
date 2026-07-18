@@ -11,7 +11,7 @@
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
     ],
-    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Staging uses the Pages GitHub token; the plugin only exports SVGs."
+    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Staging uses the Pages GitHub token; the plugin exports SVG vectors and PNG rasters from the canvas."
   },
   "documentAccess": "dynamic-page"
 }

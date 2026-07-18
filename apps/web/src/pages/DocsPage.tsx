@@ -59,8 +59,10 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         <h2>Custom icons from Figma</h2>
         <ol>
           <li>
-            Prefer the Figma Development plugin (SVG Load/Stage). Upload PNG/JPG
-            brand images in the full icon browser.
+            Prefer the Figma Development plugin (Load selection → Stage). Vectors
+            become <code>ci:</code> SVGs; placed PNG/JPG rasters become{' '}
+            <code>img:</code> brand images. You can also upload files in the full
+            icon browser.
           </li>
           <li>
             Then a maintainer runs <strong>Apply staged to library</strong>, wait

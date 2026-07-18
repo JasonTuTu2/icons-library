@@ -1,8 +1,21 @@
+export type FigmaExportKind = 'svg' | 'image'
+export type FigmaImageFormat = 'png' | 'jpg'
+
+export type FigmaExportIcon = {
+  id: string
+  name: string
+  /** SVG text, or base64 (no data: URL prefix) for images. */
+  content: string
+  kind: FigmaExportKind
+  /** Present when kind is image. */
+  format?: FigmaImageFormat
+}
+
 export type PluginToUiMessage =
   | { type: 'ready' }
   | {
       type: 'export-result'
-      icons: Array<{ id: string; name: string; content: string }>
+      icons: FigmaExportIcon[]
       error?: string
     }
 

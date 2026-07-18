@@ -10,6 +10,7 @@ import {
   type IconSource,
   type IconUsage,
   type IconVariant,
+  type ImageFormat,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { conflictMessagesForItems } from '../lib/nameConflicts'
@@ -36,6 +37,8 @@ interface PendingIcon {
   name: string
   content: string
   previewUrl: string
+  kind: 'svg' | 'image'
+  format?: ImageFormat
   colorMode: IconColorMode
   category: string
   variant: IconVariant
@@ -43,16 +46,31 @@ interface PendingIcon {
   usage: IconUsage
 }
 
+function previewUrlForExport(icon: FigmaExportIcon): string {
+  if (icon.kind === 'image') {
+    const format = icon.format === 'jpg' || icon.format === 'jpeg' ? 'jpeg' : 'png'
+    const binary = atob(icon.content)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    return URL.createObjectURL(new Blob([bytes], { type: `image/${format}` }))
+  }
+  return URL.createObjectURL(
+    new Blob([icon.content], { type: 'image/svg+xml' }),
+  )
+}
+
 function toPending(icon: FigmaExportIcon): PendingIcon {
   const name = sanitizeIconName(icon.name) ?? icon.name
+  const kind = icon.kind === 'image' ? 'image' : 'svg'
   return {
     id: icon.id,
     name,
     content: icon.content,
-    previewUrl: URL.createObjectURL(
-      new Blob([icon.content], { type: 'image/svg+xml' }),
-    ),
-    colorMode: detectSvgColorMode(icon.content),
+    previewUrl: previewUrlForExport(icon),
+    kind,
+    format: kind === 'image' ? (icon.format ?? 'png') : undefined,
+    colorMode:
+      kind === 'image' ? 'mono' : detectSvgColorMode(icon.content),
     category: '',
     variant: detectVariantFromName(name),
     source: 'custom',
@@ -62,6 +80,13 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
 
 function revokeAll(icons: PendingIcon[]): void {
   for (const icon of icons) URL.revokeObjectURL(icon.previewUrl)
+}
+
+function asConflictItems(icons: PendingIcon[]) {
+  return icons.map((icon) => ({
+    name: icon.name,
+    kind: icon.kind,
+  }))
 }
 
 /**
@@ -102,7 +127,14 @@ export function FigmaDock() {
       } else if (msg.icons.length === 0) {
         setMessage('No exportable nodes in selection.')
       } else {
-        setMessage(`Loaded ${msg.icons.length} icon(s). Edit names, then Stage.`)
+        const svgCount = msg.icons.filter((i) => i.kind !== 'image').length
+        const imgCount = msg.icons.filter((i) => i.kind === 'image').length
+        const parts: string[] = []
+        if (svgCount) parts.push(`${svgCount} SVG`)
+        if (imgCount) parts.push(`${imgCount} image`)
+        setMessage(
+          `Loaded ${parts.join(' + ') || msg.icons.length}. Edit names, then Stage.`,
+        )
       }
     })
   }, [])
@@ -138,11 +170,8 @@ export function FigmaDock() {
       return
     }
 
-    const asSvg = pending.map((icon) => ({
-      name: icon.name,
-      kind: 'svg' as const,
-    }))
-    setNameConflictMsgs(conflictMessagesForItems(asSvg, []))
+    const items = asConflictItems(pending)
+    setNameConflictMsgs(conflictMessagesForItems(items, []))
 
     const names = [
       ...new Set(
@@ -162,7 +191,7 @@ export function FigmaDock() {
       void findIconNameConflicts(names)
         .then((remote) => {
           if (cancelled) return
-          setNameConflictMsgs(conflictMessagesForItems(asSvg, remote))
+          setNameConflictMsgs(conflictMessagesForItems(items, remote))
         })
         .catch((err) => {
           if (cancelled) return
@@ -197,9 +226,22 @@ export function FigmaDock() {
             `Invalid icon name "${icon.name}". Use kebab-case, e.g. billing-alert.`,
           )
         }
+        if (icon.kind === 'image') {
+          return {
+            name,
+            content: icon.content,
+            kind: 'image' as const,
+            format: icon.format ?? 'png',
+            category: icon.category,
+            variant: icon.variant,
+            source: icon.source,
+            usage: icon.usage,
+          }
+        }
         return {
           name,
           content: icon.content,
+          kind: 'svg' as const,
           colorMode: icon.colorMode,
           category: icon.category,
           variant: icon.variant,
@@ -210,7 +252,10 @@ export function FigmaDock() {
 
       const remote = await findIconNameConflicts(payloads.map((p) => p.name))
       const blocking = conflictMessagesForItems(
-        payloads.map((p) => ({ name: p.name, kind: 'svg' as const })),
+        payloads.map((p) => ({
+          name: p.name,
+          kind: p.kind === 'image' ? 'image' : 'svg',
+        })),
         remote,
       )
       if (blocking.some((msg) => msg.length > 0)) {
@@ -229,7 +274,7 @@ export function FigmaDock() {
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} icon(s). Open the icon browser to Apply or Publish.`,
+        `Staged ${count} asset(s). Open the icon browser to Apply or Publish.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -266,9 +311,9 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi, category, variant, source,
-          usage, and names, then Stage. Names already in the library or staging
-          must be changed first.
+          Load from the canvas (vectors → ci:, placed images → img:), set
+          properties and names, then Stage. Names already in the library or
+          staging must be changed first.
         </p>
       )}
       {pending.length > 0 ? (
@@ -294,6 +339,7 @@ export function FigmaDock() {
           <ul className="figma-dock-list">
           {pending.map((icon, index) => {
             const conflictMsg = nameConflictMsgs[index] ?? ''
+            const prefix = icon.kind === 'image' ? 'img:' : 'ci:'
             return (
               <li
                 key={icon.id}
@@ -301,7 +347,7 @@ export function FigmaDock() {
               >
                 <img src={icon.previewUrl} alt="" width={24} height={24} />
                 <label>
-                  <span>ci:</span>
+                  <span>{prefix}</span>
                   <input
                     type="text"
                     value={icon.name}
@@ -322,27 +368,31 @@ export function FigmaDock() {
                     }}
                   />
                 </label>
-                <select
-                  aria-label={`Color mode for ci:${icon.name || 'icon'}`}
-                  value={icon.colorMode}
-                  onChange={(e) => {
-                    const colorMode =
-                      e.target.value === 'preserved'
-                        ? 'preserved'
-                        : e.target.value === 'gradient'
-                          ? 'gradient'
-                          : 'mono'
-                    setPending((prev) =>
-                      prev.map((row, i) =>
-                        i === index ? { ...row, colorMode } : row,
-                      ),
-                    )
-                  }}
-                >
-                  <option value="mono">Mono</option>
-                  <option value="preserved">Multi</option>
-                  <option value="gradient">Gradient</option>
-                </select>
+                {icon.kind === 'svg' ? (
+                  <select
+                    aria-label={`Color mode for ci:${icon.name || 'icon'}`}
+                    value={icon.colorMode}
+                    onChange={(e) => {
+                      const colorMode =
+                        e.target.value === 'preserved'
+                          ? 'preserved'
+                          : e.target.value === 'gradient'
+                            ? 'gradient'
+                            : 'mono'
+                      setPending((prev) =>
+                        prev.map((row, i) =>
+                          i === index ? { ...row, colorMode } : row,
+                        ),
+                      )
+                    }}
+                  >
+                    <option value="mono">Mono</option>
+                    <option value="preserved">Multi</option>
+                    <option value="gradient">Gradient</option>
+                  </select>
+                ) : (
+                  <span className="figma-dock-kind-label">PNG</span>
+                )}
                 <CategorySelect
                   value={icon.category}
                   onChange={(category) =>
@@ -358,7 +408,7 @@ export function FigmaDock() {
                       mergeCategoryIntoRegistry(prev, name),
                     )
                   }
-                  ariaLabel={`Category for ci:${icon.name || 'icon'}`}
+                  ariaLabel={`Category for ${prefix}${icon.name || 'asset'}`}
                 />
                 <VariantSelect
                   value={icon.variant}
@@ -369,7 +419,7 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Variant for ci:${icon.name || 'icon'}`}
+                  ariaLabel={`Variant for ${prefix}${icon.name || 'asset'}`}
                 />
                 <SourceSelect
                   value={icon.source}
@@ -380,7 +430,7 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Source for ci:${icon.name || 'icon'}`}
+                  ariaLabel={`Source for ${prefix}${icon.name || 'asset'}`}
                 />
                 <UsageSelect
                   value={icon.usage}
@@ -391,7 +441,7 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Usage for ci:${icon.name || 'icon'}`}
+                  ariaLabel={`Usage for ${prefix}${icon.name || 'asset'}`}
                 />
                 <button
                   type="button"
@@ -434,7 +484,7 @@ export function FigmaDock() {
         </a>
         <span className="figma-dock-link-note">
           {' '}
-          — upload PNG/JPG brand images there
+          — Apply / Publish, or upload files there
         </span>
       </p>
     </section>

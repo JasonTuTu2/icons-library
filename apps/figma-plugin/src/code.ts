@@ -1,4 +1,8 @@
-import type { PluginToUiMessage, UiToPluginMessage } from './messages'
+import type {
+  FigmaExportIcon,
+  PluginToUiMessage,
+  UiToPluginMessage,
+} from './messages'
 
 declare const __ICON_BROWSER_URL__: string
 
@@ -21,13 +25,44 @@ function post(msg: PluginToUiMessage): void {
 
 function sanitizeLayerName(raw: string): string {
   return raw
-    .replace(/\.svg$/i, '')
+    .replace(/\.(svg|png|jpe?g)$/i, '')
     .trim()
     .toLowerCase()
     .replace(/[\s_]+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+function bytesToSvgText(bytes: Uint8Array): string {
+  // Figma main-thread sandbox has no TextDecoder; avoid spread for large SVGs.
+  let content = ''
+  for (let i = 0; i < bytes.length; i++) {
+    content += String.fromCharCode(bytes[i]!)
+  }
+  return content
+}
+
+function nodeHasVisibleImageFill(node: SceneNode): boolean {
+  if (!('fills' in node)) return false
+  const fills = node.fills
+  if (fills === figma.mixed) return false
+  return fills.some(
+    (paint) => paint.type === 'IMAGE' && paint.visible !== false,
+  )
+}
+
+/**
+ * Prefer PNG/`img:` when the selection is (or wraps) a placed raster.
+ * Vectors and shapes without image fills stay SVG/`ci:`.
+ */
+function shouldExportAsImage(node: SceneNode): boolean {
+  if (nodeHasVisibleImageFill(node)) return true
+  if ('children' in node && node.children.length === 1) {
+    const child = node.children[0]!
+    if (nodeHasVisibleImageFill(child)) return true
+  }
+  return false
 }
 
 async function exportSelection(): Promise<void> {
@@ -41,19 +76,30 @@ async function exportSelection(): Promise<void> {
     return
   }
 
-  const icons: Array<{ id: string; name: string; content: string }> = []
+  const icons: FigmaExportIcon[] = []
   const errors: string[] = []
 
   for (const node of selection) {
     try {
-      const bytes = await node.exportAsync({ format: 'SVG' })
-      // Figma main-thread sandbox has no TextDecoder; avoid spread for large SVGs.
-      let content = ''
-      for (let i = 0; i < bytes.length; i++) {
-        content += String.fromCharCode(bytes[i]!)
-      }
       const name = sanitizeLayerName(node.name) || node.name
-      icons.push({ id: node.id, name, content })
+      if (shouldExportAsImage(node)) {
+        const bytes = await node.exportAsync({ format: 'PNG' })
+        icons.push({
+          id: node.id,
+          name,
+          content: figma.base64Encode(bytes),
+          kind: 'image',
+          format: 'png',
+        })
+      } else {
+        const bytes = await node.exportAsync({ format: 'SVG' })
+        icons.push({
+          id: node.id,
+          name,
+          content: bytesToSvgText(bytes),
+          kind: 'svg',
+        })
+      }
     } catch (err) {
       errors.push(
         `"${node.name}": ${err instanceof Error ? err.message : String(err)}`,

@@ -55,7 +55,11 @@ export function isFigmaHost(): boolean {
 export type FigmaExportIcon = {
   id: string
   name: string
+  /** SVG text, or base64 (no data: URL prefix) for images. */
   content: string
+  /** Defaults to svg for older plugin builds. */
+  kind?: 'svg' | 'image'
+  format?: 'png' | 'jpg' | 'jpeg'
 }
 
 export type FigmaPluginMessage =

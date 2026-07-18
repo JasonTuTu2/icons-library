@@ -14,7 +14,7 @@ Packages are published to [GitHub Packages](https://github.com/JasonTuTu2?tab=pa
 | `@JasonTuTu2/icons-core` | Shared types & helpers (usually transitive) |
 | `@JasonTuTu2/icons-catalog` | Icon metadata + search helpers |
 | `@JasonTuTu2/icons-web` | Icon browser + docs (private app, not published) |
-| `@JasonTuTu2/icons-figma` | Figma plugin — embeds the icon browser; exports canvas SVGs (private, not published) |
+| `@JasonTuTu2/icons-figma` | Figma plugin — embeds the icon browser; exports canvas SVGs and PNG rasters (private, not published) |
 
 ## Install
 
@@ -190,7 +190,7 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`ci:…`, `img:…`). New brand SVGs are added here, then published.
 
-**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). The plugin panel loads SVGs only (**Load selection** → **Stage**). Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers). PNG/JPG brand images are uploaded in the full browser, not the plugin.
+**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). **Load selection** → **Stage**: vectors become `ci:` SVGs; placed rasters become `img:` PNGs. Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers).
 
 **Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Upload** SVG / PNG / JPG → **Add to staging**, then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
@@ -203,7 +203,7 @@ pnpm changeset
 
 From Figma / git:
 
-1. Prefer the Figma plugin: **Load selection** → review names / Mono·Multi → **Stage**.
+1. Prefer the Figma plugin: **Load selection** → review names / Mono·Multi (SVGs) → **Stage**.
 2. Or commit files / use Upload in the browser (Pages or `pnpm dev`):
    - Monochrome SVG: `packages/custom-icons/svg/kebab-name.svg`
    - Multi-color SVG: `packages/custom-icons/svg/color/kebab-name.svg`
@@ -218,11 +218,11 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 On the live icon browser, **staging** uses the embedded Pages token (no personal PAT). **Apply** and **Publish** only appear for developers who open the site with a session PAT (see CONTRIBUTING — magic URL `#gv-github-token=`).
 
-1. **Add to staging** — writes SVGs into `staging/mono|color|gradient/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (SVG only; choose Mono / Multi / Gradient).
+1. **Add to staging** — writes SVGs into `staging/mono|color|gradient/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (vectors → SVG/`ci:`; placed images → PNG/`img:`).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
 3. **Publish** — check unpublished icons/images to include; unchecked assets are held aside for this package only, then restored to the library as unpublished. Then dispatch publish; Action uses secrets to patch-bump and publish to GitHub Packages.
 
-The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SVG); Apply/Publish and PNG/JPG upload happen in the full icon browser.
+The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SVG + PNG); Apply/Publish also happen in the full icon browser.
 
 **Remove a custom asset:** select `ci:…` or `img:…` in the browser → **Stage removal** → **Apply staged** (deletes the file + regenerates catalog) → **Publish** so packages no longer ship it. Markers live in `packages/custom-icons/staging/remove/`.
 
