@@ -17,6 +17,11 @@
       "category": "",
       "variant": "regular",
       "source": "iconify"
+    },
+    "v1-emoji-filled": {
+      "category": "",
+      "variant": "regular",
+      "source": "modified"
     }
   }
 }
