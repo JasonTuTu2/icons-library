@@ -788,26 +788,153 @@ export function createGithubAdminClient(
       }))
   }
 
+  type RepoCommit = { sha: string; commit: { message: string } }
+
+  /** Walk main history until the latest Changesets "Version packages" commit. */
+  async function findLatestPublishCommit(): Promise<RepoCommit | null> {
+    for (let page = 1; page <= 20; page++) {
+      const commits = await githubJson<RepoCommit[]>(
+        `/commits?sha=main&per_page=100&page=${page}`,
+      )
+      if (!Array.isArray(commits) || commits.length === 0) return null
+      const found = commits.find((entry) =>
+        /Version packages/i.test(entry.commit.message),
+      )
+      if (found) return found
+      if (commits.length < 100) return null
+    }
+    return null
+  }
+
+  /** Commits on main after `untilSha` (exclusive), newest first. */
+  async function listCommitsSince(untilSha: string): Promise<RepoCommit[]> {
+    const out: RepoCommit[] = []
+    for (let page = 1; page <= 20; page++) {
+      const commits = await githubJson<RepoCommit[]>(
+        `/commits?sha=main&per_page=100&page=${page}`,
+      )
+      if (!Array.isArray(commits) || commits.length === 0) break
+      for (const entry of commits) {
+        if (entry.sha === untilSha) return out
+        out.push(entry)
+      }
+      if (commits.length < 100) break
+    }
+    return out
+  }
+
+  /** Names from "Apply staged icons from icon browser: ci:foo,img:bar" commits. */
+  function iconNamesFromApplyCommitMessage(message: string): string[] {
+    const match = message.match(
+      /Apply staged icons from icon browser:\s*(.+)/i,
+    )
+    if (!match?.[1]) return []
+    const names: string[] = []
+    for (const part of match[1].split(',')) {
+      const token = part.trim()
+      if (!token) continue
+      const colon = token.indexOf(':')
+      const name = (colon >= 0 ? token.slice(colon + 1) : token)
+        .trim()
+        .toLowerCase()
+      if (name && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) names.push(name)
+    }
+    return names
+  }
+
+  /** Resolve library path for a kebab name (mono → color → gradient → image). */
+  async function buildLibraryPathByName(): Promise<Map<string, string>> {
+    const [
+      libraryMono,
+      libraryColor,
+      libraryGradient,
+      libraryImages,
+    ] = await Promise.all([
+      listContentFileNames('packages/custom-icons/svg'),
+      listContentFileNames('packages/custom-icons/svg/color'),
+      listContentFileNames('packages/custom-icons/svg/gradient'),
+      listContentFileNames(IMAGES_DIR),
+    ])
+    const map = new Map<string, string>()
+    for (const file of libraryMono) {
+      if (!file.endsWith('.svg')) continue
+      const name = file.slice(0, -4)
+      if (!map.has(name)) map.set(name, `packages/custom-icons/svg/${name}.svg`)
+    }
+    for (const file of libraryColor) {
+      if (!file.endsWith('.svg')) continue
+      const name = file.slice(0, -4)
+      if (!map.has(name)) {
+        map.set(name, `packages/custom-icons/svg/color/${name}.svg`)
+      }
+    }
+    for (const file of libraryGradient) {
+      if (!file.endsWith('.svg')) continue
+      const name = file.slice(0, -4)
+      if (!map.has(name)) {
+        map.set(name, `packages/custom-icons/svg/gradient/${name}.svg`)
+      }
+    }
+    for (const file of libraryImages) {
+      const match = file.match(/^(.+)\.(png|jpe?g)$/i)
+      if (!match) continue
+      const name = match[1]!
+      const ext = match[2]!.toLowerCase()
+      if (!map.has(name)) map.set(name, `${IMAGES_DIR}/${name}.${ext}`)
+    }
+    return map
+  }
+
   /**
    * Diff main against the last "Version packages" commit.
-   * Null when there is no prior publish or HEAD is that publish.
+   * Also collects icon names from Apply commits (wipe+re-add identical SVGs
+   * produce no net file diff, but should still count as unpublished).
    */
   async function compareSinceLastPublish(): Promise<{
-    files?: Array<{ filename: string; status?: string }>
-  } | null> {
-    const commits = await githubJson<
-      Array<{ sha: string; commit: { message: string } }>
-    >('/commits?sha=main&per_page=50')
-
-    const publishCommit = commits.find((entry) =>
-      /Version packages/i.test(entry.commit.message),
-    )
-
+    publishSha: string | null
+    headIsPublish: boolean
+    files: Array<{ filename: string; status?: string }>
+    applyIconNames: string[]
+  }> {
+    const publishCommit = await findLatestPublishCommit()
     // No prior publish — avoid dumping the whole library.
-    if (!publishCommit) return null
-    if (commits[0]?.sha === publishCommit.sha) return null
+    if (!publishCommit) {
+      return {
+        publishSha: null,
+        headIsPublish: false,
+        files: [],
+        applyIconNames: [],
+      }
+    }
 
-    return githubJson(`/compare/${publishCommit.sha}...main`)
+    const since = await listCommitsSince(publishCommit.sha)
+    if (since.length === 0) {
+      return {
+        publishSha: publishCommit.sha,
+        headIsPublish: true,
+        files: [],
+        applyIconNames: [],
+      }
+    }
+
+    const compare = await githubJson<{
+      files?: Array<{ filename: string; status?: string }>
+    }>(`/compare/${publishCommit.sha}...main`)
+
+    const applyIconNames = [
+      ...new Set(
+        since.flatMap((entry) =>
+          iconNamesFromApplyCommitMessage(entry.commit.message),
+        ),
+      ),
+    ]
+
+    return {
+      publishSha: publishCommit.sha,
+      headIsPublish: false,
+      files: compare.files ?? [],
+      applyIconNames,
+    }
   }
 
   return {
@@ -971,18 +1098,32 @@ export function createGithubAdminClient(
 
     async listUnpublishedIcons(): Promise<StagedIcon[]> {
       const compare = await compareSinceLastPublish()
-      if (!compare) return []
+      if (!compare.publishSha || compare.headIsPublish) return []
 
       const libraryMetadata = await readMetadataFile()
-      const icons: StagedIcon[] = []
-      for (const file of compare.files ?? []) {
+      const byName = new Map<string, StagedIcon>()
+
+      // Net file diff (misses wipe+re-add of identical SVG bytes).
+      for (const file of compare.files) {
         if (file.status === 'removed') continue
         const staged = stagedFromLibraryPath(file.filename)
-        if (staged) icons.push(staged)
+        if (staged) byName.set(staged.name, staged)
+      }
+
+      // Apply commits still count even when git net-diff omits identical files.
+      if (compare.applyIconNames.length > 0) {
+        const libraryPaths = await buildLibraryPathByName()
+        for (const name of compare.applyIconNames) {
+          if (byName.has(name)) continue
+          const path = libraryPaths.get(name)
+          if (!path) continue
+          const staged = stagedFromLibraryPath(path)
+          if (staged) byName.set(staged.name, staged)
+        }
       }
 
       return attachMetadata(
-        icons.sort((a, b) => a.name.localeCompare(b.name)),
+        [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)),
         new Map(),
         libraryMetadata,
       )
@@ -990,10 +1131,10 @@ export function createGithubAdminClient(
 
     async listUnpublishedRemovals(): Promise<StagedRemoval[]> {
       const compare = await compareSinceLastPublish()
-      if (!compare) return []
+      if (!compare.publishSha || compare.headIsPublish) return []
 
       const removals: StagedRemoval[] = []
-      for (const file of compare.files ?? []) {
+      for (const file of compare.files) {
         if (file.status !== 'removed') continue
         const staged = stagedFromLibraryPath(file.filename)
         if (staged) {
@@ -1122,16 +1263,10 @@ export function createGithubAdminClient(
       const stagedRemovalCount = removals.length
       const stagedCount = stagedAddCount + stagedRemovalCount
 
-      const commits = await githubJson<
-        Array<{ sha: string; commit: { message: string } }>
-      >('/commits?sha=main&per_page=50')
-
-      const publishCommit = commits.find((entry) =>
-        /Version packages/i.test(entry.commit.message),
-      )
+      const compare = await compareSinceLastPublish()
 
       // No prior publish on record — don't block with the "no new icons" warn.
-      if (!publishCommit) {
+      if (!compare.publishSha) {
         return {
           hasNewIcons: true,
           stagedCount,
@@ -1140,7 +1275,7 @@ export function createGithubAdminClient(
         }
       }
 
-      if (commits[0]?.sha === publishCommit.sha) {
+      if (compare.headIsPublish) {
         return {
           hasNewIcons: false,
           stagedCount,
@@ -1149,13 +1284,14 @@ export function createGithubAdminClient(
         }
       }
 
-      const compare = await githubJson<{
-        files?: Array<{ filename: string; status?: string }>
-      }>(`/compare/${publishCommit.sha}...main`)
-
-      const hasLibraryChange = (compare.files ?? []).some((file) =>
-        isLibraryAssetPath(file.filename),
-      )
+      const hasLibraryChange =
+        compare.applyIconNames.length > 0 ||
+        compare.files.some(
+          (file) =>
+            isLibraryAssetPath(file.filename) ||
+            file.filename.replace(/\\/g, '/') ===
+              'packages/custom-icons/metadata.json',
+        )
 
       return {
         hasNewIcons: hasLibraryChange,
