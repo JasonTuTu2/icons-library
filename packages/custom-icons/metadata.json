@@ -1,9 +1,14 @@
 {
   "categories": [
+    "Action",
+    "Direction",
     "Document & File",
     "Messagining",
     "Phone & Calling",
-    "Recording & Audio"
+    "Recording & Audio",
+    "Security",
+    "Status, Alert & Tips",
+    "Users & Team"
   ],
   "icons": {
     "box": {
@@ -103,19 +108,19 @@
       "usage": "in-use"
     },
     "v1-clipboard-edit-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-contact-filled": {
-      "category": "",
+      "category": "Document & File",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-contact-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -133,7 +138,7 @@
       "usage": "in-use"
     },
     "v1-document-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -169,19 +174,19 @@
       "usage": "in-use"
     },
     "v1-feedback-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-image-filled": {
-      "category": "",
+      "category": "Document & File",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-image-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -223,13 +228,13 @@
       "usage": "in-use"
     },
     "v1-note-filled": {
-      "category": "",
+      "category": "Document & File",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-note-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -271,7 +276,7 @@
       "usage": "in-use"
     },
     "v1-porting-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -325,13 +330,13 @@
       "usage": "in-use"
     },
     "v1-template-filled": {
-      "category": "",
+      "category": "Document & File",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
     "v1-template-regular": {
-      "category": "",
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
@@ -342,75 +347,357 @@
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-clipboard-edit-regular": {
-      "category": "Document & File",
-      "variant": "regular",
-      "source": "custom",
-      "usage": "in-use"
-    },
-    "v1-contact-filled": {
-      "category": "Document & File",
+    "v1-add-filled": {
+      "category": "Action",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-contact-regular": {
-      "category": "Document & File",
+    "v1-add-regular": {
+      "category": "Action",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-document-regular": {
-      "category": "Document & File",
+    "v1-arrow-left-regular": {
+      "category": "Direction",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-feedback-regular": {
-      "category": "Document & File",
+    "v1-arrow-right-regular": {
+      "category": "Direction",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-image-filled": {
-      "category": "Document & File",
+    "v1-briefcase-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-checkmark-circle-filled": {
+      "category": "Status, Alert & Tips",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-image-regular": {
-      "category": "Document & File",
+    "v1-checkmark-circle-regular": {
+      "category": "Status, Alert & Tips",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-note-filled": {
-      "category": "Document & File",
+    "v1-checkmark-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-chevron-down-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-chevron-left-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-chevron-right-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-chevron-up-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-collapse-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-company-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-copy-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-cross-circle-filled": {
+      "category": "Status, Alert & Tips",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-note-regular": {
-      "category": "Document & File",
+    "v1-cross-circle-regular": {
+      "category": "Status, Alert & Tips",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-porting-regular": {
-      "category": "Document & File",
-      "variant": "regular",
-      "source": "custom",
-      "usage": "in-use"
-    },
-    "v1-template-filled": {
-      "category": "Document & File",
+    "v1-cross-filled": {
+      "category": "Status, Alert & Tips",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     },
-    "v1-template-regular": {
-      "category": "Document & File",
+    "v1-delete-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-delete-regular": {
+      "category": "Action",
       "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-edit-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-edit-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-email-edit-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-error-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-error-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-expand-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-export-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-eye-off-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-eye-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-file-download-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-file-download-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-fire-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-fire-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-help-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-help-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-import-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-info-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-info-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-locked-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-locked-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-more-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-open-new-tab-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-person-filled": {
+      "category": "Users & Team",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-person-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-plus-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-refresh-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-remove-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-remove-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-secure-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-settings-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-settings-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-slider-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-switch-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-team-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-tip-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-tip-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-unlocked-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-upload-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-user-visibility-filled": {
+      "category": "Security",
+      "variant": "filled",
       "source": "custom",
       "usage": "in-use"
     }
