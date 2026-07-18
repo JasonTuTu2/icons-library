@@ -3,11 +3,14 @@
     "Action",
     "Direction",
     "Document & File",
+    "Finance",
     "Messagining",
     "Phone & Calling",
     "Recording & Audio",
+    "Search & Filter",
     "Security",
     "Status, Alert & Tips",
+    "Translate & Language",
     "Users & Team"
   ],
   "icons": {
@@ -698,6 +701,72 @@
     "v1-user-visibility-filled": {
       "category": "Security",
       "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-ai-translate-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-calendar-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-coin-regular": {
+      "category": "Finance",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-globe-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-globe-regular": {
+      "category": "Translate & Language",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-search-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-tag-filled": {
+      "category": "Search & Filter",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-tag-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-translate-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-translate-regular": {
+      "category": "Translate & Language",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-wallet-regular": {
+      "category": "Finance",
+      "variant": "regular",
       "source": "custom",
       "usage": "in-use"
     }
