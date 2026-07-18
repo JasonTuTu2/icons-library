@@ -46,6 +46,7 @@ import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
 import { UsageSelect, usageLabel } from './UsageSelect'
+import { NoteToggleField } from './NoteToggleField'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -891,21 +892,16 @@ export function UploadPanel({
                           }
                           ariaLabel={`Usage for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
                         />
-                        <input
-                          type="text"
-                          className="asset-note-input"
-                          placeholder="Note…"
-                          maxLength={500}
+                        <NoteToggleField
                           value={item.note}
-                          aria-label={`Note for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
-                          onChange={(e) => {
-                            const note = e.target.value
+                          ariaLabel={`Note for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                          onChange={(note) =>
                             setItems((prev) =>
                               prev.map((row, i) =>
                                 i === index ? { ...row, note } : row,
                               ),
                             )
-                          }}
+                          }
                         />
                         <button
                           type="button"

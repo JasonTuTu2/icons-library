@@ -784,9 +784,11 @@ pre {
 }
 
 .upload-list .asset-note-input,
-.figma-dock-list .asset-note-input {
+.figma-dock-list .asset-note-input,
+.note-toggle-compact .asset-note-input {
   flex: 1 1 100%;
   min-width: 8rem;
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.35rem 0.5rem;
@@ -794,9 +796,75 @@ pre {
   font-size: 0.75rem;
   background: var(--bg-elevated);
   color: var(--ink);
+  box-sizing: border-box;
 }
 
-.figma-dock-list .asset-note-input {
+.note-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.note-toggle-compact {
+  flex: 0 0 auto;
+}
+
+.note-toggle-compact.is-open {
+  flex: 1 1 100%;
+}
+
+.note-toggle-btn {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.note-toggle-btn:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: rgba(30, 167, 255, 0.45);
+}
+
+.note-toggle-btn.is-active,
+.note-toggle-btn.has-note {
+  color: var(--ink);
+}
+
+.note-toggle-btn.has-note {
+  border-color: rgba(30, 167, 255, 0.4);
+}
+
+.note-toggle-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.figma-dock-list .note-toggle-btn {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text-secondary);
+  box-shadow: none;
+}
+
+.figma-dock-list .note-toggle-btn.is-active,
+.figma-dock-list .note-toggle-btn.has-note {
+  color: var(--plugin-text);
+}
+
+.figma-dock-list .asset-note-input,
+.figma-dock-list .note-toggle-compact .asset-note-input {
   border-radius: 2px;
   border-color: var(--plugin-border);
   background: var(--plugin-bg);
@@ -823,6 +891,7 @@ pre {
   line-height: 1.4;
   background: var(--bg-elevated);
   color: var(--ink);
+  box-sizing: border-box;
 }
 
 .detail-note-input:focus {
@@ -875,8 +944,7 @@ pre {
 }
 
 .apply-all-format,
-.apply-all-color-mode,
-.apply-all-note {
+.apply-all-color-mode {
   font: inherit;
   font-size: 0.75rem;
   padding: 0.35rem 0.45rem;
@@ -886,9 +954,13 @@ pre {
   color: var(--ink);
 }
 
-.apply-all-note {
-  min-width: 8rem;
+.apply-all-note-toggle {
+  flex: 0 0 auto;
+}
+
+.apply-all-note-toggle.is-open {
   flex: 1 1 10rem;
+  min-width: 8rem;
 }
 
 .sr-only {

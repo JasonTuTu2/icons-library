@@ -9,6 +9,7 @@ import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
+import { NoteToggleField } from './NoteToggleField'
 
 export type ApplyAllAssetFormat = 'svg' | 'png' | 'jpg'
 
@@ -133,22 +134,13 @@ export function ApplyAllFields({
         ariaLabel="Apply usage to all pending assets"
       />
       {onApplyNote ? (
-        <input
-          type="text"
-          className="apply-all-note"
-          placeholder="Note…"
-          aria-label="Apply note to all pending assets"
+        <NoteToggleField
+          className="apply-all-note-toggle"
           value={note}
           disabled={formatDisabled}
-          onChange={(e) => setNote(e.target.value)}
-          onBlur={() => onApplyNote(note)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              onApplyNote(note)
-              ;(e.target as HTMLInputElement).blur()
-            }
-          }}
+          ariaLabel="Apply note to all pending assets"
+          onChange={setNote}
+          onCommit={() => onApplyNote(note)}
         />
       ) : null}
     </div>

@@ -30,6 +30,7 @@ import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
+import { NoteToggleField } from './NoteToggleField'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -576,22 +577,17 @@ export function FigmaDock() {
                   }
                   ariaLabel={`Usage for ${prefix}${icon.name || 'asset'}`}
                 />
-                <input
-                  type="text"
-                  className="asset-note-input"
-                  placeholder="Note…"
-                  maxLength={500}
+                <NoteToggleField
                   value={icon.note}
                   disabled={formatBusy}
-                  aria-label={`Note for ${prefix}${icon.name || 'asset'}`}
-                  onChange={(e) => {
-                    const note = e.target.value
+                  ariaLabel={`Note for ${prefix}${icon.name || 'asset'}`}
+                  onChange={(note) =>
                     setPending((prev) =>
                       prev.map((row, i) =>
                         i === index ? { ...row, note } : row,
                       ),
                     )
-                  }}
+                  }
                 />
                 <button
                   type="button"
