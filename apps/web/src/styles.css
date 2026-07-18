@@ -672,8 +672,8 @@ pre {
 }
 
 .upload-list li {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 7.25rem auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
   padding: 0.5rem;
@@ -708,7 +708,8 @@ pre {
   gap: 0.25rem;
   font-family: var(--mono);
   font-size: 0.8rem;
-  min-width: 0;
+  flex: 1 1 9rem;
+  min-width: 8rem;
 }
 
 .upload-list input {
@@ -748,6 +749,38 @@ pre {
   font-weight: 500;
   background: var(--bg-elevated);
   color: var(--ink);
+}
+
+.upload-list .color-mode-select {
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+}
+
+.upload-list .category-select-wrap {
+  flex: 0 0 auto;
+}
+
+.upload-list .category-select,
+.figma-dock-list .category-select {
+  width: 8.5rem;
+}
+
+.upload-list .variant-select,
+.figma-dock-list .variant-select {
+  flex: 0 0 5.75rem;
+  width: 5.75rem;
+}
+
+.upload-list .source-select,
+.figma-dock-list .source-select {
+  flex: 0 0 6.5rem;
+  width: 6.5rem;
+}
+
+.upload-list .usage-select,
+.figma-dock-list .usage-select {
+  flex: 0 0 5.5rem;
+  width: 5.5rem;
 }
 
 .category-select-wrap {
@@ -1191,8 +1224,8 @@ html.figma-host code {
 }
 
 .figma-dock-list li {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 4.5rem auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
   padding: 4px;

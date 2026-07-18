@@ -1,32 +1,4 @@
 {
-  "categories": [
-    "dogs"
-  ],
-  "icons": {
-    "jason": {
-      "category": "dogs",
-      "variant": "regular",
-      "source": "custom"
-    },
-    "jason-2": {
-      "category": "dogs",
-      "variant": "regular",
-      "source": "custom"
-    },
-    "v1-contact-regular": {
-      "category": "",
-      "variant": "regular",
-      "source": "iconify"
-    },
-    "v1-emoji-filled": {
-      "category": "",
-      "variant": "regular",
-      "source": "modified"
-    },
-    "v1-call-outbound-filled": {
-      "category": "",
-      "variant": "regular",
-      "source": "modified"
-    }
-  }
+  "categories": [],
+  "icons": {}
 }
