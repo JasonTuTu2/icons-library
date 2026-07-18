@@ -4,10 +4,19 @@
   ],
   "icons": {
     "jason": {
-      "category": "dogs"
+      "category": "dogs",
+      "variant": "regular",
+      "source": "custom"
     },
     "jason-2": {
-      "category": "dogs"
+      "category": "dogs",
+      "variant": "regular",
+      "source": "custom"
+    },
+    "v1-contact-regular": {
+      "category": "",
+      "variant": "regular",
+      "source": "iconify"
     }
   }
 }
