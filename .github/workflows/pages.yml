@@ -4,7 +4,10 @@ on:
   push:
     branches: [main, master]
     paths-ignore:
+      # Staging + property-only metadata edits should not redeploy Pages.
+      # Sidebar commits also use [skip ci]. Apply / SVG / catalog changes still deploy.
       - 'packages/custom-icons/staging/**'
+      - 'packages/custom-icons/metadata.json'
   workflow_dispatch:
 
 permissions:
@@ -18,6 +21,9 @@ concurrency:
 
 jobs:
   build:
+    if: >
+      github.event_name != 'push' ||
+      !startsWith(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

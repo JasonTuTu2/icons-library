@@ -1182,7 +1182,7 @@ export function createGithubAdminClient(
       if (patch.source !== undefined) parts.push('source')
       await writeMetadataFile(
         metadata,
-        `Update ${parts.join(' and ') || 'metadata'} for ${sanitized}`,
+        `[skip ci] Update ${parts.join(' and ') || 'metadata'} for ${sanitized}`,
       )
     },
   }

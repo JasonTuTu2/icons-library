@@ -4,18 +4,25 @@ on:
   push:
     branches: [main, master]
     paths-ignore:
-      # Staging commits (Contents API) should not burn Actions minutes
+      # Staging + property-only metadata edits are everyday designer work —
+      # do not burn Actions minutes (see also [skip ci] on sidebar commits).
       - 'packages/custom-icons/staging/**'
+      - 'packages/custom-icons/metadata.json'
   pull_request:
     paths-ignore:
       - 'packages/custom-icons/staging/**'
+      - 'packages/custom-icons/metadata.json'
 
 jobs:
   build:
     # Skip Apply bot commits on main — Pages redeploys the browser; full CI is redundant.
+    # Also skip sidebar property commits if they ever touch more than metadata.json.
     if: >
       github.event_name != 'push' ||
-      !(startsWith(github.event.head_commit.message, 'Apply staged icons from icon browser:'))
+      (
+        !startsWith(github.event.head_commit.message, 'Apply staged icons from icon browser:') &&
+        !startsWith(github.event.head_commit.message, '[skip ci]')
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

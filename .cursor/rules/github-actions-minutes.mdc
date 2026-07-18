@@ -1,0 +1,30 @@
+---
+description: Avoid burning GitHub Actions minutes on everyday designer metadata/staging work
+alwaysApply: true
+---
+
+# GitHub Actions minutes
+
+This repo pays for Actions. Prefer **not** triggering CI or Pages for routine designer edits.
+
+## Do not trigger Actions for
+
+- Sidebar property edits (category, variant, source) — commit messages must start with `[skip ci]`
+- Staging Contents API commits under `packages/custom-icons/staging/**` (already `paths-ignore`)
+- Pure `packages/custom-icons/metadata.json` updates (already `paths-ignore` on CI/Pages)
+
+## Still OK to run Actions for
+
+- Apply staged → library / catalog regeneration
+- Real code, tooling, or workflow changes
+- Publish / release
+- Manual `workflow_dispatch`
+
+## When adding new “everyday” write paths
+
+If you add another Contents API or bot commit that designers hit often (rename metadata, tags, etc.), either:
+
+1. Prefix the commit message with `[skip ci]`, and/or
+2. Add the path to `paths-ignore` on `.github/workflows/ci.yml` and `pages.yml`
+
+Do not rely on full CI/Pages to “refresh” property-only catalog fields; Apply and real asset commits already regenerate the catalog.
