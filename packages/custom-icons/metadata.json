@@ -1,5 +1,6 @@
 {
   "categories": [
+    "Document & File",
     "Messagining",
     "Phone & Calling",
     "Recording & Audio"
@@ -247,6 +248,78 @@
     },
     "v1-voicemail-regular": {
       "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-clipboard-edit-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-contact-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-contact-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-document-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-feedback-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-image-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-image-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-note-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-note-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-porting-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-template-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use"
+    },
+    "v1-template-regular": {
+      "category": "Document & File",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use"
