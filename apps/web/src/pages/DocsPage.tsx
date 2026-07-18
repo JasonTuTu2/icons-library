@@ -61,7 +61,8 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           <li>
             Prefer the Figma Development plugin (Load selection → Stage). Vectors
             become <code>ci:</code> SVGs; placed PNG/JPG rasters become{' '}
-            <code>img:</code> brand images. You can also upload files in the full
+            <code>img:</code> brand images. Use the format dropdown (SVG / PNG /
+            JPG) to override auto-detect. You can also upload files in the full
             icon browser.
           </li>
           <li>

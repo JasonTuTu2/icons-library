@@ -1,4 +1,5 @@
 import type {
+  FigmaAssetFormat,
   FigmaExportIcon,
   PluginToUiMessage,
   UiToPluginMessage,
@@ -16,7 +17,7 @@ figma.showUI(
 <script>window.location.href = ${JSON.stringify(uiUrl)};</script>
 <p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading…</p>
 </body></html>`,
-  { width: 380, height: 440, themeColors: true },
+  { width: 380, height: 520, themeColors: true },
 )
 
 function post(msg: PluginToUiMessage): void {
@@ -65,6 +66,32 @@ function shouldExportAsImage(node: SceneNode): boolean {
   return false
 }
 
+async function exportNodeAs(
+  node: SceneNode,
+  format: FigmaAssetFormat,
+): Promise<FigmaExportIcon> {
+  const name = sanitizeLayerName(node.name) || node.name
+  if (format === 'svg') {
+    const bytes = await node.exportAsync({ format: 'SVG' })
+    return {
+      id: node.id,
+      name,
+      content: bytesToSvgText(bytes),
+      kind: 'svg',
+    }
+  }
+  const bytes = await node.exportAsync({
+    format: format === 'jpg' ? 'JPG' : 'PNG',
+  })
+  return {
+    id: node.id,
+    name,
+    content: figma.base64Encode(bytes),
+    kind: 'image',
+    format,
+  }
+}
+
 async function exportSelection(): Promise<void> {
   const selection = figma.currentPage.selection
   if (selection.length === 0) {
@@ -81,25 +108,8 @@ async function exportSelection(): Promise<void> {
 
   for (const node of selection) {
     try {
-      const name = sanitizeLayerName(node.name) || node.name
-      if (shouldExportAsImage(node)) {
-        const bytes = await node.exportAsync({ format: 'PNG' })
-        icons.push({
-          id: node.id,
-          name,
-          content: figma.base64Encode(bytes),
-          kind: 'image',
-          format: 'png',
-        })
-      } else {
-        const bytes = await node.exportAsync({ format: 'SVG' })
-        icons.push({
-          id: node.id,
-          name,
-          content: bytesToSvgText(bytes),
-          kind: 'svg',
-        })
-      }
+      const format: FigmaAssetFormat = shouldExportAsImage(node) ? 'png' : 'svg'
+      icons.push(await exportNodeAs(node, format))
     } catch (err) {
       errors.push(
         `"${node.name}": ${err instanceof Error ? err.message : String(err)}`,
@@ -114,6 +124,55 @@ async function exportSelection(): Promise<void> {
   })
 }
 
+async function reexportNode(
+  nodeId: string,
+  format: FigmaAssetFormat,
+): Promise<void> {
+  const node = await figma.getNodeByIdAsync(nodeId)
+  if (!node || !('exportAsync' in node)) {
+    post({
+      type: 'reexport-result',
+      error: 'That layer is no longer on the page. Load selection again.',
+    })
+    return
+  }
+  try {
+    const icon = await exportNodeAs(node as SceneNode, format)
+    post({ type: 'reexport-result', icon })
+  } catch (err) {
+    post({
+      type: 'reexport-result',
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
+}
+
+async function reexportNodes(
+  exports: Array<{ nodeId: string; format: FigmaAssetFormat }>,
+): Promise<void> {
+  const icons: FigmaExportIcon[] = []
+  const errors: string[] = []
+  for (const item of exports) {
+    const node = await figma.getNodeByIdAsync(item.nodeId)
+    if (!node || !('exportAsync' in node)) {
+      errors.push(`Missing layer ${item.nodeId}`)
+      continue
+    }
+    try {
+      icons.push(await exportNodeAs(node as SceneNode, item.format))
+    } catch (err) {
+      errors.push(
+        `"${node.name}": ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+  }
+  post({
+    type: 'reexport-batch-result',
+    icons,
+    error: errors.length > 0 ? errors.join(' ') : undefined,
+  })
+}
+
 figma.ui.onmessage = async (msg: UiToPluginMessage) => {
   switch (msg.type) {
     case 'ui-ready': {
@@ -122,6 +181,14 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'export-selection': {
       await exportSelection()
+      break
+    }
+    case 'reexport-node': {
+      await reexportNode(msg.nodeId, msg.format)
+      break
+    }
+    case 'reexport-nodes': {
+      await reexportNodes(msg.exports)
       break
     }
     case 'open-url': {

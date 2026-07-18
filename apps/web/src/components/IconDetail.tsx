@@ -257,17 +257,18 @@ export function IconDetail({
             </button>
           </dd>
         </div>
-        <div>
-          <dt>Set</dt>
-          <dd>
-            {icon.set}
-            {isImage ? ' · brand image' : ''}
-          </dd>
-        </div>
         {icon.format ? (
           <div>
             <dt>Format</dt>
-            <dd>{icon.format.toUpperCase()}</dd>
+            <dd>
+              {icon.format.toUpperCase()}
+              {isImage ? ' · brand image' : ''}
+            </dd>
+          </div>
+        ) : isImage ? (
+          <div>
+            <dt>Type</dt>
+            <dd>Brand image</dd>
           </div>
         ) : null}
         {icon.colorMode ? (

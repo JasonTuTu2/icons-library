@@ -826,6 +826,17 @@ pre {
   color: var(--ink-muted);
 }
 
+.apply-all-format,
+.apply-all-color-mode {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1243,13 +1254,16 @@ html.figma-host code {
   border-radius: 2px;
 }
 
-.figma-dock-kind-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+.figma-dock-format {
+  flex: 0 0 auto;
+  width: 4.25rem;
+}
+
+.figma-dock-reexporting {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 11px;
   color: var(--plugin-text-secondary);
-  align-self: center;
-  min-width: 2.25rem;
 }
 
 .figma-dock-list label {

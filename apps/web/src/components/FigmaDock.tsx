@@ -19,7 +19,10 @@ import {
   notifyFigmaUiReady,
   openExternalUrl,
   requestFigmaExport,
+  requestFigmaReexport,
+  requestFigmaReexportBatch,
   subscribeFigmaPluginMessages,
+  type FigmaAssetFormat,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
 import { ApplyAllFields } from './ApplyAllFields'
@@ -37,6 +40,8 @@ interface PendingIcon {
   name: string
   content: string
   previewUrl: string
+  /** Designer-selected export format (may override auto-detect). */
+  assetFormat: FigmaAssetFormat
   kind: 'svg' | 'image'
   format?: ImageFormat
   colorMode: IconColorMode
@@ -44,6 +49,13 @@ interface PendingIcon {
   variant: IconVariant
   source: IconSource
   usage: IconUsage
+}
+
+function assetFormatFromExport(icon: FigmaExportIcon): FigmaAssetFormat {
+  if (icon.kind === 'image') {
+    return icon.format === 'jpg' || icon.format === 'jpeg' ? 'jpg' : 'png'
+  }
+  return 'svg'
 }
 
 function previewUrlForExport(icon: FigmaExportIcon): string {
@@ -62,19 +74,41 @@ function previewUrlForExport(icon: FigmaExportIcon): string {
 function toPending(icon: FigmaExportIcon): PendingIcon {
   const name = sanitizeIconName(icon.name) ?? icon.name
   const kind = icon.kind === 'image' ? 'image' : 'svg'
+  const assetFormat = assetFormatFromExport(icon)
   return {
     id: icon.id,
     name,
     content: icon.content,
     previewUrl: previewUrlForExport(icon),
+    assetFormat,
     kind,
-    format: kind === 'image' ? (icon.format ?? 'png') : undefined,
-    colorMode:
-      kind === 'image' ? 'mono' : detectSvgColorMode(icon.content),
+    format: kind === 'image' ? (icon.format === 'jpg' ? 'jpg' : 'png') : undefined,
+    colorMode: kind === 'image' ? 'mono' : detectSvgColorMode(icon.content),
     category: '',
     variant: detectVariantFromName(name),
     source: 'custom',
     usage: 'in-use',
+  }
+}
+
+function applyReexport(
+  row: PendingIcon,
+  icon: FigmaExportIcon,
+): PendingIcon {
+  const kind = icon.kind === 'image' ? 'image' : 'svg'
+  const assetFormat = assetFormatFromExport(icon)
+  URL.revokeObjectURL(row.previewUrl)
+  return {
+    ...row,
+    content: icon.content,
+    previewUrl: previewUrlForExport(icon),
+    assetFormat,
+    kind,
+    format: kind === 'image' ? (icon.format === 'jpg' ? 'jpg' : 'png') : undefined,
+    colorMode:
+      kind === 'image'
+        ? 'mono'
+        : detectSvgColorMode(icon.content),
   }
 }
 
@@ -96,6 +130,7 @@ function asConflictItems(icons: PendingIcon[]) {
 export function FigmaDock() {
   const [pending, setPending] = useState<PendingIcon[]>([])
   const [busy, setBusy] = useState(false)
+  const [reexportingId, setReexportingId] = useState<string | null>(null)
   const [message, setMessage] = useState<ReactNode>(null)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
@@ -111,13 +146,61 @@ export function FigmaDock() {
   )
   const hasNameConflicts = nameConflictMsgs.some((msg) => msg.length > 0)
   const canStage =
-    githubOk && namesValid && !hasNameConflicts && !conflictsChecking && !busy
+    githubOk &&
+    namesValid &&
+    !hasNameConflicts &&
+    !conflictsChecking &&
+    !busy &&
+    !reexportingId
 
   useEffect(() => {
     notifyFigmaUiReady()
     return subscribeFigmaPluginMessages((msg) => {
+      if (msg.type === 'reexport-batch-result') {
+        setReexportingId(null)
+        if (msg.error && msg.icons.length === 0) {
+          setMessage(msg.error)
+          return
+        }
+        const byId = new Map(msg.icons.map((icon) => [icon.id, icon]))
+        setPending((prev) =>
+          prev.map((row) => {
+            const updated = byId.get(row.id)
+            return updated ? applyReexport(row, updated) : row
+          }),
+        )
+        setMessage(
+          msg.error
+            ? `Updated formats with some errors: ${msg.error}`
+            : `Applied format to ${msg.icons.length} asset(s).`,
+        )
+        return
+      }
+
+      if (msg.type === 'reexport-result') {
+        setReexportingId(null)
+        if (msg.error) {
+          setMessage(msg.error)
+          return
+        }
+        if (!msg.icon) return
+        const updated = msg.icon
+        setPending((prev) =>
+          prev.map((row) =>
+            row.id === updated.id ? applyReexport(row, updated) : row,
+          ),
+        )
+        setMessage(
+          updated.kind === 'image'
+            ? `Switched to ${updated.format?.toUpperCase() ?? 'PNG'} (img:).`
+            : 'Switched to SVG (ci:).',
+        )
+        return
+      }
+
       if (msg.type !== 'export-result') return
       setBusy(false)
+      setReexportingId(null)
       setPending((prev) => {
         revokeAll(prev)
         return msg.icons.map(toPending)
@@ -133,7 +216,7 @@ export function FigmaDock() {
         if (svgCount) parts.push(`${svgCount} SVG`)
         if (imgCount) parts.push(`${imgCount} image`)
         setMessage(
-          `Loaded ${parts.join(' + ') || msg.icons.length}. Edit names, then Stage.`,
+          `Loaded ${parts.join(' + ') || msg.icons.length}. Edit format/names, then Stage.`,
         )
       }
     })
@@ -211,7 +294,16 @@ export function FigmaDock() {
   function handleLoad(): void {
     setMessage(null)
     setBusy(true)
+    setReexportingId(null)
     requestFigmaExport()
+  }
+
+  function handleFormatChange(index: number, format: FigmaAssetFormat): void {
+    const row = pending[index]
+    if (!row || row.assetFormat === format || reexportingId || busy) return
+    setMessage(null)
+    setReexportingId(row.id)
+    requestFigmaReexport(row.id, format)
   }
 
   async function handleStage(): Promise<void> {
@@ -290,7 +382,7 @@ export function FigmaDock() {
         <button
           type="button"
           className="figma-btn"
-          disabled={busy}
+          disabled={busy || Boolean(reexportingId)}
           onClick={handleLoad}
         >
           {busy ? 'Working…' : 'Load selection'}
@@ -311,15 +403,16 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas (vectors → ci:, placed images → img:), set
-          properties and names, then Stage. Names already in the library or
-          staging must be changed first.
+          Load from the canvas, set format (SVG / PNG / JPG), properties, and
+          names, then Stage. Mono/Multi/Gradient only apply to SVG. Names
+          already in the library or staging must be changed first.
         </p>
       )}
       {pending.length > 0 ? (
         <>
           <ApplyAllFields
             categories={categoryRegistry}
+            formatDisabled={busy || Boolean(reexportingId)}
             onCreateCategory={(name) =>
               setCategoryRegistry((prev) => mergeCategoryIntoRegistry(prev, name))
             }
@@ -335,11 +428,27 @@ export function FigmaDock() {
             onApplyUsage={(usage) =>
               setPending((prev) => prev.map((row) => ({ ...row, usage })))
             }
+            onApplyFormat={(format) => {
+              if (pending.length === 0 || reexportingId || busy) return
+              setMessage(null)
+              setReexportingId('__all__')
+              requestFigmaReexportBatch(
+                pending.map((row) => ({ nodeId: row.id, format })),
+              )
+            }}
+            onApplyColorMode={(colorMode) =>
+              setPending((prev) =>
+                prev.map((row) =>
+                  row.kind === 'svg' ? { ...row, colorMode } : row,
+                ),
+              )
+            }
           />
           <ul className="figma-dock-list">
           {pending.map((icon, index) => {
             const conflictMsg = nameConflictMsgs[index] ?? ''
             const prefix = icon.kind === 'image' ? 'img:' : 'ci:'
+            const formatBusy = reexportingId === icon.id
             return (
               <li
                 key={icon.id}
@@ -352,6 +461,7 @@ export function FigmaDock() {
                     type="text"
                     value={icon.name}
                     aria-invalid={Boolean(conflictMsg)}
+                    disabled={formatBusy}
                     onChange={(e) => {
                       const value = e.target.value
                       setPending((prev) =>
@@ -368,10 +478,28 @@ export function FigmaDock() {
                     }}
                   />
                 </label>
+                <select
+                  className="figma-dock-format"
+                  aria-label={`Export format for ${icon.name || 'asset'}`}
+                  value={icon.assetFormat}
+                  disabled={Boolean(reexportingId) || busy}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value !== 'svg' && value !== 'png' && value !== 'jpg') {
+                      return
+                    }
+                    handleFormatChange(index, value)
+                  }}
+                >
+                  <option value="svg">SVG</option>
+                  <option value="png">PNG</option>
+                  <option value="jpg">JPG</option>
+                </select>
                 {icon.kind === 'svg' ? (
                   <select
                     aria-label={`Color mode for ci:${icon.name || 'icon'}`}
                     value={icon.colorMode}
+                    disabled={formatBusy}
                     onChange={(e) => {
                       const colorMode =
                         e.target.value === 'preserved'
@@ -390,9 +518,7 @@ export function FigmaDock() {
                     <option value="preserved">Multi</option>
                     <option value="gradient">Gradient</option>
                   </select>
-                ) : (
-                  <span className="figma-dock-kind-label">PNG</span>
-                )}
+                ) : null}
                 <CategorySelect
                   value={icon.category}
                   onChange={(category) =>
@@ -446,6 +572,7 @@ export function FigmaDock() {
                 <button
                   type="button"
                   className="figma-btn figma-btn-quiet"
+                  disabled={formatBusy}
                   onClick={() => {
                     setPending((prev) => {
                       const target = prev[index]
@@ -456,6 +583,11 @@ export function FigmaDock() {
                 >
                   Remove
                 </button>
+                {formatBusy ? (
+                  <p className="figma-dock-reexporting" role="status">
+                    Re-exporting…
+                  </p>
+                ) : null}
                 {conflictMsg ? (
                   <p className="name-conflict-msg" role="alert">
                     {conflictMsg}

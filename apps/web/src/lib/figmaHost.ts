@@ -62,9 +62,21 @@ export type FigmaExportIcon = {
   format?: 'png' | 'jpg' | 'jpeg'
 }
 
+export type FigmaAssetFormat = 'svg' | 'png' | 'jpg'
+
 export type FigmaPluginMessage =
   | { type: 'ready' }
   | { type: 'export-result'; icons: FigmaExportIcon[]; error?: string }
+  | {
+      type: 'reexport-result'
+      icon?: FigmaExportIcon
+      error?: string
+    }
+  | {
+      type: 'reexport-batch-result'
+      icons: FigmaExportIcon[]
+      error?: string
+    }
 
 /** Ask the Figma main thread to export the current selection. */
 export function requestFigmaExport(): void {
@@ -72,6 +84,35 @@ export function requestFigmaExport(): void {
   parent.postMessage(
     {
       pluginMessage: { type: 'export-selection' },
+      pluginId: FIGMA_PLUGIN_ID,
+    },
+    'https://www.figma.com',
+  )
+}
+
+/** Re-export one node as SVG, PNG, or JPG (format override). */
+export function requestFigmaReexport(
+  nodeId: string,
+  format: FigmaAssetFormat,
+): void {
+  if (typeof window === 'undefined' || window.parent === window) return
+  parent.postMessage(
+    {
+      pluginMessage: { type: 'reexport-node', nodeId, format },
+      pluginId: FIGMA_PLUGIN_ID,
+    },
+    'https://www.figma.com',
+  )
+}
+
+/** Re-export many nodes (Apply-all format). */
+export function requestFigmaReexportBatch(
+  exports: Array<{ nodeId: string; format: FigmaAssetFormat }>,
+): void {
+  if (typeof window === 'undefined' || window.parent === window) return
+  parent.postMessage(
+    {
+      pluginMessage: { type: 'reexport-nodes', exports },
       pluginId: FIGMA_PLUGIN_ID,
     },
     'https://www.figma.com',

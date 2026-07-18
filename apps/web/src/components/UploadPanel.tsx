@@ -37,6 +37,7 @@ import {
 } from '../lib/unpublishedSelection'
 import { useDialogAccessibility } from '../lib/useDialogAccessibility'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
+import { convertAssetFormat } from '../lib/convertAssetFormat'
 import { conflictMessagesForItems } from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
@@ -682,6 +683,7 @@ export function UploadPanel({
                   <>
                     <ApplyAllFields
                       categories={categoryRegistry}
+                      formatDisabled={busy}
                       onCreateCategory={(name) =>
                         setCategoryRegistry((prev) =>
                           mergeCategoryIntoRegistry(prev, name),
@@ -705,6 +707,35 @@ export function UploadPanel({
                       onApplyUsage={(usage) =>
                         setItems((prev) =>
                           prev.map((row) => ({ ...row, usage })),
+                        )
+                      }
+                      onApplyFormat={(format) => {
+                        if (busy || items.length === 0) return
+                        setBusy(true)
+                        setMessage(null)
+                        void (async () => {
+                          try {
+                            const next = await Promise.all(
+                              items.map((row) => convertAssetFormat(row, format)),
+                            )
+                            setItems(next)
+                            setMessage(
+                              `Converted ${next.length} asset(s) to ${format.toUpperCase()}.`,
+                            )
+                          } catch (err) {
+                            setMessage(
+                              err instanceof Error ? err.message : String(err),
+                            )
+                          } finally {
+                            setBusy(false)
+                          }
+                        })()
+                      }}
+                      onApplyColorMode={(colorMode) =>
+                        setItems((prev) =>
+                          prev.map((row) =>
+                            row.kind === 'svg' ? { ...row, colorMode } : row,
+                          ),
                         )
                       }
                     />
