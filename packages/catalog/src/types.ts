@@ -45,6 +45,8 @@ export interface IconMeta {
   category?: string
   /** Custom assets only: regular or filled. */
   variant?: 'regular' | 'filled'
+  /** Whether the asset is currently in use (default in-use). */
+  usage?: 'in-use' | 'unused'
 }
 
 export interface IconCatalog {

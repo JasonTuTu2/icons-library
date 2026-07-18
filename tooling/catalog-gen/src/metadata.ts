@@ -3,12 +3,18 @@ import { join } from 'node:path'
 
 export type IconVariant = 'regular' | 'filled'
 export type IconSource = 'iconify' | 'custom' | 'modified'
+export type IconUsage = 'in-use' | 'unused'
 
 export interface CustomIconMetadata {
   categories: string[]
   icons: Record<
     string,
-    { category?: string; variant?: IconVariant; source?: IconSource }
+    {
+      category?: string
+      variant?: IconVariant
+      source?: IconSource
+      usage?: IconUsage
+    }
   >
 }
 
@@ -23,6 +29,10 @@ function normalizeVariant(raw: string | undefined | null): IconVariant {
 function normalizeSource(raw: string | undefined | null): IconSource {
   if (raw === 'iconify' || raw === 'modified') return raw
   return 'custom'
+}
+
+function normalizeUsage(raw: string | undefined | null): IconUsage {
+  return raw === 'unused' ? 'unused' : 'in-use'
 }
 
 export function detectVariantFromName(name: string): IconVariant {
@@ -47,7 +57,12 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
       : []
     const icons: Record<
       string,
-      { category?: string; variant?: IconVariant; source?: IconSource }
+      {
+        category?: string
+        variant?: IconVariant
+        source?: IconSource
+        usage?: IconUsage
+      }
     > = {}
     if (parsed.icons && typeof parsed.icons === 'object') {
       for (const [name, value] of Object.entries(parsed.icons)) {
@@ -56,11 +71,14 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
           category?: unknown
           variant?: unknown
           source?: unknown
+          usage?: unknown
         }
         const variantRaw =
           typeof entry.variant === 'string' ? entry.variant : undefined
         const sourceRaw =
           typeof entry.source === 'string' ? entry.source : undefined
+        const usageRaw =
+          typeof entry.usage === 'string' ? entry.usage : undefined
         icons[name] = {
           category: normalizeCategory(
             typeof entry.category === 'string' ? entry.category : '',
@@ -70,6 +88,9 @@ export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
             : {}),
           ...(sourceRaw !== undefined
             ? { source: normalizeSource(sourceRaw) }
+            : {}),
+          ...(usageRaw !== undefined
+            ? { usage: normalizeUsage(usageRaw) }
             : {}),
         }
       }
@@ -105,6 +126,13 @@ export function sourceForIcon(
   name: string,
 ): IconSource {
   return normalizeSource(metadata.icons[name]?.source)
+}
+
+export function usageForIcon(
+  metadata: CustomIconMetadata,
+  name: string,
+): IconUsage {
+  return normalizeUsage(metadata.icons[name]?.usage)
 }
 
 export function metadataPathFromCustomRoot(customRoot: string): string {

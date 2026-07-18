@@ -532,7 +532,7 @@ pre {
   right: 1.5rem;
   top: 7.5rem;
   z-index: 20;
-  width: min(420px, calc(100vw - 2rem));
+  width: min(720px, calc(100vw - 2rem));
   max-height: calc(100vh - 8.5rem);
   overflow: auto;
   padding: 1.25rem;
@@ -736,7 +736,10 @@ pre {
 .figma-dock-list .variant-select,
 .source-select,
 .upload-list .source-select,
-.figma-dock-list .source-select {
+.figma-dock-list .source-select,
+.usage-select,
+.upload-list .usage-select,
+.figma-dock-list .usage-select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.3rem 0.35rem;

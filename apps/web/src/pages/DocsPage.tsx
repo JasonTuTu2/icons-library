@@ -102,6 +102,11 @@ import { Icon } from '@JasonTuTu2/icons-vue'
           <code>custom</code>). Set it before Stage or in the detail sidebar;
           filter the grid with the Source toolbar control.
         </p>
+        <p>
+          <strong>Usage</strong> is <code>in use</code> or <code>unused</code>{' '}
+          (default in use). Change it in Upload, Figma, or the detail sidebar;
+          filter with the Usage toolbar control.
+        </p>
       </section>
 
       <section>

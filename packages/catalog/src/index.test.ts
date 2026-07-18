@@ -71,4 +71,15 @@ describe('catalog', () => {
       iconify.every((icon) => (icon.source ?? 'custom') === 'iconify'),
     ).toBe(true)
   })
+
+  it('filters by usage', () => {
+    const inUse = searchIcons({ usage: 'in-use', limit: 20 })
+    expect(inUse.every((icon) => (icon.usage ?? 'in-use') === 'in-use')).toBe(
+      true,
+    )
+    const unused = searchIcons({ usage: 'unused', limit: 20 })
+    expect(unused.every((icon) => (icon.usage ?? 'in-use') === 'unused')).toBe(
+      true,
+    )
+  })
 })

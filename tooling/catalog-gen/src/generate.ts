@@ -8,6 +8,7 @@ import {
   loadCustomMetadata,
   metadataPathFromCustomRoot,
   sourceForIcon,
+  usageForIcon,
   variantForIcon,
 } from './metadata.js'
 
@@ -51,6 +52,7 @@ interface IconMeta {
   assetPath?: string
   category?: string
   variant?: 'regular' | 'filled'
+  usage?: 'in-use' | 'unused'
 }
 
 const customLicense: IconLicense = {
@@ -111,6 +113,7 @@ function collectCustomIcons(): IconMeta[] {
     const category = categoryForIcon(customMetadata, item.name)
     const variant = variantForIcon(customMetadata, item.name)
     const source = sourceForIcon(customMetadata, item.name)
+    const usage = usageForIcon(customMetadata, item.name)
     return {
       id: `ci:${item.name}`,
       title: item.title,
@@ -126,6 +129,7 @@ function collectCustomIcons(): IconMeta[] {
         item.colorMode,
         variant,
         source,
+        usage,
         ...(category ? [category] : []),
       ],
       set: 'custom',
@@ -136,6 +140,7 @@ function collectCustomIcons(): IconMeta[] {
       assetKind: 'icon' as const,
       category,
       variant,
+      usage,
     }
   })
 }
@@ -154,6 +159,7 @@ function collectBrandImages(): IconMeta[] {
     const category = categoryForIcon(customMetadata, item.name)
     const variant = variantForIcon(customMetadata, item.name)
     const source = sourceForIcon(customMetadata, item.name)
+    const usage = usageForIcon(customMetadata, item.name)
     return {
       id: `img:${item.name}`,
       title: item.title,
@@ -166,6 +172,7 @@ function collectBrandImages(): IconMeta[] {
         'brand-image',
         variant,
         source,
+        usage,
         ...(category ? [category] : []),
       ],
       set: 'custom-images',
@@ -177,6 +184,7 @@ function collectBrandImages(): IconMeta[] {
       assetPath: item.publicPath,
       category,
       variant,
+      usage,
     }
   })
 }

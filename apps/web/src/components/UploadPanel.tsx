@@ -16,6 +16,7 @@ import {
   unstageRemoval,
   type IconColorMode,
   type IconSource,
+  type IconUsage,
   type IconVariant,
   type ImageFormat,
   type StagedIcon,
@@ -43,6 +44,7 @@ import { ApplyAllFields } from './ApplyAllFields'
 import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
+import { UsageSelect, usageLabel } from './UsageSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -59,6 +61,7 @@ interface UploadItem {
   category: string
   variant: IconVariant
   source: IconSource
+  usage: IconUsage
 }
 
 interface UploadPanelProps {
@@ -80,6 +83,7 @@ function handoffToUploadItem(icon: FigmaHandoffIcon): UploadItem {
     category: '',
     variant: detectVariantFromName(name),
     source: 'custom',
+    usage: 'in-use',
   }
 }
 
@@ -145,6 +149,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
             category: '',
             variant: detectVariantFromName(name),
             source: 'custom',
+            usage: 'in-use',
           },
         ])
       }
@@ -178,6 +183,7 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
           category: '',
           variant: detectVariantFromName(name),
           source: 'custom',
+          usage: 'in-use',
         },
       ])
     }
@@ -194,7 +200,7 @@ function revokePreviewUrls(items: UploadItem[]): void {
 
 function stagedAssetLabel(icon: StagedIcon): string {
   if (icon.kind === 'image') {
-    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)}`
+    return `img:${icon.name} (${icon.format ?? 'image'}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)} · ${usageLabel(icon.usage)}`
   }
   const mode =
     icon.colorMode === 'preserved'
@@ -202,7 +208,7 @@ function stagedAssetLabel(icon: StagedIcon): string {
       : icon.colorMode === 'gradient'
         ? 'gradient'
         : 'mono'
-  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)}`
+  return `ci:${icon.name} (${mode}) · ${categoryLabel(icon.category)} · ${variantLabel(icon.variant)} · ${sourceLabel(icon.source)} · ${usageLabel(icon.usage)}`
 }
 
 function colorModeLabel(mode: IconColorMode | undefined): string {
@@ -464,6 +470,7 @@ export function UploadPanel({
                 category: item.category,
                 variant: item.variant,
                 source: item.source,
+                usage: item.usage,
               }
             : {
                 name: item.name,
@@ -473,6 +480,7 @@ export function UploadPanel({
                 category: item.category,
                 variant: item.variant,
                 source: item.source,
+                usage: item.usage,
               },
         ),
       )
@@ -578,6 +586,7 @@ export function UploadPanel({
             category: item.category,
             variant: item.variant,
             source: item.source,
+            usage: item.usage,
           }),
         })
         const data = (await res.json()) as {
@@ -691,6 +700,11 @@ export function UploadPanel({
                       onApplySource={(source) =>
                         setItems((prev) =>
                           prev.map((row) => ({ ...row, source })),
+                        )
+                      }
+                      onApplyUsage={(usage) =>
+                        setItems((prev) =>
+                          prev.map((row) => ({ ...row, usage })),
                         )
                       }
                     />
@@ -822,6 +836,17 @@ export function UploadPanel({
                             )
                           }
                           ariaLabel={`Source for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
+                        />
+                        <UsageSelect
+                          value={item.usage}
+                          onChange={(usage) =>
+                            setItems((prev) =>
+                              prev.map((row, i) =>
+                                i === index ? { ...row, usage } : row,
+                              ),
+                            )
+                          }
+                          ariaLabel={`Usage for ${item.kind === 'image' ? 'img' : 'ci'}:${item.name || 'asset'}`}
                         />
                         <button
                           type="button"

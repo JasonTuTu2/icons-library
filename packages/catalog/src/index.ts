@@ -45,6 +45,8 @@ export interface SearchOptions {
   category?: string | null
   /** Filter by variant (custom assets). */
   variant?: 'regular' | 'filled'
+  /** Filter by usage (custom assets). */
+  usage?: 'in-use' | 'unused'
   limit?: number
 }
 
@@ -57,6 +59,7 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
     assetKind,
     category,
     variant,
+    usage,
     limit,
   } = options
   const q = query.trim().toLowerCase()
@@ -93,6 +96,11 @@ export function searchIcons(options: SearchOptions = {}): IconMeta[] {
   if (variant) {
     results = results.filter(
       (icon) => (icon.variant ?? 'regular') === variant,
+    )
+  }
+  if (usage) {
+    results = results.filter(
+      (icon) => (icon.usage ?? 'in-use') === usage,
     )
   }
   if (q) {

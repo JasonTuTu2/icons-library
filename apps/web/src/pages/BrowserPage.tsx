@@ -14,6 +14,7 @@ import { PublishButton } from '../components/PublishButton'
 import {
   isGithubRepoConfigured,
   type IconSource,
+  type IconUsage,
   type IconVariant,
 } from '../lib/github'
 
@@ -24,6 +25,7 @@ const CATEGORY_NONE = '__none__'
 
 const VARIANT_ALL = ''
 const SOURCE_ALL = ''
+const USAGE_ALL = ''
 
 export function BrowserPage() {
   const categories = useMemo(() => getCustomCategories(), [])
@@ -31,6 +33,7 @@ export function BrowserPage() {
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
   const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
+  const [usageFilter, setUsageFilter] = useState(USAGE_ALL)
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
@@ -70,8 +73,11 @@ export function BrowserPage() {
     ) {
       options.source = sourceFilter
     }
+    if (usageFilter === 'in-use' || usageFilter === 'unused') {
+      options.usage = usageFilter
+    }
     return searchIcons(options)
-  }, [deferredQuery, categoryFilter, variantFilter, sourceFilter])
+  }, [deferredQuery, categoryFilter, variantFilter, sourceFilter, usageFilter])
 
   return (
     <div className="browser">
@@ -124,6 +130,17 @@ export function BrowserPage() {
             <option value="modified">Modified</option>
           </select>
         </label>
+        <label className="field">
+          <span>Usage</span>
+          <select
+            value={usageFilter}
+            onChange={(e) => setUsageFilter(e.target.value)}
+          >
+            <option value={USAGE_ALL}>All</option>
+            <option value="in-use">In use</option>
+            <option value="unused">Unused</option>
+          </select>
+        </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -163,6 +180,11 @@ export function BrowserPage() {
             onSourceUpdated={(source: IconSource) =>
               setSelected((current) =>
                 current ? { ...current, source } : current,
+              )
+            }
+            onUsageUpdated={(usage: IconUsage) =>
+              setSelected((current) =>
+                current ? { ...current, usage } : current,
               )
             }
           />

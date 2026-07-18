@@ -18,6 +18,7 @@ import {
   serializeMetadata,
   STAGING_META_DIR,
   type IconSource,
+  type IconUsage,
   type IconVariant,
 } from '../packages/github-admin/src/metadata.ts'
 
@@ -41,6 +42,7 @@ function readStagingMetaEntries(): Array<{
   category: string
   variant: IconVariant
   source: IconSource
+  usage: IconUsage
 }> {
   const dir = join(repoRoot, STAGING_META_DIR)
   if (!existsSync(dir)) return []
@@ -49,13 +51,14 @@ function readStagingMetaEntries(): Array<{
     category: string
     variant: IconVariant
     source: IconSource
+    usage: IconUsage
   }> = []
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.json') || file.startsWith('.')) continue
     const name = file.replace(/\.json$/i, '')
     const raw = readFileSync(join(dir, file), 'utf8')
-    const { category, variant, source } = parseStagingMetaFile(raw)
-    entries.push({ name, category, variant, source })
+    const { category, variant, source, usage } = parseStagingMetaFile(raw)
+    entries.push({ name, category, variant, source, usage })
     unlinkSync(join(dir, file))
   }
   return entries

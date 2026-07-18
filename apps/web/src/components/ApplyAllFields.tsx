@@ -1,8 +1,13 @@
 import { useState } from 'react'
-import type { IconSource, IconVariant } from '@JasonTuTu2/github-admin'
+import type {
+  IconSource,
+  IconUsage,
+  IconVariant,
+} from '@JasonTuTu2/github-admin'
 import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
+import { UsageSelect } from './UsageSelect'
 
 interface ApplyAllFieldsProps {
   categories: string[]
@@ -10,6 +15,7 @@ interface ApplyAllFieldsProps {
   onApplyCategory: (category: string) => void
   onApplyVariant: (variant: IconVariant) => void
   onApplySource: (source: IconSource) => void
+  onApplyUsage: (usage: IconUsage) => void
 }
 
 export function ApplyAllFields({
@@ -18,10 +24,12 @@ export function ApplyAllFields({
   onApplyCategory,
   onApplyVariant,
   onApplySource,
+  onApplyUsage,
 }: ApplyAllFieldsProps) {
   const [category, setCategory] = useState('')
   const [variant, setVariant] = useState<IconVariant>('regular')
   const [source, setSource] = useState<IconSource>('custom')
+  const [usage, setUsage] = useState<IconUsage>('in-use')
 
   return (
     <div className="apply-all-fields">
@@ -55,6 +63,14 @@ export function ApplyAllFields({
           onApplySource(next)
         }}
         ariaLabel="Apply source to all pending assets"
+      />
+      <UsageSelect
+        value={usage}
+        onChange={(next) => {
+          setUsage(next)
+          onApplyUsage(next)
+        }}
+        ariaLabel="Apply usage to all pending assets"
       />
     </div>
   )

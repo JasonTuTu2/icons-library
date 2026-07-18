@@ -5,6 +5,7 @@ import {
   detectVariantSuffix,
   getIconCategory,
   getIconSource,
+  getIconUsage,
   getIconVariant,
   mergeStagingMetaIntoMetadata,
   parseMetadataJson,
@@ -85,7 +86,12 @@ describe('metadata', () => {
     expect(parseMetadataJson(text)).toEqual({
       categories: ['Billing'],
       icons: {
-        foo: { category: 'Billing', variant: 'filled', source: 'modified' },
+        foo: {
+          category: 'Billing',
+          variant: 'filled',
+          source: 'modified',
+          usage: 'in-use',
+        },
       },
     })
   })
@@ -99,11 +105,13 @@ describe('metadata', () => {
       category: 'Billing',
       variant: 'filled',
       source: 'iconify',
+      usage: 'in-use',
     })
     expect(parseStagingMetaFile('not json')).toEqual({
       category: '',
       variant: 'regular',
       source: 'custom',
+      usage: 'in-use',
     })
   })
 
@@ -127,5 +135,13 @@ describe('metadata', () => {
 
   it('defaults missing source to custom', () => {
     expect(getIconSource(createEmptyMetadata(), 'any')).toBe('custom')
+  })
+
+  it('defaults missing usage to in-use', () => {
+    expect(getIconUsage(createEmptyMetadata(), 'any')).toBe('in-use')
+    const withUnused = setIconMetadata(createEmptyMetadata(), 'foo', {
+      usage: 'unused',
+    })
+    expect(getIconUsage(withUnused, 'foo')).toBe('unused')
   })
 })

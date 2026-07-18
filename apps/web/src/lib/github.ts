@@ -14,6 +14,7 @@ import {
   type StagedRemoval,
   type CustomIconMetadata,
   type IconSource,
+  type IconUsage,
   type IconVariant,
 } from '@JasonTuTu2/github-admin'
 import {
@@ -31,6 +32,7 @@ export type {
   IconUploadPayload,
   ImageFormat,
   IconSource,
+  IconUsage,
   IconVariant,
   PublishReadiness,
   StagedIcon,
@@ -214,7 +216,12 @@ export async function updateIconCategory(
 
 export async function updateIconMetadata(
   name: string,
-  patch: { category?: string; variant?: IconVariant; source?: IconSource },
+  patch: {
+    category?: string
+    variant?: IconVariant
+    source?: IconSource
+    usage?: IconUsage
+  },
 ): Promise<void> {
   return withAuthClear(() => getStagingClient().updateIconMetadata(name, patch))
 }

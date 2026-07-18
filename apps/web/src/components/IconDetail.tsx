@@ -7,12 +7,14 @@ import {
   stageRemovals,
   updateIconMetadata,
   type IconSource,
+  type IconUsage,
   type IconVariant,
 } from '../lib/github'
 import { customImagePublicUrl } from '../lib/customImageUrl'
 import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
+import { UsageSelect, usageLabel } from './UsageSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -27,6 +29,7 @@ interface IconDetailProps {
   onCategoryUpdated?: (category: string) => void
   onVariantUpdated?: (variant: IconVariant) => void
   onSourceUpdated?: (source: IconSource) => void
+  onUsageUpdated?: (usage: IconUsage) => void
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -47,6 +50,7 @@ export function IconDetail({
   onCategoryUpdated,
   onVariantUpdated,
   onSourceUpdated,
+  onUsageUpdated,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -67,6 +71,11 @@ export function IconDetail({
       ? icon.source
       : 'custom',
   )
+  const [usageBusy, setUsageBusy] = useState(false)
+  const [usageMessage, setUsageMessage] = useState<string | null>(null)
+  const [usageValue, setUsageValue] = useState<IconUsage>(
+    icon.usage === 'unused' ? 'unused' : 'in-use',
+  )
 
   const isCustomAsset =
     icon.id.startsWith('ci:') || icon.id.startsWith('img:')
@@ -85,7 +94,8 @@ export function IconDetail({
         ? icon.source
         : 'custom',
     )
-  }, [icon.id, icon.category, icon.variant, icon.source])
+    setUsageValue(icon.usage === 'unused' ? 'unused' : 'in-use')
+  }, [icon.id, icon.category, icon.variant, icon.source, icon.usage])
 
   useEffect(() => {
     if (!isCustomAsset) return
@@ -160,6 +170,25 @@ export function IconDetail({
       setSourceMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setSourceBusy(false)
+    }
+  }
+
+  async function handleUsageChange(nextUsage: IconUsage) {
+    const name = icon.name
+    setUsageValue(nextUsage)
+    if (!canEditMeta) return
+
+    setUsageBusy(true)
+    setUsageMessage(null)
+    try {
+      await updateIconMetadata(name, { usage: nextUsage })
+      onUsageUpdated?.(nextUsage)
+      setUsageMessage('Usage saved.')
+    } catch (err) {
+      setUsageValue(icon.usage === 'unused' ? 'unused' : 'in-use')
+      setUsageMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setUsageBusy(false)
     }
   }
 
@@ -333,6 +362,30 @@ export function IconDetail({
               {sourceMessage ? (
                 <p className="meta-note" role="status">
                   {sourceMessage}
+                </p>
+              ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset ? (
+          <div>
+            <dt>Usage</dt>
+            <dd>
+              {canEditMeta ? (
+                <UsageSelect
+                  value={usageValue}
+                  onChange={(usage) => void handleUsageChange(usage)}
+                  ariaLabel={`Usage for ${icon.id}`}
+                />
+              ) : (
+                usageLabel(icon.usage)
+              )}
+              {usageBusy ? (
+                <span className="meta-note"> Saving…</span>
+              ) : null}
+              {usageMessage ? (
+                <p className="meta-note" role="status">
+                  {usageMessage}
                 </p>
               ) : null}
             </dd>

@@ -8,6 +8,7 @@ import {
   stageIcons,
   type IconColorMode,
   type IconSource,
+  type IconUsage,
   type IconVariant,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
@@ -24,6 +25,7 @@ import { ApplyAllFields } from './ApplyAllFields'
 import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
+import { UsageSelect } from './UsageSelect'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -38,6 +40,7 @@ interface PendingIcon {
   category: string
   variant: IconVariant
   source: IconSource
+  usage: IconUsage
 }
 
 function toPending(icon: FigmaExportIcon): PendingIcon {
@@ -53,6 +56,7 @@ function toPending(icon: FigmaExportIcon): PendingIcon {
     category: '',
     variant: detectVariantFromName(name),
     source: 'custom',
+    usage: 'in-use',
   }
 }
 
@@ -200,6 +204,7 @@ export function FigmaDock() {
           category: icon.category,
           variant: icon.variant,
           source: icon.source,
+          usage: icon.usage,
         }
       })
 
@@ -261,9 +266,9 @@ export function FigmaDock() {
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set Mono/Multi, category, variant, source, and
-          names, then Stage. Names already in the library or staging must be
-          changed first.
+          Load from the canvas, set Mono/Multi, category, variant, source,
+          usage, and names, then Stage. Names already in the library or staging
+          must be changed first.
         </p>
       )}
       {pending.length > 0 ? (
@@ -281,6 +286,9 @@ export function FigmaDock() {
             }
             onApplySource={(source) =>
               setPending((prev) => prev.map((row) => ({ ...row, source })))
+            }
+            onApplyUsage={(usage) =>
+              setPending((prev) => prev.map((row) => ({ ...row, usage })))
             }
           />
           <ul className="figma-dock-list">
@@ -373,6 +381,17 @@ export function FigmaDock() {
                     )
                   }
                   ariaLabel={`Source for ci:${icon.name || 'icon'}`}
+                />
+                <UsageSelect
+                  value={icon.usage}
+                  onChange={(usage) =>
+                    setPending((prev) =>
+                      prev.map((row, i) =>
+                        i === index ? { ...row, usage } : row,
+                      ),
+                    )
+                  }
+                  ariaLabel={`Usage for ci:${icon.name || 'icon'}`}
                 />
                 <button
                   type="button"
