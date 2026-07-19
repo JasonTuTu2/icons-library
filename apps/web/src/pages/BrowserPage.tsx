@@ -235,6 +235,7 @@ export function BrowserPage() {
             icons={icons}
             selectedId={selected?.id}
             onSelect={setSelected}
+            collapseCategory={categoryFilter !== CATEGORY_ALL}
           />
         )}
         {selected ? (

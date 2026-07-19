@@ -10,6 +10,8 @@ interface IconTableProps {
   icons: IconMeta[]
   selectedId?: string
   onSelect: (icon: IconMeta) => void
+  /** When true, only the first row shows the category (filter already narrows to one). */
+  collapseCategory?: boolean
 }
 
 function formatSource(source: IconMeta['source']): string {
@@ -26,7 +28,12 @@ function cell(value: string | undefined): string {
   return value?.trim() ? value : '—'
 }
 
-export function IconTable({ icons, selectedId, onSelect }: IconTableProps) {
+export function IconTable({
+  icons,
+  selectedId,
+  onSelect,
+  collapseCategory = false,
+}: IconTableProps) {
   const parentRef = useRef<HTMLDivElement>(null)
 
   const virtualizer = useVirtualizer({
@@ -55,6 +62,8 @@ export function IconTable({ icons, selectedId, onSelect }: IconTableProps) {
           {virtualizer.getVirtualItems().map((row) => {
             const icon = icons[row.index]!
             const selected = icon.id === selectedId
+            const showCategory =
+              !collapseCategory || row.index === 0
             return (
               <button
                 key={row.key}
@@ -72,7 +81,7 @@ export function IconTable({ icons, selectedId, onSelect }: IconTableProps) {
                 title={icon.id}
               >
                 <div className="icon-table-cell category">
-                  {cell(icon.category)}
+                  {showCategory ? cell(icon.category) : ''}
                 </div>
                 <div className="icon-table-cell icon-preview">
                   <IconPreview icon={icon} size={24} />
