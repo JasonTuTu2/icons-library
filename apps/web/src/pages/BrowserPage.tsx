@@ -5,6 +5,7 @@ import {
   type IconMeta,
 } from '@JasonTuTu2/icons-catalog'
 import { IconGrid } from '../components/IconGrid'
+import { IconTable } from '../components/IconTable'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
@@ -32,6 +33,7 @@ export function BrowserPage() {
   const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
   const [usageFilter, setUsageFilter] = useState<'in-use' | 'unused'>('in-use')
   const [selected, setSelected] = useState<IconMeta | null>(null)
+  const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
   const deferredQuery = useDeferredValue(query)
@@ -202,15 +204,39 @@ export function BrowserPage() {
           }}
         />
         <PublishButton />
+        <div className="view-toggle" role="group" aria-label="Display mode">
+          <button
+            type="button"
+            className={displayMode === 'grid' ? 'active' : undefined}
+            onClick={() => setDisplayMode('grid')}
+          >
+            Grid
+          </button>
+          <button
+            type="button"
+            className={displayMode === 'table' ? 'active' : undefined}
+            onClick={() => setDisplayMode('table')}
+          >
+            Table
+          </button>
+        </div>
         <p className="result-count">{icons.length.toLocaleString()} icons</p>
       </section>
 
       <div className="browser-body">
-        <IconGrid
-          icons={icons}
-          selectedId={selected?.id}
-          onSelect={setSelected}
-        />
+        {displayMode === 'grid' ? (
+          <IconGrid
+            icons={icons}
+            selectedId={selected?.id}
+            onSelect={setSelected}
+          />
+        ) : (
+          <IconTable
+            icons={icons}
+            selectedId={selected?.id}
+            onSelect={setSelected}
+          />
+        )}
         {selected ? (
           <IconDetail
             icon={selected}
@@ -235,7 +261,7 @@ export function BrowserPage() {
           <aside className="detail empty-detail">
             <h2>Select an icon</h2>
             <p>
-              Browse the grid to preview brand icons and images, copy snippets,
+              Select an icon to preview brand icons and images, copy snippets,
               and review license details.
               {isGithubRepoConfigured()
                 ? ' Use Upload for SVG / PNG / JPG. Maintainers Apply and Publish.'
