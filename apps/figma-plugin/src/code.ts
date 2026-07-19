@@ -17,7 +17,7 @@ figma.showUI(
 <script>window.location.href = ${JSON.stringify(uiUrl)};</script>
 <p style="font:12px sans-serif;padding:12px;color:#5c6b8a">Loading…</p>
 </body></html>`,
-  { width: 380, height: 520, themeColors: true },
+  { width: 540, height: 560, themeColors: true },
 )
 
 function post(msg: PluginToUiMessage): void {
