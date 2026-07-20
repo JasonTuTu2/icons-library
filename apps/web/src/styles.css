@@ -1139,7 +1139,19 @@ pre {
   box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
 }
 
-.category-search-input {
+.category-filter-field .category-select-wrap {
+  min-width: 10rem;
+}
+
+.category-select-wrap,
+.category-combobox {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  min-width: 8rem;
+}
+
+.category-combobox-input {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--line);
@@ -1147,43 +1159,73 @@ pre {
   padding: 0.3rem 0.45rem;
   font: inherit;
   font-size: 0.75rem;
+  font-weight: 500;
   background: var(--bg-elevated);
   color: var(--ink);
 }
 
-.category-search-input:focus {
+.category-combobox-input:focus {
   outline: none;
   border-color: rgba(30, 167, 255, 0.55);
   box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
 }
 
-.category-filter-field .category-select-wrap {
-  min-width: 10rem;
-}
-
-.category-select-wrap {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 8rem;
-}
-
-.category-create-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
-}
-
-.category-create-row input {
-  flex: 1 1 7rem;
-  min-width: 0;
+.category-combobox-list {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.2rem);
+  left: 0;
+  right: 0;
+  min-width: 12rem;
+  max-height: 14rem;
+  overflow: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.3rem 0.45rem;
+  background: var(--bg-elevated);
+  box-shadow: 0 10px 28px rgba(8, 18, 36, 0.18);
+}
+
+.category-combobox-option,
+.category-combobox-empty {
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
   font: inherit;
   font-size: 0.75rem;
-  background: var(--bg-elevated);
+  line-height: 1.3;
   color: var(--ink);
+  cursor: pointer;
+}
+
+.category-combobox-empty {
+  cursor: default;
+  color: var(--ink-muted);
+}
+
+.category-combobox-option.is-active,
+.category-combobox-option:hover {
+  background: rgba(30, 167, 255, 0.12);
+}
+
+.category-combobox-option.is-create {
+  font-weight: 600;
+  color: var(--accent, #1ea7ff);
+}
+
+.upload-list .category-combobox,
+.figma-dock-list .category-combobox,
+.apply-all-fields .category-combobox {
+  z-index: 5;
+}
+
+.upload-list .category-combobox.is-open,
+.figma-dock-list .category-combobox.is-open,
+.apply-all-fields .category-combobox.is-open,
+.category-filter-field .category-combobox.is-open {
+  z-index: 50;
 }
 
 .apply-all-fields {
