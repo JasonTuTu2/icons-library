@@ -18,6 +18,7 @@ import {
 import { useLiveCatalog } from '../lib/liveCatalog'
 import { useIntroducedVersions } from '../lib/useIntroducedVersions'
 import { CategoryFilterSelect } from '../components/CategorySelect'
+import { DropdownCombobox } from '../components/DropdownCombobox'
 import {
   CATEGORY_FILTER_ALL,
   CATEGORY_FILTER_NONE,
@@ -183,38 +184,61 @@ export function BrowserPage() {
         </label>
         <label className="field">
           <span>Variant</span>
-          <select
+          <DropdownCombobox
             value={variantFilter}
-            onChange={(e) => setVariantFilter(e.target.value)}
-          >
-            <option value={VARIANT_ALL}>All variants</option>
-            <option value="regular">Regular</option>
-            <option value="filled">Filled</option>
-          </select>
+            onChange={setVariantFilter}
+            ariaLabel="Variant filter"
+            searchable
+            placeholder="Variant…"
+            options={[
+              { value: VARIANT_ALL, label: 'All variants' },
+              { value: 'regular', label: 'Regular' },
+              { value: 'filled', label: 'Filled' },
+            ]}
+            displayValue={(v) => {
+              if (v === VARIANT_ALL) return 'All variants'
+              if (v === 'filled') return 'Filled'
+              return 'Regular'
+            }}
+          />
         </label>
         <label className="field">
           <span>Source</span>
-          <select
+          <DropdownCombobox
             value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-          >
-            <option value={SOURCE_ALL}>All sources</option>
-            <option value="custom">Custom</option>
-            <option value="iconify">Iconify</option>
-            <option value="modified">Modified</option>
-          </select>
+            onChange={setSourceFilter}
+            ariaLabel="Source filter"
+            searchable
+            placeholder="Source…"
+            options={[
+              { value: SOURCE_ALL, label: 'All sources' },
+              { value: 'custom', label: 'Custom' },
+              { value: 'iconify', label: 'Iconify' },
+              { value: 'modified', label: 'Modified' },
+            ]}
+            displayValue={(v) => {
+              if (v === SOURCE_ALL) return 'All sources'
+              if (v === 'iconify') return 'Iconify'
+              if (v === 'modified') return 'Modified'
+              return 'Custom'
+            }}
+          />
         </label>
         <label className="field">
           <span>Usage</span>
-          <select
+          <DropdownCombobox
             value={usageFilter}
-            onChange={(e) =>
-              setUsageFilter(e.target.value === 'unused' ? 'unused' : 'in-use')
+            onChange={(next) =>
+              setUsageFilter(next === 'unused' ? 'unused' : 'in-use')
             }
-          >
-            <option value="in-use">In use</option>
-            <option value="unused">Unused</option>
-          </select>
+            ariaLabel="Usage filter"
+            searchable
+            placeholder="Usage…"
+            options={[
+              { value: 'in-use', label: 'In use' },
+              { value: 'unused', label: 'Unused' },
+            ]}
+          />
         </label>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}

@@ -1,4 +1,11 @@
 import type { IconSource } from '@JasonTuTu2/github-admin'
+import { DropdownCombobox } from './DropdownCombobox'
+
+const OPTIONS = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'iconify', label: 'Iconify' },
+  { value: 'modified', label: 'Modified' },
+]
 
 interface SourceSelectProps {
   value: IconSource
@@ -11,24 +18,22 @@ export function SourceSelect({
   value,
   onChange,
   ariaLabel = 'Source',
-  className = 'source-select',
+  className = '',
 }: SourceSelectProps) {
   return (
-    <select
-      className={className}
-      aria-label={ariaLabel}
+    <DropdownCombobox
       value={value}
-      onChange={(e) => {
-        const next = e.target.value
+      onChange={(next) =>
         onChange(
           next === 'iconify' || next === 'modified' ? next : 'custom',
         )
-      }}
-    >
-      <option value="custom">Custom</option>
-      <option value="iconify">Iconify</option>
-      <option value="modified">Modified</option>
-    </select>
+      }
+      options={OPTIONS}
+      ariaLabel={ariaLabel}
+      className={`source-dropdown${className ? ` ${className}` : ''}`}
+      searchable
+      placeholder="Source…"
+    />
   )
 }
 

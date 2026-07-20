@@ -54,6 +54,7 @@ import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
 import { UsageSelect, usageLabel } from './UsageSelect'
 import { NoteToggleField } from './NoteToggleField'
+import { DropdownCombobox } from './DropdownCombobox'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -848,12 +849,23 @@ export function UploadPanel({
                           />
                         </label>
                         {item.kind === 'svg' ? (
-                          <select
-                            className="color-mode-select"
-                            aria-label={`Color mode for ci:${item.name || 'icon'}`}
+                          <DropdownCombobox
+                            className="color-mode-dropdown"
+                            ariaLabel={`Color mode for ci:${item.name || 'icon'}`}
                             value={item.colorMode}
-                            onChange={(e) => {
-                              const value = e.target.value as IconColorMode
+                            searchable
+                            placeholder="Color…"
+                            displayValue={(v) => {
+                              if (v === 'preserved') return 'Multi-color'
+                              if (v === 'gradient') return 'Gradient'
+                              return 'Monochrome'
+                            }}
+                            options={[
+                              { value: 'mono', label: 'Monochrome' },
+                              { value: 'preserved', label: 'Multi-color' },
+                              { value: 'gradient', label: 'Gradient' },
+                            ]}
+                            onChange={(value) => {
                               setItems((prev) =>
                                 prev.map((row, i) =>
                                   i === index
@@ -870,11 +882,7 @@ export function UploadPanel({
                                 ),
                               )
                             }}
-                          >
-                            <option value="mono">Monochrome</option>
-                            <option value="preserved">Multi-color</option>
-                            <option value="gradient">Gradient</option>
-                          </select>
+                          />
                         ) : (
                           <span className="upload-format-tag">
                             {(item.format ?? 'image').toUpperCase()}

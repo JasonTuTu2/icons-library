@@ -1,4 +1,10 @@
 import type { IconUsage } from '@JasonTuTu2/github-admin'
+import { DropdownCombobox } from './DropdownCombobox'
+
+const OPTIONS = [
+  { value: 'in-use', label: 'In use' },
+  { value: 'unused', label: 'Unused' },
+]
 
 interface UsageSelectProps {
   value: IconUsage
@@ -11,20 +17,20 @@ export function UsageSelect({
   value,
   onChange,
   ariaLabel = 'Usage',
-  className = 'usage-select',
+  className = '',
 }: UsageSelectProps) {
   return (
-    <select
-      className={className}
-      aria-label={ariaLabel}
+    <DropdownCombobox
       value={value}
-      onChange={(e) =>
-        onChange(e.target.value === 'unused' ? 'unused' : 'in-use')
+      onChange={(next) =>
+        onChange(next === 'unused' ? 'unused' : 'in-use')
       }
-    >
-      <option value="in-use">In use</option>
-      <option value="unused">Unused</option>
-    </select>
+      options={OPTIONS}
+      ariaLabel={ariaLabel}
+      className={`usage-dropdown${className ? ` ${className}` : ''}`}
+      searchable
+      placeholder="Usage…"
+    />
   )
 }
 

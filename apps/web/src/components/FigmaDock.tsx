@@ -35,6 +35,7 @@ import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
 import { NoteToggleField } from './NoteToggleField'
+import { DropdownCombobox } from './DropdownCombobox'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -508,33 +509,47 @@ export function FigmaDock() {
                     }}
                   />
                 </label>
-                <select
+                <DropdownCombobox
                   className="figma-dock-format"
-                  aria-label={`Export format for ${icon.name || 'asset'}`}
+                  ariaLabel={`Export format for ${icon.name || 'asset'}`}
                   value={icon.assetFormat}
                   disabled={Boolean(reexportingId) || busy}
-                  onChange={(e) => {
-                    const value = e.target.value
+                  searchable
+                  placeholder="Format…"
+                  options={[
+                    { value: 'svg', label: 'SVG' },
+                    { value: 'png', label: 'PNG' },
+                    { value: 'jpg', label: 'JPG' },
+                  ]}
+                  onChange={(value) => {
                     if (value !== 'svg' && value !== 'png' && value !== 'jpg') {
                       return
                     }
                     handleFormatChange(index, value)
                   }}
-                >
-                  <option value="svg">SVG</option>
-                  <option value="png">PNG</option>
-                  <option value="jpg">JPG</option>
-                </select>
+                />
                 {icon.kind === 'svg' ? (
-                  <select
-                    aria-label={`Color mode for ci:${icon.name || 'icon'}`}
+                  <DropdownCombobox
+                    ariaLabel={`Color mode for ci:${icon.name || 'icon'}`}
                     value={icon.colorMode}
                     disabled={formatBusy}
-                    onChange={(e) => {
+                    searchable
+                    placeholder="Color…"
+                    displayValue={(v) => {
+                      if (v === 'preserved') return 'Multi'
+                      if (v === 'gradient') return 'Gradient'
+                      return 'Mono'
+                    }}
+                    options={[
+                      { value: 'mono', label: 'Mono' },
+                      { value: 'preserved', label: 'Multi' },
+                      { value: 'gradient', label: 'Gradient' },
+                    ]}
+                    onChange={(value) => {
                       const colorMode =
-                        e.target.value === 'preserved'
+                        value === 'preserved'
                           ? 'preserved'
-                          : e.target.value === 'gradient'
+                          : value === 'gradient'
                             ? 'gradient'
                             : 'mono'
                       setPending((prev) =>
@@ -543,11 +558,7 @@ export function FigmaDock() {
                         ),
                       )
                     }}
-                  >
-                    <option value="mono">Mono</option>
-                    <option value="preserved">Multi</option>
-                    <option value="gradient">Gradient</option>
-                  </select>
+                  />
                 ) : null}
                 <CategorySelect
                   value={icon.category}

@@ -1,4 +1,10 @@
 import type { IconVariant } from '@JasonTuTu2/github-admin'
+import { DropdownCombobox } from './DropdownCombobox'
+
+const OPTIONS = [
+  { value: 'regular', label: 'Regular' },
+  { value: 'filled', label: 'Filled' },
+]
 
 interface VariantSelectProps {
   value: IconVariant
@@ -11,20 +17,20 @@ export function VariantSelect({
   value,
   onChange,
   ariaLabel = 'Variant',
-  className = 'variant-select',
+  className = '',
 }: VariantSelectProps) {
   return (
-    <select
-      className={className}
-      aria-label={ariaLabel}
+    <DropdownCombobox
       value={value}
-      onChange={(e) =>
-        onChange(e.target.value === 'filled' ? 'filled' : 'regular')
+      onChange={(next) =>
+        onChange(next === 'filled' ? 'filled' : 'regular')
       }
-    >
-      <option value="regular">Regular</option>
-      <option value="filled">Filled</option>
-    </select>
+      options={OPTIONS}
+      ariaLabel={ariaLabel}
+      className={`variant-dropdown${className ? ` ${className}` : ''}`}
+      searchable
+      placeholder="Variant…"
+    />
   )
 }
 

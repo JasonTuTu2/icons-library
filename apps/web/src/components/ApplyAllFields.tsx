@@ -10,6 +10,7 @@ import { VariantSelect } from './VariantSelect'
 import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
 import { NoteToggleField } from './NoteToggleField'
+import { DropdownCombobox } from './DropdownCombobox'
 
 export type ApplyAllAssetFormat = 'svg' | 'png' | 'jpg'
 
@@ -53,47 +54,59 @@ export function ApplyAllFields({
     <div className="apply-all-fields">
       <span className="apply-all-label">Apply to all</span>
       {onApplyFormat ? (
-        <select
+        <DropdownCombobox
           className="apply-all-format"
-          aria-label="Apply export format to all pending assets"
+          ariaLabel="Apply export format to all pending assets"
           value={format}
           disabled={formatDisabled}
-          onChange={(e) => {
-            const value = e.target.value
+          searchable
+          placeholder="Format…"
+          displayValue={(v) =>
+            v === 'svg' || v === 'png' || v === 'jpg'
+              ? v.toUpperCase()
+              : 'Format…'
+          }
+          options={[
+            { value: 'svg', label: 'SVG' },
+            { value: 'png', label: 'PNG' },
+            { value: 'jpg', label: 'JPG' },
+          ]}
+          onChange={(value) => {
             if (value !== 'svg' && value !== 'png' && value !== 'jpg') return
             setFormat(value)
             onApplyFormat(value)
           }}
-        >
-          <option value="" disabled>
-            Format…
-          </option>
-          <option value="svg">SVG</option>
-          <option value="png">PNG</option>
-          <option value="jpg">JPG</option>
-        </select>
+        />
       ) : null}
       {onApplyFormat && onApplyColorMode && format === 'svg' ? (
-        <select
+        <DropdownCombobox
           className="apply-all-color-mode"
-          aria-label="Apply color mode to all SVG assets"
+          ariaLabel="Apply color mode to all SVG assets"
           value={colorMode}
           disabled={formatDisabled}
-          onChange={(e) => {
+          searchable
+          placeholder="Color…"
+          displayValue={(v) => {
+            if (v === 'preserved') return 'Multi'
+            if (v === 'gradient') return 'Gradient'
+            return 'Mono'
+          }}
+          options={[
+            { value: 'mono', label: 'Mono' },
+            { value: 'preserved', label: 'Multi' },
+            { value: 'gradient', label: 'Gradient' },
+          ]}
+          onChange={(value) => {
             const next =
-              e.target.value === 'preserved'
+              value === 'preserved'
                 ? 'preserved'
-                : e.target.value === 'gradient'
+                : value === 'gradient'
                   ? 'gradient'
                   : 'mono'
             setColorMode(next)
             onApplyColorMode(next)
           }}
-        >
-          <option value="mono">Mono</option>
-          <option value="preserved">Multi</option>
-          <option value="gradient">Gradient</option>
-        </select>
+        />
       ) : null}
       <CategorySelect
         value={category}
