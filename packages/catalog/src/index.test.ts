@@ -21,7 +21,10 @@ describe('catalog', () => {
   })
 
   it('searches by query', () => {
-    const results = searchIcons({ query: 'v1', limit: 10 })
+    const sample = catalog.icons[0]
+    expect(sample).toBeTruthy()
+    const query = sample!.name.split('-')[0]!
+    const results = searchIcons({ query, limit: 10 })
     expect(results.length).toBeGreaterThan(0)
   })
 
