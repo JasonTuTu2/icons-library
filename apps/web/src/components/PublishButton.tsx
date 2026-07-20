@@ -2,6 +2,7 @@ import { useCallback, useState, type ReactNode } from 'react'
 import {
   actionsWorkflowUrl,
   dispatchPublish,
+  getPublishedPackageVersion,
   getPublishReadiness,
   listUnpublishedIcons,
   listUnpublishedRemovals,
@@ -9,6 +10,7 @@ import {
   useGithubDevEnabled,
   type StagedRemoval,
 } from '../lib/github'
+import { formatVersionBumpLabel } from '../lib/formatVersionBumpLabel'
 import {
   getCheckedUnpublishedIcons,
   getUncheckedUnpublishedIcons,
@@ -91,12 +93,9 @@ export function PublishButton() {
       let versionBump: 'patch' | 'minor' | 'major' = 'patch'
       if (publishingReplacements) versionBump = 'minor'
       if (publishingRemovals) versionBump = 'major'
-      const bumpLabel =
-        versionBump === 'major'
-          ? 'Bump major versions (e.g. 0.3.21 → 1.0.0)'
-          : versionBump === 'minor'
-            ? 'Bump minor versions (e.g. 0.3.21 → 0.4.0)'
-            : 'Bump patch versions'
+
+      const currentVersion = await getPublishedPackageVersion()
+      const bumpLabel = formatVersionBumpLabel(currentVersion, versionBump)
       const addSection = addsNote(selected)
       const deferSection = addsNote(
         deferred,
@@ -110,27 +109,27 @@ export function PublishButton() {
           readiness.stagedRemovalCount,
         )
         const ok = window.confirm(
-          `${waiting} still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${addSection}${deferSection}${removeSection}\n\nPublish package versions anyway?`,
+          `${waiting} still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${addSection}${deferSection}${removeSection}\n\n${bumpLabel}?`,
         )
         if (!ok) return
       } else if (!readiness.hasNewIcons) {
         const ok = window.confirm(
-          'No custom SVG adds or removals have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no library changes for consumers.\n\nPublish anyway?',
+          `No custom SVG adds or removals have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no library changes for consumers.\n\n${bumpLabel}?`,
         )
         if (!ok) return
       } else if (selected.length === 0 && removals.length === 0) {
         const ok = window.confirm(
-          `No unpublished adds are checked and there are no applied removals.\n\nUnchecked adds (${deferred.length}) stay out of this package, then return to the library as unpublished. Publishing will only bump package versions.${deferSection}\n\nPublish anyway?`,
+          `No unpublished adds are checked and there are no applied removals.\n\nUnchecked adds (${deferred.length}) stay out of this package, then return to the library as unpublished.${deferSection}\n\n${bumpLabel}?`,
         )
         if (!ok) return
       } else if (selected.length === 0) {
         const ok = window.confirm(
-          `No unpublished adds are checked.${removeSection}${deferSection}\n\n${bumpLabel} and publish to GitHub Packages?`,
+          `No unpublished adds are checked.${removeSection}${deferSection}\n\n${bumpLabel}?`,
         )
         if (!ok) return
       } else {
         const ok = window.confirm(
-          `Publish these changes?${addSection}${removeSection}${deferSection}\n\n${bumpLabel} and publish to GitHub Packages?`,
+          `Publish these changes?${addSection}${removeSection}${deferSection}\n\n${bumpLabel}?`,
         )
         if (!ok) return
       }

@@ -59,6 +59,7 @@ export {
   sanitizeIconName,
   detectVariantFromName,
   detectVariantSuffix,
+  bumpPackageVersion,
 } from '@JasonTuTu2/github-admin'
 
 function getRepo(): string {
@@ -293,6 +294,11 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
 /** Promote remote staging into the library (legacy; prefer applyLocalStagedToLibrary). */
 export async function dispatchApplyStaged(): Promise<void> {
   return applyLocalStagedToLibrary()
+}
+
+export async function getPublishedPackageVersion(): Promise<string> {
+  if (!getStagingToken()) return 'unknown'
+  return withAuthClear(() => getStagingClient().getPublishedPackageVersion())
 }
 
 export async function getPublishReadiness(): Promise<PublishReadiness> {

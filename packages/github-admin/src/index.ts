@@ -154,6 +154,8 @@ export interface GithubAdminClient {
   /** First library path for a kebab name (svg / color / gradient / images). */
   findLibraryAssetPath(name: string): Promise<string | null>
   getPublishReadiness(): Promise<PublishReadiness>
+  /** Current semver on main (`packages/react/package.json`, shared across icon packages). */
+  getPublishedPackageVersion(): Promise<string>
   /** Past package publishes with library add/remove summaries (newest first). */
   listPublishHistory(options?: { limit?: number }): Promise<PublishHistoryEntry[]>
   dispatchApplyStaged(): Promise<void>
@@ -256,6 +258,21 @@ export function sanitizeIconName(raw: string): string | null {
 
   if (!base || !KEBAB.test(base)) return null
   return base
+}
+
+/** Next semver after a patch / minor / major bump (Changesets-style). */
+export function bumpPackageVersion(
+  current: string,
+  bump: 'patch' | 'minor' | 'major',
+): string {
+  const match = current.trim().match(/^(\d+)\.(\d+)\.(\d+)/)
+  if (!match) return current
+  const major = Number(match[1])
+  const minor = Number(match[2])
+  const patch = Number(match[3])
+  if (bump === 'major') return `${major + 1}.0.0`
+  if (bump === 'minor') return `${major}.${minor + 1}.0`
+  return `${major}.${minor}.${patch + 1}`
 }
 
 function findImageFileName(
@@ -1552,6 +1569,10 @@ export function createGithubAdminClient(
       }
 
       return entries
+    },
+
+    async getPublishedPackageVersion(): Promise<string> {
+      return readPackageVersionAtRef('main')
     },
 
     async getPublishReadiness(): Promise<PublishReadiness> {
