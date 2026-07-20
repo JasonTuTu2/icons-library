@@ -975,6 +975,27 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "alipay": {
+      "category": "Payment Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "crypto-pay": {
+      "category": "Payment Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "wechat-pay": {
+      "category": "Payment Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
