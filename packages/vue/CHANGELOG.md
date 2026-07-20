@@ -1,5 +1,14 @@
 # @JasonTuTu2/icons-vue
 
+## 0.3.22
+
+### Patch Changes
+
+- Publish from icon browser (patch).
+- Updated dependencies
+  - @JasonTuTu2/icons-core@0.3.22
+  - @JasonTuTu2/icons-custom@0.3.22
+
 ## 0.3.21
 
 ### Patch Changes
