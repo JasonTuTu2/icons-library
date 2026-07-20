@@ -173,6 +173,8 @@ async function reexportNodes(
   })
 }
 
+const STAGING_SNAPSHOT_KEY = 'gv-staging-snapshot-v1'
+
 figma.ui.onmessage = async (msg: UiToPluginMessage) => {
   switch (msg.type) {
     case 'ui-ready': {
@@ -193,6 +195,14 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'open-url': {
       figma.openExternal(msg.url)
+      break
+    }
+    case 'save-staging-snapshot': {
+      try {
+        await figma.clientStorage.setAsync(STAGING_SNAPSHOT_KEY, msg.json)
+      } catch {
+        // ignore quota / sandbox errors
+      }
       break
     }
     case 'close': {

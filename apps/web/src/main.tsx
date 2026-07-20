@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { App } from './App'
 import { consumeFigmaHandoffFromUrl } from './lib/figmaHandoff'
+import { consumeStagingHandoffFromUrl } from './lib/stagingHandoff'
 import { consumeGithubTokenFromUrl } from './lib/githubAuth'
 import './styles.css'
 
 consumeGithubTokenFromUrl()
 consumeFigmaHandoffFromUrl()
+consumeStagingHandoffFromUrl()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

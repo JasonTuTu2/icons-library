@@ -1,3 +1,9 @@
+import {
+  buildStagingHandoffPayload,
+  encodeStagingHandoffParam,
+  STAGING_HANDOFF_URL_MAX,
+} from './stagingHandoff.js'
+
 const FIGMA_PARAM = 'gv-figma'
 /** Allow any plugin id so Development imports receive messages from Pages. */
 const FIGMA_PLUGIN_ID = '*'
@@ -145,6 +151,46 @@ export function openExternalUrl(url: string): void {
     },
     'https://www.figma.com',
   )
+}
+
+/** Persist staging snapshot in the plugin file (backup for handoff). */
+export async function syncStagingSnapshotToPlugin(): Promise<void> {
+  if (typeof window === 'undefined' || window.parent === window) return
+  const payload = await buildStagingHandoffPayload()
+  parent.postMessage(
+    {
+      pluginMessage: {
+        type: 'save-staging-snapshot',
+        json: JSON.stringify(payload),
+      },
+      pluginId: FIGMA_PLUGIN_ID,
+    },
+    'https://www.figma.com',
+  )
+}
+
+/**
+ * Open the full icon browser with the local staging queue (Figma iframe → first-party tab).
+ * Required because IndexedDB is partitioned when figma.html runs inside Figma.
+ */
+export async function openIconBrowserWithStaging(): Promise<string | null> {
+  const payload = await buildStagingHandoffPayload()
+  if (payload.icons.length === 0 && payload.removals.length === 0) {
+    openExternalUrl(fullIconBrowserUrl())
+    return null
+  }
+
+  await syncStagingSnapshotToPlugin()
+
+  const encoded = encodeStagingHandoffParam(payload)
+  if (encoded.length > STAGING_HANDOFF_URL_MAX) {
+    return `Staging queue is too large for a link (${encoded.length} chars). Stage fewer icons at once, or stage from the full icon browser.`
+  }
+
+  const base = fullIconBrowserUrl()
+  const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
+  openExternalUrl(url)
+  return null
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

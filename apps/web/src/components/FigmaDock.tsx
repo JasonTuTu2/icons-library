@@ -17,7 +17,8 @@ import { conflictMessagesForItems } from '../lib/nameConflicts'
 import {
   fullIconBrowserUrl,
   notifyFigmaUiReady,
-  openExternalUrl,
+  openIconBrowserWithStaging,
+  syncStagingSnapshotToPlugin,
   requestFigmaExport,
   requestFigmaReexport,
   requestFigmaReexportBatch,
@@ -365,13 +366,14 @@ export function FigmaDock() {
 
       const count = payloads.length
       await stageIcons(payloads)
+      await syncStagingSnapshotToPlugin()
       setPending((prev) => {
         revokeAll(prev)
         return []
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s) locally. Open the icon browser to Apply (maintainer PAT) or Publish.`,
+        `Staged ${count} asset(s) in the plugin. Click Open icon browser to sync your queue for Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -409,8 +411,9 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage. Mono/Multi/Gradient only apply to SVG. Names
-          already in the library or staging must be changed first.
+          names, then Stage. Use <strong>Open icon browser</strong> so your queue
+          appears on the site (Figma keeps plugin storage separate from a normal
+          tab). Mono/Multi/Gradient only apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (
@@ -629,14 +632,16 @@ export function FigmaDock() {
           href={browserUrl}
           onClick={(e) => {
             e.preventDefault()
-            openExternalUrl(browserUrl)
+            void openIconBrowserWithStaging().then((err) => {
+              if (err) setMessage(err)
+            })
           }}
         >
           Open icon browser
         </a>
         <span className="figma-dock-link-note">
           {' '}
-          — Apply / Publish, or upload files there
+          — syncs staging, then Apply / Publish
         </span>
       </p>
     </section>

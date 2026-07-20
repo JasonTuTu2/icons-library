@@ -26,6 +26,7 @@ export type UiToPluginMessage =
       exports: Array<{ nodeId: string; format: FigmaAssetFormat }>
     }
   | { type: 'open-url'; url: string }
+  | { type: 'save-staging-snapshot'; json: string }
   | { type: 'close' }
 
 export type PluginToUiMessage =

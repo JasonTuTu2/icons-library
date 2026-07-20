@@ -22,6 +22,11 @@ import {
   type StagedRemoval,
 } from '../lib/github'
 import {
+  importStagingHandoff,
+  takePendingStagingHandoff,
+  takeStagingImportMessage,
+} from '../lib/stagingHandoff'
+import {
   parseFigmaHandoffFile,
   takeFigmaHandoffError,
   takeOpenUploadPanelFlag,
@@ -108,6 +113,10 @@ function readInitialHandoff(): {
   }
   if (handoffError) {
     return { open: true, items: [], message: handoffError }
+  }
+  const stagingMsg = takeStagingImportMessage()
+  if (stagingMsg) {
+    return { open: true, items: [], message: stagingMsg }
   }
   if (openPanel) {
     return {
@@ -248,6 +257,7 @@ export function UploadPanel({
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
   const wasOpenRef = useRef(open)
+  const stagingImportStarted = useRef(false)
 
   const close = useCallback(() => {
     setOpen(false)
@@ -286,6 +296,21 @@ export function UploadPanel({
       setStagedLoading(false)
     }
   }, [mode, githubRepoConfigured])
+
+  useEffect(() => {
+    if (stagingImportStarted.current) return
+    const payload = takePendingStagingHandoff()
+    if (!payload) return
+    stagingImportStarted.current = true
+    void (async () => {
+      try {
+        await importStagingHandoff(payload)
+        await refreshStaged()
+      } catch (err) {
+        setMessage(err instanceof Error ? err.message : String(err))
+      }
+    })()
+  }, [refreshStaged])
 
   // Only clear when the dialog closes — not on the initial mount (handoff opens it).
   useEffect(() => {
