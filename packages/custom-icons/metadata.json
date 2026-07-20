@@ -646,6 +646,356 @@
       "source": "iconify",
       "usage": "in-use",
       "note": ""
+    },
+    "ai-translate-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "alipay": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "apple": {
+      "category": "Brand Logos",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "briefcase-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "checkmark-circle-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "checkmark-circle-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "checkmark-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "coins-go-gold": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "coins-go-grey": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "coins-pingme-grey": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "company-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "cross-circle-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "unused",
+      "note": ""
+    },
+    "cross-circle-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "cross-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "crypto-com": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "crypto-pay": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "error-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "error-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "eye-off-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "eye-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "fire-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "fire-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "globe-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "globe-regular": {
+      "category": "Translate & Language",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "google": {
+      "category": "Brand Logos",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "help-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "help-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "info-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "info-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "locked-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "locked-regular": {
+      "category": "Security",
+      "variant": "regular",
+      "source": "modified",
+      "usage": "in-use",
+      "note": ""
+    },
+    "logo-go": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "logo-pingme": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "logo-team": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "logo-wephone": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "logo-wetalk": {
+      "category": "Product Logos & Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "paypal": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "person-filled": {
+      "category": "Users & Team",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "person-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "secure-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "team-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "tip-filled": {
+      "category": "Status, Alert & Tips",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "unused",
+      "note": ""
+    },
+    "tip-regular": {
+      "category": "Status, Alert & Tips",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "translate-filled": {
+      "category": "Translate & Language",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "translate-regular": {
+      "category": "Translate & Language",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "unionpay": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "unlocked-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "modified",
+      "usage": "in-use",
+      "note": ""
+    },
+    "user-visibility-filled": {
+      "category": "Security",
+      "variant": "filled",
+      "source": "modified",
+      "usage": "in-use",
+      "note": ""
+    },
+    "visa": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "wechat-pay": {
+      "category": "Payment",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
