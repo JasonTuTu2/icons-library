@@ -30,3 +30,25 @@ export function mergeCategoryIntoRegistry(
   if (!trimmed || categories.includes(trimmed)) return categories
   return [...categories, trimmed].sort((a, b) => a.localeCompare(b))
 }
+
+/** Match every whitespace-separated word as a case-insensitive substring. */
+export function filterCategoriesBySearch(
+  categories: string[],
+  query: string,
+): string[] {
+  const words = query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+  if (words.length === 0) return categories
+  return categories.filter((category) => {
+    const hay = category.toLowerCase()
+    return words.every((word) => hay.includes(word))
+  })
+}
+
+/** Browser toolbar: show all categories. */
+export const CATEGORY_FILTER_ALL = ''
+/** Browser toolbar: icons with no category. */
+export const CATEGORY_FILTER_NONE = '__none__'

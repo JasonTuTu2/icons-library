@@ -1139,6 +1139,28 @@ pre {
   box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
 }
 
+.category-search-input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  font-size: 0.75rem;
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.category-search-input:focus {
+  outline: none;
+  border-color: rgba(30, 167, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12);
+}
+
+.category-filter-field .category-select-wrap {
+  min-width: 10rem;
+}
+
 .category-select-wrap {
   display: grid;
   gap: 0.35rem;

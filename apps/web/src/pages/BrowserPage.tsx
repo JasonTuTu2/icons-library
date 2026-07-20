@@ -17,6 +17,11 @@ import {
 } from '../lib/github'
 import { useLiveCatalog } from '../lib/liveCatalog'
 import { useIntroducedVersions } from '../lib/useIntroducedVersions'
+import { CategoryFilterSelect } from '../components/CategorySelect'
+import {
+  CATEGORY_FILTER_ALL,
+  CATEGORY_FILTER_NONE,
+} from '../lib/categories'
 import {
   BROWSE_ZOOM_DEFAULT,
   BROWSE_ZOOM_MAX,
@@ -25,11 +30,6 @@ import {
   zoomOut,
 } from '../lib/browseZoom'
 
-/** Toolbar sentinel: show all categories. */
-const CATEGORY_ALL = ''
-/** Toolbar sentinel: icons with no category assigned. */
-const CATEGORY_NONE = '__none__'
-
 const VARIANT_ALL = ''
 const SOURCE_ALL = ''
 
@@ -37,7 +37,7 @@ export function BrowserPage() {
   const { categories, search, getById, patchIcon } = useLiveCatalog()
   const introducedVersions = useIntroducedVersions()
   const [query, setQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
+  const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
   const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
   const [usageFilter, setUsageFilter] = useState<'in-use' | 'unused'>('in-use')
@@ -85,9 +85,9 @@ export function BrowserPage() {
     const options: Parameters<typeof search>[0] = {
       query: deferredQuery,
     }
-    if (categoryFilter === CATEGORY_NONE) {
+    if (categoryFilter === CATEGORY_FILTER_NONE) {
       options.category = ''
-    } else if (categoryFilter !== CATEGORY_ALL) {
+    } else if (categoryFilter !== CATEGORY_FILTER_ALL) {
       options.category = categoryFilter
     }
     if (variantFilter === 'regular' || variantFilter === 'filled') {
@@ -173,20 +173,13 @@ export function BrowserPage() {
             autoFocus
           />
         </label>
-        <label className="field">
+        <label className="field category-filter-field">
           <span>Category</span>
-          <select
+          <CategoryFilterSelect
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <option value={CATEGORY_ALL}>All categories</option>
-            <option value={CATEGORY_NONE}>No category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+            onChange={setCategoryFilter}
+            categories={categories}
+          />
         </label>
         <label className="field">
           <span>Variant</span>
@@ -292,7 +285,7 @@ export function BrowserPage() {
               icons={icons}
               selectedId={selected?.id}
               onSelect={setSelected}
-              collapseCategory={categoryFilter !== CATEGORY_ALL}
+              collapseCategory={categoryFilter !== CATEGORY_FILTER_ALL}
               zoom={browseZoom}
             />
           )}

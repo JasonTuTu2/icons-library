@@ -1,4 +1,9 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
+import {
+  CATEGORY_FILTER_ALL,
+  CATEGORY_FILTER_NONE,
+  filterCategoriesBySearch,
+} from '../lib/categories'
 
 const CREATE_VALUE = '__create__'
 
@@ -11,6 +16,18 @@ interface CategorySelectProps {
   className?: string
 }
 
+function visibleCategories(
+  categories: string[],
+  search: string,
+  selectedValue: string,
+): string[] {
+  const filtered = filterCategoriesBySearch(categories, search)
+  if (!selectedValue || filtered.includes(selectedValue)) {
+    return filtered
+  }
+  return [selectedValue, ...filtered]
+}
+
 export function CategorySelect({
   value,
   onChange,
@@ -20,8 +37,15 @@ export function CategorySelect({
   className = 'category-select',
 }: CategorySelectProps) {
   const createInputId = useId()
+  const searchInputId = useId()
   const [creating, setCreating] = useState(false)
   const [draft, setDraft] = useState('')
+  const [search, setSearch] = useState('')
+
+  const options = useMemo(
+    () => visibleCategories(categories, search, value),
+    [categories, search, value],
+  )
 
   function handleSelectChange(next: string) {
     if (next === CREATE_VALUE) {
@@ -40,10 +64,23 @@ export function CategorySelect({
     onChange(trimmed)
     setCreating(false)
     setDraft('')
+    setSearch('')
   }
 
   return (
     <div className="category-select-wrap">
+      <label className="sr-only" htmlFor={searchInputId}>
+        Search categories
+      </label>
+      <input
+        id={searchInputId}
+        type="search"
+        className="category-search-input"
+        placeholder="Search categories…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        autoComplete="off"
+      />
       <select
         className={className}
         aria-label={ariaLabel}
@@ -51,7 +88,7 @@ export function CategorySelect({
         onChange={(e) => handleSelectChange(e.target.value)}
       >
         <option value="">No category</option>
-        {categories.map((category) => (
+        {options.map((category) => (
           <option key={category} value={category}>
             {category}
           </option>
@@ -91,6 +128,66 @@ export function CategorySelect({
           </button>
         </div>
       ) : null}
+    </div>
+  )
+}
+
+interface CategoryFilterSelectProps {
+  value: string
+  onChange: (value: string) => void
+  categories: string[]
+}
+
+/** Toolbar category filter (all / none / one category) with search. */
+export function CategoryFilterSelect({
+  value,
+  onChange,
+  categories,
+}: CategoryFilterSelectProps) {
+  const searchInputId = useId()
+  const selectId = useId()
+  const [search, setSearch] = useState('')
+
+  const filtered = useMemo(
+    () => filterCategoriesBySearch(categories, search),
+    [categories, search],
+  )
+
+  const showSelected =
+    value !== CATEGORY_FILTER_ALL &&
+    value !== CATEGORY_FILTER_NONE &&
+    !filtered.includes(value)
+
+  return (
+    <div className="category-select-wrap category-filter-wrap">
+      <label className="sr-only" htmlFor={searchInputId}>
+        Search categories
+      </label>
+      <input
+        id={searchInputId}
+        type="search"
+        className="category-search-input"
+        placeholder="Search categories…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        autoComplete="off"
+      />
+      <select
+        id={selectId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value={CATEGORY_FILTER_ALL}>All categories</option>
+        <option value={CATEGORY_FILTER_NONE}>No category</option>
+        {showSelected ? (
+          <option value={value}>{value}</option>
+        ) : null}
+        {filtered.map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }
