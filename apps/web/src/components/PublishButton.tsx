@@ -87,11 +87,16 @@ export function PublishButton() {
       const publishingReplacements = selected.some(
         (icon) => icon.changeKind === 'replace',
       )
-      const versionBump = publishingReplacements ? 'minor' : 'patch'
+      const publishingRemovals = removals.length > 0
+      let versionBump: 'patch' | 'minor' | 'major' = 'patch'
+      if (publishingReplacements) versionBump = 'minor'
+      if (publishingRemovals) versionBump = 'major'
       const bumpLabel =
-        versionBump === 'minor'
-          ? 'Bump minor versions (e.g. 0.3.21 → 0.4.0)'
-          : 'Bump patch versions'
+        versionBump === 'major'
+          ? 'Bump major versions (e.g. 0.3.21 → 1.0.0)'
+          : versionBump === 'minor'
+            ? 'Bump minor versions (e.g. 0.3.21 → 0.4.0)'
+            : 'Bump patch versions'
       const addSection = addsNote(selected)
       const deferSection = addsNote(
         deferred,

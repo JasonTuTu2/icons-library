@@ -131,7 +131,7 @@ export interface DispatchPublishOptions {
    */
   deferPaths?: string[]
   /** Package semver bump for this publish (default patch). */
-  versionBump?: 'patch' | 'minor'
+  versionBump?: 'patch' | 'minor' | 'major'
 }
 
 export interface GithubAdminClient {
@@ -1629,7 +1629,11 @@ export function createGithubAdminClient(
           inputs: {
             defer_paths: JSON.stringify(deferPaths),
             version_bump:
-              options?.versionBump === 'minor' ? 'minor' : 'patch',
+              options?.versionBump === 'major'
+                ? 'major'
+                : options?.versionBump === 'minor'
+                  ? 'minor'
+                  : 'patch',
           },
         }),
       })

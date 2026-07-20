@@ -12,13 +12,14 @@ on:
         required: false
         default: '[]'
       version_bump:
-        description: Semver bump for icon packages (minor when publishing library replacements).
+        description: Semver bump — major when publishing applied removals, minor for replacements, else patch.
         required: false
         default: patch
         type: choice
         options:
           - patch
           - minor
+          - major
 
 concurrency: publish-packages-${{ github.ref }}
 
@@ -114,7 +115,7 @@ jobs:
           VERSION_BUMP: ${{ inputs.version_bump }}
         run: |
           bump="${VERSION_BUMP:-patch}"
-          if [ "$bump" != "minor" ] && [ "$bump" != "patch" ]; then
+          if [ "$bump" != "major" ] && [ "$bump" != "minor" ] && [ "$bump" != "patch" ]; then
             bump="patch"
           fi
           {
