@@ -187,31 +187,38 @@ export async function loadPluginStaging(): Promise<StagingHandoffPayload> {
 /**
  * Open the full icon browser with the plugin staging queue.
  * Uses a URL handoff when small enough; otherwise downloads JSON and opens Upload.
+ * Always returns the URL that was opened so the plugin UI can display it.
  */
-export async function openIconBrowserWithStaging(): Promise<string | null> {
+export async function openIconBrowserWithStaging(): Promise<{
+  url: string
+  note?: string
+}> {
   const payload = isFigmaHost()
     ? await loadPluginStaging()
     : await buildStagingHandoffPayload()
 
+  const base = fullIconBrowserUrl()
+
   if (payload.icons.length === 0 && payload.removals.length === 0) {
-    openExternalUrl(fullIconBrowserUrl())
-    return null
+    openExternalUrl(base)
+    return { url: base }
   }
 
   const encoded = encodeStagingHandoffParam(payload)
-  const base = fullIconBrowserUrl()
 
   if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
     const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
     openExternalUrl(url)
-    return null
+    return { url }
   }
 
+  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
   downloadStagingHandoffJson(payload)
-  openExternalUrl(
-    `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`,
-  )
-  return `Queue is too large for a link — downloaded gv-staging-handoff.json. Drop that file into Upload to import your staged icons.`
+  openExternalUrl(url)
+  return {
+    url,
+    note: 'Queue is too large for a link — downloaded gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
+  }
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

@@ -663,9 +663,18 @@ export function FigmaDock() {
           href={browserUrl}
           onClick={(e) => {
             e.preventDefault()
-            void openIconBrowserWithStaging().then((err) => {
-              if (err) setMessage(err)
-            })
+            void openIconBrowserWithStaging()
+              .then((result) => {
+                const lines = [
+                  result.note,
+                  `Opened URL:`,
+                  result.url,
+                ].filter(Boolean)
+                setMessage(lines.join('\n'))
+              })
+              .catch((err) => {
+                setMessage(err instanceof Error ? err.message : String(err))
+              })
           }}
         >
           Open icon browser

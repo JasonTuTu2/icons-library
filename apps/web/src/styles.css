@@ -1957,6 +1957,7 @@ html.figma-host code {
   color: var(--plugin-text);
   word-break: break-word;
   line-height: 16px;
+  white-space: pre-wrap;
 }
 
 .figma-dock-link {
