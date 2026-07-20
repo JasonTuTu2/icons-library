@@ -534,6 +534,118 @@
       "source": "iconify",
       "usage": "in-use",
       "note": ""
+    },
+    "calendar-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "pause-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "play-circle-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "play-circle-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "play-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "record-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "record-stop-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "search-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "speaker-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "speaker-mute-filled": {
+      "category": "Recording & Audio",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "speaker-mute-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "speaker-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "speed-1x-regular": {
+      "category": "Recording & Audio",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "tag-filled": {
+      "category": "Search & Filter",
+      "variant": "filled",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "tag-regular": {
+      "category": "Search & Filter",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
+    },
+    "voicemail-regular": {
+      "category": "Recording & Audio",
+      "variant": "regular",
+      "source": "iconify",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
