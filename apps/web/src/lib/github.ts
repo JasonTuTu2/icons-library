@@ -5,6 +5,7 @@ import {
   GithubAuthError,
   isValidRepo,
   packagesUrl as sharedPackagesUrl,
+  sanitizeIconName,
   type AssetPreview,
   type DispatchPublishOptions,
   type IconNameConflict,
@@ -18,6 +19,18 @@ import {
   type IconUsage,
   type IconVariant,
 } from '@JasonTuTu2/github-admin'
+import {
+  clearLocalStaging,
+  exportIconUploadPayloads,
+  exportRemovalNames,
+  findLocalStagingNameConflicts,
+  getLocalAssetPreview,
+  listStagedIconsLocal,
+  listStagedRemovalsLocal,
+  stageIconsLocal,
+  stageRemovalsLocal,
+  unstageRemovalLocal,
+} from './localStagingStore.js'
 import {
   clearGithubSessionToken,
   getGithubSessionToken,
@@ -54,9 +67,8 @@ function getRepo(): string {
 }
 
 /**
- * Token for staging (Contents API). Pages bakes ICON_BROWSER_TOKEN into
- * VITE_GITHUB_TOKEN so designers can stage without a personal PAT.
- * Session PAT (magic URL) overrides when present.
+ * Token for library reads (conflicts, metadata, unpublished lists).
+ * Session PAT overrides when present; Pages may bake ICON_BROWSER_TOKEN.
  */
 function getStagingToken(): string {
   return (
@@ -107,11 +119,27 @@ async function withAuthClear<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+function mergeConflicts(
+  lists: IconNameConflict[][],
+): IconNameConflict[] {
+  const seen = new Set<string>()
+  const out: IconNameConflict[] = []
+  for (const list of lists) {
+    for (const c of list) {
+      const key = `${c.name}:${c.location}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(c)
+    }
+  }
+  return out
+}
+
 export function isGithubRepoConfigured(): boolean {
   return isValidRepo(getRepo())
 }
 
-/** True when staging / Contents API writes are available. */
+/** True when Contents API reads are available (library conflict checks, metadata edits). */
 export function isGithubAdminEnabled(): boolean {
   return isGithubRepoConfigured() && Boolean(getStagingToken())
 }
@@ -145,29 +173,57 @@ export function commitUrl(sha: string): string {
   return `https://github.com/${repo}/commit/${sha}`
 }
 
-/** Write icons into the shared staging folder (Contents API, no Action). */
+/** Queue icons in this browser (IndexedDB) until Apply. */
 export async function stageIcons(icons: IconUploadPayload[]): Promise<void> {
-  return withAuthClear(() => getStagingClient().stageIcons(icons))
+  if (!isGithubRepoConfigured()) {
+    throw new Error('GitHub repo is not configured.')
+  }
+  return stageIconsLocal(icons)
 }
 
 /** Stage library icon names for removal on next Apply. */
 export async function stageRemovals(names: string[]): Promise<void> {
-  return withAuthClear(() => getStagingClient().stageRemovals(names))
+  if (!isGithubRepoConfigured()) {
+    throw new Error('GitHub repo is not configured.')
+  }
+  const unique = [
+    ...new Set(
+      names
+        .map((n) => sanitizeIconName(n))
+        .filter((n): n is string => Boolean(n)),
+    ),
+  ]
+  if (unique.length === 0) {
+    throw new Error('No icon names to remove.')
+  }
+  if (getStagingToken()) {
+    for (const name of unique) {
+      const path = await withAuthClear(() =>
+        getStagingClient().findLibraryAssetPath(name),
+      )
+      if (!path) {
+        throw new Error(
+          `${name} is not in the library (ci: or img:) — nothing to stage for removal.`,
+        )
+      }
+    }
+  }
+  return stageRemovalsLocal(unique)
 }
 
 /** Cancel a staged removal marker. */
 export async function unstageRemoval(name: string): Promise<void> {
-  return withAuthClear(() => getStagingClient().unstageRemoval(name))
+  return unstageRemovalLocal(name)
 }
 
-/** List all staged SVGs currently on main. */
+/** List staged adds in this browser. */
 export async function listStagedIcons(): Promise<StagedIcon[]> {
-  return withAuthClear(() => getStagingClient().listStagedIcons())
+  return listStagedIconsLocal()
 }
 
-/** List staged removal markers. */
+/** List staged removal markers in this browser. */
 export async function listStagedRemovals(): Promise<StagedRemoval[]> {
-  return withAuthClear(() => getStagingClient().listStagedRemovals())
+  return listStagedRemovalsLocal()
 }
 
 /** Custom SVGs applied to the library since the last package publish. */
@@ -189,24 +245,55 @@ export async function listPublishHistory(options?: {
 export async function findIconNameConflicts(
   names: string[],
 ): Promise<IconNameConflict[]> {
-  return withAuthClear(() => getStagingClient().findIconNameConflicts(names))
+  const local = await findLocalStagingNameConflicts(names)
+  if (!getStagingToken()) {
+    return local
+  }
+  const library = await withAuthClear(() =>
+    getStagingClient().findLibraryNameConflicts(names),
+  )
+  return mergeConflicts([library, local])
 }
 
 export async function getAssetPreview(
   path: string,
 ): Promise<AssetPreview | null> {
+  const local = await getLocalAssetPreview(path)
+  if (local) return local
+  if (!getStagingToken()) return null
   return withAuthClear(() => getStagingClient().getAssetPreview(path))
 }
 
 export async function findLibraryAssetPath(
   name: string,
 ): Promise<string | null> {
+  if (!getStagingToken()) return null
   return withAuthClear(() => getStagingClient().findLibraryAssetPath(name))
 }
 
-/** Promote whatever is staged now into the library (one Action). */
+/**
+ * Upload this browser's staging queue to GitHub, run Apply, then clear local staging.
+ */
+export async function applyLocalStagedToLibrary(): Promise<void> {
+  const icons = await exportIconUploadPayloads()
+  const removals = await exportRemovalNames()
+  if (icons.length === 0 && removals.length === 0) {
+    throw new Error('Nothing is staged in this browser.')
+  }
+
+  const client = getDevClient()
+  await withAuthClear(async () => {
+    await client.clearRemoteStaging()
+    if (icons.length > 0) await client.stageIcons(icons)
+    if (removals.length > 0) await client.stageRemovals(removals)
+    await client.dispatchApplyStaged()
+  })
+  await clearLocalStaging()
+}
+
+/** Promote remote staging into the library (legacy; prefer applyLocalStagedToLibrary). */
 export async function dispatchApplyStaged(): Promise<void> {
-  return withAuthClear(() => getDevClient().dispatchApplyStaged())
+  return applyLocalStagedToLibrary()
 }
 
 export async function getPublishedPackageVersion(): Promise<string> {
@@ -215,7 +302,21 @@ export async function getPublishedPackageVersion(): Promise<string> {
 }
 
 export async function getPublishReadiness(): Promise<PublishReadiness> {
-  return withAuthClear(() => getDevClient().getPublishReadiness())
+  const readiness = await withAuthClear(() =>
+    getDevClient().getPublishReadiness(),
+  )
+  const [staged, removals] = await Promise.all([
+    listStagedIconsLocal(),
+    listStagedRemovalsLocal(),
+  ])
+  const stagedAddCount = staged.length
+  const stagedRemovalCount = removals.length
+  return {
+    ...readiness,
+    stagedCount: stagedAddCount + stagedRemovalCount,
+    stagedAddCount,
+    stagedRemovalCount,
+  }
 }
 
 export async function dispatchPublish(

@@ -5,7 +5,6 @@ import {
   detectVariantFromName,
   detectVariantSuffix,
   findIconNameConflicts,
-  isGithubAdminEnabled,
   isGithubRepoConfigured,
   useGithubDevEnabled,
   listStagedIcons,
@@ -22,6 +21,12 @@ import {
   type StagedIcon,
   type StagedRemoval,
 } from '../lib/github'
+import {
+  importStagingHandoff,
+  parseStagingHandoffFile,
+  takePendingStagingHandoff,
+  takeStagingImportMessage,
+} from '../lib/stagingHandoff'
 import {
   parseFigmaHandoffFile,
   takeFigmaHandoffError,
@@ -114,12 +119,16 @@ function readInitialHandoff(): {
   if (handoffError) {
     return { open: true, items: [], message: handoffError }
   }
+  const stagingMsg = takeStagingImportMessage()
+  if (stagingMsg) {
+    return { open: true, items: [], message: stagingMsg }
+  }
   if (openPanel) {
     return {
       open: true,
       items: [],
       message:
-        'Drop gv-icons-handoff.json (or SVGs) here, then Stage.',
+        'Drop gv-staging-handoff.json (or SVG / PNG / JPG) here, then Stage.',
     }
   }
   return { open: false, items: [], message: null }
@@ -173,7 +182,11 @@ function fileToUploadItem(file: File): Promise<UploadItem[]> {
       if (file.name.toLowerCase().endsWith('.json')) {
         const handoff = parseFigmaHandoffFile(content)
         if (!handoff) {
-          reject(new Error(`Not a valid Figma handoff JSON: ${file.name}`))
+          reject(
+            new Error(
+              `Not a valid Figma handoff JSON: ${file.name}. For plugin staging, drop gv-staging-handoff.json after Open icon browser downloads it.`,
+            ),
+          )
           return
         }
         resolve(handoff.map(handoffToUploadItem))
@@ -232,7 +245,6 @@ export function UploadPanel({
   onUploaded,
 }: UploadPanelProps) {
   const githubRepoConfigured = isGithubRepoConfigured()
-  const githubAuthed = isGithubAdminEnabled()
   const canApplyPublish = useGithubDevEnabled()
   const uploadEnabled = localUploadEnabled || githubRepoConfigured
   const mode: 'local' | 'github' | 'none' = localUploadEnabled
@@ -255,6 +267,7 @@ export function UploadPanel({
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
   const wasOpenRef = useRef(open)
+  const stagingImportStarted = useRef(false)
 
   const close = useCallback(() => {
     setOpen(false)
@@ -276,13 +289,13 @@ export function UploadPanel({
   const hasStagedWork = staged.length > 0 || stagedRemovals.length > 0
 
   const refreshStaged = useCallback(async () => {
-    if (mode !== 'github' || !githubAuthed) return
+    if (mode !== 'github' || !githubRepoConfigured) return
     setStagedLoading(true)
     try {
       const [nextStaged, nextRemovals, nextUnpublished] = await Promise.all([
         listStagedIcons(),
         listStagedRemovals(),
-        listUnpublishedIcons(),
+        listUnpublishedIcons().catch(() => [] as StagedIcon[]),
       ])
       setStaged(nextStaged)
       setStagedRemovals(nextRemovals)
@@ -292,7 +305,22 @@ export function UploadPanel({
     } finally {
       setStagedLoading(false)
     }
-  }, [mode, githubAuthed])
+  }, [mode, githubRepoConfigured])
+
+  useEffect(() => {
+    if (stagingImportStarted.current) return
+    const payload = takePendingStagingHandoff()
+    if (!payload) return
+    stagingImportStarted.current = true
+    void (async () => {
+      try {
+        await importStagingHandoff(payload)
+        await refreshStaged()
+      } catch (err) {
+        setMessage(err instanceof Error ? err.message : String(err))
+      }
+    })()
+  }, [refreshStaged])
 
   // Only clear when the dialog closes — not on the initial mount (handoff opens it).
   useEffect(() => {
@@ -307,14 +335,14 @@ export function UploadPanel({
   }, [open])
 
   useEffect(() => {
-    if (open && mode === 'github' && githubAuthed) {
+    if (open && mode === 'github' && githubRepoConfigured) {
       void refreshStaged()
     }
-  }, [open, mode, githubAuthed, refreshStaged])
+  }, [open, mode, githubRepoConfigured, refreshStaged])
 
   // Strict live name checks — Stage stays disabled until every name is free.
   useEffect(() => {
-    if (mode !== 'github' || !githubAuthed || items.length === 0) {
+    if (mode !== 'github' || !githubRepoConfigured || items.length === 0) {
       setNameConflictMsgs([])
       setReplaceHintMsgs([])
       setConflictsChecking(false)
@@ -364,7 +392,7 @@ export function UploadPanel({
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [items, mode, githubAuthed])
+  }, [items, mode, githubRepoConfigured])
 
   useEffect(() => {
     if (!open) return
@@ -418,10 +446,36 @@ export function UploadPanel({
     })
     if (files.length === 0) return
     try {
-      const batches = await Promise.all(files.map(fileToUploadItem))
-      const next = batches.flat()
-      setItems((prev) => [...prev, ...next])
-      setMessage(null)
+      const stagingFiles = files.filter((f) =>
+        f.name.toLowerCase().endsWith('.json'),
+      )
+      const otherFiles = files.filter(
+        (f) => !f.name.toLowerCase().endsWith('.json'),
+      )
+
+      for (const file of stagingFiles) {
+        const content = await file.text()
+        const staging = parseStagingHandoffFile(content)
+        if (staging) {
+          await importStagingHandoff(staging)
+          await refreshStaged()
+          setMessage(
+            `Imported ${staging.icons.length} staged add(s) and ${staging.removals.length} removal(s) from ${file.name}.`,
+          )
+          continue
+        }
+        const handoff = parseFigmaHandoffFile(content)
+        if (!handoff) {
+          throw new Error(`Not a valid handoff JSON: ${file.name}`)
+        }
+        setItems((prev) => [...prev, ...handoff.map(handoffToUploadItem)])
+      }
+
+      if (otherFiles.length > 0) {
+        const batches = await Promise.all(otherFiles.map(fileToUploadItem))
+        setItems((prev) => [...prev, ...batches.flat()])
+      }
+      if (stagingFiles.length === 0) setMessage(null)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
     }
@@ -436,7 +490,7 @@ export function UploadPanel({
   }
 
   async function handleStage() {
-    if (mode !== 'github' || !canSubmit || !githubAuthed) return
+    if (mode !== 'github' || !canSubmit || !githubRepoConfigured) return
     setBusy(true)
     setMessage(null)
     try {
@@ -505,7 +559,7 @@ export function UploadPanel({
       })
       await refreshStaged()
       setMessage(
-        `Staged ${count} asset(s) on GitHub (shared queue). Maintainers Apply when ready — no Action ran yet.`,
+        `Staged ${count} asset(s) locally in this browser. Apply uploads your queue to GitHub when ready.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -526,7 +580,7 @@ export function UploadPanel({
       setStaged(current)
       setStagedRemovals(currentRemovals)
       if (current.length === 0 && currentRemovals.length === 0) {
-        setMessage('Nothing is staged on GitHub right now.')
+        setMessage('Nothing is staged in this browser.')
         return
       }
 
@@ -542,7 +596,7 @@ export function UploadPanel({
           : ''
       const summary = [addSection, removeSection].filter(Boolean).join('\n\n')
       const ok = window.confirm(
-        `Apply staged changes to the library?\n\n${summary}\n\nApplies whatever is staged on GitHub right now. If someone else is still editing staging, they will not be included unless they click Apply again after.`,
+        `Apply staged changes to the library?\n\n${summary}\n\nThis uploads your local queue to GitHub and runs Apply. Only what you staged in this browser is included.`,
       )
       if (!ok) return
 
@@ -567,7 +621,7 @@ export function UploadPanel({
   }
 
   async function handleUnstageRemoval(name: string) {
-    if (mode !== 'github' || !githubAuthed) return
+    if (mode !== 'github' || !githubRepoConfigured) return
     setBusy(true)
     setMessage(null)
     try {
@@ -671,8 +725,8 @@ export function UploadPanel({
               <>
                 {mode === 'github' ? (
                   <p>
-                    Drop SVG icons or PNG/JPG brand images. Staging writes to the
-                    shared GitHub queue (no Action yet). SVGs become{' '}
+                    Drop SVG icons or PNG/JPG brand images. Staging is saved in
+                    this browser until Apply. SVGs become{' '}
                     <code>ci:kebab-name</code> Images become{' '}
                     <code>img:kebab-name</code> (not usable with{' '}
                     <code>&lt;Icon /&gt;</code>).
@@ -952,7 +1006,7 @@ export function UploadPanel({
                     <button
                       type="button"
                       className="ghost accent"
-                      disabled={!canSubmit || busy || !githubAuthed}
+                      disabled={!canSubmit || busy || !githubRepoConfigured}
                       onClick={() => void handleStage()}
                     >
                       {busy ? 'Working…' : 'Add to staging'}
@@ -960,7 +1014,7 @@ export function UploadPanel({
 
                     <div className="staged-block">
                       <div className="staged-header">
-                        <strong>Staged on GitHub</strong>
+                        <strong>Staged locally</strong>
                         <button
                           type="button"
                           className="ghost"

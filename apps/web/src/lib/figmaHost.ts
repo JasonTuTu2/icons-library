@@ -1,3 +1,12 @@
+import {
+  buildStagingHandoffPayload,
+  downloadStagingHandoffJson,
+  encodeStagingHandoffParam,
+  STAGING_HANDOFF_URL_MAX,
+  type StagingHandoffPayload,
+} from './stagingHandoff.js'
+import type { IconUploadPayload } from './github.js'
+
 const FIGMA_PARAM = 'gv-figma'
 /** Allow any plugin id so Development imports receive messages from Pages. */
 const FIGMA_PLUGIN_ID = '*'
@@ -77,17 +86,49 @@ export type FigmaPluginMessage =
       icons: FigmaExportIcon[]
       error?: string
     }
+  | {
+      type: 'staging-result'
+      ok: boolean
+      payload?: StagingHandoffPayload
+      error?: string
+    }
+
+function postToPlugin(pluginMessage: Record<string, unknown>): void {
+  if (typeof window === 'undefined' || window.parent === window) return
+  parent.postMessage(
+    { pluginMessage, pluginId: FIGMA_PLUGIN_ID },
+    'https://www.figma.com',
+  )
+}
+
+function awaitStagingResult(
+  timeoutMs = 8000,
+): Promise<StagingHandoffPayload> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      window.removeEventListener('message', onMessage)
+      reject(new Error('Timed out waiting for Figma plugin staging.'))
+    }, timeoutMs)
+
+    function onMessage(event: MessageEvent): void {
+      const msg = event.data?.pluginMessage as FigmaPluginMessage | undefined
+      if (!msg || msg.type !== 'staging-result') return
+      window.clearTimeout(timer)
+      window.removeEventListener('message', onMessage)
+      if (!msg.ok) {
+        reject(new Error(msg.error || 'Plugin staging failed.'))
+        return
+      }
+      resolve(msg.payload ?? { v: 1, icons: [], removals: [] })
+    }
+
+    window.addEventListener('message', onMessage)
+  })
+}
 
 /** Ask the Figma main thread to export the current selection. */
 export function requestFigmaExport(): void {
-  if (typeof window === 'undefined' || window.parent === window) return
-  parent.postMessage(
-    {
-      pluginMessage: { type: 'export-selection' },
-      pluginId: FIGMA_PLUGIN_ID,
-    },
-    'https://www.figma.com',
-  )
+  postToPlugin({ type: 'export-selection' })
 }
 
 /** Re-export one node as SVG, PNG, or JPG (format override). */
@@ -95,40 +136,19 @@ export function requestFigmaReexport(
   nodeId: string,
   format: FigmaAssetFormat,
 ): void {
-  if (typeof window === 'undefined' || window.parent === window) return
-  parent.postMessage(
-    {
-      pluginMessage: { type: 'reexport-node', nodeId, format },
-      pluginId: FIGMA_PLUGIN_ID,
-    },
-    'https://www.figma.com',
-  )
+  postToPlugin({ type: 'reexport-node', nodeId, format })
 }
 
 /** Re-export many nodes (Apply-all format). */
 export function requestFigmaReexportBatch(
   exports: Array<{ nodeId: string; format: FigmaAssetFormat }>,
 ): void {
-  if (typeof window === 'undefined' || window.parent === window) return
-  parent.postMessage(
-    {
-      pluginMessage: { type: 'reexport-nodes', exports },
-      pluginId: FIGMA_PLUGIN_ID,
-    },
-    'https://www.figma.com',
-  )
+  postToPlugin({ type: 'reexport-nodes', exports })
 }
 
 /** Tell the main thread the Pages UI is ready. */
 export function notifyFigmaUiReady(): void {
-  if (typeof window === 'undefined' || window.parent === window) return
-  parent.postMessage(
-    {
-      pluginMessage: { type: 'ui-ready' },
-      pluginId: FIGMA_PLUGIN_ID,
-    },
-    'https://www.figma.com',
-  )
+  postToPlugin({ type: 'ui-ready' })
 }
 
 /** Open a URL in the system browser (via Figma when embedded). */
@@ -138,13 +158,60 @@ export function openExternalUrl(url: string): void {
     window.open(url, '_blank', 'noopener,noreferrer')
     return
   }
-  parent.postMessage(
-    {
-      pluginMessage: { type: 'open-url', url },
-      pluginId: FIGMA_PLUGIN_ID,
-    },
-    'https://www.figma.com',
+  postToPlugin({ type: 'open-url', url })
+}
+
+/** Stage icons into figma.clientStorage (plugin main thread). */
+export async function stageIconsInPlugin(
+  icons: IconUploadPayload[],
+  removals: string[] = [],
+): Promise<StagingHandoffPayload> {
+  if (!isFigmaHost()) {
+    throw new Error('Not running inside the Figma plugin.')
+  }
+  const wait = awaitStagingResult()
+  postToPlugin({ type: 'stage-icons', icons, removals })
+  return wait
+}
+
+/** Load the plugin clientStorage staging queue. */
+export async function loadPluginStaging(): Promise<StagingHandoffPayload> {
+  if (!isFigmaHost()) {
+    return { v: 1, icons: [], removals: [] }
+  }
+  const wait = awaitStagingResult()
+  postToPlugin({ type: 'load-staging' })
+  return wait
+}
+
+/**
+ * Open the full icon browser with the plugin staging queue.
+ * Uses a URL handoff when small enough; otherwise downloads JSON and opens Upload.
+ */
+export async function openIconBrowserWithStaging(): Promise<string | null> {
+  const payload = isFigmaHost()
+    ? await loadPluginStaging()
+    : await buildStagingHandoffPayload()
+
+  if (payload.icons.length === 0 && payload.removals.length === 0) {
+    openExternalUrl(fullIconBrowserUrl())
+    return null
+  }
+
+  const encoded = encodeStagingHandoffParam(payload)
+  const base = fullIconBrowserUrl()
+
+  if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
+    const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
+    openExternalUrl(url)
+    return null
+  }
+
+  downloadStagingHandoffJson(payload)
+  openExternalUrl(
+    `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`,
   )
+  return `Queue is too large for a link — downloaded gv-staging-handoff.json. Drop that file into Upload to import your staged icons.`
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

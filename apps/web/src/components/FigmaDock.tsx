@@ -3,9 +3,8 @@ import {
   detectVariantFromName,
   detectVariantSuffix,
   findIconNameConflicts,
-  isGithubAdminEnabled,
+  isGithubRepoConfigured,
   sanitizeIconName,
-  stageIcons,
   type IconColorMode,
   type IconSource,
   type IconUsage,
@@ -19,11 +18,13 @@ import {
 } from '../lib/nameConflicts'
 import {
   fullIconBrowserUrl,
+  isFigmaHost,
   notifyFigmaUiReady,
-  openExternalUrl,
+  openIconBrowserWithStaging,
   requestFigmaExport,
   requestFigmaReexport,
   requestFigmaReexportBatch,
+  stageIconsInPlugin,
   subscribeFigmaPluginMessages,
   type FigmaAssetFormat,
   type FigmaExportIcon,
@@ -143,7 +144,7 @@ export function FigmaDock() {
   const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
-  const githubOk = isGithubAdminEnabled()
+  const githubOk = isGithubRepoConfigured() && isFigmaHost()
   const browserUrl = fullIconBrowserUrl()
 
   const namesValid = useMemo(
@@ -383,14 +384,14 @@ export function FigmaDock() {
       }))
 
       const count = stagedPayloads.length
-      await stageIcons(stagedPayloads)
+      await stageIconsInPlugin(stagedPayloads)
       setPending((prev) => {
         revokeAll(prev)
         return []
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s). Open the icon browser to Apply or Publish.`,
+        `Staged ${count} asset(s) in the plugin. Open icon browser to sync for Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -422,15 +423,15 @@ export function FigmaDock() {
       </div>
       {!githubOk ? (
         <p className="figma-dock-hint">
-          GitHub write token missing — redeploy Pages with{' '}
-          <code>ICON_BROWSER_TOKEN</code> / <code>VITE_GITHUB_REPO</code>, or open
-          with <code>#gv-github-token=…</code>.
+          Open this panel from the Figma plugin (Pages figma.html). Staging is
+          saved in the plugin until you open the icon browser.
         </p>
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage to the shared GitHub queue. Mono/Multi/Gradient only
-          apply to SVG.
+          names, then Stage (local to this plugin). Use{' '}
+          <strong>Open icon browser</strong> to sync your queue for Apply.
+          Mono/Multi/Gradient only apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (
@@ -662,14 +663,16 @@ export function FigmaDock() {
           href={browserUrl}
           onClick={(e) => {
             e.preventDefault()
-            openExternalUrl(browserUrl)
+            void openIconBrowserWithStaging().then((err) => {
+              if (err) setMessage(err)
+            })
           }}
         >
           Open icon browser
         </a>
         <span className="figma-dock-link-note">
           {' '}
-          — Apply / Publish
+          — syncs staging, then Apply / Publish
         </span>
       </p>
     </section>

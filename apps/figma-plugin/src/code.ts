@@ -175,6 +175,36 @@ async function reexportNodes(
 
 const STAGING_SNAPSHOT_KEY = 'gv-staging-snapshot-v1'
 
+type StagingPayload = {
+  v: 1
+  icons: Array<Record<string, unknown>>
+  removals: string[]
+}
+
+function emptyStaging(): StagingPayload {
+  return { v: 1, icons: [], removals: [] }
+}
+
+async function readStaging(): Promise<StagingPayload> {
+  try {
+    const raw = await figma.clientStorage.getAsync(STAGING_SNAPSHOT_KEY)
+    if (typeof raw !== 'string' || !raw.trim()) return emptyStaging()
+    const parsed = JSON.parse(raw) as Partial<StagingPayload>
+    if (parsed.v !== 1) return emptyStaging()
+    const icons = Array.isArray(parsed.icons) ? parsed.icons : []
+    const removals = Array.isArray(parsed.removals)
+      ? parsed.removals.filter((n): n is string => typeof n === 'string')
+      : []
+    return { v: 1, icons, removals }
+  } catch {
+    return emptyStaging()
+  }
+}
+
+async function writeStaging(payload: StagingPayload): Promise<void> {
+  await figma.clientStorage.setAsync(STAGING_SNAPSHOT_KEY, JSON.stringify(payload))
+}
+
 figma.ui.onmessage = async (msg: UiToPluginMessage) => {
   switch (msg.type) {
     case 'ui-ready': {
@@ -197,11 +227,63 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
       figma.openExternal(msg.url)
       break
     }
-    case 'save-staging-snapshot': {
+    case 'stage-icons': {
       try {
-        await figma.clientStorage.setAsync(STAGING_SNAPSHOT_KEY, msg.json)
-      } catch {
-        // ignore quota / sandbox errors
+        const current = await readStaging()
+        const byName = new Map<string, Record<string, unknown>>()
+        for (const icon of current.icons) {
+          const name = typeof icon.name === 'string' ? icon.name : ''
+          if (name) byName.set(name, icon)
+        }
+        for (const icon of msg.icons) {
+          const name = typeof icon.name === 'string' ? icon.name : ''
+          if (name) byName.set(name, icon)
+        }
+        const removals = new Set(current.removals)
+        for (const name of msg.removals ?? []) {
+          if (typeof name === 'string' && name.trim()) removals.add(name.trim())
+        }
+        // Staging an add cancels a pending removal of the same name.
+        for (const name of byName.keys()) removals.delete(name)
+        const next: StagingPayload = {
+          v: 1,
+          icons: [...byName.values()],
+          removals: [...removals],
+        }
+        await writeStaging(next)
+        post({ type: 'staging-result', ok: true, payload: next })
+      } catch (err) {
+        post({
+          type: 'staging-result',
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+      break
+    }
+    case 'load-staging': {
+      try {
+        const payload = await readStaging()
+        post({ type: 'staging-result', ok: true, payload })
+      } catch (err) {
+        post({
+          type: 'staging-result',
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        })
+      }
+      break
+    }
+    case 'clear-staging': {
+      try {
+        await writeStaging(emptyStaging())
+        post({ type: 'staging-result', ok: true, payload: emptyStaging() })
+      } catch (err) {
+        post({
+          type: 'staging-result',
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        })
       }
       break
     }
