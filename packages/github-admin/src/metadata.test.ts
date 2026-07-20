@@ -62,6 +62,34 @@ describe('metadata', () => {
     expect(getIconSource(merged, 'logo-filled')).toBe('modified')
   })
 
+  it('keeps library category when staged category is empty', () => {
+    const base = setIconCategory(createEmptyMetadata(), 'call-filled', 'Phone & Calling')
+    const merged = mergeStagingMetaIntoMetadata(base, [
+      {
+        name: 'call-filled',
+        category: '',
+        variant: 'filled',
+        source: 'custom',
+      },
+    ])
+    expect(getIconCategory(merged, 'call-filled')).toBe('Phone & Calling')
+    expect(getIconVariant(merged, 'call-filled')).toBe('filled')
+  })
+
+  it('allows staged category to overwrite library category', () => {
+    const base = setIconCategory(createEmptyMetadata(), 'call-filled', 'Phone & Calling')
+    const merged = mergeStagingMetaIntoMetadata(base, [
+      {
+        name: 'call-filled',
+        category: 'Action',
+        variant: 'filled',
+        source: 'custom',
+      },
+    ])
+    expect(getIconCategory(merged, 'call-filled')).toBe('Action')
+    expect(merged.categories).toEqual(['Action', 'Phone & Calling'])
+  })
+
   it('updates and removes icon metadata', () => {
     const base = setIconCategory(createEmptyMetadata(), 'foo', 'Nav')
     expect(base.categories).toEqual(['Nav'])

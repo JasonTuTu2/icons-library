@@ -8,6 +8,8 @@ Pending custom SVG / brand-image **adds** and **removals** shared by the icon br
 - `images/*.{png,jpg,jpeg}` → applied to `packages/custom-icons/images/`
 - `remove/*.remove` → Apply deletes matching `svg/{name}.svg`, `svg/color/{name}.svg`, `svg/gradient/{name}.svg`, and/or `images/{name}.*`
 
+When promoting an SVG add/replace, Apply also deletes the same basename from the other SVG folders (mono / color / gradient). Names share one `ci:` namespace — leaving an old mono file behind would hide a new multi/gradient asset in the catalog.
+
 **Add to staging** / **Stage removal** write here via the GitHub Contents API (no Action).
 **Apply staged to library** runs one workflow that promotes adds, applies removals, regenerates the catalog, and clears these folders.
 

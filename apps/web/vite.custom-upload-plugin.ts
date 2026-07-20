@@ -1,5 +1,5 @@
 import type { Plugin, ViteDevServer } from 'vite'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
@@ -79,7 +79,8 @@ function setIconMetadataLocal(
   const current = metadata.icons[name] ?? {}
   const cat =
     patch.category !== undefined
-      ? normalizeCategory(patch.category)
+      ? normalizeCategory(patch.category) ||
+        normalizeCategory(current.category)
       : normalizeCategory(current.category)
   const variant =
     patch.variant !== undefined
@@ -286,6 +287,16 @@ export function customIconUploadPlugin(): Plugin {
                 ? gradientDir
                 : svgDir
           mkdirSync(targetDir, { recursive: true })
+          // Shared ci: namespace — remove siblings so mono first-wins cannot hide this file.
+          const siblingPaths =
+            colorMode === 'preserved'
+              ? [join(svgDir, `${name}.svg`), join(gradientDir, `${name}.svg`)]
+              : colorMode === 'gradient'
+                ? [join(svgDir, `${name}.svg`), join(colorDir, `${name}.svg`)]
+                : [join(colorDir, `${name}.svg`), join(gradientDir, `${name}.svg`)]
+          for (const sibling of siblingPaths) {
+            if (existsSync(sibling)) unlinkSync(sibling)
+          }
           const filePath = join(targetDir, `${name}.svg`)
           writeFileSync(filePath, `${content}\n`, 'utf8')
           setIconMetadataLocal(metadataFile, name, {

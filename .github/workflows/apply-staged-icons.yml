@@ -32,20 +32,25 @@ jobs:
           removed_names=()
 
           shopt -s nullglob
+          # Shared ci: namespace — drop sibling colorMode files so catalog-gen
+          # (mono > color > gradient first-wins) does not hide the new asset.
           for f in "$STAGING"/mono/*.svg; do
             base=$(basename "$f")
+            rm -f "$COLOR_DST/$base" "$GRAD_DST/$base"
             mv -f "$f" "$MONO_DST/$base"
             names+=("ci:${base%.svg}")
             echo "Promoted mono/$base"
           done
           for f in "$STAGING"/color/*.svg; do
             base=$(basename "$f")
+            rm -f "$MONO_DST/$base" "$GRAD_DST/$base"
             mv -f "$f" "$COLOR_DST/$base"
             names+=("ci:${base%.svg}")
             echo "Promoted color/$base"
           done
           for f in "$STAGING"/gradient/*.svg; do
             base=$(basename "$f")
+            rm -f "$MONO_DST/$base" "$COLOR_DST/$base"
             mv -f "$f" "$GRAD_DST/$base"
             names+=("ci:${base%.svg}")
             echo "Promoted gradient/$base"

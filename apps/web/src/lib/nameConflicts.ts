@@ -135,7 +135,7 @@ export function analyzeItemConflicts(
       ].join(', ')
       const prefix = item.kind === 'image' ? 'img:' : 'ci:'
       replaceHints[index] =
-        `${prefix}${name} will replace ${where} when you Stage (Apply overwrites the file).`
+        `${prefix}${name} will replace ${where} when you Stage (Apply overwrites the file, including when color mode changes).`
     }
   })
 

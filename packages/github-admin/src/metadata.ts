@@ -234,7 +234,11 @@ export function mergeStagingMetaIntoMetadata(
     icons: { ...metadata.icons },
   }
   for (const { name, category, variant, source, usage, note } of stagingEntries) {
-    const cat = normalizeCategory(category)
+    const stagedCat = normalizeCategory(category)
+    const existingCat = normalizeCategory(next.icons[name]?.category)
+    // Empty staged category means "unchanged" on replace — Figma/Upload default
+    // to '' and must not wipe a library category into "No category".
+    const cat = stagedCat || existingCat
     next.icons[name] = {
       ...next.icons[name],
       category: cat,
