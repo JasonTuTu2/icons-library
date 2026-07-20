@@ -996,6 +996,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "wechat-pay-two": {
+      "category": "Payment Icons",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
