@@ -10,6 +10,7 @@ import {
   type IconNameConflict,
   type IconUploadPayload,
   type PublishReadiness,
+  type PublishHistoryEntry,
   type StagedIcon,
   type StagedRemoval,
   type CustomIconMetadata,
@@ -37,6 +38,7 @@ export type {
   IconUsage,
   IconVariant,
   PublishReadiness,
+  PublishHistoryEntry,
   StagedIcon,
   StagedRemoval,
 } from '@JasonTuTu2/github-admin'
@@ -136,6 +138,12 @@ export function packagesUrl(): string {
   return sharedPackagesUrl(getRepo())
 }
 
+export function commitUrl(sha: string): string {
+  const repo = getRepo()
+  if (!isValidRepo(repo)) return '#'
+  return `https://github.com/${repo}/commit/${sha}`
+}
+
 /** Write icons into the shared staging folder (Contents API, no Action). */
 export async function stageIcons(icons: IconUploadPayload[]): Promise<void> {
   return withAuthClear(() => getStagingClient().stageIcons(icons))
@@ -169,6 +177,12 @@ export async function listUnpublishedIcons(): Promise<StagedIcon[]> {
 /** Library SVGs removed since the last package publish (after Apply). */
 export async function listUnpublishedRemovals(): Promise<StagedRemoval[]> {
   return withAuthClear(() => getStagingClient().listUnpublishedRemovals())
+}
+
+export async function listPublishHistory(options?: {
+  limit?: number
+}): Promise<PublishHistoryEntry[]> {
+  return withAuthClear(() => getStagingClient().listPublishHistory(options))
 }
 
 export async function findIconNameConflicts(

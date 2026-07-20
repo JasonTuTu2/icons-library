@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { BrowserPage } from './pages/BrowserPage'
 import { DocsPage } from './pages/DocsPage'
+import { ReleasesPage } from './pages/ReleasesPage'
 import { packagesUrl } from './lib/github'
 
 const packageVersion = import.meta.env.VITE_PACKAGE_VERSION
@@ -32,6 +33,7 @@ export function App() {
               Browse
             </NavLink>
             <NavLink to="/docs">Docs</NavLink>
+            <NavLink to="/releases">Releases</NavLink>
           </nav>
         </div>
       </header>
@@ -39,6 +41,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<BrowserPage />} />
           <Route path="/docs" element={<DocsPage />} />
+          <Route path="/releases" element={<ReleasesPage />} />
         </Routes>
       </main>
     </div>

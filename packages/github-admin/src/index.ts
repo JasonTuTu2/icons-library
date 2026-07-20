@@ -92,6 +92,17 @@ export interface PublishReadiness {
   stagedRemovalCount: number
 }
 
+/** One published package version (from a Changesets "Version packages" commit). */
+export interface PublishHistoryEntry {
+  version: string
+  publishedAt: string
+  commitSha: string
+  adds: StagedIcon[]
+  removals: StagedRemoval[]
+  /** No custom asset adds or removals in this release — version bump only. */
+  versionOnly: boolean
+}
+
 export interface IconNameConflict {
   name: string
   location:
@@ -131,6 +142,8 @@ export interface GithubAdminClient {
   /** First library path for a kebab name (svg / color / gradient / images). */
   findLibraryAssetPath(name: string): Promise<string | null>
   getPublishReadiness(): Promise<PublishReadiness>
+  /** Past package publishes with library add/remove summaries (newest first). */
+  listPublishHistory(options?: { limit?: number }): Promise<PublishHistoryEntry[]>
   dispatchApplyStaged(): Promise<void>
   dispatchPublish(options?: DispatchPublishOptions): Promise<void>
   getCustomMetadata(): Promise<CustomIconMetadata>
@@ -465,8 +478,10 @@ export function createGithubAdminClient(
 
   async function readContentFile(
     path: string,
+    ref?: string,
   ): Promise<{ name: string; contentBase64: string } | null> {
-    const res = await githubFetch(`/contents/${path}`)
+    const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : ''
+    const res = await githubFetch(`/contents/${path}${refQuery}`)
     if (res.status === 404) return null
     if (!res.ok) {
       let detail = res.statusText
@@ -556,10 +571,23 @@ export function createGithubAdminClient(
     return putBase64File(path, toBase64Utf8(content), message)
   }
 
-  async function readMetadataFile(): Promise<CustomIconMetadata> {
-    const file = await readContentFile(METADATA_FILE)
+  async function readMetadataFile(ref?: string): Promise<CustomIconMetadata> {
+    const file = await readContentFile(METADATA_FILE, ref)
     if (!file) return createEmptyMetadata()
     return parseMetadataJson(decodeBase64Utf8(file.contentBase64))
+  }
+
+  async function readPackageVersionAtRef(ref: string): Promise<string> {
+    const file = await readContentFile('packages/react/package.json', ref)
+    if (!file) return 'unknown'
+    try {
+      const json = JSON.parse(decodeBase64Utf8(file.contentBase64)) as {
+        version?: string
+      }
+      return json.version?.trim() || 'unknown'
+    } catch {
+      return 'unknown'
+    }
   }
 
   async function writeMetadataFile(
@@ -701,8 +729,12 @@ export function createGithubAdminClient(
     })
   }
 
-  async function listContentFileNames(dirPath: string): Promise<Set<string>> {
-    const res = await githubFetch(`/contents/${dirPath}`)
+  async function listContentFileNames(
+    dirPath: string,
+    ref?: string,
+  ): Promise<Set<string>> {
+    const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : ''
+    const res = await githubFetch(`/contents/${dirPath}${refQuery}`)
     if (res.status === 404) return new Set()
     if (!res.ok) {
       let detail = res.statusText
@@ -812,6 +844,14 @@ export function createGithubAdminClient(
   }
 
   type RepoCommit = { sha: string; commit: { message: string } }
+  type RepoCommitWithDate = {
+    sha: string
+    commit: {
+      message: string
+      committer?: { date?: string }
+      author?: { date?: string }
+    }
+  }
 
   /** Walk main history until the latest Changesets "Version packages" commit. */
   async function findLatestPublishCommit(): Promise<RepoCommit | null> {
@@ -847,6 +887,57 @@ export function createGithubAdminClient(
     return out
   }
 
+  /** Commits reachable from `headSha` after `baseSha` (exclusive), newest first. */
+  async function listCommitsBetween(
+    baseSha: string,
+    headSha: string,
+  ): Promise<RepoCommit[]> {
+    const out: RepoCommit[] = []
+    for (let page = 1; page <= 20; page++) {
+      const commits = await githubJson<RepoCommit[]>(
+        `/commits?sha=${encodeURIComponent(headSha)}&per_page=100&page=${page}`,
+      )
+      if (!Array.isArray(commits) || commits.length === 0) break
+      for (const entry of commits) {
+        if (entry.sha === baseSha) return out
+        out.push(entry)
+      }
+      if (commits.length < 100) break
+    }
+    return out
+  }
+
+  function isVersionPackagesSubject(message: string): boolean {
+    const subject = message.split('\n', 1)[0] ?? ''
+    return /^Version packages\b/i.test(subject)
+  }
+
+  /** Newest-first publish commits on main. */
+  async function listAllPublishCommits(
+    max: number,
+  ): Promise<Array<{ sha: string; publishedAt: string }>> {
+    const out: Array<{ sha: string; publishedAt: string }> = []
+    for (let page = 1; page <= 20 && out.length < max; page++) {
+      const commits = await githubJson<RepoCommitWithDate[]>(
+        `/commits?sha=main&per_page=100&page=${page}`,
+      )
+      if (!Array.isArray(commits) || commits.length === 0) break
+      for (const entry of commits) {
+        if (!isVersionPackagesSubject(entry.commit.message)) continue
+        out.push({
+          sha: entry.sha,
+          publishedAt:
+            entry.commit.committer?.date ??
+            entry.commit.author?.date ??
+            '',
+        })
+        if (out.length >= max) return out
+      }
+      if (commits.length < 100) break
+    }
+    return out
+  }
+
   /** Names from "Apply staged icons from icon browser: ci:foo,img:bar" commits. */
   function iconNamesFromApplyCommitMessage(message: string): string[] {
     const match = message.match(
@@ -867,17 +958,19 @@ export function createGithubAdminClient(
   }
 
   /** Resolve library path for a kebab name (mono → color → gradient → image). */
-  async function buildLibraryPathByName(): Promise<Map<string, string>> {
+  async function buildLibraryPathByName(
+    ref?: string,
+  ): Promise<Map<string, string>> {
     const [
       libraryMono,
       libraryColor,
       libraryGradient,
       libraryImages,
     ] = await Promise.all([
-      listContentFileNames('packages/custom-icons/svg'),
-      listContentFileNames('packages/custom-icons/svg/color'),
-      listContentFileNames('packages/custom-icons/svg/gradient'),
-      listContentFileNames(IMAGES_DIR),
+      listContentFileNames('packages/custom-icons/svg', ref),
+      listContentFileNames('packages/custom-icons/svg/color', ref),
+      listContentFileNames('packages/custom-icons/svg/gradient', ref),
+      listContentFileNames(IMAGES_DIR, ref),
     ])
     const map = new Map<string, string>()
     for (const file of libraryMono) {
@@ -909,6 +1002,63 @@ export function createGithubAdminClient(
     return map
   }
 
+  async function collectLibraryChanges(
+    baseSha: string,
+    headSha: string,
+  ): Promise<{ adds: StagedIcon[]; removals: StagedRemoval[] }> {
+    const [compare, between, libraryMetadata] = await Promise.all([
+      githubJson<{
+        files?: Array<{ filename: string; status?: string }>
+      }>(`/compare/${baseSha}...${headSha}`),
+      listCommitsBetween(baseSha, headSha),
+      readMetadataFile(headSha),
+    ])
+
+    const applyIconNames = [
+      ...new Set(
+        between.flatMap((entry) =>
+          iconNamesFromApplyCommitMessage(entry.commit.message),
+        ),
+      ),
+    ]
+
+    const byName = new Map<string, StagedIcon>()
+    for (const file of compare.files ?? []) {
+      if (file.status === 'removed') continue
+      const staged = stagedFromLibraryPath(file.filename)
+      if (staged) byName.set(staged.name, staged)
+    }
+
+    if (applyIconNames.length > 0) {
+      const libraryPaths = await buildLibraryPathByName(headSha)
+      for (const name of applyIconNames) {
+        if (byName.has(name)) continue
+        const path = libraryPaths.get(name)
+        if (!path) continue
+        const staged = stagedFromLibraryPath(path)
+        if (staged) byName.set(staged.name, staged)
+      }
+    }
+
+    const removals: StagedRemoval[] = []
+    for (const file of compare.files ?? []) {
+      if (file.status !== 'removed') continue
+      const staged = stagedFromLibraryPath(file.filename)
+      if (staged) {
+        removals.push({ name: staged.name, path: staged.path })
+      }
+    }
+
+    return {
+      adds: attachMetadata(
+        [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)),
+        new Map(),
+        libraryMetadata,
+      ),
+      removals: removals.sort((a, b) => a.name.localeCompare(b.name)),
+    }
+  }
+
   /**
    * Diff main against the last "Version packages" commit.
    * Also collects icon names from Apply commits (wipe+re-add identical SVGs
@@ -921,7 +1071,6 @@ export function createGithubAdminClient(
     applyIconNames: string[]
   }> {
     const publishCommit = await findLatestPublishCommit()
-    // No prior publish — avoid dumping the whole library.
     if (!publishCommit) {
       return {
         publishSha: null,
@@ -1125,50 +1274,15 @@ export function createGithubAdminClient(
     async listUnpublishedIcons(): Promise<StagedIcon[]> {
       const compare = await compareSinceLastPublish()
       if (!compare.publishSha || compare.headIsPublish) return []
-
-      const libraryMetadata = await readMetadataFile()
-      const byName = new Map<string, StagedIcon>()
-
-      // Net file diff (misses wipe+re-add of identical SVG bytes).
-      for (const file of compare.files) {
-        if (file.status === 'removed') continue
-        const staged = stagedFromLibraryPath(file.filename)
-        if (staged) byName.set(staged.name, staged)
-      }
-
-      // Apply commits still count even when git net-diff omits identical files.
-      if (compare.applyIconNames.length > 0) {
-        const libraryPaths = await buildLibraryPathByName()
-        for (const name of compare.applyIconNames) {
-          if (byName.has(name)) continue
-          const path = libraryPaths.get(name)
-          if (!path) continue
-          const staged = stagedFromLibraryPath(path)
-          if (staged) byName.set(staged.name, staged)
-        }
-      }
-
-      return attachMetadata(
-        [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)),
-        new Map(),
-        libraryMetadata,
-      )
+      const { adds } = await collectLibraryChanges(compare.publishSha, 'main')
+      return adds
     },
 
     async listUnpublishedRemovals(): Promise<StagedRemoval[]> {
       const compare = await compareSinceLastPublish()
       if (!compare.publishSha || compare.headIsPublish) return []
-
-      const removals: StagedRemoval[] = []
-      for (const file of compare.files) {
-        if (file.status !== 'removed') continue
-        const staged = stagedFromLibraryPath(file.filename)
-        if (staged) {
-          removals.push({ name: staged.name, path: staged.path })
-        }
-      }
-
-      return removals.sort((a, b) => a.name.localeCompare(b.name))
+      const { removals } = await collectLibraryChanges(compare.publishSha, 'main')
+      return removals
     },
 
     async findIconNameConflicts(names: string[]): Promise<IconNameConflict[]> {
@@ -1278,6 +1392,36 @@ export function createGithubAdminClient(
         if (sha) return candidate
       }
       return null
+    },
+
+    async listPublishHistory(options?: {
+      limit?: number
+    }): Promise<PublishHistoryEntry[]> {
+      const limit = Math.min(Math.max(options?.limit ?? 20, 1), 40)
+      const publishes = await listAllPublishCommits(limit + 1)
+      const entries: PublishHistoryEntry[] = []
+
+      for (let i = 0; i < publishes.length && entries.length < limit; i++) {
+        const current = publishes[i]!
+        const previous = publishes[i + 1]
+        const [version, changes] = await Promise.all([
+          readPackageVersionAtRef(current.sha),
+          previous
+            ? collectLibraryChanges(previous.sha, current.sha)
+            : Promise.resolve({ adds: [] as StagedIcon[], removals: [] as StagedRemoval[] }),
+        ])
+        entries.push({
+          version,
+          publishedAt: current.publishedAt,
+          commitSha: current.sha,
+          adds: changes.adds,
+          removals: changes.removals,
+          versionOnly:
+            changes.adds.length === 0 && changes.removals.length === 0,
+        })
+      }
+
+      return entries
     },
 
     async getPublishReadiness(): Promise<PublishReadiness> {

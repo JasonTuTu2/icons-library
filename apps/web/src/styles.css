@@ -1353,6 +1353,140 @@ pre {
   margin-top: 1rem;
 }
 
+.releases .release-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.release-card {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+}
+
+.release-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.release-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.release-card h2 a {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.release-card h2 a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.release-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.release-meta a {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.release-summary {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.release-expand {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--navy);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.release-expand:hover {
+  background: var(--accent-soft);
+  border-color: rgba(30, 167, 255, 0.35);
+}
+
+.release-detail-lists {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.release-detail-lists h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.release-detail-lists ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.release-detail-lists code {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+}
+
+.release-pending {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(30, 167, 255, 0.35);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.release-pending h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.release-pending p {
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.release-muted {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.release-error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
 @media (max-width: 960px) {
   .browser-body {
     grid-template-columns: 1fr;
