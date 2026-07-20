@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
   reactSnippet,
   vueSnippet,
@@ -45,8 +45,26 @@ export function BrowserPage() {
   const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
   const [browseZoom, setBrowseZoom] = useState(BROWSE_ZOOM_DEFAULT)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
+  const browsePaneRef = useRef<HTMLDivElement>(null)
 
   const deferredQuery = useDeferredValue(query)
+
+  useEffect(() => {
+    const pane = browsePaneRef.current
+    if (!pane) return
+
+    function onWheel(event: WheelEvent) {
+      if (!event.ctrlKey) return
+      event.preventDefault()
+      if (event.deltaY === 0) return
+      setBrowseZoom((current) =>
+        event.deltaY > 0 ? zoomOut(current) : zoomIn(current),
+      )
+    }
+
+    pane.addEventListener('wheel', onWheel, { passive: false })
+    return () => pane.removeEventListener('wheel', onWheel)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -258,6 +276,7 @@ export function BrowserPage() {
 
       <div className="browser-body">
         <div
+          ref={browsePaneRef}
           className="browser-pane"
           style={{ '--browse-zoom': browseZoom } as CSSProperties}
         >
