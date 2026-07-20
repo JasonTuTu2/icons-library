@@ -234,7 +234,7 @@ export function IconDetail({
   }
 
   async function handleStageRemoval() {
-    const name = icon.id.replace(/^(gv|img):/, '')
+    const name = icon.name
     const ok = window.confirm(
       `Stage removal of ${icon.id}?\n\nThis queues a removal in this browser until someone clicks Apply. The file stays in the library until then.`,
     )
