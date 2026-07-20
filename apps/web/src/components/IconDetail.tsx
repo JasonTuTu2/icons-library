@@ -218,7 +218,7 @@ export function IconDetail({
     try {
       await updateIconMetadata(name, { usage: nextUsage })
       onUsageUpdated?.(nextUsage)
-      setUsageMessage('Usage saved.')
+      setUsageMessage('Status saved.')
     } catch (err) {
       setUsageValue(icon.usage === 'unused' ? 'unused' : 'in-use')
       setUsageMessage(err instanceof Error ? err.message : String(err))
@@ -479,13 +479,13 @@ export function IconDetail({
         ) : null}
         {isCustomAsset ? (
           <div>
-            <dt>Usage</dt>
+            <dt>Status</dt>
             <dd>
               {canEditMeta ? (
                 <UsageSelect
                   value={usageValue}
                   onChange={(usage) => void handleUsageChange(usage)}
-                  ariaLabel={`Usage for ${icon.id}`}
+                  ariaLabel={`Status for ${icon.id}`}
                 />
               ) : (
                 usageLabel(icon.usage)
