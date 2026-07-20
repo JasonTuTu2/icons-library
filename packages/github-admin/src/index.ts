@@ -45,6 +45,8 @@ export interface IconUploadPayload {
   kind?: AssetKind
   /** Required when kind is image. */
   format?: ImageFormat
+  /** Overwrites an existing library asset on Apply (designer confirmed). */
+  replaceLibrary?: boolean
 }
 
 export interface StagedIcon {
@@ -65,6 +67,8 @@ export interface StagedIcon {
   usage?: IconUsage
   /** Free-form designer note. */
   note?: string
+  /** Present on unpublished library entries that overwrote an existing asset. */
+  changeKind?: 'add' | 'replace'
 }
 
 /** Tombstone in staging/remove — Apply deletes matching library SVG(s) and/or image. */
@@ -86,6 +90,8 @@ export interface GithubAdminConfig {
 export interface PublishReadiness {
   /** Custom SVG/image adds/removes applied to the library since the last package version publish. */
   hasNewIcons: boolean
+  /** Library assets modified (not new paths) since the last publish — semver minor when shipped. */
+  hasReplacementChanges: boolean
   /** Staged adds + removal markers waiting for Apply. */
   stagedCount: number
   stagedAddCount: number
@@ -124,6 +130,8 @@ export interface DispatchPublishOptions {
    * so they remain unpublished for a later release — not demoted to staging.
    */
   deferPaths?: string[]
+  /** Package semver bump for this publish (default patch). */
+  versionBump?: 'patch' | 'minor'
 }
 
 export interface GithubAdminClient {
@@ -349,6 +357,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
         source: normalizeSource(icon.source),
         usage: normalizeUsage(icon.usage),
         note: normalizeNote(icon.note),
+        replaceLibrary: icon.replaceLibrary === true,
       }
     }
 
@@ -366,6 +375,7 @@ function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
       source: normalizeSource(icon.source),
       usage: normalizeUsage(icon.usage),
       note: normalizeNote(icon.note),
+      replaceLibrary: icon.replaceLibrary === true,
     }
   })
 }
@@ -615,6 +625,7 @@ export function createGithubAdminClient(
     source: IconSource = 'custom',
     usage: IconUsage = 'in-use',
     note: string = '',
+    replaceLibrary: boolean = false,
   ): Promise<void> {
     await putTextFile(
       stagingMetaPath(name),
@@ -624,6 +635,7 @@ export function createGithubAdminClient(
         source: normalizeSource(source),
         usage: normalizeUsage(usage),
         note: normalizeNote(note),
+        replaceLibrary: replaceLibrary ? true : undefined,
       })}\n`,
       `Stage metadata for ${name}`,
     )
@@ -1016,13 +1028,18 @@ export function createGithubAdminClient(
   async function collectLibraryChanges(
     baseSha: string,
     headSha: string,
-  ): Promise<{ adds: StagedIcon[]; removals: StagedRemoval[] }> {
-    const [compare, between, libraryMetadata] = await Promise.all([
+  ): Promise<{
+    adds: StagedIcon[]
+    replacements: StagedIcon[]
+    removals: StagedRemoval[]
+  }> {
+    const [compare, between, libraryMetadata, libraryAtBase] = await Promise.all([
       githubJson<{
         files?: Array<{ filename: string; status?: string }>
       }>(`/compare/${baseSha}...${headSha}`),
       listCommitsBetween(baseSha, headSha),
       readMetadataFile(headSha),
+      buildLibraryPathByName(baseSha),
     ])
 
     const applyIconNames = [
@@ -1033,11 +1050,23 @@ export function createGithubAdminClient(
       ),
     ]
 
-    const byName = new Map<string, StagedIcon>()
+    const byName = new Map<
+      string,
+      { icon: StagedIcon; changeKind: 'add' | 'replace' }
+    >()
     for (const file of compare.files ?? []) {
       if (file.status === 'removed') continue
       const staged = stagedFromLibraryPath(file.filename)
-      if (staged) byName.set(staged.name, staged)
+      if (!staged) continue
+      let changeKind: 'add' | 'replace' = 'add'
+      if (file.status === 'modified') {
+        changeKind = 'replace'
+      } else if (file.status === 'added') {
+        changeKind = 'add'
+      } else if (libraryAtBase.has(staged.name)) {
+        changeKind = 'replace'
+      }
+      byName.set(staged.name, { icon: staged, changeKind })
     }
 
     if (applyIconNames.length > 0) {
@@ -1047,7 +1076,11 @@ export function createGithubAdminClient(
         const path = libraryPaths.get(name)
         if (!path) continue
         const staged = stagedFromLibraryPath(path)
-        if (staged) byName.set(staged.name, staged)
+        if (!staged) continue
+        byName.set(name, {
+          icon: staged,
+          changeKind: libraryAtBase.has(name) ? 'replace' : 'add',
+        })
       }
     }
 
@@ -1060,12 +1093,24 @@ export function createGithubAdminClient(
       }
     }
 
+    const withMeta = attachMetadata(
+      [...byName.values()].map((entry) => entry.icon),
+      new Map(),
+      libraryMetadata,
+    ).map((icon) => {
+      const entry = byName.get(icon.name)
+      return {
+        ...icon,
+        changeKind: entry?.changeKind ?? 'add',
+      }
+    })
+
+    const adds = withMeta.filter((icon) => icon.changeKind !== 'replace')
+    const replacements = withMeta.filter((icon) => icon.changeKind === 'replace')
+
     return {
-      adds: attachMetadata(
-        [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)),
-        new Map(),
-        libraryMetadata,
-      ),
+      adds: adds.sort((a, b) => a.name.localeCompare(b.name)),
+      replacements: replacements.sort((a, b) => a.name.localeCompare(b.name)),
       removals: removals.sort((a, b) => a.name.localeCompare(b.name)),
     }
   }
@@ -1154,6 +1199,7 @@ export function createGithubAdminClient(
             icon.source ?? 'custom',
             icon.usage ?? 'in-use',
             icon.note ?? '',
+            icon.replaceLibrary === true,
           )
           continue
         }
@@ -1180,6 +1226,7 @@ export function createGithubAdminClient(
           icon.source ?? 'custom',
           icon.usage ?? 'in-use',
           icon.note ?? '',
+          icon.replaceLibrary === true,
         )
       }
     },
@@ -1285,8 +1332,13 @@ export function createGithubAdminClient(
     async listUnpublishedIcons(): Promise<StagedIcon[]> {
       const compare = await compareSinceLastPublish()
       if (!compare.publishSha || compare.headIsPublish) return []
-      const { adds } = await collectLibraryChanges(compare.publishSha, 'main')
-      return adds
+      const { adds, replacements } = await collectLibraryChanges(
+        compare.publishSha,
+        'main',
+      )
+      return [...adds, ...replacements].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      )
     },
 
     async listUnpublishedRemovals(): Promise<StagedRemoval[]> {
@@ -1480,16 +1532,22 @@ export function createGithubAdminClient(
           readPackageVersionAtRef(current.sha),
           previous
             ? collectLibraryChanges(previous.sha, current.sha)
-            : Promise.resolve({ adds: [] as StagedIcon[], removals: [] as StagedRemoval[] }),
+            : Promise.resolve({
+                adds: [] as StagedIcon[],
+                replacements: [] as StagedIcon[],
+                removals: [] as StagedRemoval[],
+              }),
         ])
         entries.push({
           version,
           publishedAt: current.publishedAt,
           commitSha: current.sha,
-          adds: changes.adds,
+          adds: [...changes.adds, ...changes.replacements],
           removals: changes.removals,
           versionOnly:
-            changes.adds.length === 0 && changes.removals.length === 0,
+            changes.adds.length === 0 &&
+            changes.replacements.length === 0 &&
+            changes.removals.length === 0,
         })
       }
 
@@ -1511,6 +1569,7 @@ export function createGithubAdminClient(
       if (!compare.publishSha) {
         return {
           hasNewIcons: true,
+          hasReplacementChanges: false,
           stagedCount,
           stagedAddCount,
           stagedRemovalCount,
@@ -1520,11 +1579,17 @@ export function createGithubAdminClient(
       if (compare.headIsPublish) {
         return {
           hasNewIcons: false,
+          hasReplacementChanges: false,
           stagedCount,
           stagedAddCount,
           stagedRemovalCount,
         }
       }
+
+      const { replacements } = await collectLibraryChanges(
+        compare.publishSha,
+        'main',
+      )
 
       const hasLibraryChange =
         compare.applyIconNames.length > 0 ||
@@ -1537,6 +1602,7 @@ export function createGithubAdminClient(
 
       return {
         hasNewIcons: hasLibraryChange,
+        hasReplacementChanges: replacements.length > 0,
         stagedCount,
         stagedAddCount,
         stagedRemovalCount,
@@ -1562,6 +1628,8 @@ export function createGithubAdminClient(
           ref: 'main',
           inputs: {
             defer_paths: JSON.stringify(deferPaths),
+            version_bump:
+              options?.versionBump === 'minor' ? 'minor' : 'patch',
           },
         }),
       })

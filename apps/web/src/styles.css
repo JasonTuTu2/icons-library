@@ -932,6 +932,15 @@ pre {
   font-family: var(--font);
 }
 
+.name-replace-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
+  font-family: var(--font);
+}
+
 .upload-list label {
   display: flex;
   align-items: center;

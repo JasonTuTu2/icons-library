@@ -30,6 +30,20 @@ export function conflictLocationLabel(
   }
 }
 
+export function isLibraryConflictLocation(
+  location: IconNameConflict['location'],
+): boolean {
+  return location.startsWith('library-')
+}
+
+export function isStagingConflictLocation(
+  location: IconNameConflict['location'],
+): boolean {
+  return (
+    location.startsWith('staging-') || location === 'staging-remove'
+  )
+}
+
 /** Image names only collide with images; SVG names only with SVGs. */
 export function isConflictForKind(
   location: IconNameConflict['location'],
@@ -49,21 +63,35 @@ export function isConflictForKind(
   )
 }
 
+function itemKey(kind: ConflictAssetKind, name: string): string {
+  return `${kind}:${name}`
+}
+
+export interface ItemConflictAnalysis {
+  /** Blocks Stage (staging dupes, staging queue conflicts, invalid batch dupes). */
+  messages: string[]
+  /** Library conflicts — confirm replace on Stage. */
+  replaceKeys: string[]
+  /** Non-blocking hints for library replace (shown in the row). */
+  replaceHints: string[]
+}
+
 /**
- * Per-item blocking messages. Empty string = ok.
- * Strict: duplicates in-batch or existing library/staging names block staging.
+ * Per-item conflict analysis. Empty `messages` entry = ok to stage (library hits → replace flow).
  */
-export function conflictMessagesForItems(
+export function analyzeItemConflicts(
   items: Array<{ name: string; kind: ConflictAssetKind }>,
   remote: IconNameConflict[],
-): string[] {
+): ItemConflictAnalysis {
   const messages = items.map(() => '')
+  const replaceHints = items.map(() => '')
+  const replaceKeys: string[] = []
 
   const indexesByKey = new Map<string, number[]>()
   items.forEach((item, index) => {
     const name = sanitizeIconName(item.name)
     if (!name) return
-    const key = `${item.kind}:${name}`
+    const key = itemKey(item.kind, name)
     const list = indexesByKey.get(key) ?? []
     list.push(index)
     indexesByKey.set(key, list)
@@ -85,18 +113,59 @@ export function conflictMessagesForItems(
       (c) => c.name === name && isConflictForKind(c.location, item.kind),
     )
     if (hits.length === 0) return
-    const where = [...new Set(hits.map((c) => conflictLocationLabel(c.location)))]
-      .join(', ')
-    const prefix = item.kind === 'image' ? 'img:' : 'ci:'
-    messages[index] =
-      `${prefix}${name} is already used in ${where}. Choose a different name.`
+
+    const stagingHits = hits.filter((c) => isStagingConflictLocation(c.location))
+    const libraryHits = hits.filter((c) => isLibraryConflictLocation(c.location))
+
+    if (stagingHits.length > 0) {
+      const where = [
+        ...new Set(stagingHits.map((c) => conflictLocationLabel(c.location))),
+      ].join(', ')
+      const prefix = item.kind === 'image' ? 'img:' : 'ci:'
+      messages[index] =
+        `${prefix}${name} is already in ${where}. Unstage it first or rename.`
+      return
+    }
+
+    if (libraryHits.length > 0) {
+      const key = itemKey(item.kind, name)
+      replaceKeys.push(key)
+      const where = [
+        ...new Set(libraryHits.map((c) => conflictLocationLabel(c.location))),
+      ].join(', ')
+      const prefix = item.kind === 'image' ? 'img:' : 'ci:'
+      replaceHints[index] =
+        `${prefix}${name} will replace ${where} when you Stage (Apply overwrites the file).`
+    }
   })
 
-  return messages
+  return { messages, replaceHints, replaceKeys: [...new Set(replaceKeys)] }
+}
+
+/** @deprecated Prefer analyzeItemConflicts — kept for simple call sites. */
+export function conflictMessagesForItems(
+  items: Array<{ name: string; kind: ConflictAssetKind }>,
+  remote: IconNameConflict[],
+): string[] {
+  return analyzeItemConflicts(items, remote).messages
 }
 
 export function formatConflictList(conflicts: IconNameConflict[]): string {
   return conflicts
     .map((c) => `• ${c.name} — already in ${conflictLocationLabel(c.location)}`)
     .join('\n')
+}
+
+export function confirmLibraryReplacements(
+  replaceKeys: string[],
+): boolean {
+  for (const key of replaceKeys) {
+    const [kind, name] = key.split(':') as [ConflictAssetKind, string]
+    const label = kind === 'image' ? `img:${name}` : `ci:${name}`
+    const ok = window.confirm(
+      `Replace existing ${label} in the library?\n\nApply will overwrite the current file. Publishing a replacement bumps the minor package version (e.g. 0.3.21 → 0.4.0).`,
+    )
+    if (!ok) return false
+  }
+  return true
 }

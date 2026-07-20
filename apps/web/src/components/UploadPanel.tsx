@@ -42,7 +42,10 @@ import {
 import { useDialogAccessibility } from '../lib/useDialogAccessibility'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
 import { convertAssetFormat } from '../lib/convertAssetFormat'
-import { conflictMessagesForItems } from '../lib/nameConflicts'
+import {
+  analyzeItemConflicts,
+  confirmLibraryReplacements,
+} from '../lib/nameConflicts'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 import { ApplyAllFields } from './ApplyAllFields'
@@ -253,6 +256,7 @@ export function UploadPanel({
   const [stagedRemovals, setStagedRemovals] = useState<StagedRemoval[]>([])
   const [stagedLoading, setStagedLoading] = useState(false)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
+  const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const { unpublished, checkedPaths, allChecked } = useUnpublishedSelection()
@@ -334,18 +338,18 @@ export function UploadPanel({
   useEffect(() => {
     if (mode !== 'github' || !githubRepoConfigured || items.length === 0) {
       setNameConflictMsgs([])
+      setReplaceHintMsgs([])
       setConflictsChecking(false)
       return
     }
 
-    const batchDupes = conflictMessagesForItems(
-      items.map((item) => ({
-        name: item.name,
-        kind: item.kind === 'image' ? 'image' : 'svg',
-      })),
-      [],
-    )
-    setNameConflictMsgs(batchDupes)
+    const conflictItems = items.map((item) => ({
+      name: item.name,
+      kind: item.kind === 'image' ? ('image' as const) : ('svg' as const),
+    }))
+    const batchDupes = analyzeItemConflicts(conflictItems, [])
+    setNameConflictMsgs(batchDupes.messages)
+    setReplaceHintMsgs(batchDupes.replaceHints)
 
     const names = [
       ...new Set(
@@ -365,15 +369,9 @@ export function UploadPanel({
       void findIconNameConflicts(names)
         .then((remote) => {
           if (cancelled) return
-          setNameConflictMsgs(
-            conflictMessagesForItems(
-              items.map((item) => ({
-                name: item.name,
-                kind: item.kind === 'image' ? 'image' : 'svg',
-              })),
-              remote,
-            ),
-          )
+          const analysis = analyzeItemConflicts(conflictItems, remote)
+          setNameConflictMsgs(analysis.messages)
+          setReplaceHintMsgs(analysis.replaceHints)
         })
         .catch((err) => {
           if (cancelled) return
@@ -472,25 +470,31 @@ export function UploadPanel({
         ),
       ]
       const remote = await findIconNameConflicts(names)
-      const blocking = conflictMessagesForItems(
-        items.map((item) => ({
-          name: item.name,
-          kind: item.kind === 'image' ? 'image' : 'svg',
-        })),
-        remote,
-      )
-      if (blocking.some((msg) => msg.length > 0)) {
-        setNameConflictMsgs(blocking)
+      const conflictItems = items.map((item) => ({
+        name: item.name,
+        kind: item.kind === 'image' ? ('image' as const) : ('svg' as const),
+      }))
+      const analysis = analyzeItemConflicts(conflictItems, remote)
+      if (analysis.messages.some((msg) => msg.length > 0)) {
+        setNameConflictMsgs(analysis.messages)
+        setReplaceHintMsgs(analysis.replaceHints)
         setMessage(
-          'Rename assets that already exist in the library or staging before adding.',
+          'Fix staging conflicts or batch duplicates before adding.',
         )
         return
       }
+      if (!confirmLibraryReplacements(analysis.replaceKeys)) {
+        return
+      }
 
+      const replaceKeySet = new Set(analysis.replaceKeys)
       const count = items.length
       await stageIcons(
-        items.map((item) =>
-          item.kind === 'image'
+        items.map((item) => {
+          const kind = item.kind === 'image' ? 'image' : 'svg'
+          const name = sanitizeIconName(item.name) ?? item.name
+          const replaceLibrary = replaceKeySet.has(`${kind}:${name}`)
+          return item.kind === 'image'
             ? {
                 name: item.name,
                 content: item.content,
@@ -501,6 +505,7 @@ export function UploadPanel({
                 source: item.source,
                 usage: item.usage,
                 note: item.note,
+                replaceLibrary,
               }
             : {
                 name: item.name,
@@ -512,8 +517,9 @@ export function UploadPanel({
                 source: item.source,
                 usage: item.usage,
                 note: item.note,
-              },
-        ),
+                replaceLibrary,
+              }
+        }),
       )
       setItems((prev) => {
         revokePreviewUrls(prev)
@@ -786,6 +792,7 @@ export function UploadPanel({
                   <ul className="upload-list">
                     {items.map((item, index) => {
                       const conflictMsg = nameConflictMsgs[index] ?? ''
+                      const replaceHint = replaceHintMsgs[index] ?? ''
                       return (
                       <li
                         key={`${item.fileName}-${index}`}
@@ -945,6 +952,8 @@ export function UploadPanel({
                           <p className="name-conflict-msg" role="alert">
                             {conflictMsg}
                           </p>
+                        ) : replaceHint ? (
+                          <p className="name-replace-hint">{replaceHint}</p>
                         ) : null}
                       </li>
                       )

@@ -13,7 +13,10 @@ import {
   type ImageFormat,
 } from '../lib/github'
 import { detectSvgColorMode } from '../lib/detectSvgColorMode'
-import { conflictMessagesForItems } from '../lib/nameConflicts'
+import {
+  analyzeItemConflicts,
+  confirmLibraryReplacements,
+} from '../lib/nameConflicts'
 import {
   fullIconBrowserUrl,
   notifyFigmaUiReady,
@@ -137,6 +140,7 @@ export function FigmaDock() {
   const [reexportingId, setReexportingId] = useState<string | null>(null)
   const [message, setMessage] = useState<ReactNode>(null)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
+  const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const githubOk = isGithubRepoConfigured()
@@ -253,12 +257,15 @@ export function FigmaDock() {
   useEffect(() => {
     if (!githubOk || pending.length === 0) {
       setNameConflictMsgs([])
+      setReplaceHintMsgs([])
       setConflictsChecking(false)
       return
     }
 
     const items = asConflictItems(pending)
-    setNameConflictMsgs(conflictMessagesForItems(items, []))
+    const batch = analyzeItemConflicts(items, [])
+    setNameConflictMsgs(batch.messages)
+    setReplaceHintMsgs(batch.replaceHints)
 
     const names = [
       ...new Set(
@@ -278,7 +285,9 @@ export function FigmaDock() {
       void findIconNameConflicts(names)
         .then((remote) => {
           if (cancelled) return
-          setNameConflictMsgs(conflictMessagesForItems(items, remote))
+          const analysis = analyzeItemConflicts(items, remote)
+          setNameConflictMsgs(analysis.messages)
+          setReplaceHintMsgs(analysis.replaceHints)
         })
         .catch((err) => {
           if (cancelled) return
@@ -348,24 +357,33 @@ export function FigmaDock() {
         }
       })
 
+      const conflictItems = payloads.map((p) => ({
+        name: p.name,
+        kind: p.kind === 'image' ? ('image' as const) : ('svg' as const),
+      }))
       const remote = await findIconNameConflicts(payloads.map((p) => p.name))
-      const blocking = conflictMessagesForItems(
-        payloads.map((p) => ({
-          name: p.name,
-          kind: p.kind === 'image' ? 'image' : 'svg',
-        })),
-        remote,
-      )
-      if (blocking.some((msg) => msg.length > 0)) {
-        setNameConflictMsgs(blocking)
+      const analysis = analyzeItemConflicts(conflictItems, remote)
+      if (analysis.messages.some((msg) => msg.length > 0)) {
+        setNameConflictMsgs(analysis.messages)
+        setReplaceHintMsgs(analysis.replaceHints)
         setMessage(
-          'Rename icons that already exist in the library or staging before staging.',
+          'Fix staging conflicts or batch duplicates before staging.',
         )
         return
       }
+      if (!confirmLibraryReplacements(analysis.replaceKeys)) {
+        return
+      }
+      const replaceKeySet = new Set(analysis.replaceKeys)
+      const stagedPayloads = payloads.map((p) => ({
+        ...p,
+        replaceLibrary: replaceKeySet.has(
+          `${p.kind === 'image' ? 'image' : 'svg'}:${p.name}`,
+        ),
+      }))
 
-      const count = payloads.length
-      await stageIcons(payloads)
+      const count = stagedPayloads.length
+      await stageIcons(stagedPayloads)
       await syncStagingSnapshotToPlugin()
       setPending((prev) => {
         revokeAll(prev)
@@ -458,6 +476,7 @@ export function FigmaDock() {
           <ul className="figma-dock-list">
           {pending.map((icon, index) => {
             const conflictMsg = nameConflictMsgs[index] ?? ''
+            const replaceHint = replaceHintMsgs[index] ?? ''
             const prefix = icon.kind === 'image' ? 'img:' : 'ci:'
             const formatBusy = reexportingId === icon.id
             return (
@@ -615,6 +634,8 @@ export function FigmaDock() {
                   <p className="name-conflict-msg" role="alert">
                     {conflictMsg}
                   </p>
+                ) : replaceHint ? (
+                  <p className="name-replace-hint">{replaceHint}</p>
                 ) : null}
               </li>
             )

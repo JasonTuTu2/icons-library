@@ -84,6 +84,14 @@ export function PublishButton() {
 
       const selected = getCheckedUnpublishedIcons()
       const deferred = getUncheckedUnpublishedIcons()
+      const publishingReplacements = selected.some(
+        (icon) => icon.changeKind === 'replace',
+      )
+      const versionBump = publishingReplacements ? 'minor' : 'patch'
+      const bumpLabel =
+        versionBump === 'minor'
+          ? 'Bump minor versions (e.g. 0.3.21 → 0.4.0)'
+          : 'Bump patch versions'
       const addSection = addsNote(selected)
       const deferSection = addsNote(
         deferred,
@@ -112,18 +120,19 @@ export function PublishButton() {
         if (!ok) return
       } else if (selected.length === 0) {
         const ok = window.confirm(
-          `No unpublished adds are checked.${removeSection}${deferSection}\n\nBump patch versions and publish to GitHub Packages?`,
+          `No unpublished adds are checked.${removeSection}${deferSection}\n\n${bumpLabel} and publish to GitHub Packages?`,
         )
         if (!ok) return
       } else {
         const ok = window.confirm(
-          `Publish these changes?${addSection}${removeSection}${deferSection}\n\nBump patch versions and publish to GitHub Packages?`,
+          `Publish these changes?${addSection}${removeSection}${deferSection}\n\n${bumpLabel} and publish to GitHub Packages?`,
         )
         if (!ok) return
       }
 
       await dispatchPublish({
         deferPaths: deferred.map((icon) => icon.path),
+        versionBump,
       })
       setNotice(
         <WorkflowQueuedNotice

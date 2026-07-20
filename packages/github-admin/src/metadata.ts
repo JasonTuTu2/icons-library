@@ -175,6 +175,7 @@ export function parseStagingMetaFile(raw: string): {
   source: IconSource
   usage: IconUsage
   note: string
+  replaceLibrary?: boolean
 } {
   try {
     const parsed = JSON.parse(raw) as {
@@ -183,6 +184,7 @@ export function parseStagingMetaFile(raw: string): {
       source?: unknown
       usage?: unknown
       note?: unknown
+      replaceLibrary?: unknown
     }
     return {
       category: normalizeCategory(String(parsed.category ?? '')),
@@ -198,6 +200,7 @@ export function parseStagingMetaFile(raw: string): {
       note: normalizeNote(
         typeof parsed.note === 'string' ? parsed.note : undefined,
       ),
+      replaceLibrary: parsed.replaceLibrary === true ? true : undefined,
     }
   } catch {
     return {

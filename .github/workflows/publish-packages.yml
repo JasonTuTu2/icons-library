@@ -11,6 +11,14 @@ on:
           Example: ["packages/custom-icons/svg/foo.svg","packages/custom-icons/images/logo.png"]
         required: false
         default: '[]'
+      version_bump:
+        description: Semver bump for icon packages (minor when publishing library replacements).
+        required: false
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
 
 concurrency: publish-packages-${{ github.ref }}
 
@@ -101,18 +109,24 @@ jobs:
         if: steps.defer.outputs.count != '0'
         run: pnpm catalog:gen
 
-      - name: Create patch changeset
+      - name: Create changeset
+        env:
+          VERSION_BUMP: ${{ inputs.version_bump }}
         run: |
+          bump="${VERSION_BUMP:-patch}"
+          if [ "$bump" != "minor" ] && [ "$bump" != "patch" ]; then
+            bump="patch"
+          fi
           {
             echo '---'
-            echo '"@JasonTuTu2/icons-core": patch'
-            echo '"@JasonTuTu2/icons-catalog": patch'
-            echo '"@JasonTuTu2/icons-react": patch'
-            echo '"@JasonTuTu2/icons-vue": patch'
-            echo '"@JasonTuTu2/icons-custom": patch'
+            echo "\"@JasonTuTu2/icons-core\": $bump"
+            echo "\"@JasonTuTu2/icons-catalog\": $bump"
+            echo "\"@JasonTuTu2/icons-react\": $bump"
+            echo "\"@JasonTuTu2/icons-vue\": $bump"
+            echo "\"@JasonTuTu2/icons-custom\": $bump"
             echo '---'
             echo ''
-            echo 'Publish from icon browser.'
+            echo "Publish from icon browser ($bump)."
           } > .changeset/icon-browser-publish.md
 
       - name: Version packages

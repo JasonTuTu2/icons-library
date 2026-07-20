@@ -126,6 +126,7 @@ async function writeStagingMeta(
   source: IconUploadPayload['source'],
   usage: IconUploadPayload['usage'],
   note: string,
+  replaceLibrary?: boolean,
 ): Promise<void> {
   await putRecord(
     stagingMetaPath(name),
@@ -135,6 +136,7 @@ async function writeStagingMeta(
       source: source ?? 'custom',
       usage: usage ?? 'in-use',
       note: note ?? '',
+      replaceLibrary: replaceLibrary ? true : undefined,
     })}\n`,
   )
 }
@@ -209,6 +211,7 @@ export async function stageIconsLocal(
         icon.source,
         icon.usage,
         icon.note ?? '',
+        icon.replaceLibrary === true,
       )
       continue
     }
@@ -229,6 +232,7 @@ export async function stageIconsLocal(
       icon.source,
       icon.usage,
       icon.note ?? '',
+      icon.replaceLibrary === true,
     )
   }
 }
