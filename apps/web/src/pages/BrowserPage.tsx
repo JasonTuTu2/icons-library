@@ -22,6 +22,7 @@ import { DropdownCombobox } from '../components/DropdownCombobox'
 import {
   CATEGORY_FILTER_ALL,
   CATEGORY_FILTER_NONE,
+  sortIconsByCategoryThenName,
 } from '../lib/categories'
 import {
   BROWSE_ZOOM_DEFAULT,
@@ -109,7 +110,7 @@ export function BrowserPage() {
     if (usageFilter === 'in-use' || usageFilter === 'unused') {
       options.usage = usageFilter
     }
-    return search(options)
+    return sortIconsByCategoryThenName(search(options))
   }, [
     search,
     deferredQuery,
@@ -329,7 +330,6 @@ export function BrowserPage() {
               icons={icons}
               selectedId={selected?.id}
               onSelect={setSelected}
-              collapseCategory={categoryFilter !== CATEGORY_FILTER_ALL}
               zoom={browseZoom}
             />
           )}

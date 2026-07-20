@@ -339,6 +339,23 @@ pre {
   white-space: nowrap;
 }
 
+.icon-cell-category {
+  font-size: calc(0.62rem * var(--browse-zoom, 1));
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+  min-height: calc(0.75rem * var(--browse-zoom, 1));
+}
+
+.icon-cell-category.is-spacer {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .icon-cell:hover {
   background: var(--accent-soft);
   border-color: rgba(30, 167, 255, 0.2);

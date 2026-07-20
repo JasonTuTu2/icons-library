@@ -52,3 +52,22 @@ export function filterCategoriesBySearch(
 export const CATEGORY_FILTER_ALL = ''
 /** Browser toolbar: icons with no category. */
 export const CATEGORY_FILTER_NONE = '__none__'
+
+/** Sort key: named categories A–Z, empty/no category last. */
+export function categorySortKey(category: string | undefined | null): string {
+  const trimmed = (category ?? '').trim()
+  return trimmed ? trimmed.toLowerCase() : '\uffff'
+}
+
+/** Sort icons by category (No category last), then by name. */
+export function sortIconsByCategoryThenName<
+  T extends { category?: string; name: string },
+>(icons: T[]): T[] {
+  return [...icons].sort((a, b) => {
+    const byCat = categorySortKey(a.category).localeCompare(
+      categorySortKey(b.category),
+    )
+    if (byCat !== 0) return byCat
+    return a.name.localeCompare(b.name)
+  })
+}
