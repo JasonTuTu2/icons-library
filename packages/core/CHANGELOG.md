@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-core
 
+## 3.0.0
+
+### Major Changes
+
+- Publish from icon browser (major).
+
 ## 2.0.0
 
 ### Major Changes
