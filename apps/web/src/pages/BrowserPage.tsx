@@ -169,6 +169,21 @@ export function BrowserPage() {
     })
   }
 
+  const hasActiveFilters =
+    query.trim() !== '' ||
+    categoryFilter !== CATEGORY_FILTER_ALL ||
+    variantFilter !== VARIANT_ALL ||
+    sourceFilter !== SOURCE_ALL ||
+    usageFilter !== USAGE_ALL
+
+  function clearAllFilters() {
+    setQuery('')
+    setCategoryFilter(CATEGORY_FILTER_ALL)
+    setVariantFilter(VARIANT_ALL)
+    setSourceFilter(SOURCE_ALL)
+    setUsageFilter(USAGE_ALL)
+  }
+
   return (
     <div className="browser">
       <section className="browser-toolbar">
@@ -261,6 +276,14 @@ export function BrowserPage() {
             }}
           />
         </label>
+        <button
+          type="button"
+          className="ghost clear-filters-btn"
+          disabled={!hasActiveFilters}
+          onClick={clearAllFilters}
+        >
+          Clear filters
+        </button>
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {

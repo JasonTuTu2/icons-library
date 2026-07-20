@@ -210,6 +210,11 @@ pre {
   box-shadow: var(--shadow);
 }
 
+.clear-filters-btn {
+  align-self: end;
+  white-space: nowrap;
+}
+
 .field {
   display: flex;
   flex-direction: column;
