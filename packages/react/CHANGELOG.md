@@ -1,5 +1,17 @@
 # @JasonTuTu2/icons-react
 
+## 0.4.0
+
+### Minor Changes
+
+- Publish from icon browser (minor).
+
+### Patch Changes
+
+- Updated dependencies
+  - @JasonTuTu2/icons-core@0.4.0
+  - @JasonTuTu2/icons-custom@0.4.0
+
 ## 0.3.22
 
 ### Patch Changes
