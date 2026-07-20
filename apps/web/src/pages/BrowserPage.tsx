@@ -16,6 +16,7 @@ import {
   type IconVariant,
 } from '../lib/github'
 import { useLiveCatalog } from '../lib/liveCatalog'
+import { useIntroducedVersions } from '../lib/useIntroducedVersions'
 
 /** Toolbar sentinel: show all categories. */
 const CATEGORY_ALL = ''
@@ -27,6 +28,7 @@ const SOURCE_ALL = ''
 
 export function BrowserPage() {
   const { categories, search, getById, patchIcon } = useLiveCatalog()
+  const introducedVersions = useIntroducedVersions()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
@@ -257,6 +259,13 @@ export function BrowserPage() {
               patchSelected(selected.name, { usage })
             }
             onNoteUpdated={(note) => patchSelected(selected.name, { note })}
+            introducedPackageVersion={introducedVersions.packageVersionForIcon(
+              selected.name,
+            )}
+            introducedVersionLoading={introducedVersions.loading}
+            introducedVersionPending={introducedVersions.isPendingPublish(
+              selected.name,
+            )}
           />
         ) : (
           <aside className="detail empty-detail">

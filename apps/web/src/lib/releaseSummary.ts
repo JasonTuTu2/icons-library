@@ -65,3 +65,19 @@ export function iconListLabel(icon: StagedIcon): string {
   }
   return `ci:${icon.name}`
 }
+
+/** First package version that shipped each icon name (oldest matching release wins). */
+export function buildIntroducedVersionByName(
+  history: PublishHistoryEntry[],
+): Map<string, string> {
+  const map = new Map<string, string>()
+  const chronological = [...history].reverse()
+  for (const entry of chronological) {
+    for (const icon of entry.adds) {
+      if (!map.has(icon.name)) {
+        map.set(icon.name, entry.version)
+      }
+    }
+  }
+  return map
+}

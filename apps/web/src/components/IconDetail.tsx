@@ -4,6 +4,7 @@ import { Icon } from '@JasonTuTu2/icons-react'
 import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
+  packagesUrl,
   stageRemovals,
   updateIconMetadata,
   type IconSource,
@@ -31,6 +32,10 @@ interface IconDetailProps {
   onSourceUpdated?: (source: IconSource) => void
   onUsageUpdated?: (usage: IconUsage) => void
   onNoteUpdated?: (note: string) => void
+  /** First published package version (fixed after first ship). */
+  introducedPackageVersion?: string | null
+  introducedVersionLoading?: boolean
+  introducedVersionPending?: boolean
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -53,6 +58,9 @@ export function IconDetail({
   onSourceUpdated,
   onUsageUpdated,
   onNoteUpdated,
+  introducedPackageVersion = null,
+  introducedVersionLoading = false,
+  introducedVersionPending = false,
 }: IconDetailProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -314,6 +322,24 @@ export function IconDetail({
                   The <code>color</code> prop may not recolor this icon.
                 </span>
               ) : null}
+            </dd>
+          </div>
+        ) : null}
+        {isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled() ? (
+          <div>
+            <dt>Added in package</dt>
+            <dd>
+              {introducedVersionLoading ? (
+                <span className="meta-note">Loading…</span>
+              ) : introducedPackageVersion ? (
+                <a href={packagesUrl()} target="_blank" rel="noreferrer">
+                  v{introducedPackageVersion}
+                </a>
+              ) : introducedVersionPending ? (
+                'Not published yet'
+              ) : (
+                '—'
+              )}
             </dd>
           </div>
         ) : null}
