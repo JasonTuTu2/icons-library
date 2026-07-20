@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-custom
 
+## 4.0.0
+
+### Major Changes
+
+- Publish from icon browser (major).
+
 ## 3.0.0
 
 ### Major Changes
