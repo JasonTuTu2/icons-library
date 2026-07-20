@@ -878,13 +878,6 @@
       "usage": "in-use",
       "note": ""
     },
-    "alipay": {
-      "category": "",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
     "apple": {
       "category": "Brand Logos",
       "variant": "none",
@@ -915,13 +908,6 @@
     },
     "crypto-com": {
       "category": "Payment Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "crypto-pay": {
-      "category": "",
       "variant": "none",
       "source": "custom",
       "usage": "in-use",
@@ -984,20 +970,6 @@
       "note": ""
     },
     "visa": {
-      "category": "Payment Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "wechat-pay": {
-      "category": "",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "wechat-pay-two": {
       "category": "Payment Icons",
       "variant": "none",
       "source": "custom",
