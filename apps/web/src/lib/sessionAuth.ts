@@ -13,7 +13,13 @@ export interface AuthSession {
 type Listener = () => void
 const listeners = new Set<Listener>()
 
+/** Cached snapshot so useSyncExternalStore does not infinite-loop. */
+let cachedSession: AuthSession | null | undefined
+let cachedRaw: string | null | undefined
+
 function emit(): void {
+  cachedSession = undefined
+  cachedRaw = undefined
   for (const listener of listeners) listener()
 }
 
@@ -28,21 +34,32 @@ export function isAuthApiConfigured(): boolean {
 export function getAuthSession(): AuthSession | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
+    if (raw === cachedRaw && cachedSession !== undefined) {
+      return cachedSession
+    }
+    cachedRaw = raw
+    if (!raw) {
+      cachedSession = null
+      return null
+    }
     const parsed = JSON.parse(raw) as Partial<AuthSession>
     if (
       typeof parsed.token !== 'string' ||
       typeof parsed.username !== 'string' ||
       (parsed.role !== 'designer' && parsed.role !== 'dev')
     ) {
+      cachedSession = null
       return null
     }
-    return {
+    cachedSession = {
       token: parsed.token,
       username: parsed.username,
       role: parsed.role,
     }
+    return cachedSession
   } catch {
+    cachedRaw = undefined
+    cachedSession = null
     return null
   }
 }
