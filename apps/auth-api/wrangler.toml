@@ -7,4 +7,4 @@ compatibility_date = "2024-12-01"
 
 [vars]
 # Public CORS origins (comma-separated). Override per env if needed.
-CORS_ORIGINS = "https://JasonTuTu2.github.io,http://localhost:5173,http://127.0.0.1:5173"
+CORS_ORIGINS = "https://jasontutu2.github.io,http://localhost:5173,http://127.0.0.1:5173"

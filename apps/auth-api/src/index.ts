@@ -26,17 +26,30 @@ app.use('*', async (c, next) => {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean)
+  const allowed = new Set(origins.map((o) => o.toLowerCase()))
   return cors({
     origin: (origin) => {
       if (!origin) return origins[0] ?? '*'
-      if (origins.includes(origin)) return origin
+      const lower = origin.toLowerCase()
+      if (allowed.has(lower)) return origin
       if (
-        origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://127.0.0.1:')
+        lower.startsWith('http://localhost:') ||
+        lower.startsWith('http://127.0.0.1:')
       ) {
         return origin
       }
-      return origins[0] ?? ''
+      // GitHub Pages usernames are case-insensitive in practice; accept any
+      // github.io host that matches an allowed pages host ignoring case.
+      try {
+        const host = new URL(origin).hostname.toLowerCase()
+        for (const allowedOrigin of origins) {
+          const allowedHost = new URL(allowedOrigin).hostname.toLowerCase()
+          if (host === allowedHost) return origin
+        }
+      } catch {
+        // ignore
+      }
+      return ''
     },
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
