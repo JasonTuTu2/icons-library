@@ -53,6 +53,29 @@ function toCurrentColor(svg: string): string {
     .replace(/stroke:\s*(?!none|url\()([^;"']+)/gi, 'stroke:currentColor')
 }
 
+const SHAPE_TAG = 'path|circle|rect|polygon|polyline|ellipse|line'
+
+/**
+ * Figma often sets fill="none" on the root <svg>. Iconify only stores the inner
+ * body, so that inheritance is lost and unfilled shapes default to black —
+ * covering brand logos with opaque black rects/strokes. Bake fill="none" onto
+ * descendant shapes that omit fill before the body is extracted.
+ */
+function bakeRootFillNone(svg: string): string {
+  const root = svg.match(/<svg\b([^>]*)>/i)
+  if (!root?.[1]) return svg
+  const attrs = root[1]
+  const hasFillNone =
+    /\bfill\s*=\s*["']none["']/i.test(attrs) ||
+    /(?:^|[;"'])\s*fill\s*:\s*none\b/i.test(attrs)
+  if (!hasFillNone) return svg
+
+  return svg.replace(
+    new RegExp(`<(${SHAPE_TAG})\\b(?![^>]*\\bfill=)`, 'gi'),
+    '<$1 fill="none"',
+  )
+}
+
 function extractViewBox(svg: string): { width: number; height: number; viewBox: string } {
   const vb = svg.match(/viewBox=["']([^"']+)["']/i)
   if (vb?.[1]) {
@@ -121,9 +144,11 @@ export function processSvgContent(
     // SVGO may drop default black fills; force monochrome inheritance
     // except shapes that already use a paint server (gradient/pattern).
     svg = svg.replace(
-      /<(path|circle|rect|polygon|polyline|ellipse)\b(?![^>]*\bfill=)/gi,
+      new RegExp(`<(${SHAPE_TAG})\\b(?![^>]*\\bfill=)`, 'gi'),
       '<$1 fill="currentColor"',
     )
+  } else {
+    svg = bakeRootFillNone(svg)
   }
 
   const { width, height, viewBox } = extractViewBox(svg)

@@ -48,6 +48,19 @@ describe('customSvg', () => {
     expect(result.body).not.toContain('currentColor')
   })
 
+  it('bakes root fill="none" onto unfilled shapes for color/gradient icons', () => {
+    const result = processSvgContent(
+      `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#00A1E9" d="M4 1h16v22H4z"/>
+        <rect x="1" y="1" width="22" height="22" rx="2" stroke="#fff" stroke-width="1"/>
+      </svg>`,
+      { monochrome: false },
+    )
+    expect(result.body).toMatch(/fill="#00A1E9"|fill="#00a1e9"/i)
+    expect(result.body).toMatch(/<rect[^>]*fill="none"/i)
+    expect(result.body).not.toMatch(/<rect(?![^>]*fill=)/i)
+  })
+
   it('does not rewrite url(#…) fills to currentColor in mono mode', () => {
     const result = processSvgContent(
       `<svg viewBox="0 0 24 24">
