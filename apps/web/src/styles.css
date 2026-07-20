@@ -645,6 +645,13 @@ pre {
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
 
+.detail-download {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  justify-items: start;
+}
+
 .meta {
   margin: 0;
   display: grid;

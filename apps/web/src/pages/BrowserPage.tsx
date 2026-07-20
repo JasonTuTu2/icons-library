@@ -388,7 +388,8 @@ export function BrowserPage() {
           <aside className="detail empty-detail">
             <h2>Select an icon</h2>
             <p>
-              Select an icon to preview brand icons and images, copy snippets,
+              Select an icon to preview brand icons and images, download
+              source files, copy snippets,
               and review license details.
               {isGithubRepoConfigured()
                 ? ' Use Upload for SVG / PNG / JPG. Maintainers Apply and Publish.'

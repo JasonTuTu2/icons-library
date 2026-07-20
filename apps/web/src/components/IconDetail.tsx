@@ -12,6 +12,7 @@ import {
   type IconVariant,
 } from '../lib/github'
 import { customImagePublicUrl } from '../lib/customImageUrl'
+import { downloadIconAsset, resolveIconAssetPath } from '../lib/iconAssetUrl'
 import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
@@ -93,9 +94,12 @@ export function IconDetail({
   const [noteBusy, setNoteBusy] = useState(false)
   const [noteMessage, setNoteMessage] = useState<string | null>(null)
   const [noteValue, setNoteValue] = useState(icon.note ?? '')
+  const [downloadBusy, setDownloadBusy] = useState(false)
+  const [downloadMessage, setDownloadMessage] = useState<string | null>(null)
 
   const isCustomAsset =
     icon.id.startsWith('ci:') || icon.id.startsWith('img:')
+  const canDownload = Boolean(resolveIconAssetPath(icon))
 
   const canStageRemoval =
     isCustomAsset && isGithubRepoConfigured()
@@ -119,6 +123,7 @@ export function IconDetail({
     )
     setUsageValue(icon.usage === 'unused' ? 'unused' : 'in-use')
     setNoteValue(icon.note ?? '')
+    setDownloadMessage(null)
   }, [icon.id, icon.category, icon.variant, icon.source, icon.usage, icon.note])
 
   useEffect(() => {
@@ -271,7 +276,24 @@ export function IconDetail({
     }
   }
 
+  async function handleDownload() {
+    setDownloadBusy(true)
+    setDownloadMessage(null)
+    try {
+      await downloadIconAsset(icon)
+      setDownloadMessage('Downloaded.')
+      window.setTimeout(() => setDownloadMessage(null), 1600)
+    } catch (err) {
+      setDownloadMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setDownloadBusy(false)
+    }
+  }
+
   const isImage = icon.assetKind === 'image'
+  const downloadLabel = isImage
+    ? `Download ${(icon.format ?? 'image').toUpperCase()}`
+    : 'Download SVG'
 
   return (
     <aside className="detail">
@@ -293,6 +315,24 @@ export function IconDetail({
           <Icon name={icon.id} size={56} label={icon.title} />
         )}
       </div>
+
+      {canDownload ? (
+        <div className="detail-download">
+          <button
+            type="button"
+            className="ghost"
+            disabled={downloadBusy}
+            onClick={() => void handleDownload()}
+          >
+            {downloadBusy ? 'Downloading…' : downloadLabel}
+          </button>
+          {downloadMessage ? (
+            <p className="copy-toast" role="status">
+              {downloadMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <dl className="meta">
         <div>

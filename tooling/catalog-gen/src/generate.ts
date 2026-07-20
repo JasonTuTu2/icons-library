@@ -50,6 +50,7 @@ interface IconMeta {
   colorMode?: 'mono' | 'preserved' | 'gradient'
   assetKind?: 'icon' | 'image'
   format?: 'png' | 'jpg' | 'jpeg'
+  /** Public path under the icon browser (e.g. custom-icons/foo.svg). */
   assetPath?: string
   category?: string
   variant?: 'regular' | 'filled' | 'none'
@@ -141,6 +142,12 @@ function collectCustomIcons(): IconMeta[] {
       name: item.name,
       colorMode: item.colorMode,
       assetKind: 'icon' as const,
+      assetPath:
+        item.colorMode === 'preserved'
+          ? `custom-icons/color/${item.name}.svg`
+          : item.colorMode === 'gradient'
+            ? `custom-icons/gradient/${item.name}.svg`
+            : `custom-icons/${item.name}.svg`,
       category,
       variant,
       usage,

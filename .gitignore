@@ -10,5 +10,9 @@ coverage
 *.tsbuildinfo
 .vite
 apps/web/dist
+apps/web/public/custom-images/*
+!apps/web/public/custom-images/.gitkeep
+apps/web/public/custom-icons/**
+!apps/web/public/custom-icons/.gitkeep
 tooling/bundle-smoke/tmp-bundle
 packages/custom-icons/.publish-hold/

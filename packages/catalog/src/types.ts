@@ -37,8 +37,9 @@ export interface IconMeta {
   assetKind?: 'icon' | 'image'
   /** Brand images only: file format. */
   format?: 'png' | 'jpg' | 'jpeg'
-  /** Brand images: path under the icon browser public root
-   * (e.g. custom-images/logo.png).
+  /** Public path under the icon browser root
+   * (e.g. custom-images/logo.png, custom-icons/foo.svg,
+   * custom-icons/color/foo.svg, custom-icons/gradient/foo.svg).
    */
   assetPath?: string
   /** Custom assets only: designer-assigned category (empty = no category). */
