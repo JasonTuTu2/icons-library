@@ -16,5 +16,524 @@
     "Translate & Language",
     "Users & Team"
   ],
-  "icons": {}
+  "icons": {
+    "add-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "add-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "arrow-left-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "arrow-right-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-answered-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-connecting-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-end-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-hold-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-hold-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-inbound-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-missed-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-outbound-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-outbound-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "call-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "campaign-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "campaign-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "chevron-down-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "chevron-left-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "chevron-right-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "chevron-up-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "clipboard-edit-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "coin-regular": {
+      "category": "Finance",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "collapse-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "contact-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "contact-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "copy-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "delete-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "delete-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "dialpad-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "dialpad-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "document-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "edit-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "edit-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "email-edit-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "email-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "email-read-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "email-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "emoji-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "emoji-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "expand-regular": {
+      "category": "Direction",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "export-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "feedback-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "file-download-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "file-download-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "image-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "image-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "import-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "message-add-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "message-add-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "message-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "message-regular": {
+      "category": "Messagining",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "mic-off-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "mic-off-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "more-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "note-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "note-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "number-filled": {
+      "category": "Phone & Calling",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "number-regular": {
+      "category": "Phone & Calling",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "open-new-tab-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "plus-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "porting-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "refresh-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "remove-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "remove-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "send-filled": {
+      "category": "Messagining",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "settings-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "settings-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "slider-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "switch-regular": {
+      "category": "Action",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "template-filled": {
+      "category": "Document & File",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "template-regular": {
+      "category": "Document & File",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "upload-filled": {
+      "category": "Action",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "wallet-regular": {
+      "category": "Finance",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    }
+  }
 }
