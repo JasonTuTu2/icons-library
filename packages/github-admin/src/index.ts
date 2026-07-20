@@ -135,8 +135,12 @@ export interface GithubAdminClient {
   listUnpublishedIcons(): Promise<StagedIcon[]>
   /** Library SVGs deleted (Apply removal) since the last package publish. */
   listUnpublishedRemovals(): Promise<StagedRemoval[]>
+  /** Existing library files that collide with these kebab names. */
+  findLibraryNameConflicts(names: string[]): Promise<IconNameConflict[]>
   /** Existing library / staging files that collide with these kebab names. */
   findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
+  /** Delete all files under packages/custom-icons/staging (before re-upload on Apply). */
+  clearRemoteStaging(): Promise<void>
   /** Load SVG text or image bytes for a library/staging path (thumbnails). */
   getAssetPreview(path: string): Promise<AssetPreview | null>
   /** First library path for a kebab name (svg / color / gradient / images). */
@@ -300,6 +304,13 @@ function toBase64Utf8(text: string): string {
   let binary = ''
   for (const byte of bytes) binary += String.fromCharCode(byte)
   return btoa(binary)
+}
+
+/** Normalize and validate payloads before staging (local or GitHub). */
+export function validateIconUploads(
+  icons: IconUploadPayload[],
+): IconUploadPayload[] {
+  return validateIcons(icons)
 }
 
 function validateIcons(icons: IconUploadPayload[]): IconUploadPayload[] {
@@ -1285,7 +1296,9 @@ export function createGithubAdminClient(
       return removals
     },
 
-    async findIconNameConflicts(names: string[]): Promise<IconNameConflict[]> {
+    async findLibraryNameConflicts(
+      names: string[],
+    ): Promise<IconNameConflict[]> {
       const unique = [
         ...new Set(
           names
@@ -1295,28 +1308,13 @@ export function createGithubAdminClient(
       ]
       if (unique.length === 0) return []
 
-      // List directories once — avoid per-path GET 404s for names that are new.
-      const [
-        libraryMono,
-        libraryColor,
-        libraryGradient,
-        libraryImages,
-        stagingMono,
-        stagingColor,
-        stagingGradient,
-        stagingImages,
-        stagingRemove,
-      ] = await Promise.all([
-        listContentFileNames('packages/custom-icons/svg'),
-        listContentFileNames('packages/custom-icons/svg/color'),
-        listContentFileNames('packages/custom-icons/svg/gradient'),
-        listContentFileNames(IMAGES_DIR),
-        listContentFileNames(`${STAGING_BASE}/mono`),
-        listContentFileNames(`${STAGING_BASE}/color`),
-        listContentFileNames(`${STAGING_BASE}/gradient`),
-        listContentFileNames(STAGING_IMAGES),
-        listContentFileNames(`${STAGING_BASE}/remove`),
-      ])
+      const [libraryMono, libraryColor, libraryGradient, libraryImages] =
+        await Promise.all([
+          listContentFileNames('packages/custom-icons/svg'),
+          listContentFileNames('packages/custom-icons/svg/color'),
+          listContentFileNames('packages/custom-icons/svg/gradient'),
+          listContentFileNames(IMAGES_DIR),
+        ])
 
       const conflicts: IconNameConflict[] = []
       for (const name of unique) {
@@ -1332,6 +1330,39 @@ export function createGithubAdminClient(
         if (findImageFileName(libraryImages, name)) {
           conflicts.push({ name, location: 'library-image' })
         }
+      }
+
+      return conflicts
+    },
+
+    async findIconNameConflicts(names: string[]): Promise<IconNameConflict[]> {
+      const unique = [
+        ...new Set(
+          names
+            .map((n) => sanitizeIconName(n))
+            .filter((n): n is string => Boolean(n)),
+        ),
+      ]
+      if (unique.length === 0) return []
+
+      const [
+        libraryConflicts,
+        stagingMono,
+        stagingColor,
+        stagingGradient,
+        stagingImages,
+        stagingRemove,
+      ] = await Promise.all([
+        this.findLibraryNameConflicts(unique),
+        listContentFileNames(`${STAGING_BASE}/mono`),
+        listContentFileNames(`${STAGING_BASE}/color`),
+        listContentFileNames(`${STAGING_BASE}/gradient`),
+        listContentFileNames(STAGING_IMAGES),
+        listContentFileNames(`${STAGING_BASE}/remove`),
+      ])
+
+      const conflicts: IconNameConflict[] = [...libraryConflicts]
+      for (const name of unique) {
         if (stagingMono.has(`${name}.svg`)) {
           conflicts.push({ name, location: 'staging-mono' })
         }
@@ -1350,6 +1381,47 @@ export function createGithubAdminClient(
       }
 
       return conflicts
+    },
+
+    async clearRemoteStaging(): Promise<void> {
+      const dirs = [
+        `${STAGING_BASE}/mono`,
+        `${STAGING_BASE}/color`,
+        `${STAGING_BASE}/gradient`,
+        STAGING_IMAGES,
+        REMOVE_DIR,
+        STAGING_META,
+      ] as const
+
+      for (const dir of dirs) {
+        const res = await githubFetch(`/contents/${dir}`)
+        if (res.status === 404) continue
+        if (!res.ok) {
+          let detail = res.statusText
+          try {
+            const body = (await res.json()) as { message?: string }
+            if (body.message) detail = body.message
+          } catch {
+            // ignore
+          }
+          if (res.status === 401 || res.status === 403) {
+            throw new GithubAuthError(res.status, detail)
+          }
+          throw new Error(`GitHub API ${res.status}: ${detail}`)
+        }
+
+        const entries = (await res.json()) as Array<{
+          path: string
+          type: string
+          name: string
+        }>
+        if (!Array.isArray(entries)) continue
+
+        for (const entry of entries) {
+          if (entry.type !== 'file' || entry.name.startsWith('.')) continue
+          await deletePath(entry.path, `Clear remote staging ${entry.path}`)
+        }
+      }
     },
 
     async getAssetPreview(path: string): Promise<AssetPreview | null> {

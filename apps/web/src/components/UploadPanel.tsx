@@ -5,7 +5,6 @@ import {
   detectVariantFromName,
   detectVariantSuffix,
   findIconNameConflicts,
-  isGithubAdminEnabled,
   isGithubRepoConfigured,
   useGithubDevEnabled,
   listStagedIcons,
@@ -228,7 +227,6 @@ export function UploadPanel({
   onUploaded,
 }: UploadPanelProps) {
   const githubRepoConfigured = isGithubRepoConfigured()
-  const githubAuthed = isGithubAdminEnabled()
   const canApplyPublish = useGithubDevEnabled()
   const uploadEnabled = localUploadEnabled || githubRepoConfigured
   const mode: 'local' | 'github' | 'none' = localUploadEnabled
@@ -271,7 +269,7 @@ export function UploadPanel({
   const hasStagedWork = staged.length > 0 || stagedRemovals.length > 0
 
   const refreshStaged = useCallback(async () => {
-    if (mode !== 'github' || !githubAuthed) return
+    if (mode !== 'github' || !githubRepoConfigured) return
     setStagedLoading(true)
     try {
       const [nextStaged, nextRemovals, nextUnpublished] = await Promise.all([
@@ -287,7 +285,7 @@ export function UploadPanel({
     } finally {
       setStagedLoading(false)
     }
-  }, [mode, githubAuthed])
+  }, [mode, githubRepoConfigured])
 
   // Only clear when the dialog closes — not on the initial mount (handoff opens it).
   useEffect(() => {
@@ -302,14 +300,14 @@ export function UploadPanel({
   }, [open])
 
   useEffect(() => {
-    if (open && mode === 'github' && githubAuthed) {
+    if (open && mode === 'github' && githubRepoConfigured) {
       void refreshStaged()
     }
-  }, [open, mode, githubAuthed, refreshStaged])
+  }, [open, mode, githubRepoConfigured, refreshStaged])
 
   // Strict live name checks — Stage stays disabled until every name is free.
   useEffect(() => {
-    if (mode !== 'github' || !githubAuthed || items.length === 0) {
+    if (mode !== 'github' || !githubRepoConfigured || items.length === 0) {
       setNameConflictMsgs([])
       setConflictsChecking(false)
       return
@@ -365,7 +363,7 @@ export function UploadPanel({
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [items, mode, githubAuthed])
+  }, [items, mode, githubRepoConfigured])
 
   useEffect(() => {
     if (!open) return
@@ -437,7 +435,7 @@ export function UploadPanel({
   }
 
   async function handleStage() {
-    if (mode !== 'github' || !canSubmit || !githubAuthed) return
+    if (mode !== 'github' || !canSubmit || !githubRepoConfigured) return
     setBusy(true)
     setMessage(null)
     try {
@@ -498,7 +496,7 @@ export function UploadPanel({
       })
       await refreshStaged()
       setMessage(
-        `Staged ${count} asset(s) on GitHub (shared queue). Maintainers Apply when ready — no Action ran yet.`,
+        `Staged ${count} asset(s) locally in this browser. A maintainer with a PAT clicks Apply when ready — nothing hits GitHub until then.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -508,7 +506,7 @@ export function UploadPanel({
   }
 
   async function handleApplyStaged() {
-    if (mode !== 'github' || !githubAuthed) return
+    if (mode !== 'github' || !canApplyPublish) return
     setBusy(true)
     setMessage(null)
     try {
@@ -519,7 +517,7 @@ export function UploadPanel({
       setStaged(current)
       setStagedRemovals(currentRemovals)
       if (current.length === 0 && currentRemovals.length === 0) {
-        setMessage('Nothing is staged on GitHub right now.')
+        setMessage('Nothing is staged in this browser.')
         return
       }
 
@@ -535,7 +533,7 @@ export function UploadPanel({
           : ''
       const summary = [addSection, removeSection].filter(Boolean).join('\n\n')
       const ok = window.confirm(
-        `Apply staged changes to the library?\n\n${summary}\n\nApplies whatever is staged on GitHub right now. If someone else is still editing staging, they will not be included unless they click Apply again after.`,
+        `Apply staged changes to the library?\n\n${summary}\n\nThis uploads your local queue to GitHub and runs Apply. Only what you staged in this browser is included.`,
       )
       if (!ok) return
 
@@ -560,7 +558,7 @@ export function UploadPanel({
   }
 
   async function handleUnstageRemoval(name: string) {
-    if (mode !== 'github' || !githubAuthed) return
+    if (mode !== 'github' || !githubRepoConfigured) return
     setBusy(true)
     setMessage(null)
     try {
@@ -662,19 +660,27 @@ export function UploadPanel({
               </p>
             ) : (
               <>
-                {mode === 'github' && !githubAuthed ? (
+                {mode === 'github' ? (
                   <p>
-                    GitHub write access is not configured. Redeploy Pages with
-                    the <code>ICON_BROWSER_TOKEN</code> secret (
-                    <code>contents: write</code> + <code>actions: write</code>
-                    ), or set <code>VITE_GITHUB_TOKEN</code> in local{' '}
-                    <code>.env.local</code>.
+                    Drop SVG icons or PNG/JPG brand images. Staging is saved in
+                    this browser until Apply. SVGs become{' '}
+                    <code>ci:kebab-name</code> Images become{' '}
+                    <code>img:kebab-name</code> (not usable with{' '}
+                    <code>&lt;Icon /&gt;</code>).
+                    {!canApplyPublish ? (
+                      <>
+                        {' '}
+                        Apply needs a maintainer PAT (
+                        <code>#gv-github-token=…</code>).
+                      </>
+                    ) : null}
                   </p>
                 ) : (
                   <p>
                     Drop SVG icons or PNG/JPG brand images. SVGs become{' '}
-                    <code>ci:kebab-name</code> Images become <code>img:kebab-name</code> (not
-                    usable with <code>&lt;Icon /&gt;</code>).
+                    <code>ci:kebab-name</code> Images become{' '}
+                    <code>img:kebab-name</code> (not usable with{' '}
+                    <code>&lt;Icon /&gt;</code>).
                   </p>
                 )}
                 <label className="upload-drop">
@@ -927,19 +933,15 @@ export function UploadPanel({
                     <button
                       type="button"
                       className="ghost accent"
-                      disabled={!canSubmit || busy || !githubAuthed}
+                      disabled={!canSubmit || busy || !githubRepoConfigured}
                       onClick={() => void handleStage()}
                     >
-                      {busy
-                        ? 'Working…'
-                        : githubAuthed
-                          ? 'Add to staging'
-                          : 'GitHub token required'}
+                      {busy ? 'Working…' : 'Add to staging'}
                     </button>
 
                     <div className="staged-block">
                       <div className="staged-header">
-                        <strong>Staged on GitHub</strong>
+                        <strong>Staged locally</strong>
                         <button
                           type="button"
                           className="ghost"

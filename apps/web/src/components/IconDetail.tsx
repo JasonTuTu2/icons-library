@@ -94,7 +94,7 @@ export function IconDetail({
     icon.id.startsWith('ci:') || icon.id.startsWith('img:')
 
   const canStageRemoval =
-    isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
+    isCustomAsset && isGithubRepoConfigured()
 
   const canEditMeta =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
@@ -236,7 +236,7 @@ export function IconDetail({
   async function handleStageRemoval() {
     const name = icon.id.replace(/^(gv|img):/, '')
     const ok = window.confirm(
-      `Stage removal of ${icon.id}?\n\nThis writes a shared marker on GitHub. The file stays in the library until someone clicks Apply staged. Consumers keep it until you Publish after Apply.`,
+      `Stage removal of ${icon.id}?\n\nThis queues a removal in this browser until someone clicks Apply. The file stays in the library until then.`,
     )
     if (!ok) return
 

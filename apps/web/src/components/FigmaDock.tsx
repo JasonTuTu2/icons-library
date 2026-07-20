@@ -3,7 +3,7 @@ import {
   detectVariantFromName,
   detectVariantSuffix,
   findIconNameConflicts,
-  isGithubAdminEnabled,
+  isGithubRepoConfigured,
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
@@ -138,7 +138,7 @@ export function FigmaDock() {
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
-  const githubOk = isGithubAdminEnabled()
+  const githubOk = isGithubRepoConfigured()
   const browserUrl = fullIconBrowserUrl()
 
   const namesValid = useMemo(
@@ -371,7 +371,7 @@ export function FigmaDock() {
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s). Open the icon browser to Apply or Publish.`,
+        `Staged ${count} asset(s) locally. Open the icon browser to Apply (maintainer PAT) or Publish.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -403,8 +403,8 @@ export function FigmaDock() {
       </div>
       {!githubOk ? (
         <p className="figma-dock-hint">
-          GitHub write token missing — redeploy Pages with{' '}
-          <code>ICON_BROWSER_TOKEN</code>.
+          GitHub repo is not configured for this build (
+          <code>VITE_GITHUB_REPO</code>).
         </p>
       ) : (
         <p className="figma-dock-hint">
