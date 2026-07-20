@@ -27,32 +27,32 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 3. The plugin panel loads the live icon browser. Select icon frame(s)/component(s) → **Load selection** → edit kebab names / Mono·Multi → **Stage**.
 4. Open the full icon browser with a magic-URL PAT (see below) → **Apply staged to library** → **Publish** when releasing packages.
 
-The plugin never talks to GitHub — it only exports SVGs from the canvas into the embedded browser, which stages with the baked Pages token. Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
+The plugin never talks to GitHub — it only exports SVGs/images into the embedded browser panel. Staging is local; Sign in + Apply happen via the auth API. Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
 
 ### Dev: Apply & Publish
 
-**Preferred:** deploy `apps/auth-api` (Cloudflare Worker) and set repo variable `AUTH_API_URL`. Then use **Sign in** in the icon browser:
+**Preferred:** deploy `apps/auth-api` (Cloudflare Worker) and set repo variable `AUTH_API_URL`. The icon browser and Figma plugin require **Sign in**; after that, Apply / Publish / metadata edits use the Worker — no personal PAT:
 
-- **designer** — Stage locally + Apply
-- **dev** — Stage, Apply, and Publish
+- **designer** — Browse, Stage locally, Apply, metadata
+- **dev** — Same + Publish
 
-See [`apps/auth-api/README.md`](apps/auth-api/README.md) for secrets and deploy steps.
+See [`apps/auth-api/README.md`](apps/auth-api/README.md) for secrets and deploy steps. Redeploy the Worker whenever its routes change.
 
-**Legacy fallback** (when `AUTH_API_URL` is unset): open the icon browser with a session PAT in the URL hash:
+**Local / legacy** (when `AUTH_API_URL` / `VITE_AUTH_API_URL` is unset): open the icon browser with a session PAT in the URL hash:
 
 ```
 https://JasonTuTu2.github.io/icons-library/#gv-github-token=ghp_YOUR_PAT
 ```
 
-The app stores the token in `sessionStorage` for that tab and strips it from the address bar. Create a classic PAT with **`contents: write`** + **`actions: write`**. Locally, `VITE_GITHUB_TOKEN` in `.env.local` also unlocks Apply/Publish during `pnpm dev`.
+The app stores the token in `sessionStorage` for that tab and strips it from the address bar. Create a classic PAT with **`contents: write`** + **`actions: write`**. Locally, `VITE_GITHUB_TOKEN` in `.env.local` also unlocks admin features during `pnpm dev`.
 
 ### Pages icon browser
 
-1. **Add to staging** — shared `packages/custom-icons/staging/` via Contents API (no Action; multiple people can stage). From Figma: **Load selection** → **Stage** (SVG). From the full browser Upload: SVG and/or PNG/JPG.
-2. **Apply staged to library** (dev magic URL) — dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes whatever is staged now, regenerates the catalog, clears staging.
-3. **Publish** (dev magic URL) — check unpublished icons/images to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
+1. **Add to staging** — local to this browser/plugin until Apply. From Figma: **Load selection** → **Stage**. From the full browser Upload: SVG and/or PNG/JPG.
+2. **Apply staged to library** (Sign in as designer or dev) — uploads the local queue, dispatches an Action (uses secret `ICON_BROWSER_TOKEN` for the push) that promotes staging, regenerates the catalog, clears remote staging.
+3. **Publish** (Sign in as **dev**) — check unpublished icons/images to include (unchecked stay out of the package, then return to the library as unpublished), then dispatch publish.
 
-To **remove** a custom SVG or brand image: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**. Removals are shared markers under `packages/custom-icons/staging/remove/`; Apply deletes matching library files.
+To **remove** a custom SVG or brand image: open it in the browser → **Stage removal** → **Apply staged to library** → **Publish**.
 
 ### Brand images (PNG / JPG)
 

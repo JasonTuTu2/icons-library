@@ -1,0 +1,93 @@
+import { useState, type ReactNode } from 'react'
+import {
+  isAuthApiConfigured,
+  loginWithPassword,
+  useAuthSession,
+} from '../lib/sessionAuth'
+
+interface AuthGateProps {
+  children: ReactNode
+  /** Compact layout for the Figma plugin panel. */
+  compact?: boolean
+}
+
+/**
+ * When the auth API is configured, block the site/plugin until Sign in.
+ * Local/dev without VITE_AUTH_API_URL keeps the old open access.
+ */
+export function AuthGate({ children, compact = false }: AuthGateProps) {
+  const configured = isAuthApiConfigured()
+  const session = useAuthSession()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  if (!configured || session) {
+    return children
+  }
+
+  return (
+    <div className={compact ? 'auth-gate auth-gate-compact' : 'auth-gate'}>
+      <div className="auth-gate-card">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden />
+          <div>
+            <strong>GenVoice Icons</strong>
+            <p>{compact ? 'Sign in to use the plugin' : 'Sign in to continue'}</p>
+          </div>
+        </div>
+        <form
+          className="auth-gate-form"
+          onSubmit={(e) => {
+            e.preventDefault()
+            setBusy(true)
+            setError(null)
+            void loginWithPassword(username, password)
+              .then(() => {
+                setPassword('')
+              })
+              .catch((err) => {
+                setError(err instanceof Error ? err.message : String(err))
+              })
+              .finally(() => setBusy(false))
+          }}
+        >
+          <label>
+            Username
+            <input
+              type="text"
+              name="username"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={busy}
+              required
+              autoFocus
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={busy}
+              required
+            />
+          </label>
+          <button type="submit" className="ghost accent" disabled={busy}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+          {error ? (
+            <p className="login-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </form>
+      </div>
+    </div>
+  )
+}

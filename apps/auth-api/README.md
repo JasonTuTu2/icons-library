@@ -1,11 +1,11 @@
 # Icon browser auth API (Cloudflare Worker)
 
-Tiny authenticated API so designers/devs log in with username + password instead of personal GitHub PATs.
+Authenticated API so designers/devs sign in with username + password. The browser and Figma plugin stay locked until Sign in; GitHub admin uses the Worker’s `GITHUB_TOKEN` (no personal PAT, no token baked into Pages).
 
-| Role | Stage (local) | Apply | Publish |
-|------|---------------|-------|---------|
-| `designer` | yes (browser) | yes | no |
-| `dev` | yes | yes | yes |
+| Role | Browse / Stage | Apply | Publish | Metadata edits |
+|------|----------------|-------|---------|----------------|
+| `designer` | yes | yes | no | yes |
+| `dev` | yes | yes | yes | yes |
 
 ## What you need to do (one-time)
 
@@ -25,11 +25,12 @@ Tiny authenticated API so designers/devs log in with username + password instead
      ```json
      [{"username":"designer","password":"…","role":"designer"},{"username":"dev","password":"…","role":"dev"}]
      ```
+   - `CORS_ORIGINS` — Pages origin, e.g. `https://jasontutu2.github.io`
 4. Local smoke test:
    ```bash
    pnpm --filter @JasonTuTu2/icons-auth-api dev
    ```
-5. Deploy:
+5. Deploy (and re-deploy whenever Worker routes change):
    ```bash
    pnpm --filter @JasonTuTu2/icons-auth-api deploy
    ```
@@ -41,17 +42,27 @@ Tiny authenticated API so designers/devs log in with username + password instead
    npx wrangler secret put SESSION_SECRET
    npx wrangler secret put AUTH_USERS
    ```
+   Optional: `npx wrangler secret put CORS_ORIGINS`
 6. Copy the Worker URL (e.g. `https://icons-library-auth.<subdomain>.workers.dev`).
 7. In the GitHub repo → **Settings → Secrets and variables → Actions → Variables**:
-   - Add **`AUTH_API_URL`** = that Worker URL (no trailing slash).
+   - **`AUTH_API_URL`** = that Worker URL (no trailing slash).
 8. Redeploy Pages (push to `main` or run the Pages workflow) so the browser gets `VITE_AUTH_API_URL`.
 
-Until step 7–8, the browser keeps the old magic-URL PAT path for Apply/Publish.
+Until step 7–8, the local browser can still use `VITE_GITHUB_TOKEN` / `#gv-github-token=` when `VITE_AUTH_API_URL` is unset.
 
 ## Endpoints
 
 - `POST /api/login` `{ username, password }` → `{ token, username, role }`
 - `GET /api/me` `Authorization: Bearer …`
+- `GET /api/metadata` — live `metadata.json`
+- `POST /api/icon-metadata` `{ name, patch }` — sidebar property edits
+- `POST /api/library-conflicts` `{ names }` → `{ conflicts }`
+- `GET /api/unpublished-icons` / `unpublished-removals`
+- `GET /api/publish-history?limit=`
+- `GET /api/publish-readiness`
+- `GET /api/published-version` → `{ version }`
+- `GET /api/library-asset-path?name=` → `{ path }`
+- `GET /api/asset-preview?path=` → `{ preview }`
 - `POST /api/apply` body `{ icons, removals }` — designer or dev
 - `POST /api/publish` body publish options — **dev only**
 - `GET /health`

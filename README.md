@@ -216,7 +216,7 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 ### Upload & publish from Pages
 
-On the live icon browser, **staging** is local to the browser/plugin. **Apply** (designer or dev) and **Publish** (dev only) use **Sign in** when `AUTH_API_URL` is configured — see [`apps/auth-api/README.md`](apps/auth-api/README.md). Without that, the legacy session PAT (`#gv-github-token=`) still works for Apply/Publish.
+On the live icon browser, the site and Figma plugin require **Sign in**. Staging stays local; **Apply** (designer or dev), **Publish** (dev), and sidebar metadata edits go through the auth API — see [`apps/auth-api/README.md`](apps/auth-api/README.md). No personal PAT is needed after Sign in. Locally without `VITE_AUTH_API_URL`, `VITE_GITHUB_TOKEN` / `#gv-github-token=` still work.
 
 1. **Add to staging** — writes SVGs into `staging/mono|color|gradient/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (vectors → SVG/`ci:`; placed images → PNG/`img:`).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
@@ -230,17 +230,18 @@ The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SV
 
 | Kind | Name | Purpose |
 |------|------|---------|
-| Secret | `ICON_BROWSER_TOKEN` | PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and baked into Pages so anyone can **stage** |
+| Secret | `ICON_BROWSER_TOKEN` | Bot PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and as the auth Worker `GITHUB_TOKEN` |
+| Variable | `AUTH_API_URL` | Cloudflare Worker URL for Sign in (baked as `VITE_AUTH_API_URL` on Pages) |
 | Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-Anyone with the Pages URL can stage locally. Apply/Publish go through the auth API after Sign in (or legacy `#gv-github-token=…`). The baked Pages token is still used for library reads/conflict checks.
+The live site and plugin are locked behind **Sign in**. Apply/Publish/metadata use the auth API (Worker `GITHUB_TOKEN`); nothing is baked into Pages.
 
 | Action | What happens |
 |--------|----------------|
-| Add to staging | Embedded token → Contents API → `staging/mono`, `staging/color`, `staging/gradient`, or `staging/images` |
-| Stage removal | Embedded token → Contents API → `staging/remove/{name}.remove` |
-| Apply staged | Session PAT dispatches → Action uses `ICON_BROWSER_TOKEN` → library adds/removes + `catalog:gen` |
-| Publish | Session PAT dispatches → Action publishes with package permissions |
+| Add to staging | Local IndexedDB / plugin `clientStorage` until Apply |
+| Stage removal | Local marker until Apply |
+| Apply staged | Sign in → auth API uploads queue + dispatches → Action uses `ICON_BROWSER_TOKEN` → library + `catalog:gen` |
+| Publish | Sign in as **dev** → auth API dispatches → Action publishes |
 
 Local `pnpm dev` still uploads to disk (Vite plugin) without GitHub staging. For local GitHub staging, set `VITE_GITHUB_TOKEN` in `.env.local`.
 

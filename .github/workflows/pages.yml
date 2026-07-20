@@ -76,11 +76,9 @@ jobs:
         env:
           # Optional override via repo variable ICON_BROWSER_REPO (owner/name).
           VITE_GITHUB_REPO: ${{ vars.ICON_BROWSER_REPO || github.repository }}
-          # Optional auth API (Cloudflare Worker). When set, Sign in replaces Apply/Publish PATs.
+          # Auth API (Cloudflare Worker). Required for Sign in; GitHub admin uses
+          # the Worker’s GITHUB_TOKEN — no PAT is baked into Pages.
           VITE_AUTH_API_URL: ${{ vars.AUTH_API_URL }}
-          # Embedded for library reads / conflict checks (Contents API).
-          # Requires contents:write + actions:write on the PAT (same bot as Apply Actions).
-          VITE_GITHUB_TOKEN: ${{ secrets.ICON_BROWSER_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist

@@ -3,7 +3,10 @@ import { cors } from 'hono/cors'
 import {
   createGithubAdminClient,
   type DispatchPublishOptions,
+  type IconSource,
   type IconUploadPayload,
+  type IconUsage,
+  type IconVariant,
 } from '@JasonTuTu2/github-admin'
 import {
   findUser,
@@ -131,6 +134,136 @@ function githubClient(env: Env) {
   return createGithubAdminClient({ token, repo })
 }
 
+function githubError(err: unknown) {
+  return {
+    error: err instanceof Error ? err.message : String(err),
+  }
+}
+
+/** Live metadata.json from the repo (sidebar / catalog properties). */
+authed.get('/metadata', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).getCustomMetadata())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+/** Patch category / variant / source / usage / note for one custom icon. */
+authed.post('/icon-metadata', async (c) => {
+  let body: {
+    name?: string
+    patch?: {
+      category?: string
+      variant?: IconVariant
+      source?: IconSource
+      usage?: IconUsage
+      note?: string
+    }
+  }
+  try {
+    body = (await c.req.json()) as typeof body
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const name = body.name?.trim() ?? ''
+  if (!name || !body.patch || typeof body.patch !== 'object') {
+    return c.json({ error: 'name and patch required' }, 400)
+  }
+  try {
+    await githubClient(c.env).updateIconMetadata(name, body.patch)
+    return c.json({ ok: true })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+/** Library name collisions for staging checks. */
+authed.post('/library-conflicts', async (c) => {
+  let body: { names?: string[] }
+  try {
+    body = (await c.req.json()) as { names?: string[] }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const names = Array.isArray(body.names) ? body.names : []
+  try {
+    const conflicts = await githubClient(c.env).findLibraryNameConflicts(names)
+    return c.json({ conflicts })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/unpublished-icons', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).listUnpublishedIcons())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/unpublished-removals', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).listUnpublishedRemovals())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/publish-history', async (c) => {
+  const limitRaw = c.req.query('limit')
+  const limit = limitRaw ? Number(limitRaw) : undefined
+  try {
+    return c.json(
+      await githubClient(c.env).listPublishHistory(
+        Number.isFinite(limit) ? { limit } : undefined,
+      ),
+    )
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/publish-readiness', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).getPublishReadiness())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/published-version', async (c) => {
+  try {
+    const version = await githubClient(c.env).getPublishedPackageVersion()
+    return c.json({ version })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/library-asset-path', async (c) => {
+  const name = c.req.query('name')?.trim() ?? ''
+  if (!name) return c.json({ error: 'name required' }, 400)
+  try {
+    const path = await githubClient(c.env).findLibraryAssetPath(name)
+    return c.json({ path })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/asset-preview', async (c) => {
+  const path = c.req.query('path')?.trim() ?? ''
+  if (!path) return c.json({ error: 'path required' }, 400)
+  try {
+    const preview = await githubClient(c.env).getAssetPreview(path)
+    return c.json({ preview })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
 authed.post('/apply', async (c) => {
   let body: { icons?: IconUploadPayload[]; removals?: string[] }
   try {
@@ -155,10 +288,7 @@ authed.post('/apply', async (c) => {
     if (removals.length > 0) await client.stageRemovals(removals)
     await client.dispatchApplyStaged()
   } catch (err) {
-    return c.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      502,
-    )
+    return c.json(githubError(err), 502)
   }
 
   return c.json({
@@ -185,10 +315,7 @@ authed.post('/publish', async (c) => {
     const client = githubClient(c.env)
     await client.dispatchPublish(body)
   } catch (err) {
-    return c.json(
-      { error: err instanceof Error ? err.message : String(err) },
-      502,
-    )
+    return c.json(githubError(err), 502)
   }
 
   return c.json({

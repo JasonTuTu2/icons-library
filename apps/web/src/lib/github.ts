@@ -73,10 +73,11 @@ function getRepo(): string {
 }
 
 /**
- * Token for library reads (conflicts, metadata, unpublished lists).
- * Session PAT overrides when present; Pages may bake ICON_BROWSER_TOKEN.
+ * Legacy client PAT for local/dev when the auth API is not configured.
+ * Production Pages uses the auth API + server GITHUB_TOKEN only.
  */
-function getStagingToken(): string {
+function getLegacyToken(): string {
+  if (isAuthApiConfigured()) return ''
   return (
     getGithubSessionToken() ||
     import.meta.env.VITE_GITHUB_TOKEN?.trim() ||
@@ -85,10 +86,10 @@ function getStagingToken(): string {
 }
 
 /**
- * Token for Apply / Publish (workflow_dispatch). On Pages, only a session
- * PAT from `#gv-github-token=…`. Locally, `.env` VITE_GITHUB_TOKEN also works.
+ * Apply/Publish client token when auth API is unset (local + optional hash PAT).
  */
 function getDevToken(): string {
+  if (isAuthApiConfigured()) return ''
   const session = getGithubSessionToken()
   if (session) return session
   if (import.meta.env.DEV) {
@@ -99,7 +100,7 @@ function getDevToken(): string {
 
 function getStagingClient() {
   return createGithubAdminClient({
-    token: getStagingToken(),
+    token: getLegacyToken(),
     repo: getRepo(),
   })
 }
@@ -108,7 +109,7 @@ function getDevClient() {
   const token = getDevToken()
   if (!token) {
     throw new Error(
-      'Apply/Publish require a personal PAT. Open the icon browser with #gv-github-token=YOUR_PAT (contents:write + actions:write).',
+      'Apply/Publish require Sign in (auth API) or a personal PAT via #gv-github-token=…',
     )
   }
   return createGithubAdminClient({ token, repo: getRepo() })
@@ -123,6 +124,18 @@ async function withAuthClear<T>(fn: () => Promise<T>): Promise<T> {
     }
     throw err
   }
+}
+
+async function authApiJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await authApiFetch(path, init)
+  const body = (await res.json().catch(() => ({}))) as T & { error?: string }
+  if (!res.ok) {
+    throw new Error(
+      (typeof body === 'object' && body && 'error' in body && body.error) ||
+        `Request failed (${res.status})`,
+    )
+  }
+  return body
 }
 
 function mergeConflicts(
@@ -145,9 +158,19 @@ export function isGithubRepoConfigured(): boolean {
   return isValidRepo(getRepo())
 }
 
-/** True when Contents API reads are available (library conflict checks, metadata edits). */
+/**
+ * True when library admin reads/writes are available.
+ * With auth API: any signed-in designer/dev. Otherwise: legacy client PAT.
+ */
 export function isGithubAdminEnabled(): boolean {
-  return isGithubRepoConfigured() && Boolean(getStagingToken())
+  if (!isGithubRepoConfigured()) return false
+  if (isAuthApiConfigured()) {
+    const session = getAuthSession()
+    return Boolean(
+      session && (session.role === 'designer' || session.role === 'dev'),
+    )
+  }
+  return Boolean(getLegacyToken())
 }
 
 /** True when Apply is available (auth API session, or legacy PAT). */
@@ -167,6 +190,13 @@ export function isPublishEnabled(): boolean {
     return getAuthSession()?.role === 'dev'
   }
   return isGithubDevEnabled()
+}
+
+/** Reactive admin gate (metadata, Releases, conflicts). */
+export function useGithubAdminEnabled(): boolean {
+  useGithubSessionToken()
+  useAuthSession()
+  return isGithubAdminEnabled()
 }
 
 /** Reactive Apply gate. */
@@ -224,11 +254,9 @@ export async function stageRemovals(names: string[]): Promise<void> {
   if (unique.length === 0) {
     throw new Error('No icon names to remove.')
   }
-  if (getStagingToken()) {
+  if (isGithubAdminEnabled()) {
     for (const name of unique) {
-      const path = await withAuthClear(() =>
-        getStagingClient().findLibraryAssetPath(name),
-      )
+      const path = await findLibraryAssetPath(name)
       if (!path) {
         throw new Error(
           `${name} is not in the library (ci: or img:) — nothing to stage for removal.`,
@@ -256,17 +284,30 @@ export async function listStagedRemovals(): Promise<StagedRemoval[]> {
 
 /** Custom SVGs applied to the library since the last package publish. */
 export async function listUnpublishedIcons(): Promise<StagedIcon[]> {
+  if (isAuthApiConfigured()) {
+    return authApiJson<StagedIcon[]>('/api/unpublished-icons')
+  }
   return withAuthClear(() => getStagingClient().listUnpublishedIcons())
 }
 
 /** Library SVGs removed since the last package publish (after Apply). */
 export async function listUnpublishedRemovals(): Promise<StagedRemoval[]> {
+  if (isAuthApiConfigured()) {
+    return authApiJson<StagedRemoval[]>('/api/unpublished-removals')
+  }
   return withAuthClear(() => getStagingClient().listUnpublishedRemovals())
 }
 
 export async function listPublishHistory(options?: {
   limit?: number
 }): Promise<PublishHistoryEntry[]> {
+  if (isAuthApiConfigured()) {
+    const q =
+      options?.limit != null
+        ? `?limit=${encodeURIComponent(String(options.limit))}`
+        : ''
+    return authApiJson<PublishHistoryEntry[]>(`/api/publish-history${q}`)
+  }
   return withAuthClear(() => getStagingClient().listPublishHistory(options))
 }
 
@@ -274,8 +315,18 @@ export async function findIconNameConflicts(
   names: string[],
 ): Promise<IconNameConflict[]> {
   const local = await findLocalStagingNameConflicts(names)
-  if (!getStagingToken()) {
+  if (!isGithubAdminEnabled()) {
     return local
+  }
+  if (isAuthApiConfigured()) {
+    const body = await authApiJson<{ conflicts: IconNameConflict[] }>(
+      '/api/library-conflicts',
+      {
+        method: 'POST',
+        body: JSON.stringify({ names }),
+      },
+    )
+    return mergeConflicts([body.conflicts, local])
   }
   const library = await withAuthClear(() =>
     getStagingClient().findLibraryNameConflicts(names),
@@ -288,14 +339,26 @@ export async function getAssetPreview(
 ): Promise<AssetPreview | null> {
   const local = await getLocalAssetPreview(path)
   if (local) return local
-  if (!getStagingToken()) return null
+  if (!isGithubAdminEnabled()) return null
+  if (isAuthApiConfigured()) {
+    const body = await authApiJson<{ preview: AssetPreview | null }>(
+      `/api/asset-preview?path=${encodeURIComponent(path)}`,
+    )
+    return body.preview
+  }
   return withAuthClear(() => getStagingClient().getAssetPreview(path))
 }
 
 export async function findLibraryAssetPath(
   name: string,
 ): Promise<string | null> {
-  if (!getStagingToken()) return null
+  if (!isGithubAdminEnabled()) return null
+  if (isAuthApiConfigured()) {
+    const body = await authApiJson<{ path: string | null }>(
+      `/api/library-asset-path?name=${encodeURIComponent(name)}`,
+    )
+    return body.path
+  }
   return withAuthClear(() => getStagingClient().findLibraryAssetPath(name))
 }
 
@@ -339,13 +402,22 @@ export async function dispatchApplyStaged(): Promise<void> {
 }
 
 export async function getPublishedPackageVersion(): Promise<string> {
-  if (!getStagingToken()) return 'unknown'
+  if (!isGithubAdminEnabled()) return 'unknown'
+  if (isAuthApiConfigured()) {
+    const body = await authApiJson<{ version: string }>('/api/published-version')
+    return body.version
+  }
   return withAuthClear(() => getStagingClient().getPublishedPackageVersion())
 }
 
 export async function getPublishReadiness(): Promise<PublishReadiness> {
-  const readClient = getStagingToken() ? getStagingClient() : getDevClient()
-  const readiness = await withAuthClear(() => readClient.getPublishReadiness())
+  let readiness: PublishReadiness
+  if (isAuthApiConfigured()) {
+    readiness = await authApiJson<PublishReadiness>('/api/publish-readiness')
+  } else {
+    const readClient = getLegacyToken() ? getStagingClient() : getDevClient()
+    readiness = await withAuthClear(() => readClient.getPublishReadiness())
+  }
   const [staged, removals] = await Promise.all([
     listStagedIconsLocal(),
     listStagedRemovalsLocal(),
@@ -378,6 +450,9 @@ export async function dispatchPublish(
 }
 
 export async function getCustomMetadata(): Promise<CustomIconMetadata> {
+  if (isAuthApiConfigured()) {
+    return authApiJson<CustomIconMetadata>('/api/metadata')
+  }
   return withAuthClear(() => getStagingClient().getCustomMetadata())
 }
 
@@ -398,5 +473,12 @@ export async function updateIconMetadata(
     note?: string
   },
 ): Promise<void> {
+  if (isAuthApiConfigured()) {
+    await authApiJson<{ ok: boolean }>('/api/icon-metadata', {
+      method: 'POST',
+      body: JSON.stringify({ name, patch }),
+    })
+    return
+  }
   return withAuthClear(() => getStagingClient().updateIconMetadata(name, patch))
 }

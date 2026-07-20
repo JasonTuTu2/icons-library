@@ -7,11 +7,12 @@
   "networkAccess": {
     "allowedDomains": [
       "https://*.github.io",
+      "https://*.workers.dev",
       "https://github.com",
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
     ],
-    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Staging uses the Pages GitHub token; the plugin exports SVG vectors and PNG rasters from the canvas."
+    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Sign-in and Apply go through the Cloudflare auth Worker; staging is local to the plugin/browser."
   },
   "documentAccess": "dynamic-page"
 }

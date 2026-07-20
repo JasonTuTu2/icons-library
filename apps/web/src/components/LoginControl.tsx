@@ -6,7 +6,7 @@ import {
   useAuthSession,
 } from '../lib/sessionAuth'
 
-/** Topbar login for the auth API (username/password). Hidden when API URL unset. */
+/** Topbar session control (Sign out). Sign-in UI lives in AuthGate. */
 export function LoginControl() {
   const configured = isAuthApiConfigured()
   const session = useAuthSession()

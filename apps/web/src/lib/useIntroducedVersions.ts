@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import {
-  isGithubAdminEnabled,
   isGithubRepoConfigured,
   listPublishHistory,
   listUnpublishedIcons,
+  useGithubAdminEnabled,
 } from './github'
 import { buildIntroducedVersionByName } from './releaseSummary'
 
 export function useIntroducedVersions() {
-  const enabled =
-    isGithubRepoConfigured() && isGithubAdminEnabled()
+  const adminEnabled = useGithubAdminEnabled()
+  const enabled = isGithubRepoConfigured() && adminEnabled
   const [byName, setByName] = useState<Map<string, string> | null>(null)
   const [pendingNames, setPendingNames] = useState<Set<string> | null>(null)
   const [loading, setLoading] = useState(enabled)
