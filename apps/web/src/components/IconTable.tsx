@@ -1,10 +1,11 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { IconPreview } from './IconPreview'
 
-const ROW_HEIGHT = 56
-const HEADER_HEIGHT = 44
+const BASE_ROW_HEIGHT = 56
+const BASE_HEADER_HEIGHT = 44
+const BASE_ICON_SIZE = 24
 
 interface IconTableProps {
   icons: IconMeta[]
@@ -12,6 +13,7 @@ interface IconTableProps {
   onSelect: (icon: IconMeta) => void
   /** When true, only the first row shows the category (filter already narrows to one). */
   collapseCategory?: boolean
+  zoom?: number
 }
 
 function formatSource(source: IconMeta['source']): string {
@@ -33,20 +35,31 @@ export function IconTable({
   selectedId,
   onSelect,
   collapseCategory = false,
+  zoom = 1,
 }: IconTableProps) {
   const parentRef = useRef<HTMLDivElement>(null)
+  const rowHeight = BASE_ROW_HEIGHT * zoom
+  const headerHeight = BASE_HEADER_HEIGHT * zoom
+  const iconSize = Math.max(14, Math.round(BASE_ICON_SIZE * zoom))
 
   const virtualizer = useVirtualizer({
     count: icons.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => rowHeight,
     overscan: 12,
   })
+
+  useEffect(() => {
+    virtualizer.measure()
+  }, [zoom, virtualizer])
 
   return (
     <div className="table-wrap" ref={parentRef}>
       <div className="icon-table">
-        <div className="icon-table-header" style={{ height: HEADER_HEIGHT }}>
+        <div
+          className="icon-table-header"
+          style={{ height: headerHeight }}
+        >
           <div className="icon-table-cell category">Category</div>
           <div className="icon-table-cell">Icon</div>
           <div className="icon-table-cell">Internal Name</div>
@@ -84,7 +97,7 @@ export function IconTable({
                   {showCategory ? cell(icon.category) : ''}
                 </div>
                 <div className="icon-table-cell icon-preview">
-                  <IconPreview icon={icon} size={24} />
+                  <IconPreview icon={icon} size={iconSize} />
                 </div>
                 <div className="icon-table-cell">{icon.name}</div>
                 <div className="icon-table-cell">{cell(icon.variant)}</div>

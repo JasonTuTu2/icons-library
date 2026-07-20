@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import {
   reactSnippet,
   vueSnippet,
@@ -17,6 +17,13 @@ import {
 } from '../lib/github'
 import { useLiveCatalog } from '../lib/liveCatalog'
 import { useIntroducedVersions } from '../lib/useIntroducedVersions'
+import {
+  BROWSE_ZOOM_DEFAULT,
+  BROWSE_ZOOM_MAX,
+  BROWSE_ZOOM_MIN,
+  zoomIn,
+  zoomOut,
+} from '../lib/browseZoom'
 
 /** Toolbar sentinel: show all categories. */
 const CATEGORY_ALL = ''
@@ -36,6 +43,7 @@ export function BrowserPage() {
   const [usageFilter, setUsageFilter] = useState<'in-use' | 'unused'>('in-use')
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
+  const [browseZoom, setBrowseZoom] = useState(BROWSE_ZOOM_DEFAULT)
   const [localUploadEnabled, setLocalUploadEnabled] = useState(false)
 
   const deferredQuery = useDeferredValue(query)
@@ -206,40 +214,70 @@ export function BrowserPage() {
           }}
         />
         <PublishButton />
-        <div className="view-toggle" role="group" aria-label="Display mode">
-          <button
-            type="button"
-            className={displayMode === 'grid' ? 'active' : undefined}
-            onClick={() => setDisplayMode('grid')}
-          >
-            Grid
-          </button>
-          <button
-            type="button"
-            className={displayMode === 'table' ? 'active' : undefined}
-            onClick={() => setDisplayMode('table')}
-          >
-            Table
-          </button>
+        <div className="browser-display-controls">
+          <div className="view-toggle" role="group" aria-label="Display mode">
+            <button
+              type="button"
+              className={displayMode === 'grid' ? 'active' : undefined}
+              onClick={() => setDisplayMode('grid')}
+            >
+              Grid
+            </button>
+            <button
+              type="button"
+              className={displayMode === 'table' ? 'active' : undefined}
+              onClick={() => setDisplayMode('table')}
+            >
+              Table
+            </button>
+          </div>
+          <div className="zoom-controls" role="group" aria-label="Zoom">
+            <button
+              type="button"
+              aria-label="Zoom out"
+              disabled={browseZoom <= BROWSE_ZOOM_MIN}
+              onClick={() => setBrowseZoom((z) => zoomOut(z))}
+            >
+              −
+            </button>
+            <span className="zoom-label" aria-live="polite">
+              {Math.round(browseZoom * 100)}%
+            </span>
+            <button
+              type="button"
+              aria-label="Zoom in"
+              disabled={browseZoom >= BROWSE_ZOOM_MAX}
+              onClick={() => setBrowseZoom((z) => zoomIn(z))}
+            >
+              +
+            </button>
+          </div>
         </div>
         <p className="result-count">{icons.length.toLocaleString()} icons</p>
       </section>
 
       <div className="browser-body">
-        {displayMode === 'grid' ? (
-          <IconGrid
-            icons={icons}
-            selectedId={selected?.id}
-            onSelect={setSelected}
-          />
-        ) : (
-          <IconTable
-            icons={icons}
-            selectedId={selected?.id}
-            onSelect={setSelected}
-            collapseCategory={categoryFilter !== CATEGORY_ALL}
-          />
-        )}
+        <div
+          className="browser-pane"
+          style={{ '--browse-zoom': browseZoom } as CSSProperties}
+        >
+          {displayMode === 'grid' ? (
+            <IconGrid
+              icons={icons}
+              selectedId={selected?.id}
+              onSelect={setSelected}
+              zoom={browseZoom}
+            />
+          ) : (
+            <IconTable
+              icons={icons}
+              selectedId={selected?.id}
+              onSelect={setSelected}
+              collapseCategory={categoryFilter !== CATEGORY_ALL}
+              zoom={browseZoom}
+            />
+          )}
+        </div>
         {selected ? (
           <IconDetail
             icon={selected}

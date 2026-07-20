@@ -271,6 +271,19 @@ pre {
   gap: 1.25rem;
 }
 
+.browser-pane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-pane .grid-wrap,
+.browser-pane .table-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
 .grid-wrap {
   overflow: auto;
   border: 1px solid var(--line);
@@ -290,8 +303,8 @@ pre {
   right: 0;
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 0.5rem;
-  padding: 0.65rem;
+  gap: calc(0.5rem * var(--browse-zoom, 1));
+  padding: calc(0.65rem * var(--browse-zoom, 1));
 }
 
 .icon-cell {
@@ -299,11 +312,12 @@ pre {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: calc(0.45rem * var(--browse-zoom, 1));
   border: 1px solid transparent;
   background: transparent;
-  border-radius: 12px;
-  padding: 0.65rem 0.35rem;
+  border-radius: calc(12px * var(--browse-zoom, 1));
+  padding: calc(0.65rem * var(--browse-zoom, 1))
+    calc(0.35rem * var(--browse-zoom, 1));
   cursor: pointer;
   color: var(--icon-fg);
   font: inherit;
@@ -316,7 +330,7 @@ pre {
 }
 
 .icon-cell span {
-  font-size: 0.68rem;
+  font-size: calc(0.68rem * var(--browse-zoom, 1));
   font-weight: 500;
   color: var(--muted);
   max-width: 100%;
@@ -338,11 +352,64 @@ pre {
   box-shadow: 0 0 0 1px rgba(30, 167, 255, 0.15);
 }
 
+.browser-display-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.2rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.zoom-controls button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--navy);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.zoom-controls button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.zoom-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zoom-label {
+  min-width: 2.75rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  user-select: none;
+}
+
 .view-toggle {
   display: inline-flex;
   gap: 0.15rem;
   padding: 0.2rem;
-  margin-bottom: 0.35rem;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -385,20 +452,20 @@ pre {
 }
 
 .icon-table {
-  min-width: 980px;
+  min-width: calc(980px * var(--browse-zoom, 1));
 }
 
 .icon-table-header,
 .icon-table-row {
   display: grid;
   grid-template-columns:
-    minmax(120px, 1.1fr)
-    64px
-    minmax(140px, 1.2fr)
-    minmax(90px, 0.7fr)
-    minmax(90px, 0.7fr)
-    minmax(90px, 0.7fr)
-    minmax(180px, 2fr);
+    minmax(calc(120px * var(--browse-zoom, 1)), 1.1fr)
+    calc(64px * var(--browse-zoom, 1))
+    minmax(calc(140px * var(--browse-zoom, 1)), 1.2fr)
+    minmax(calc(90px * var(--browse-zoom, 1)), 0.7fr)
+    minmax(calc(90px * var(--browse-zoom, 1)), 0.7fr)
+    minmax(calc(90px * var(--browse-zoom, 1)), 0.7fr)
+    minmax(calc(180px * var(--browse-zoom, 1)), 2fr);
   align-items: stretch;
   width: 100%;
 }
@@ -448,12 +515,12 @@ pre {
 .icon-table-cell {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: calc(0.5rem * var(--browse-zoom, 1));
   min-width: 0;
-  padding: 0 1.25rem;
+  padding: 0 calc(1.25rem * var(--browse-zoom, 1));
   border-right: 1px solid #e7e9ed;
   border-bottom: 1px solid #e7e9ed;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--browse-zoom, 1));
   font-weight: 400;
   color: #495057;
   white-space: nowrap;
@@ -475,14 +542,16 @@ pre {
 
 .icon-table-cell.icon-preview {
   justify-content: center;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding-left: calc(0.75rem * var(--browse-zoom, 1));
+  padding-right: calc(0.75rem * var(--browse-zoom, 1));
   color: var(--icon-fg);
 }
 
 .icon-table-cell.icon-preview .icon-cell-image {
-  width: 24px;
-  height: 24px;
+  width: auto;
+  height: auto;
+  max-width: calc(32px * var(--browse-zoom, 1));
+  max-height: calc(32px * var(--browse-zoom, 1));
 }
 
 .icon-table-cell.note {

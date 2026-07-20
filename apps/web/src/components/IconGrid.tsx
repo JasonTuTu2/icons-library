@@ -1,27 +1,40 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { IconPreview } from './IconPreview'
 
 const COLS = 8
-const ROW_HEIGHT = 96
+const BASE_ROW_HEIGHT = 96
+const BASE_ICON_SIZE = 28
 
 interface IconGridProps {
   icons: IconMeta[]
   selectedId?: string
   onSelect: (icon: IconMeta) => void
+  zoom?: number
 }
 
-export function IconGrid({ icons, selectedId, onSelect }: IconGridProps) {
+export function IconGrid({
+  icons,
+  selectedId,
+  onSelect,
+  zoom = 1,
+}: IconGridProps) {
   const parentRef = useRef<HTMLDivElement>(null)
   const rowCount = Math.ceil(icons.length / COLS) || 0
+  const rowHeight = BASE_ROW_HEIGHT * zoom
+  const iconSize = Math.max(16, Math.round(BASE_ICON_SIZE * zoom))
 
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => rowHeight,
     overscan: 6,
   })
+
+  useEffect(() => {
+    virtualizer.measure()
+  }, [zoom, virtualizer])
 
   return (
     <div className="grid-wrap" ref={parentRef}>
@@ -51,7 +64,7 @@ export function IconGrid({ icons, selectedId, onSelect }: IconGridProps) {
                   onClick={() => onSelect(icon)}
                   title={icon.id}
                 >
-                  <IconPreview icon={icon} />
+                  <IconPreview icon={icon} size={iconSize} />
                   <span>{icon.name}</span>
                 </button>
               ))}
