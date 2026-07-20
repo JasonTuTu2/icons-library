@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from 'react-router-dom'
 import { BrowserPage } from './pages/BrowserPage'
 import { DocsPage } from './pages/DocsPage'
 import { ReleasesPage } from './pages/ReleasesPage'
+import { LoginControl } from './components/LoginControl'
 import { packagesUrl } from './lib/github'
 
 const packageVersion = import.meta.env.VITE_PACKAGE_VERSION
@@ -19,6 +20,7 @@ export function App() {
           </div>
         </div>
         <div className="topbar-end">
+          <LoginControl />
           <a
             className="package-version"
             href={packagesUrl()}

@@ -47,6 +47,7 @@ import {
   analyzeItemConflicts,
   confirmLibraryReplacements,
 } from '../lib/nameConflicts'
+import { isAuthApiConfigured } from '../lib/sessionAuth'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 import { ApplyAllFields } from './ApplyAllFields'
@@ -733,8 +734,16 @@ export function UploadPanel({
                     {!canApplyPublish ? (
                       <>
                         {' '}
-                        Apply needs a maintainer PAT (
-                        <code>#gv-github-token=…</code>).
+                        {isAuthApiConfigured() ? (
+                          <>
+                            Sign in (designer or dev) to Apply.
+                          </>
+                        ) : (
+                          <>
+                            Apply needs a maintainer PAT (
+                            <code>#gv-github-token=…</code>).
+                          </>
+                        )}
                       </>
                     ) : null}
                   </p>

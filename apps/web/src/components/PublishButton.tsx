@@ -7,7 +7,7 @@ import {
   listUnpublishedIcons,
   listUnpublishedRemovals,
   packagesUrl,
-  useGithubDevEnabled,
+  usePublishEnabled,
   type StagedRemoval,
 } from '../lib/github'
 import { formatVersionBumpLabel } from '../lib/formatVersionBumpLabel'
@@ -67,7 +67,7 @@ function stagedWaitingSummary(addCount: number, removalCount: number): string {
 }
 
 export function PublishButton() {
-  const enabled = useGithubDevEnabled()
+  const enabled = usePublishEnabled()
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<ReactNode>(null)
 

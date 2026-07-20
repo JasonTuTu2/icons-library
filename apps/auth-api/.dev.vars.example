@@ -1,0 +1,15 @@
+# Copy to .dev.vars for `pnpm --filter @JasonTuTu2/icons-auth-api dev`
+# Never commit real secrets.
+
+# Bot PAT: contents:write + actions:write (same as ICON_BROWSER_TOKEN)
+GITHUB_TOKEN=ghp_xxx
+
+# owner/repo
+GITHUB_REPO=JasonTuTu2/icons-library
+
+# Random long string for signing session JWTs
+SESSION_SECRET=replace-with-long-random-secret
+
+# JSON array of accounts (passwords live only in this secret)
+# AUTH_USERS=[{"username":"designer","password":"change-me","role":"designer"},{"username":"dev","password":"change-me","role":"dev"}]
+AUTH_USERS=

@@ -14,5 +14,7 @@ apps/web/public/custom-images/*
 !apps/web/public/custom-images/.gitkeep
 apps/web/public/custom-icons/**
 !apps/web/public/custom-icons/.gitkeep
+apps/auth-api/.dev.vars
+apps/auth-api/.wrangler
 tooling/bundle-smoke/tmp-bundle
 packages/custom-icons/.publish-hold/

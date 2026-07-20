@@ -190,7 +190,7 @@ pnpm changeset
 
 **App consumers** do not add icons to this library — they install packages and use names (`ci:…`, `img:…`). New brand SVGs are added here, then published.
 
-**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). **Load selection** → **Stage**: vectors become `ci:` SVGs; placed rasters become `img:` PNGs. Apply/Publish happen in the full icon browser (magic-URL PAT for maintainers).
+**Preferred (Figma):** build and import the Development plugin (`apps/figma-plugin` — see [CONTRIBUTING.md](CONTRIBUTING.md)). **Load selection** → **Stage**: vectors become `ci:` SVGs; placed rasters become `img:` PNGs. Apply/Publish happen in the full icon browser after **Sign in** (auth API) or a legacy magic-URL PAT.
 
 **Alternative (Pages):** open the [icon browser](https://JasonTuTu2.github.io/icons-library/), **Upload** SVG / PNG / JPG → **Add to staging**, then **Apply staged to library** when ready. Wait for Actions + Pages refresh, then **Publish** for a new package version.
 
@@ -216,7 +216,7 @@ Monochrome SVGs are rewritten to `currentColor` (the `color` prop works). Multi-
 
 ### Upload & publish from Pages
 
-On the live icon browser, **staging** uses the embedded Pages token (no personal PAT). **Apply** and **Publish** only appear for developers who open the site with a session PAT (see CONTRIBUTING — magic URL `#gv-github-token=`).
+On the live icon browser, **staging** is local to the browser/plugin. **Apply** (designer or dev) and **Publish** (dev only) use **Sign in** when `AUTH_API_URL` is configured — see [`apps/auth-api/README.md`](apps/auth-api/README.md). Without that, the legacy session PAT (`#gv-github-token=`) still works for Apply/Publish.
 
 1. **Add to staging** — writes SVGs into `staging/mono|color|gradient/` and images into `staging/images/` via the GitHub Contents API (**no Action**; multi-file OK). Staging-only commits do **not** redeploy Pages. In the Figma plugin, use **Load selection** then **Stage** (vectors → SVG/`ci:`; placed images → PNG/`img:`).
 2. **Apply staged to library** — dispatches an Action that promotes **whatever is staged on GitHub right now**, runs `catalog:gen`, clears staging, then Pages redeploys. The Action authenticates with the **`ICON_BROWSER_TOKEN`** repo secret.
@@ -233,7 +233,7 @@ The Figma plugin loads a dedicated Pages panel (`figma.html`) for Load/Stage (SV
 | Secret | `ICON_BROWSER_TOKEN` | PAT with `contents: write` + `actions: write`. Used in Actions for apply/publish pushes, and baked into Pages so anyone can **stage** |
 | Variable (optional) | `ICON_BROWSER_REPO` | Override `owner/repo` baked into Pages (`VITE_GITHUB_REPO`). Defaults to `github.repository` |
 
-Anyone with the Pages URL can stage. Apply/Publish need a personal PAT via `#gv-github-token=…` (stored in sessionStorage for that tab). Note: a determined user can still extract the baked token from the JS bundle and call the API — rotate the PAT or narrow scopes if you need a harder lock.
+Anyone with the Pages URL can stage locally. Apply/Publish go through the auth API after Sign in (or legacy `#gv-github-token=…`). The baked Pages token is still used for library reads/conflict checks.
 
 | Action | What happens |
 |--------|----------------|

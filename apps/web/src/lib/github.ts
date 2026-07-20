@@ -36,6 +36,12 @@ import {
   getGithubSessionToken,
   useGithubSessionToken,
 } from './githubAuth.js'
+import {
+  authApiFetch,
+  getAuthSession,
+  isAuthApiConfigured,
+  useAuthSession,
+} from './sessionAuth.js'
 
 export type {
   AssetKind,
@@ -144,15 +150,37 @@ export function isGithubAdminEnabled(): boolean {
   return isGithubRepoConfigured() && Boolean(getStagingToken())
 }
 
-/** True when Apply / Publish UI and dispatches are available. */
+/** True when Apply is available (auth API session, or legacy PAT). */
 export function isGithubDevEnabled(): boolean {
+  if (isAuthApiConfigured()) {
+    const session = getAuthSession()
+    return Boolean(
+      session && (session.role === 'designer' || session.role === 'dev'),
+    )
+  }
   return isGithubRepoConfigured() && Boolean(getDevToken())
 }
 
-/** Reactive Apply/Publish gate (updates after magic-URL PAT is stored). */
+/** True when Publish is available (dev role via auth API, or legacy PAT). */
+export function isPublishEnabled(): boolean {
+  if (isAuthApiConfigured()) {
+    return getAuthSession()?.role === 'dev'
+  }
+  return isGithubDevEnabled()
+}
+
+/** Reactive Apply gate. */
 export function useGithubDevEnabled(): boolean {
   useGithubSessionToken()
+  useAuthSession()
   return isGithubDevEnabled()
+}
+
+/** Reactive Publish gate. */
+export function usePublishEnabled(): boolean {
+  useGithubSessionToken()
+  useAuthSession()
+  return isPublishEnabled()
 }
 
 export function actionsUrl(): string {
@@ -272,13 +300,27 @@ export async function findLibraryAssetPath(
 }
 
 /**
- * Upload this browser's staging queue to GitHub, run Apply, then clear local staging.
+ * Upload this browser's staging queue, run Apply, then clear local staging.
+ * Uses the auth API when configured; otherwise a session/dev PAT.
  */
 export async function applyLocalStagedToLibrary(): Promise<void> {
   const icons = await exportIconUploadPayloads()
   const removals = await exportRemovalNames()
   if (icons.length === 0 && removals.length === 0) {
     throw new Error('Nothing is staged in this browser.')
+  }
+
+  if (isAuthApiConfigured()) {
+    const res = await authApiFetch('/api/apply', {
+      method: 'POST',
+      body: JSON.stringify({ icons, removals }),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    if (!res.ok) {
+      throw new Error(body.error || `Apply failed (${res.status})`)
+    }
+    await clearLocalStaging()
+    return
   }
 
   const client = getDevClient()
@@ -302,9 +344,8 @@ export async function getPublishedPackageVersion(): Promise<string> {
 }
 
 export async function getPublishReadiness(): Promise<PublishReadiness> {
-  const readiness = await withAuthClear(() =>
-    getDevClient().getPublishReadiness(),
-  )
+  const readClient = getStagingToken() ? getStagingClient() : getDevClient()
+  const readiness = await withAuthClear(() => readClient.getPublishReadiness())
   const [staged, removals] = await Promise.all([
     listStagedIconsLocal(),
     listStagedRemovalsLocal(),
@@ -322,6 +363,17 @@ export async function getPublishReadiness(): Promise<PublishReadiness> {
 export async function dispatchPublish(
   options?: DispatchPublishOptions,
 ): Promise<void> {
+  if (isAuthApiConfigured()) {
+    const res = await authApiFetch('/api/publish', {
+      method: 'POST',
+      body: JSON.stringify(options ?? {}),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    if (!res.ok) {
+      throw new Error(body.error || `Publish failed (${res.status})`)
+    }
+    return
+  }
   return withAuthClear(() => getDevClient().dispatchPublish(options))
 }
 

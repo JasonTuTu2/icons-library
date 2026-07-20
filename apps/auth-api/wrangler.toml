@@ -1,0 +1,10 @@
+name = "icons-library-auth"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# Set after first deploy, e.g. https://icons-library-auth.<account>.workers.dev
+# Also add repo variable AUTH_API_URL for Pages builds (VITE_AUTH_API_URL).
+
+[vars]
+# Public CORS origins (comma-separated). Override per env if needed.
+CORS_ORIGINS = "https://JasonTuTu2.github.io,http://localhost:5173,http://127.0.0.1:5173"

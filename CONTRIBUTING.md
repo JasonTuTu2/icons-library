@@ -29,9 +29,16 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 
 The plugin never talks to GitHub — it only exports SVGs from the canvas into the embedded browser, which stages with the baked Pages token. Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
 
-### Dev: Apply & Publish (magic URL)
+### Dev: Apply & Publish
 
-Designers can **Stage** without a personal token. **Apply** and **Publish** only appear after a developer opens the icon browser with a session PAT in the URL hash (no Connect UI):
+**Preferred:** deploy `apps/auth-api` (Cloudflare Worker) and set repo variable `AUTH_API_URL`. Then use **Sign in** in the icon browser:
+
+- **designer** — Stage locally + Apply
+- **dev** — Stage, Apply, and Publish
+
+See [`apps/auth-api/README.md`](apps/auth-api/README.md) for secrets and deploy steps.
+
+**Legacy fallback** (when `AUTH_API_URL` is unset): open the icon browser with a session PAT in the URL hash:
 
 ```
 https://JasonTuTu2.github.io/icons-library/#gv-github-token=ghp_YOUR_PAT

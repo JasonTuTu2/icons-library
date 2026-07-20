@@ -129,6 +129,51 @@ pre {
   gap: 0.75rem;
 }
 
+.login-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.login-user {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.login-role {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.login-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 28rem;
+}
+
+.login-form input {
+  width: 7.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.55rem;
+  font: inherit;
+  font-size: 0.8rem;
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.login-error {
+  margin: 0;
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--danger, #b42318);
+}
+
 .package-version {
   font-size: 0.8rem;
   font-weight: 600;

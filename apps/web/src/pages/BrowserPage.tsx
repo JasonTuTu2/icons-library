@@ -392,7 +392,7 @@ export function BrowserPage() {
               source files, copy snippets,
               and review license details.
               {isGithubRepoConfigured()
-                ? ' Use Upload for SVG / PNG / JPG. Maintainers Apply and Publish.'
+                ? ' Use Upload for SVG / PNG / JPG. Sign in to Apply; devs can Publish.'
                 : ' Upload custom assets with Upload (local `pnpm dev`).'}
             </p>
           </aside>
