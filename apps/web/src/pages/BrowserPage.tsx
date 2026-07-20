@@ -195,7 +195,7 @@ export function BrowserPage() {
             value={variantFilter}
             onChange={setVariantFilter}
             ariaLabel="Variant filter"
-            searchable
+            searchable={false}
             placeholder="Variant…"
             options={[
               { value: VARIANT_ALL, label: 'All variants' },
@@ -218,7 +218,7 @@ export function BrowserPage() {
             value={sourceFilter}
             onChange={setSourceFilter}
             ariaLabel="Source filter"
-            searchable
+            searchable={false}
             placeholder="Source…"
             options={[
               { value: SOURCE_ALL, label: 'All sources' },
@@ -246,7 +246,7 @@ export function BrowserPage() {
               setUsageFilter(USAGE_ALL)
             }}
             ariaLabel="Status filter"
-            searchable
+            searchable={false}
             placeholder="Status…"
             options={[
               { value: USAGE_ALL, label: 'All' },
