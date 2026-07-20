@@ -3,7 +3,7 @@ import {
   detectVariantFromName,
   detectVariantSuffix,
   findIconNameConflicts,
-  isGithubRepoConfigured,
+  isGithubAdminEnabled,
   sanitizeIconName,
   stageIcons,
   type IconColorMode,
@@ -20,8 +20,7 @@ import {
 import {
   fullIconBrowserUrl,
   notifyFigmaUiReady,
-  openIconBrowserWithStaging,
-  syncStagingSnapshotToPlugin,
+  openExternalUrl,
   requestFigmaExport,
   requestFigmaReexport,
   requestFigmaReexportBatch,
@@ -144,7 +143,7 @@ export function FigmaDock() {
   const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
-  const githubOk = isGithubRepoConfigured()
+  const githubOk = isGithubAdminEnabled()
   const browserUrl = fullIconBrowserUrl()
 
   const namesValid = useMemo(
@@ -385,14 +384,13 @@ export function FigmaDock() {
 
       const count = stagedPayloads.length
       await stageIcons(stagedPayloads)
-      await syncStagingSnapshotToPlugin()
       setPending((prev) => {
         revokeAll(prev)
         return []
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s) in the plugin. Click Open icon browser to sync your queue for Apply.`,
+        `Staged ${count} asset(s). Open the icon browser to Apply or Publish.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -424,15 +422,15 @@ export function FigmaDock() {
       </div>
       {!githubOk ? (
         <p className="figma-dock-hint">
-          GitHub repo is not configured for this build (
-          <code>VITE_GITHUB_REPO</code>).
+          GitHub write token missing — redeploy Pages with{' '}
+          <code>ICON_BROWSER_TOKEN</code> / <code>VITE_GITHUB_REPO</code>, or open
+          with <code>#gv-github-token=…</code>.
         </p>
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage. Use <strong>Open icon browser</strong> so your queue
-          appears on the site (Figma keeps plugin storage separate from a normal
-          tab). Mono/Multi/Gradient only apply to SVG.
+          names, then Stage to the shared GitHub queue. Mono/Multi/Gradient only
+          apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (
@@ -664,16 +662,14 @@ export function FigmaDock() {
           href={browserUrl}
           onClick={(e) => {
             e.preventDefault()
-            void openIconBrowserWithStaging().then((err) => {
-              if (err) setMessage(err)
-            })
+            openExternalUrl(browserUrl)
           }}
         >
           Open icon browser
         </a>
         <span className="figma-dock-link-note">
           {' '}
-          — syncs staging, then Apply / Publish
+          — Apply / Publish
         </span>
       </p>
     </section>

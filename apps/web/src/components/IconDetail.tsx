@@ -102,7 +102,7 @@ export function IconDetail({
   const canDownload = Boolean(resolveIconAssetPath(icon))
 
   const canStageRemoval =
-    isCustomAsset && isGithubRepoConfigured()
+    isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
 
   const canEditMeta =
     isCustomAsset && isGithubRepoConfigured() && isGithubAdminEnabled()
@@ -257,7 +257,7 @@ export function IconDetail({
   async function handleStageRemoval() {
     const name = icon.name
     const ok = window.confirm(
-      `Stage removal of ${icon.id}?\n\nThis queues a removal in this browser until someone clicks Apply. The file stays in the library until then.`,
+      `Stage removal of ${icon.id}?\n\nThis writes a shared marker on GitHub. The file stays in the library until someone clicks Apply staged. Consumers keep it until you Publish after Apply.`,
     )
     if (!ok) return
 
