@@ -14,7 +14,7 @@ interface CustomIconMetadata {
     string,
     {
       category?: string
-      variant?: 'regular' | 'filled'
+      variant?: 'regular' | 'filled' | 'none'
       source?: 'iconify' | 'custom' | 'modified'
       usage?: 'in-use' | 'unused'
       note?: string
@@ -28,8 +28,10 @@ function normalizeCategory(raw: string | undefined | null): string {
 
 function normalizeVariant(
   raw: string | undefined | null,
-): 'regular' | 'filled' {
-  return raw === 'filled' ? 'filled' : 'regular'
+): 'regular' | 'filled' | 'none' {
+  if (raw === 'filled') return 'filled'
+  if (raw === 'regular') return 'regular'
+  return 'none'
 }
 
 function normalizeSource(
@@ -67,7 +69,7 @@ function setIconMetadataLocal(
   name: string,
   patch: {
     category?: string
-    variant?: 'regular' | 'filled'
+    variant?: 'regular' | 'filled' | 'none'
     source?: 'iconify' | 'custom' | 'modified'
     usage?: 'in-use' | 'unused'
     note?: string
@@ -195,7 +197,7 @@ export function customIconUploadPlugin(): Plugin {
             kind?: 'svg' | 'image'
             format?: 'png' | 'jpg' | 'jpeg'
             category?: string
-            variant?: 'regular' | 'filled'
+            variant?: 'regular' | 'filled' | 'none'
             source?: 'iconify' | 'custom' | 'modified'
             usage?: 'in-use' | 'unused'
             note?: string

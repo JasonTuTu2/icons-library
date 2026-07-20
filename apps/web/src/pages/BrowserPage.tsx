@@ -33,6 +33,7 @@ import {
 
 const VARIANT_ALL = ''
 const SOURCE_ALL = ''
+const USAGE_ALL = ''
 
 export function BrowserPage() {
   const { categories, search, getById, patchIcon } = useLiveCatalog()
@@ -41,7 +42,7 @@ export function BrowserPage() {
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
   const [variantFilter, setVariantFilter] = useState(VARIANT_ALL)
   const [sourceFilter, setSourceFilter] = useState(SOURCE_ALL)
-  const [usageFilter, setUsageFilter] = useState<'in-use' | 'unused'>('in-use')
+  const [usageFilter, setUsageFilter] = useState(USAGE_ALL)
   const [selected, setSelected] = useState<IconMeta | null>(null)
   const [displayMode, setDisplayMode] = useState<'grid' | 'table'>('grid')
   const [browseZoom, setBrowseZoom] = useState(BROWSE_ZOOM_DEFAULT)
@@ -91,7 +92,11 @@ export function BrowserPage() {
     } else if (categoryFilter !== CATEGORY_FILTER_ALL) {
       options.category = categoryFilter
     }
-    if (variantFilter === 'regular' || variantFilter === 'filled') {
+    if (
+      variantFilter === 'regular' ||
+      variantFilter === 'filled' ||
+      variantFilter === 'none'
+    ) {
       options.variant = variantFilter
     }
     if (
@@ -101,7 +106,9 @@ export function BrowserPage() {
     ) {
       options.source = sourceFilter
     }
-    options.usage = usageFilter
+    if (usageFilter === 'in-use' || usageFilter === 'unused') {
+      options.usage = usageFilter
+    }
     return search(options)
   }, [
     search,
@@ -192,13 +199,16 @@ export function BrowserPage() {
             placeholder="Variant…"
             options={[
               { value: VARIANT_ALL, label: 'All variants' },
+              { value: 'none', label: 'No variant' },
               { value: 'regular', label: 'Regular' },
               { value: 'filled', label: 'Filled' },
             ]}
             displayValue={(v) => {
               if (v === VARIANT_ALL) return 'All variants'
               if (v === 'filled') return 'Filled'
-              return 'Regular'
+              if (v === 'regular') return 'Regular'
+              if (v === 'none') return 'No variant'
+              return 'All variants'
             }}
           />
         </label>
@@ -225,19 +235,29 @@ export function BrowserPage() {
           />
         </label>
         <label className="field">
-          <span>Usage</span>
+          <span>Status</span>
           <DropdownCombobox
             value={usageFilter}
-            onChange={(next) =>
-              setUsageFilter(next === 'unused' ? 'unused' : 'in-use')
-            }
-            ariaLabel="Usage filter"
+            onChange={(next) => {
+              if (next === 'unused' || next === 'in-use') {
+                setUsageFilter(next)
+                return
+              }
+              setUsageFilter(USAGE_ALL)
+            }}
+            ariaLabel="Status filter"
             searchable
-            placeholder="Usage…"
+            placeholder="Status…"
             options={[
+              { value: USAGE_ALL, label: 'All' },
               { value: 'in-use', label: 'In use' },
               { value: 'unused', label: 'Unused' },
             ]}
+            displayValue={(v) => {
+              if (v === 'unused') return 'Unused'
+              if (v === 'in-use') return 'In use'
+              return 'All'
+            }}
           />
         </label>
         <UploadPanel

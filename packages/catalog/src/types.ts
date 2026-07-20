@@ -43,8 +43,8 @@ export interface IconMeta {
   assetPath?: string
   /** Custom assets only: designer-assigned category (empty = no category). */
   category?: string
-  /** Custom assets only: regular or filled. */
-  variant?: 'regular' | 'filled'
+  /** Custom assets only: regular, filled, or none. */
+  variant?: 'regular' | 'filled' | 'none'
   /** Whether the asset is currently in use (default in-use). */
   usage?: 'in-use' | 'unused'
   /** Free-form designer note. */

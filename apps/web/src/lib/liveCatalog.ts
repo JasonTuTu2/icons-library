@@ -72,7 +72,7 @@ function applyEntry(
   return {
     ...icon,
     category: category || undefined,
-    variant: entry.variant ?? icon.variant ?? 'regular',
+    variant: entry.variant ?? icon.variant ?? 'none',
     source: entry.source ?? icon.source ?? 'custom',
     usage: entry.usage ?? icon.usage ?? 'in-use',
     note: note || undefined,

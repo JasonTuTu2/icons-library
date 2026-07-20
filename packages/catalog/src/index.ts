@@ -44,7 +44,7 @@ export interface SearchOptions {
    */
   category?: string | null
   /** Filter by variant (custom assets). */
-  variant?: 'regular' | 'filled'
+  variant?: 'regular' | 'filled' | 'none'
   /** Filter by usage (custom assets). */
   usage?: 'in-use' | 'unused'
   limit?: number
@@ -103,7 +103,7 @@ export function filterIcons(
   }
   if (variant) {
     results = results.filter(
-      (icon) => (icon.variant ?? 'regular') === variant,
+      (icon) => (icon.variant ?? 'none') === variant,
     )
   }
   if (usage) {

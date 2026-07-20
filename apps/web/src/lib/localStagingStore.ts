@@ -132,7 +132,7 @@ async function writeStagingMeta(
     stagingMetaPath(name),
     `${JSON.stringify({
       category: category ?? '',
-      variant: variant ?? 'regular',
+      variant: variant ?? 'none',
       source: source ?? 'custom',
       usage: usage ?? 'in-use',
       note: note ?? '',
@@ -331,7 +331,7 @@ export async function listStagedIconsLocal(): Promise<StagedIcon[]> {
       return {
         ...icon,
         category: staged?.category ?? icon.category ?? '',
-        variant: staged?.variant ?? icon.variant ?? 'regular',
+        variant: staged?.variant ?? icon.variant ?? 'none',
         source: staged?.source ?? icon.source ?? 'custom',
         usage: staged?.usage ?? icon.usage ?? 'in-use',
         note: staged?.note ?? icon.note ?? '',

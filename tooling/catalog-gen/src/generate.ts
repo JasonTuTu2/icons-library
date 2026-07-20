@@ -52,7 +52,7 @@ interface IconMeta {
   format?: 'png' | 'jpg' | 'jpeg'
   assetPath?: string
   category?: string
-  variant?: 'regular' | 'filled'
+  variant?: 'regular' | 'filled' | 'none'
   usage?: 'in-use' | 'unused'
   note?: string
 }

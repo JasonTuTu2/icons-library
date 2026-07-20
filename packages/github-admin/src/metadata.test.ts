@@ -111,7 +111,7 @@ describe('metadata', () => {
     })
     expect(parseStagingMetaFile('not json')).toEqual({
       category: '',
-      variant: 'regular',
+      variant: 'none',
       source: 'custom',
       usage: 'in-use',
       note: '',
@@ -121,7 +121,7 @@ describe('metadata', () => {
   it('detects variant from name suffix', () => {
     expect(detectVariantFromName('v1-call-filled')).toBe('filled')
     expect(detectVariantFromName('v1-call-regular')).toBe('regular')
-    expect(detectVariantFromName('billing-alert')).toBe('regular')
+    expect(detectVariantFromName('billing-alert')).toBe('none')
     expect(detectVariantFromName('filled')).toBe('filled')
   })
 
@@ -134,6 +134,7 @@ describe('metadata', () => {
     const metadata = createEmptyMetadata()
     expect(getIconVariant(metadata, 'v1-note-filled')).toBe('filled')
     expect(getIconVariant(metadata, 'v1-note-regular')).toBe('regular')
+    expect(getIconVariant(metadata, 'billing-alert')).toBe('none')
   })
 
   it('defaults missing source to custom', () => {

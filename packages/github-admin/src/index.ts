@@ -638,7 +638,7 @@ export function createGithubAdminClient(
   async function writeStagingMeta(
     name: string,
     category: string,
-    variant: IconVariant = 'regular',
+    variant: IconVariant = 'none',
     source: IconSource = 'custom',
     usage: IconUsage = 'in-use',
     note: string = '',
@@ -1212,7 +1212,7 @@ export function createGithubAdminClient(
           await writeStagingMeta(
             icon.name,
             icon.category ?? '',
-            icon.variant ?? 'regular',
+            icon.variant ?? 'none',
             icon.source ?? 'custom',
             icon.usage ?? 'in-use',
             icon.note ?? '',
@@ -1239,7 +1239,7 @@ export function createGithubAdminClient(
         await writeStagingMeta(
           icon.name,
           icon.category ?? '',
-          icon.variant ?? 'regular',
+          icon.variant ?? 'none',
           icon.source ?? 'custom',
           icon.usage ?? 'in-use',
           icon.note ?? '',

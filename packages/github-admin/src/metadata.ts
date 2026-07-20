@@ -1,4 +1,4 @@
-export type IconVariant = 'regular' | 'filled'
+export type IconVariant = 'regular' | 'filled' | 'none'
 /** Designer-assigned origin for a custom asset. */
 export type IconSource = 'iconify' | 'custom' | 'modified'
 /** Whether the asset is currently in use. */
@@ -37,11 +37,13 @@ export function categoryLabel(category: string | undefined | null): string {
 export function normalizeVariant(
   raw: string | undefined | null,
 ): IconVariant {
-  return raw === 'filled' ? 'filled' : 'regular'
+  if (raw === 'filled') return 'filled'
+  if (raw === 'regular') return 'regular'
+  return 'none'
 }
 
 export function detectVariantFromName(name: string): IconVariant {
-  return detectVariantSuffix(name) ?? 'regular'
+  return detectVariantSuffix(name) ?? 'none'
 }
 
 /** Returns a variant only when the name ends in `-filled` / `-regular` (or is those words). */
@@ -53,7 +55,10 @@ export function detectVariantSuffix(name: string): IconVariant | null {
 }
 
 export function variantLabel(variant: IconVariant | undefined | null): string {
-  return normalizeVariant(variant) === 'filled' ? 'Filled' : 'Regular'
+  const value = normalizeVariant(variant)
+  if (value === 'filled') return 'Filled'
+  if (value === 'regular') return 'Regular'
+  return 'No variant'
 }
 
 export function normalizeSource(
@@ -205,7 +210,7 @@ export function parseStagingMetaFile(raw: string): {
   } catch {
     return {
       category: '',
-      variant: 'regular',
+      variant: 'none',
       source: 'custom',
       usage: 'in-use',
       note: '',
@@ -325,7 +330,7 @@ export function getIconVariant(
   name: string,
 ): IconVariant {
   const stored = metadata.icons[name]?.variant
-  if (stored === 'filled' || stored === 'regular') {
+  if (stored === 'filled' || stored === 'regular' || stored === 'none') {
     return stored
   }
   return detectVariantFromName(name)

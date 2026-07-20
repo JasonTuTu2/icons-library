@@ -43,7 +43,7 @@ export function ApplyAllFields({
   formatDisabled = false,
 }: ApplyAllFieldsProps) {
   const [category, setCategory] = useState('')
-  const [variant, setVariant] = useState<IconVariant>('regular')
+  const [variant, setVariant] = useState<IconVariant>('none')
   const [source, setSource] = useState<IconSource>('custom')
   const [usage, setUsage] = useState<IconUsage>('in-use')
   const [note, setNote] = useState('')

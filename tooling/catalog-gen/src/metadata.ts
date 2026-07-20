@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-export type IconVariant = 'regular' | 'filled'
+export type IconVariant = 'regular' | 'filled' | 'none'
 export type IconSource = 'iconify' | 'custom' | 'modified'
 export type IconUsage = 'in-use' | 'unused'
 
@@ -24,7 +24,9 @@ function normalizeCategory(raw: string | undefined | null): string {
 }
 
 function normalizeVariant(raw: string | undefined | null): IconVariant {
-  return raw === 'filled' ? 'filled' : 'regular'
+  if (raw === 'filled') return 'filled'
+  if (raw === 'regular') return 'regular'
+  return 'none'
 }
 
 function normalizeSource(raw: string | undefined | null): IconSource {
@@ -44,7 +46,7 @@ export function detectVariantFromName(name: string): IconVariant {
   const trimmed = name.trim()
   if (/(^|-)filled$/i.test(trimmed)) return 'filled'
   if (/(^|-)regular$/i.test(trimmed)) return 'regular'
-  return 'regular'
+  return 'none'
 }
 
 export function loadCustomMetadata(metadataPath: string): CustomIconMetadata {
@@ -126,7 +128,9 @@ export function variantForIcon(
   name: string,
 ): IconVariant {
   const stored = metadata.icons[name]?.variant
-  if (stored === 'filled' || stored === 'regular') return stored
+  if (stored === 'filled' || stored === 'regular' || stored === 'none') {
+    return stored
+  }
   return detectVariantFromName(name)
 }
 

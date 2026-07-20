@@ -72,7 +72,11 @@ export function IconDetail({
   const [variantBusy, setVariantBusy] = useState(false)
   const [variantMessage, setVariantMessage] = useState<string | null>(null)
   const [variantValue, setVariantValue] = useState<IconVariant>(
-    icon.variant === 'filled' ? 'filled' : 'regular',
+    icon.variant === 'filled'
+      ? 'filled'
+      : icon.variant === 'regular'
+        ? 'regular'
+        : 'none',
   )
   const [sourceBusy, setSourceBusy] = useState(false)
   const [sourceMessage, setSourceMessage] = useState<string | null>(null)
@@ -101,7 +105,13 @@ export function IconDetail({
 
   useEffect(() => {
     setCategoryValue(icon.category ?? '')
-    setVariantValue(icon.variant === 'filled' ? 'filled' : 'regular')
+    setVariantValue(
+      icon.variant === 'filled'
+        ? 'filled'
+        : icon.variant === 'regular'
+          ? 'regular'
+          : 'none',
+    )
     setSourceValue(
       icon.source === 'iconify' || icon.source === 'modified'
         ? icon.source
@@ -157,7 +167,13 @@ export function IconDetail({
       onVariantUpdated?.(nextVariant)
       setVariantMessage('Variant saved.')
     } catch (err) {
-      setVariantValue(icon.variant === 'filled' ? 'filled' : 'regular')
+      setVariantValue(
+        icon.variant === 'filled'
+          ? 'filled'
+          : icon.variant === 'regular'
+            ? 'regular'
+            : 'none',
+      )
       setVariantMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setVariantBusy(false)
