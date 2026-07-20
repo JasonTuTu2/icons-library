@@ -447,7 +447,7 @@
     "porting-regular": {
       "category": "Document & File",
       "variant": "regular",
-      "source": "iconify",
+      "source": "modified",
       "usage": "in-use",
       "note": ""
     },
