@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-catalog
 
+## 2.0.0
+
+### Major Changes
+
+- Publish from icon browser (major).
+
 ## 1.1.0
 
 ### Minor Changes
