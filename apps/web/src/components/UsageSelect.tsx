@@ -28,7 +28,7 @@ export function UsageSelect({
       options={OPTIONS}
       ariaLabel={ariaLabel}
       className={`usage-dropdown${className ? ` ${className}` : ''}`}
-      searchable={false}
+      searchable
       placeholder="Usage…"
     />
   )

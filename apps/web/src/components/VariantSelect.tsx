@@ -33,7 +33,7 @@ export function VariantSelect({
       options={OPTIONS}
       ariaLabel={ariaLabel}
       className={`variant-dropdown${className ? ` ${className}` : ''}`}
-      searchable={false}
+      searchable
       placeholder="Variant…"
       displayValue={(v) => {
         if (v === 'filled') return 'Filled'

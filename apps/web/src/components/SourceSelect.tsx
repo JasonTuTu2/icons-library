@@ -31,7 +31,7 @@ export function SourceSelect({
       options={OPTIONS}
       ariaLabel={ariaLabel}
       className={`source-dropdown${className ? ` ${className}` : ''}`}
-      searchable={false}
+      searchable
       placeholder="Source…"
     />
   )
