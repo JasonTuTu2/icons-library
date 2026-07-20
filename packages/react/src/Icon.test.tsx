@@ -5,7 +5,7 @@ import { Icon } from '../src/index.js'
 describe('Icon', () => {
   it('mounts a brand icon without throwing', () => {
     const { container } = render(
-      <Icon name="ci:v1-call-filled" label="Call" />,
+      <Icon name="ci:call-filled" label="Call" />,
     )
     // Iconify may render svg asynchronously; at least mount without throw
     expect(container.firstChild).toBeTruthy()
@@ -13,7 +13,7 @@ describe('Icon', () => {
 
   it('renders decorative brand icon', async () => {
     const { container } = render(
-      <Icon name="ci:v1-call-filled" decorative />,
+      <Icon name="ci:call-filled" decorative />,
     )
     expect(container.firstChild).toBeTruthy()
     await waitFor(() => {

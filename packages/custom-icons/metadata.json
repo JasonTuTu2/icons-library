@@ -1,14 +1,11 @@
 {
   "categories": [
     "Action",
-    "Brand Logos",
     "Direction",
     "Document & File",
     "Finance",
     "Messagining",
-    "Payment",
     "Phone & Calling",
-    "Product Logos & Icons",
     "Recording & Audio",
     "Search & Filter",
     "Security",
@@ -875,125 +872,6 @@
       "category": "Security",
       "variant": "filled",
       "source": "modified",
-      "usage": "in-use",
-      "note": ""
-    },
-    "logo-go": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "alipay": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "apple": {
-      "category": "Brand Logos",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "coins-go-gold": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "coins-go-grey": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "coins-pingme-grey": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "crypto-com": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "crypto-pay": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "google": {
-      "category": "Brand Logos",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "logo-pingme": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "logo-team": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "logo-wephone": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "logo-wetalk": {
-      "category": "Product Logos & Icons",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "paypal": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "unionpay": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "visa": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "wechat-pay": {
-      "category": "Payment",
-      "variant": "none",
-      "source": "custom",
       "usage": "in-use",
       "note": ""
     }

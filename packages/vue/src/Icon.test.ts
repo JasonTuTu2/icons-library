@@ -5,14 +5,14 @@ import { Icon } from '../src/index.js'
 describe('Icon', () => {
   it('renders a brand icon with label', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'ci:v1-call-filled', label: 'Call' },
+      props: { name: 'ci:call-filled', label: 'Call' },
     })
     expect(wrapper.attributes('aria-label')).toBe('Call')
   })
 
   it('marks decorative icons', () => {
     const wrapper = mount(Icon, {
-      props: { name: 'ci:v1-call-filled', decorative: true },
+      props: { name: 'ci:call-filled', decorative: true },
     })
     expect(wrapper.attributes('aria-hidden')).toBe('true')
   })
