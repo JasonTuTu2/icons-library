@@ -6,6 +6,7 @@
     "Document & File",
     "Finance",
     "Messagining",
+    "My First Category",
     "Payment Icons",
     "Phone & Calling",
     "Product Logos & Icons",
@@ -648,11 +649,11 @@
       "note": ""
     },
     "ai-translate-filled": {
-      "category": "Translate & Language",
+      "category": "My First Category",
       "variant": "filled",
       "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "My first note."
     },
     "briefcase-regular": {
       "category": "Users & Team",
@@ -753,18 +754,18 @@
       "note": ""
     },
     "globe-filled": {
-      "category": "Translate & Language",
+      "category": "My First Category",
       "variant": "filled",
       "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "My first note."
     },
     "globe-regular": {
-      "category": "Translate & Language",
+      "category": "My First Category",
       "variant": "regular",
       "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "My first note."
     },
     "help-filled": {
       "category": "Status, Alert & Tips",
@@ -851,18 +852,18 @@
       "note": ""
     },
     "translate-filled": {
-      "category": "Translate & Language",
+      "category": "My First Category",
       "variant": "filled",
       "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "My first note."
     },
     "translate-regular": {
-      "category": "Translate & Language",
+      "category": "My First Category",
       "variant": "regular",
-      "source": "custom",
+      "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "My first note."
     },
     "unlocked-filled": {
       "category": "Security",
