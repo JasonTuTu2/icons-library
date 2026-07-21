@@ -1,6 +1,6 @@
 {
   "name": "@JasonTuTu2/icons-core",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Shared types, naming, and a11y helpers for the icons library",
   "license": "MIT",
   "type": "module",
