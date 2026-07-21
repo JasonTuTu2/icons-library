@@ -1028,21 +1028,6 @@ pre {
   font-weight: 500;
 }
 
-.category-edit {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.4rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.category-remove-btn {
-  align-self: flex-start;
-  font-size: 0.8rem;
-  padding: 0.35rem 0.65rem;
-}
-
 .snippet {
   margin-top: 1.25rem;
   padding: 1rem;

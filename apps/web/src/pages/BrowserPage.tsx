@@ -38,7 +38,7 @@ const SOURCE_ALL = ''
 const USAGE_ALL = ''
 
 export function BrowserPage() {
-  const { categories, search, getById, patchIcon, refresh } = useLiveCatalog()
+  const { categories, search, getById, patchIcon } = useLiveCatalog()
   const introducedVersions = useIntroducedVersions()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(CATEGORY_FILTER_ALL)
@@ -373,20 +373,6 @@ export function BrowserPage() {
             onCategoryUpdated={(category) =>
               patchSelected(selected.name, { category })
             }
-            onCategoryRemoved={(category, affectedNames) => {
-              for (const name of affectedNames) {
-                patchIcon(name, { category: '' })
-              }
-              if (categoryFilter === category) {
-                setCategoryFilter(CATEGORY_FILTER_ALL)
-              }
-              setSelected((current) => {
-                if (!current) return current
-                if ((current.category ?? '').trim() !== category) return current
-                return { ...current, category: undefined }
-              })
-              void refresh()
-            }}
             onVariantUpdated={(variant: IconVariant) =>
               patchSelected(selected.name, { variant })
             }

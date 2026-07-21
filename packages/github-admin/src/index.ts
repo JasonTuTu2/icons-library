@@ -12,7 +12,6 @@ import {
   normalizeVariant,
   parseMetadataJson,
   parseStagingMetaFile,
-  removeCategoryFromRegistry,
   serializeMetadata,
   setIconMetadata,
   type CustomIconMetadata,
@@ -178,8 +177,6 @@ export interface GithubAdminClient {
       note?: string
     },
   ): Promise<void>
-  /** Remove a category from the registry; icons using it become No Category. */
-  removeCategory(category: string): Promise<{ affectedNames: string[] }>
 }
 
 /** Thrown when GitHub rejects credentials (401/403). Callers should clear stored tokens. */
@@ -232,7 +229,6 @@ export {
   usageLabel,
   variantLabel,
   noteLabel,
-  removeCategoryFromRegistry,
 } from './metadata.js'
 
 function stagingMetaPath(name: string): string {
@@ -1731,24 +1727,6 @@ export function createGithubAdminClient(
         metadata,
         `[skip ci] Update ${parts.join(' and ') || 'metadata'} for ${sanitized}`,
       )
-    },
-
-    async removeCategory(
-      category: string,
-    ): Promise<{ affectedNames: string[] }> {
-      const target = normalizeCategory(category)
-      if (!target) {
-        throw new Error('Category name is required.')
-      }
-      const { metadata, affectedNames } = removeCategoryFromRegistry(
-        await readMetadataFile(),
-        target,
-      )
-      await writeMetadataFile(
-        metadata,
-        `[skip ci] Remove category ${target}`,
-      )
-      return { affectedNames }
     },
   }
 }
