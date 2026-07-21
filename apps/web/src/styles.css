@@ -601,13 +601,19 @@ pre {
 .field-search input {
   width: 100%;
   box-sizing: border-box;
-  padding-left: 2.15rem;
+  padding-left: 2.65rem;
 }
 
 .ghost.with-chrome-icon {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.staged-block > .ghost {
+  justify-self: start;
 }
 
 .field {
