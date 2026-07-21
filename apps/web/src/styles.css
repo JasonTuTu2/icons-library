@@ -571,6 +571,45 @@ pre {
   border-color: #1e7ad9;
 }
 
+.chrome-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: inherit;
+}
+
+.chrome-icon svg {
+  display: block;
+}
+
+.field-search {
+  position: relative;
+  display: block;
+}
+
+.field-search .chrome-icon {
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.field-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 2.15rem;
+}
+
+.ghost.with-chrome-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .field {
   display: flex;
   flex-direction: column;

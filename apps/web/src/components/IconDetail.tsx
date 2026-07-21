@@ -17,6 +17,7 @@ import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
 import { UsageSelect, usageLabel } from './UsageSelect'
+import { ChromeIcon } from './ChromeIcon'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -320,10 +321,11 @@ export function IconDetail({
         <div className="detail-download">
           <button
             type="button"
-            className="ghost"
+            className="ghost with-chrome-icon"
             disabled={downloadBusy}
             onClick={() => void handleDownload()}
           >
+            <ChromeIcon name="ci:file-download-regular" />
             {downloadBusy ? 'Downloading…' : downloadLabel}
           </button>
           {downloadMessage ? (

@@ -55,6 +55,7 @@ import {
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 import { ApplyAllFields } from './ApplyAllFields'
+import { ChromeIcon } from './ChromeIcon'
 import { CategorySelect, categoryLabel } from './CategorySelect'
 import { VariantSelect, variantLabel } from './VariantSelect'
 import { SourceSelect, sourceLabel } from './SourceSelect'
@@ -723,6 +724,7 @@ export function UploadPanel({
         className="toolbar-btn toolbar-btn-upload"
         onClick={() => setOpen(true)}
       >
+        <ChromeIcon name="ci:upload-filled" />
         Upload
       </button>
 
@@ -1136,10 +1138,11 @@ export function UploadPanel({
                       {canApplyPublish ? (
                         <button
                           type="button"
-                          className="ghost accent"
+                          className="ghost accent with-chrome-icon"
                           disabled={busy || !hasStagedWork}
                           onClick={() => void handleApplyStaged()}
                         >
+                          <ChromeIcon name="ci:checkmark-regular" />
                           {busy ? 'Working…' : 'Apply staged to library'}
                         </button>
                       ) : null}

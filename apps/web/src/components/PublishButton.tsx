@@ -21,6 +21,7 @@ import {
 } from '../lib/unpublishedSelection'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { PublishConfirmDialog } from './PublishConfirmDialog'
+import { ChromeIcon } from './ChromeIcon'
 
 function stagedWaitingSummary(addCount: number, removalCount: number): string {
   const parts: string[] = []
@@ -160,6 +161,7 @@ export function PublishButton() {
         disabled={busy}
         onClick={() => void handlePublish()}
       >
+        <ChromeIcon name="ci:checkmark-circle-filled" />
         {busy && !confirm ? 'Preparing…' : 'Publish'}
       </button>
       {notice}
