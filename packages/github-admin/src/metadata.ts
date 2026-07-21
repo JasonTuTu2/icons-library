@@ -31,7 +31,7 @@ export function normalizeCategory(raw: string | undefined | null): string {
 
 export function categoryLabel(category: string | undefined | null): string {
   const value = normalizeCategory(category)
-  return value || 'No category'
+  return value || 'No Category'
 }
 
 export function normalizeVariant(
@@ -56,9 +56,9 @@ export function detectVariantSuffix(name: string): IconVariant | null {
 
 export function variantLabel(variant: IconVariant | undefined | null): string {
   const value = normalizeVariant(variant)
-  if (value === 'filled') return 'Filled'
-  if (value === 'regular') return 'Regular'
-  return 'No variant'
+  if (value === 'filled') return 'filled'
+  if (value === 'regular') return 'regular'
+  return 'no variant'
 }
 
 export function normalizeSource(
@@ -80,7 +80,7 @@ export function normalizeUsage(raw: string | undefined | null): IconUsage {
 }
 
 export function usageLabel(usage: IconUsage | undefined | null): string {
-  return normalizeUsage(usage) === 'unused' ? 'Unused' : 'In use'
+  return normalizeUsage(usage) === 'unused' ? 'Unused' : 'In Use'
 }
 
 /** Trim; empty string means no note. Cap length for Contents API commits. */
@@ -90,7 +90,7 @@ export function normalizeNote(raw: string | undefined | null): string {
 
 export function noteLabel(note: string | undefined | null): string {
   const value = normalizeNote(note)
-  return value || 'No note'
+  return value || 'No Note'
 }
 
 export function parseMetadataJson(raw: string): CustomIconMetadata {
@@ -237,7 +237,7 @@ export function mergeStagingMetaIntoMetadata(
     const stagedCat = normalizeCategory(category)
     const existingCat = normalizeCategory(next.icons[name]?.category)
     // Empty staged category means "unchanged" on replace — Figma/Upload default
-    // to '' and must not wipe a library category into "No category".
+    // to '' and must not wipe a library category into "No Category".
     const cat = stagedCat || existingCat
     next.icons[name] = {
       ...next.icons[name],

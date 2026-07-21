@@ -2,7 +2,7 @@ import type { IconUsage } from '@JasonTuTu2/github-admin'
 import { DropdownCombobox } from './DropdownCombobox'
 
 const OPTIONS = [
-  { value: 'in-use', label: 'In use' },
+  { value: 'in-use', label: 'In Use' },
   { value: 'unused', label: 'Unused' },
 ]
 
@@ -35,5 +35,5 @@ export function UsageSelect({
 }
 
 export function usageLabel(usage: IconUsage | undefined): string {
-  return usage === 'unused' ? 'Unused' : 'In use'
+  return usage === 'unused' ? 'Unused' : 'In Use'
 }

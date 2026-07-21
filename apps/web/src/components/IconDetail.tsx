@@ -367,7 +367,7 @@ export function IconDetail({
             <dt>Color mode</dt>
             <dd>
               {icon.colorMode === 'preserved'
-                ? 'Multi-color (preserved)'
+                ? 'Multi-Color (preserved)'
                 : icon.colorMode === 'gradient'
                   ? 'Gradient (preserved paints)'
                   : 'Monochrome'}
@@ -525,7 +525,7 @@ export function IconDetail({
               ) : icon.note?.trim() ? (
                 icon.note
               ) : (
-                'No note'
+                'No Note'
               )}
               {noteBusy ? (
                 <span className="meta-note"> Saving…</span>

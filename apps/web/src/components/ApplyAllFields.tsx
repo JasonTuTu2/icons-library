@@ -52,7 +52,7 @@ export function ApplyAllFields({
 
   return (
     <div className="apply-all-fields">
-      <span className="apply-all-label">Apply to all</span>
+      <span className="apply-all-label">Apply to All</span>
       {onApplyFormat ? (
         <DropdownCombobox
           className="apply-all-format"

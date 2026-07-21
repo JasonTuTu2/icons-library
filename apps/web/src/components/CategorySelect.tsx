@@ -24,7 +24,7 @@ export function CategorySelect({
 }: CategorySelectProps) {
   const options = useMemo(
     (): DropdownOption[] => [
-      { value: '', label: 'No category' },
+      { value: '', label: 'No Category' },
       ...categories.map((c) => ({ value: c, label: c })),
     ],
     [categories],
@@ -41,7 +41,7 @@ export function CategorySelect({
       allowCreate
       onCreateOption={onCreateCategory}
       placeholder="Type to find or create…"
-      displayValue={(v) => (v.trim() ? v : 'No category')}
+      displayValue={(v) => (v.trim() ? v : 'No Category')}
     />
   )
 }
@@ -59,8 +59,8 @@ export function CategoryFilterSelect({
 }: CategoryFilterSelectProps) {
   const options = useMemo(
     (): DropdownOption[] => [
-      { value: CATEGORY_FILTER_ALL, label: 'All categories' },
-      { value: CATEGORY_FILTER_NONE, label: 'No category' },
+      { value: CATEGORY_FILTER_ALL, label: 'All Categories' },
+      { value: CATEGORY_FILTER_NONE, label: 'No Category' },
       ...categories.map((c) => ({ value: c, label: c })),
     ],
     [categories],
@@ -76,8 +76,8 @@ export function CategoryFilterSelect({
       searchable
       placeholder="Type to filter categories…"
       displayValue={(v) => {
-        if (v === CATEGORY_FILTER_ALL) return 'All categories'
-        if (v === CATEGORY_FILTER_NONE) return 'No category'
+        if (v === CATEGORY_FILTER_ALL) return 'All Categories'
+        if (v === CATEGORY_FILTER_NONE) return 'No Category'
         return v
       }}
     />
@@ -86,5 +86,5 @@ export function CategoryFilterSelect({
 
 export function categoryLabel(category: string | undefined): string {
   const trimmed = (category ?? '').trim()
-  return trimmed || 'No category'
+  return trimmed || 'No Category'
 }

@@ -245,7 +245,7 @@ export function DropdownCombobox({
         >
           {visible.length === 0 ? (
             <li className="dropdown-combobox-empty" role="presentation">
-              No matches
+              No Matches
             </li>
           ) : (
             visible.map((option, index) => (

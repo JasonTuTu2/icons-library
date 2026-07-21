@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { IconPreview } from './IconPreview'
+import { variantLabel } from './VariantSelect'
 
 const BASE_ROW_HEIGHT = 56
 const BASE_HEADER_HEIGHT = 44
@@ -103,7 +104,9 @@ export function IconTable({
                   <IconPreview icon={icon} size={iconSize} />
                 </div>
                 <div className="icon-table-cell">{icon.name}</div>
-                <div className="icon-table-cell">{cell(icon.variant)}</div>
+                <div className="icon-table-cell">
+                  {variantLabel(icon.variant)}
+                </div>
                 <div className="icon-table-cell">
                   {formatSource(icon.source)}
                 </div>

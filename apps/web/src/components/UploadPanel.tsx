@@ -888,7 +888,7 @@ export function UploadPanel({
                             item.kind === 'image'
                               ? `Brand image (${item.format})`
                               : item.colorMode === 'preserved'
-                                ? 'Multi-color preview'
+                                ? 'Multi-Color preview'
                                 : item.colorMode === 'gradient'
                                   ? 'Gradient preview'
                                   : 'Monochrome preview (tinted)'
@@ -930,13 +930,13 @@ export function UploadPanel({
                             searchable
                             placeholder="Color…"
                             displayValue={(v) => {
-                              if (v === 'preserved') return 'Multi-color'
+                              if (v === 'preserved') return 'Multi-Color'
                               if (v === 'gradient') return 'Gradient'
                               return 'Monochrome'
                             }}
                             options={[
                               { value: 'mono', label: 'Monochrome' },
-                              { value: 'preserved', label: 'Multi-color' },
+                              { value: 'preserved', label: 'Multi-Color' },
                               { value: 'gradient', label: 'Gradient' },
                             ]}
                             onChange={(value) => {
@@ -1163,7 +1163,7 @@ export function UploadPanel({
                                 setAllUnpublishedChecked(e.target.checked)
                               }
                             />
-                            <span>Check all</span>
+                            <span>Check All</span>
                           </label>
                           <ul className="staged-list check-list">
                             {unpublished.map((icon) => (

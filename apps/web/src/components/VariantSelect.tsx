@@ -2,9 +2,9 @@ import type { IconVariant } from '@JasonTuTu2/github-admin'
 import { DropdownCombobox } from './DropdownCombobox'
 
 const OPTIONS = [
-  { value: 'none', label: 'No variant' },
-  { value: 'regular', label: 'Regular' },
-  { value: 'filled', label: 'Filled' },
+  { value: 'none', label: 'no variant' },
+  { value: 'regular', label: 'regular' },
+  { value: 'filled', label: 'filled' },
 ]
 
 interface VariantSelectProps {
@@ -36,16 +36,16 @@ export function VariantSelect({
       searchable
       placeholder="Variant…"
       displayValue={(v) => {
-        if (v === 'filled') return 'Filled'
-        if (v === 'regular') return 'Regular'
-        return 'No variant'
+        if (v === 'filled') return 'filled'
+        if (v === 'regular') return 'regular'
+        return 'no variant'
       }}
     />
   )
 }
 
 export function variantLabel(variant: IconVariant | undefined): string {
-  if (variant === 'filled') return 'Filled'
-  if (variant === 'regular') return 'Regular'
-  return 'No variant'
+  if (variant === 'filled') return 'filled'
+  if (variant === 'regular') return 'regular'
+  return 'no variant'
 }

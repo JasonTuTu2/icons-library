@@ -63,7 +63,7 @@ export function NoteToggleField({
         aria-expanded={open}
         aria-controls={inputId}
         disabled={disabled}
-        title={hasNote ? 'Edit note' : 'Add note'}
+        title={hasNote ? 'Edit Note' : 'Add Note'}
         onClick={() => setOpen((prev) => !prev)}
       >
         Note{hasNote ? ' ·' : ''}

@@ -133,7 +133,7 @@ import { Icon } from '@JasonTuTu2/icons-vue'
         </p>
         <p>
           Assign a <strong>Category</strong> before Stage (apply to all or per
-          asset). Default is <em>No category</em>. Edit category later in the
+          asset). Default is <em>No Category</em>. Edit category later in the
           detail sidebar for custom <code>ci:</code> / <code>img:</code> assets.
         </p>
         <p>

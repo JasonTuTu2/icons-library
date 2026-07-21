@@ -216,17 +216,17 @@ export function BrowserPage() {
             searchable
             placeholder="Variant…"
             options={[
-              { value: VARIANT_ALL, label: 'All variants' },
-              { value: 'none', label: 'No variant' },
-              { value: 'regular', label: 'Regular' },
-              { value: 'filled', label: 'Filled' },
+              { value: VARIANT_ALL, label: 'All Variants' },
+              { value: 'none', label: 'no variant' },
+              { value: 'regular', label: 'regular' },
+              { value: 'filled', label: 'filled' },
             ]}
             displayValue={(v) => {
-              if (v === VARIANT_ALL) return 'All variants'
-              if (v === 'filled') return 'Filled'
-              if (v === 'regular') return 'Regular'
-              if (v === 'none') return 'No variant'
-              return 'All variants'
+              if (v === VARIANT_ALL) return 'All Variants'
+              if (v === 'filled') return 'filled'
+              if (v === 'regular') return 'regular'
+              if (v === 'none') return 'no variant'
+              return 'All Variants'
             }}
           />
         </label>
@@ -239,13 +239,13 @@ export function BrowserPage() {
             searchable
             placeholder="Source…"
             options={[
-              { value: SOURCE_ALL, label: 'All sources' },
+              { value: SOURCE_ALL, label: 'All Sources' },
               { value: 'custom', label: 'Custom' },
               { value: 'iconify', label: 'Iconify' },
               { value: 'modified', label: 'Modified' },
             ]}
             displayValue={(v) => {
-              if (v === SOURCE_ALL) return 'All sources'
+              if (v === SOURCE_ALL) return 'All Sources'
               if (v === 'iconify') return 'Iconify'
               if (v === 'modified') return 'Modified'
               return 'Custom'
@@ -268,12 +268,12 @@ export function BrowserPage() {
             placeholder="Status…"
             options={[
               { value: USAGE_ALL, label: 'All' },
-              { value: 'in-use', label: 'In use' },
+              { value: 'in-use', label: 'In Use' },
               { value: 'unused', label: 'Unused' },
             ]}
             displayValue={(v) => {
               if (v === 'unused') return 'Unused'
-              if (v === 'in-use') return 'In use'
+              if (v === 'in-use') return 'In Use'
               return 'All'
             }}
           />
@@ -284,7 +284,7 @@ export function BrowserPage() {
           disabled={!hasActiveFilters}
           onClick={clearAllFilters}
         >
-          Clear filters
+          Clear Filters
         </button>
         </div>
         <div className="browser-toolbar-actions">

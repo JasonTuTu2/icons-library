@@ -74,7 +74,7 @@ export function IconGrid({
                   >
                     {showCategory ? (
                       <span className="icon-cell-category">
-                        {cat || 'No category'}
+                        {cat || 'No Category'}
                       </span>
                     ) : (
                       <span className="icon-cell-category is-spacer" aria-hidden>
