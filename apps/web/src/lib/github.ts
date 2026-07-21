@@ -31,6 +31,7 @@ import {
   stageRemovalsLocal,
   unstageRemovalLocal,
 } from './localStagingStore.js'
+import { clearAccountStaging } from './stagingHandoff.js'
 import {
   clearGithubSessionToken,
   getGithubSessionToken,
@@ -505,6 +506,9 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
   if (isAuthApiConfigured()) {
     await applyStagedViaAuthApi(icons, removals)
     await clearLocalStaging()
+    await clearAccountStaging().catch(() => {
+      // Local already cleared; server queue TTL will expire if delete fails.
+    })
     return
   }
 

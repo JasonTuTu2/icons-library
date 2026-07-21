@@ -28,6 +28,8 @@ import {
   type FigmaAssetFormat,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
+import { putAccountStaging } from '../lib/stagingHandoff'
+import { getAuthSession, isAuthApiConfigured } from '../lib/sessionAuth'
 import { ApplyAllFields } from './ApplyAllFields'
 import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
@@ -382,6 +384,9 @@ export function FigmaDock() {
 
       const count = stagedPayloads.length
       await stageIconsInPlugin(stagedPayloads)
+      if (isAuthApiConfigured() && getAuthSession()) {
+        await putAccountStaging({ v: 1, icons: stagedPayloads, removals: [] })
+      }
       setPending((prev) => {
         revokeAll(prev)
         return []
@@ -389,8 +394,12 @@ export function FigmaDock() {
       setNameConflictMsgs([])
       setMessage(
         count === 1
-          ? 'Staged 1 asset. Open icon browser to Apply.'
-          : `Staged ${count} assets. Open icon browser to Apply.`,
+          ? isAuthApiConfigured() && getAuthSession()
+            ? 'Staged 1 asset to your account. Open the icon browser (signed in) to Apply.'
+            : 'Staged 1 asset. Sign in, then open icon browser to Apply.'
+          : isAuthApiConfigured() && getAuthSession()
+            ? `Staged ${count} assets to your account. Open the icon browser (signed in) to Apply.`
+            : `Staged ${count} assets. Sign in, then open icon browser to Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -428,9 +437,9 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage (saved in the plugin). Use{' '}
-          <strong>Open icon browser</strong> to Apply / Publish. Mono/Multi/Gradient
-          only apply to SVG.
+          names, then Stage (saved to your account when signed in). Use{' '}
+          <strong>Open icon browser</strong> to Apply / Publish — or open the
+          site signed in and open Upload. Mono/Multi/Gradient only apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (

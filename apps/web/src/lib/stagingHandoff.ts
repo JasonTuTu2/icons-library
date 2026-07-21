@@ -109,6 +109,68 @@ export async function buildStagingHandoffPayload(): Promise<StagingHandoffPayloa
   return { v: 1, icons, removals }
 }
 
+/**
+ * Save this account's staging queue on the auth API (survives across browsers).
+ * Empty payload deletes the server queue.
+ */
+export async function putAccountStaging(
+  payload: StagingHandoffPayload,
+): Promise<void> {
+  if (!isAuthApiConfigured() || !getAuthSession()) {
+    throw new Error('Sign in to sync staging to your account.')
+  }
+  const res = await authApiFetch('/api/my-staging', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  if (!res.ok) {
+    throw new Error(body.error || `Account staging failed (${res.status})`)
+  }
+}
+
+/** Push the current IndexedDB queue to the signed-in account. */
+export async function pushLocalStagingToAccount(): Promise<void> {
+  if (!isAuthApiConfigured() || !getAuthSession()) return
+  await putAccountStaging(await buildStagingHandoffPayload())
+}
+
+export async function fetchAccountStaging(): Promise<StagingHandoffPayload | null> {
+  if (!isAuthApiConfigured() || !getAuthSession()) return null
+  const res = await authApiFetch('/api/my-staging')
+  if (res.status === 401) return null
+  const body = (await res.json().catch(() => null)) as unknown
+  if (!res.ok) {
+    const err = body as { error?: string } | null
+    throw new Error(err?.error || `Account staging failed (${res.status})`)
+  }
+  return parseStagingPayload(body)
+}
+
+export async function clearAccountStaging(): Promise<void> {
+  if (!isAuthApiConfigured() || !getAuthSession()) return
+  const res = await authApiFetch('/api/my-staging', { method: 'DELETE' })
+  if (!res.ok && res.status !== 404) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    throw new Error(body.error || `Clear account staging failed (${res.status})`)
+  }
+}
+
+/**
+ * Pull account staging into this browser's IndexedDB.
+ * Returns true when the local queue was replaced from the server.
+ */
+export async function syncAccountStagingToLocal(): Promise<boolean> {
+  const payload = await fetchAccountStaging()
+  if (!payload) return false
+  if (payload.icons.length === 0 && payload.removals.length === 0) {
+    return false
+  }
+  await importHandoffOrThrow(payload, { replaceLocal: true })
+  clearPendingStagingHandoff()
+  return true
+}
+
 /** Max encoded `gv-staging` param length (leave room for auth hash + query). */
 export const STAGING_HANDOFF_URL_MAX = 14_000
 

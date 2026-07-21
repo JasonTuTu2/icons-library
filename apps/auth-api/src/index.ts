@@ -22,6 +22,11 @@ import {
   putStagingHandoff,
   readStagingHandoff,
 } from './stagingHandoff'
+import {
+  deleteUserStaging,
+  putUserStaging,
+  readUserStaging,
+} from './userStaging'
 
 type Variables = {
   username: string
@@ -61,7 +66,7 @@ app.use('*', async (c, next) => {
       return ''
     },
     allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   })(c, next)
 })
 
@@ -455,6 +460,78 @@ authed.delete('/staging-handoff/:id', async (c) => {
   }
   try {
     await deleteStagingHandoff(c.env.STAGING_HANDOFF, id)
+    return c.json({ ok: true })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+function parseStagingBody(body: unknown): {
+  v: 1
+  icons: unknown[]
+  removals: unknown[]
+} | null {
+  if (!body || typeof body !== 'object') return null
+  const row = body as { v?: number; icons?: unknown; removals?: unknown }
+  if (row.v !== 1 || !Array.isArray(row.icons) || !Array.isArray(row.removals)) {
+    return null
+  }
+  return { v: 1, icons: row.icons, removals: row.removals }
+}
+
+/**
+ * Account-scoped staging queue (plugin Stage + browser). Survives across devices
+ * for the same login (~7 days). Not the shared GitHub staging/ folder.
+ */
+authed.put('/my-staging', async (c) => {
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const parsed = parseStagingBody(body)
+  if (!parsed) {
+    return c.json({ error: 'Expected { v: 1, icons, removals }' }, 400)
+  }
+  const username = c.get('username')
+  try {
+    if (parsed.icons.length === 0 && parsed.removals.length === 0) {
+      await deleteUserStaging(c.env.STAGING_HANDOFF, username)
+      return c.json({ ok: true, empty: true })
+    }
+    await putUserStaging(c.env.STAGING_HANDOFF, username, JSON.stringify(parsed))
+    return c.json({
+      ok: true,
+      icons: parsed.icons.length,
+      removals: parsed.removals.length,
+    })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/my-staging', async (c) => {
+  const username = c.get('username')
+  try {
+    const raw = await readUserStaging(c.env.STAGING_HANDOFF, username)
+    if (!raw) {
+      return c.json({ v: 1, icons: [], removals: [] })
+    }
+    const parsed = parseStagingBody(JSON.parse(raw) as unknown)
+    if (!parsed) {
+      return c.json({ v: 1, icons: [], removals: [] })
+    }
+    return c.json(parsed)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.delete('/my-staging', async (c) => {
+  const username = c.get('username')
+  try {
+    await deleteUserStaging(c.env.STAGING_HANDOFF, username)
     return c.json({ ok: true })
   } catch (err) {
     return c.json(githubError(err), 502)

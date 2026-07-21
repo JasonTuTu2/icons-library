@@ -69,6 +69,9 @@ If every authed call returns `GitHub API 403: Forbidden`, redeploy the Worker af
 - `POST /api/stage-icons` body `{ icons }` — Figma plugin → GitHub staging (Contents API)
 - `GET /api/staged-icons` / `staged-removals` — remote staging queue
 - `POST /api/staging-handoff` body `{ v:1, icons, removals }` → `{ id }` (15 min, one-time fetch)
-- `GET /api/staging-handoff/:id` — returns queue, then deletes (designer or dev)
+- `GET /api/staging-handoff/:id` — returns queue (designer or dev)
+- `PUT /api/my-staging` `{ v:1, icons, removals }` — account queue (~7 days; plugin/browser Stage)
+- `GET /api/my-staging` — pull account queue into any signed-in browser
+- `DELETE /api/my-staging` — clear after Apply
 - `POST /api/publish` body publish options — **dev only**
 - `GET /health`

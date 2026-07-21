@@ -25,10 +25,13 @@ import {
 import {
   importStagingHandoff,
   parseStagingHandoffFile,
+  pushLocalStagingToAccount,
   retryPendingStagingHandoffImport,
+  syncAccountStagingToLocal,
   takePendingStagingHandoff,
   takeStagingImportMessage,
 } from '../lib/stagingHandoff'
+import { getAuthSession, isAuthApiConfigured } from '../lib/sessionAuth'
 import {
   parseFigmaHandoffFile,
   takeFigmaHandoffError,
@@ -49,7 +52,6 @@ import {
   analyzeItemConflicts,
   confirmLibraryReplacements,
 } from '../lib/nameConflicts'
-import { isAuthApiConfigured } from '../lib/sessionAuth'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
 import { GithubAssetPreview } from './GithubAssetPreview'
 import { ApplyAllFields } from './ApplyAllFields'
@@ -344,9 +346,22 @@ export function UploadPanel({
   }, [open])
 
   useEffect(() => {
-    if (open && mode === 'github' && githubRepoConfigured) {
-      void refreshStaged()
-    }
+    if (!(open && mode === 'github' && githubRepoConfigured)) return
+    void (async () => {
+      try {
+        if (isAuthApiConfigured() && getAuthSession()) {
+          const did = await syncAccountStagingToLocal()
+          if (did) {
+            setMessage(
+              'Loaded staging from your account (plugin or another browser).',
+            )
+          }
+        }
+      } catch (err) {
+        setMessage(err instanceof Error ? err.message : String(err))
+      }
+      await refreshStaged()
+    })()
   }, [open, mode, githubRepoConfigured, refreshStaged])
 
   // Strict live name checks — Stage stays disabled until every name is free.
@@ -562,13 +577,16 @@ export function UploadPanel({
               }
         }),
       )
+      await pushLocalStagingToAccount()
       setItems((prev) => {
         revokePreviewUrls(prev)
         return []
       })
       await refreshStaged()
       setMessage(
-        `Staged ${count} asset(s) locally in this browser. Apply uploads your queue to GitHub when ready.`,
+        isAuthApiConfigured() && getAuthSession()
+          ? `Staged ${count} asset(s) to your account. Apply when ready.`
+          : `Staged ${count} asset(s) locally in this browser. Apply uploads your queue to GitHub when ready.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
