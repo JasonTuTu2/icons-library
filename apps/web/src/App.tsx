@@ -1,7 +1,9 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { BrowserPage } from './pages/BrowserPage'
 import { DocsPage } from './pages/DocsPage'
+import { InvitePage } from './pages/InvitePage'
 import { ReleasesPage } from './pages/ReleasesPage'
+import { UsersPage } from './pages/UsersPage'
 import { AuthGate } from './components/AuthGate'
 import { LoginControl } from './components/LoginControl'
 import { packagesUrl } from './lib/github'
@@ -14,6 +16,8 @@ function AppShell() {
   const showDocs = true
   const showDevDocs =
     !isAuthApiConfigured() || session?.role === 'dev'
+  const showUsers =
+    isAuthApiConfigured() && session?.role === 'dev'
 
   return (
     <div className="shell">
@@ -44,6 +48,7 @@ function AppShell() {
               <NavLink to="/docs">Docs</NavLink>
             ) : null}
             <NavLink to="/releases">Releases</NavLink>
+            {showUsers ? <NavLink to="/users">Accounts</NavLink> : null}
           </nav>
         </div>
       </header>
@@ -61,6 +66,10 @@ function AppShell() {
             }
           />
           <Route path="/releases" element={<ReleasesPage />} />
+          <Route
+            path="/users"
+            element={showUsers ? <UsersPage /> : <Navigate to="/" replace />}
+          />
         </Routes>
       </main>
     </div>
@@ -70,8 +79,16 @@ function AppShell() {
 /** Full icon browser (not used inside the Figma plugin panel). */
 export function App() {
   return (
-    <AuthGate>
-      <AppShell />
-    </AuthGate>
+    <Routes>
+      <Route path="/invite" element={<InvitePage />} />
+      <Route
+        path="/*"
+        element={
+          <AuthGate>
+            <AppShell />
+          </AuthGate>
+        }
+      />
+    </Routes>
   )
 }

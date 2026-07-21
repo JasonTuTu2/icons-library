@@ -10,6 +10,7 @@ GITHUB_REPO=JasonTuTu2/icons-library
 # Random long string for signing session JWTs
 SESSION_SECRET=replace-with-long-random-secret
 
-# JSON array of accounts (passwords live only in this secret)
-# AUTH_USERS=[{"username":"designer","password":"change-me","role":"designer"},{"username":"dev","password":"change-me","role":"dev"}]
+# JSON array of bootstrap accounts (at least one "dev").
+# After first login each user is migrated into KV; add more people via invite links.
+# AUTH_USERS=[{"username":"dev","password":"change-me","role":"dev"}]
 AUTH_USERS=

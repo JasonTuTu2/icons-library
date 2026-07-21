@@ -51,6 +51,18 @@ export function DocsPage({ showDevSections = true }: DocsPageProps) {
       </section>
 
       {showDevSections ? (
+        <section id="accounts">
+          <h2>Accounts &amp; invites</h2>
+          <p>
+            Open <strong>Accounts</strong> in the nav (dev only) to create a
+            one-time invite link. Designers open the link, pick a username and
+            password, and sign in — no Wrangler / <code>AUTH_USERS</code> edits.
+            Invites expire after 7 days and can be revoked from the same page.
+          </p>
+        </section>
+      ) : null}
+
+      {showDevSections ? (
         <section>
           <h2>Install</h2>
           <p>

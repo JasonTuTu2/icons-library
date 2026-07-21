@@ -23,6 +23,19 @@ import {
   readStagingHandoff,
 } from './stagingHandoff'
 import {
+  createInvite,
+  createUser,
+  deleteInvite,
+  getInvite,
+  getStoredUser,
+  listInvites,
+  listUsers,
+  upsertMigratedUser,
+  validatePassword,
+  validateUsername,
+  verifyStoredUser,
+} from './usersKv'
+import {
   deleteUserStaging,
   putUserStaging,
   readUserStaging,
@@ -85,31 +98,119 @@ app.post('/api/login', async (c) => {
     return c.json({ error: 'Username and password required' }, 400)
   }
 
-  let users
-  try {
-    users = parseUsers(c.env.AUTH_USERS)
-  } catch (err) {
-    return c.json(
-      { error: err instanceof Error ? err.message : 'Auth misconfigured' },
-      500,
+  const existingKv = await getStoredUser(c.env.STAGING_HANDOFF, username)
+  if (existingKv) {
+    const kvUser = await verifyStoredUser(
+      c.env.STAGING_HANDOFF,
+      username,
+      password,
     )
+    if (!kvUser) {
+      return c.json({ error: 'Invalid username or password' }, 401)
+    }
+    const token = await signSession(c.env.SESSION_SECRET, {
+      sub: kvUser.username,
+      role: kvUser.role,
+    })
+    return c.json({
+      token,
+      username: kvUser.username,
+      role: kvUser.role,
+    })
   }
 
-  const user = findUser(users, username, password)
-  if (!user) {
+  // Bootstrap / fallback: AUTH_USERS secret (lazy-migrates into KV on success).
+  let secretUser: ReturnType<typeof findUser> = null
+  try {
+    const users = parseUsers(c.env.AUTH_USERS)
+    secretUser = findUser(users, username, password)
+  } catch {
+    // Secret missing or invalid — only KV accounts can sign in.
+  }
+  if (!secretUser) {
     return c.json({ error: 'Invalid username or password' }, 401)
   }
 
+  try {
+    await upsertMigratedUser(c.env.STAGING_HANDOFF, {
+      username: secretUser.username,
+      password,
+      role: secretUser.role,
+    })
+  } catch {
+    // Migration failure should not block login.
+  }
+
   const token = await signSession(c.env.SESSION_SECRET, {
-    sub: user.username,
-    role: user.role,
+    sub: secretUser.username,
+    role: secretUser.role,
   })
 
   return c.json({
     token,
-    username: user.username,
-    role: user.role,
+    username: secretUser.username,
+    role: secretUser.role,
   })
+})
+
+/** Peek invite (public) — used by the invite redeem form. */
+app.get('/api/invites/:token', async (c) => {
+  const token = c.req.param('token')?.trim() ?? ''
+  if (!token) return c.json({ error: 'Missing invite token' }, 400)
+  const invite = await getInvite(c.env.STAGING_HANDOFF, token)
+  if (!invite) {
+    return c.json({ error: 'Invite expired or not found' }, 404)
+  }
+  return c.json({ role: invite.role, valid: true })
+})
+
+/** Redeem invite: create account + return session (public). */
+app.post('/api/invites/:token/redeem', async (c) => {
+  const token = c.req.param('token')?.trim() ?? ''
+  if (!token) return c.json({ error: 'Missing invite token' }, 400)
+
+  let body: { username?: string; password?: string }
+  try {
+    body = (await c.req.json()) as { username?: string; password?: string }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+
+  const username = body.username?.trim() ?? ''
+  const password = body.password ?? ''
+  const usernameError = validateUsername(username)
+  if (usernameError) return c.json({ error: usernameError }, 400)
+  const passwordError = validatePassword(password)
+  if (passwordError) return c.json({ error: passwordError }, 400)
+
+  const invite = await getInvite(c.env.STAGING_HANDOFF, token)
+  if (!invite) {
+    return c.json({ error: 'Invite expired or not found' }, 404)
+  }
+
+  try {
+    const user = await createUser(c.env.STAGING_HANDOFF, {
+      username,
+      password,
+      role: invite.role,
+    })
+    await deleteInvite(c.env.STAGING_HANDOFF, token)
+    const sessionToken = await signSession(c.env.SESSION_SECRET, {
+      sub: user.username,
+      role: user.role,
+    })
+    return c.json({
+      token: sessionToken,
+      username: user.username,
+      role: user.role,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message === 'Username already taken') {
+      return c.json({ error: message }, 409)
+    }
+    return c.json({ error: message }, 502)
+  }
 })
 
 const authed = new Hono<{ Bindings: Env; Variables: Variables }>()
@@ -135,6 +236,69 @@ authed.get('/me', (c) =>
     role: c.get('role'),
   }),
 )
+
+/** List KV accounts (dev only). AUTH_USERS secret accounts appear after first login. */
+authed.get('/users', async (c) => {
+  if (c.get('role') !== 'dev') {
+    return c.json({ error: 'Listing users requires a developer account' }, 403)
+  }
+  try {
+    return c.json({ users: await listUsers(c.env.STAGING_HANDOFF) })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+/** Create invite link (dev only). */
+authed.post('/invites', async (c) => {
+  if (c.get('role') !== 'dev') {
+    return c.json({ error: 'Creating invites requires a developer account' }, 403)
+  }
+  let body: { role?: string }
+  try {
+    body = (await c.req.json()) as { role?: string }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const role = body.role === 'dev' || body.role === 'designer' ? body.role : null
+  if (!role) {
+    return c.json({ error: 'role must be designer or dev' }, 400)
+  }
+  try {
+    const invite = await createInvite(c.env.STAGING_HANDOFF, {
+      role,
+      createdBy: c.get('username'),
+    })
+    return c.json(invite)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/invites', async (c) => {
+  if (c.get('role') !== 'dev') {
+    return c.json({ error: 'Listing invites requires a developer account' }, 403)
+  }
+  try {
+    return c.json({ invites: await listInvites(c.env.STAGING_HANDOFF) })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.delete('/invites/:token', async (c) => {
+  if (c.get('role') !== 'dev') {
+    return c.json({ error: 'Revoking invites requires a developer account' }, 403)
+  }
+  const token = c.req.param('token')?.trim() ?? ''
+  if (!token) return c.json({ error: 'Missing invite token' }, 400)
+  try {
+    await deleteInvite(c.env.STAGING_HANDOFF, token)
+    return c.json({ ok: true })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
 
 function githubClient(env: Env) {
   const token = env.GITHUB_TOKEN?.trim()

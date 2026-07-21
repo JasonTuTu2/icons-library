@@ -2,10 +2,12 @@
 
 Authenticated API so designers/devs sign in with username + password. The browser and Figma plugin stay locked until Sign in; GitHub admin uses the Worker’s `GITHUB_TOKEN` (no personal PAT, no token baked into Pages).
 
-| Role | Browse / Stage | Apply | Publish | Metadata edits |
-|------|----------------|-------|---------|----------------|
-| `designer` | yes | yes | no | yes |
-| `dev` | yes | yes | yes | yes |
+| Role | Browse / Stage | Apply | Publish | Metadata edits | Invite users |
+|------|----------------|-------|---------|----------------|--------------|
+| `designer` | yes | yes | no | yes | no |
+| `dev` | yes | yes | yes | yes | yes |
+
+Accounts live in Workers KV (hashed passwords). `AUTH_USERS` is bootstrap only: first successful secret login migrates that user into KV. Day-to-day adds use **invite links** from the site’s Accounts page (dev).
 
 ## What you need to do (one-time)
 
@@ -21,9 +23,9 @@ Authenticated API so designers/devs sign in with username + password. The browse
    - `GITHUB_TOKEN` — same bot PAT as repo secret `ICON_BROWSER_TOKEN` (`contents:write` + `actions:write`)
    - `GITHUB_REPO` — e.g. `JasonTuTu2/icons-library`
    - `SESSION_SECRET` — long random string
-   - `AUTH_USERS` — JSON array, e.g.
+   - `AUTH_USERS` — JSON array of bootstrap accounts (at least one `dev`), e.g.
      ```json
-     [{"username":"designer","password":"…","role":"designer"},{"username":"dev","password":"…","role":"dev"}]
+     [{"username":"dev","password":"…","role":"dev"}]
      ```
    - `CORS_ORIGINS` — Pages origin, e.g. `https://jasontutu2.github.io`
 4. Local smoke test:
@@ -32,7 +34,7 @@ Authenticated API so designers/devs sign in with username + password. The browse
    ```
 5. Deploy (and re-deploy whenever Worker routes change):
    ```bash
-   pnpm --filter @JasonTuTu2/icons-auth-api deploy
+   pnpm --filter @JasonTuTu2/icons-auth-api run deploy
    ```
    Then set Worker secrets (same values as `.dev.vars`):
    ```bash
@@ -52,10 +54,23 @@ Until step 7–8, the local browser can still use `VITE_GITHUB_TOKEN` / `#gv-git
 
 If every authed call returns `GitHub API 403: Forbidden`, redeploy the Worker after updating `@JasonTuTu2/github-admin` (GitHub requires a `User-Agent` on API requests; the Worker bundle must include that fix).
 
+## Adding designers (no Wrangler)
+
+1. Sign in as `dev` on the icon browser.
+2. Open **Accounts** → choose role → **Create invite link** → copy the URL.
+3. Designer opens the link → sets username + password → signed in.
+4. Invites expire in 7 days; revoke unused ones from the same page.
+
 ## Endpoints
 
 - `POST /api/login` `{ username, password }` → `{ token, username, role }`
 - `GET /api/me` `Authorization: Bearer …`
+- `GET /api/users` — list KV accounts (**dev**)
+- `POST /api/invites` `{ role }` → invite (**dev**)
+- `GET /api/invites` — pending invites (**dev**)
+- `DELETE /api/invites/:token` — revoke (**dev**)
+- `GET /api/invites/:token` — public peek `{ role, valid }`
+- `POST /api/invites/:token/redeem` `{ username, password }` → session
 - `GET /api/metadata` — live `metadata.json`
 - `POST /api/icon-metadata` `{ name, patch }` — sidebar property edits
 - `POST /api/library-conflicts` `{ names }` → `{ conflicts }`

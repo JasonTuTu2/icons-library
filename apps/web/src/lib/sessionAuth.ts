@@ -165,6 +165,167 @@ export async function loginWithPassword(
   return session
 }
 
+export interface AuthInvite {
+  token: string
+  role: AuthRole
+  createdBy: string
+  createdAt: string
+  expiresAt: string
+}
+
+export interface AuthUserRow {
+  username: string
+  role: AuthRole
+  createdAt: string
+}
+
+function sessionFromLoginBody(body: {
+  error?: string
+  token?: string
+  username?: string
+  role?: AuthRole
+}): AuthSession {
+  if (
+    !body.token ||
+    !body.username ||
+    (body.role !== 'designer' && body.role !== 'dev')
+  ) {
+    throw new Error('Login response was incomplete')
+  }
+  return {
+    token: body.token,
+    username: body.username,
+    role: body.role,
+  }
+}
+
+/** Public: validate invite token before showing the form. */
+export async function peekInvite(
+  token: string,
+): Promise<{ role: AuthRole; valid: true }> {
+  const base = getAuthApiBaseUrl()
+  if (!base) {
+    throw new Error('Auth API URL is not configured (VITE_AUTH_API_URL).')
+  }
+  const res = await fetch(
+    `${base}/api/invites/${encodeURIComponent(token.trim())}`,
+  )
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string
+    role?: AuthRole
+    valid?: boolean
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `Invite lookup failed (${res.status})`)
+  }
+  if (body.role !== 'designer' && body.role !== 'dev') {
+    throw new Error('Invite response was incomplete')
+  }
+  return { role: body.role, valid: true }
+}
+
+/** Public: create account from invite and sign in. */
+export async function redeemInvite(
+  token: string,
+  username: string,
+  password: string,
+): Promise<AuthSession> {
+  const base = getAuthApiBaseUrl()
+  if (!base) {
+    throw new Error('Auth API URL is not configured (VITE_AUTH_API_URL).')
+  }
+  const res = await fetch(
+    `${base}/api/invites/${encodeURIComponent(token.trim())}/redeem`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    },
+  )
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string
+    token?: string
+    username?: string
+    role?: AuthRole
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `Invite redeem failed (${res.status})`)
+  }
+  const session = sessionFromLoginBody(body)
+  setAuthSession(session)
+  return session
+}
+
+export async function listAuthUsers(): Promise<AuthUserRow[]> {
+  const res = await authApiFetch('/api/users')
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string
+    users?: AuthUserRow[]
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `List users failed (${res.status})`)
+  }
+  return Array.isArray(body.users) ? body.users : []
+}
+
+export async function listAuthInvites(): Promise<AuthInvite[]> {
+  const res = await authApiFetch('/api/invites')
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string
+    invites?: AuthInvite[]
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `List invites failed (${res.status})`)
+  }
+  return Array.isArray(body.invites) ? body.invites : []
+}
+
+export async function createAuthInvite(role: AuthRole): Promise<AuthInvite> {
+  const res = await authApiFetch('/api/invites', {
+    method: 'POST',
+    body: JSON.stringify({ role }),
+  })
+  const body = (await res.json().catch(() => ({}))) as AuthInvite & {
+    error?: string
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `Create invite failed (${res.status})`)
+  }
+  if (
+    typeof body.token !== 'string' ||
+    (body.role !== 'designer' && body.role !== 'dev')
+  ) {
+    throw new Error('Invite response was incomplete')
+  }
+  return {
+    token: body.token,
+    role: body.role,
+    createdBy: body.createdBy,
+    createdAt: body.createdAt,
+    expiresAt: body.expiresAt,
+  }
+}
+
+export async function revokeAuthInvite(token: string): Promise<void> {
+  const res = await authApiFetch(
+    `/api/invites/${encodeURIComponent(token.trim())}`,
+    { method: 'DELETE' },
+  )
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  if (!res.ok) {
+    throw new Error(body.error || `Revoke invite failed (${res.status})`)
+  }
+}
+
+/** Full invite URL for the current site origin + router basename. */
+export function buildInviteUrl(token: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  const path = `${base}/invite`
+  const url = new URL(path, window.location.origin)
+  url.searchParams.set('t', token)
+  return url.toString()
+}
+
 export async function authApiFetch(
   path: string,
   init?: RequestInit,
