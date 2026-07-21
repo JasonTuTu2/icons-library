@@ -270,7 +270,45 @@ authed.get('/asset-preview', async (c) => {
   }
 })
 
-authed.post('/apply', async (c) => {
+authed.post('/clear-remote-staging', async (c) => {
+  try {
+    const { complete } = await githubClient(c.env).clearRemoteStagingBatch(12)
+    return c.json({ ok: true, complete })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.post('/stage-removals', async (c) => {
+  let body: { removals?: string[] }
+  try {
+    body = (await c.req.json()) as { removals?: string[] }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const removals = Array.isArray(body.removals) ? body.removals : []
+  if (removals.length === 0) {
+    return c.json({ error: 'No removals to stage' }, 400)
+  }
+  try {
+    await githubClient(c.env).stageRemovals(removals)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+  return c.json({ ok: true, staged: removals.length })
+})
+
+authed.post('/dispatch-apply-staged', async (c) => {
+  try {
+    await githubClient(c.env).dispatchApplyStaged()
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+  return c.json({ ok: true })
+})
+
+/** @deprecated Prefer stepped apply from the browser (subrequest limits). */
+authed.post('/apply-legacy', async (c) => {
   let body: { icons?: IconUploadPayload[]; removals?: string[] }
   try {
     body = (await c.req.json()) as {

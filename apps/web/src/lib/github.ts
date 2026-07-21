@@ -433,6 +433,64 @@ export async function findLibraryAssetPath(
   return withAuthClear(() => getStagingClient().findLibraryAssetPath(name))
 }
 
+function chunkArray<T>(items: T[], size: number): T[][] {
+  if (size <= 0) return [items]
+  const out: T[][] = []
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size))
+  }
+  return out
+}
+
+async function applyStagedViaAuthApi(
+  icons: IconUploadPayload[],
+  removals: string[],
+): Promise<void> {
+  for (;;) {
+    const res = await authApiFetch('/api/clear-remote-staging', {
+      method: 'POST',
+    })
+    const body = (await res.json().catch(() => ({}))) as {
+      complete?: boolean
+      error?: string
+    }
+    if (!res.ok) {
+      throw new Error(body.error || `Clear remote staging failed (${res.status})`)
+    }
+    if (body.complete) break
+  }
+
+  for (const batch of chunkArray(icons, 3)) {
+    const res = await authApiFetch('/api/stage-icons', {
+      method: 'POST',
+      body: JSON.stringify({ icons: batch }),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    if (!res.ok) {
+      throw new Error(body.error || `Stage failed (${res.status})`)
+    }
+  }
+
+  for (const batch of chunkArray(removals, 2)) {
+    const res = await authApiFetch('/api/stage-removals', {
+      method: 'POST',
+      body: JSON.stringify({ removals: batch }),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    if (!res.ok) {
+      throw new Error(body.error || `Stage removals failed (${res.status})`)
+    }
+  }
+
+  const res = await authApiFetch('/api/dispatch-apply-staged', {
+    method: 'POST',
+  })
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  if (!res.ok) {
+    throw new Error(body.error || `Apply failed (${res.status})`)
+  }
+}
+
 /**
  * Upload this browser's staging queue, run Apply, then clear local staging.
  * Uses the auth API when configured; otherwise a session/dev PAT.
@@ -445,14 +503,7 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
   }
 
   if (isAuthApiConfigured()) {
-    const res = await authApiFetch('/api/apply', {
-      method: 'POST',
-      body: JSON.stringify({ icons, removals }),
-    })
-    const body = (await res.json().catch(() => ({}))) as { error?: string }
-    if (!res.ok) {
-      throw new Error(body.error || `Apply failed (${res.status})`)
-    }
+    await applyStagedViaAuthApi(icons, removals)
     await clearLocalStaging()
     return
   }

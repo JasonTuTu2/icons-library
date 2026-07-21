@@ -149,6 +149,11 @@ export interface GithubAdminClient {
   findIconNameConflicts(names: string[]): Promise<IconNameConflict[]>
   /** Delete all files under packages/custom-icons/staging (before re-upload on Apply). */
   clearRemoteStaging(): Promise<void>
+  /**
+   * Delete up to `maxFileDeletes` staging files (Worker subrequest budget).
+   * Returns whether staging dirs are empty.
+   */
+  clearRemoteStagingBatch(maxFileDeletes: number): Promise<{ complete: boolean }>
   /** Load SVG text or image bytes for a library/staging path (thumbnails). */
   getAssetPreview(path: string): Promise<AssetPreview | null>
   /** First library path for a kebab name (svg / color / gradient / images). */
@@ -1455,6 +1460,15 @@ export function createGithubAdminClient(
     },
 
     async clearRemoteStaging(): Promise<void> {
+      for (;;) {
+        const { complete } = await this.clearRemoteStagingBatch(500)
+        if (complete) return
+      }
+    },
+
+    async clearRemoteStagingBatch(
+      maxFileDeletes: number,
+    ): Promise<{ complete: boolean }> {
       const dirs = [
         `${STAGING_BASE}/mono`,
         `${STAGING_BASE}/color`,
@@ -1464,6 +1478,7 @@ export function createGithubAdminClient(
         STAGING_META,
       ] as const
 
+      let deleted = 0
       for (const dir of dirs) {
         const res = await githubFetch(`/contents/${dir}`)
         if (res.status === 404) continue
@@ -1490,9 +1505,12 @@ export function createGithubAdminClient(
 
         for (const entry of entries) {
           if (entry.type !== 'file' || entry.name.startsWith('.')) continue
+          if (deleted >= maxFileDeletes) return { complete: false }
           await deletePath(entry.path, `Clear remote staging ${entry.path}`)
+          deleted++
         }
       }
+      return { complete: true }
     },
 
     async getAssetPreview(path: string): Promise<AssetPreview | null> {
