@@ -195,6 +195,13 @@ export async function clearLocalStaging(): Promise<void> {
     }
     tx.onerror = () => reject(tx.error)
   })
+  // Drop plugin handoff copies so a later refresh cannot rehydrate staging.
+  try {
+    sessionStorage.removeItem('gv-pending-staging-handoff')
+    sessionStorage.removeItem('gv-pending-staging-handoff-id')
+  } catch {
+    // ignore
+  }
 }
 
 export async function stageIconsLocal(

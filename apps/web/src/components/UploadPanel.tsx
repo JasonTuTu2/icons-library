@@ -322,17 +322,13 @@ export function UploadPanel({
 
   useEffect(() => {
     if (stagingImportStarted.current) return
-    const payload = takePendingStagingHandoff()
-    if (!payload) return
     stagingImportStarted.current = true
-    void (async () => {
-      try {
-        await importStagingHandoff(payload)
-        await refreshStaged()
-      } catch (err) {
-        setMessage(err instanceof Error ? err.message : String(err))
-      }
-    })()
+    // Bootstrap already wrote IndexedDB. Only drain leftover session copies /
+    // messages — never re-import (that resurrected staging after Apply).
+    takePendingStagingHandoff()
+    const msg = takeStagingImportMessage()
+    if (msg) setMessage(msg)
+    void refreshStaged()
   }, [refreshStaged])
 
   // Only clear when the dialog closes — not on the initial mount (handoff opens it).

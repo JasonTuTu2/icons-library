@@ -226,7 +226,9 @@ async function importFromHandoffId(id: string): Promise<boolean> {
     importedHandoffIds.add(trimmed)
     clearPendingHandoffId()
     void ackServerHandoff(trimmed)
-    storePendingStaging(payload)
+    // IndexedDB is the source of truth ? do not keep a sessionStorage copy
+    // (that used to re-import after Apply + refresh).
+    clearPendingStagingHandoff()
     storeOpenUploadPanel()
     storeImportMessage(handoffImportedMessage(payload))
     return true
@@ -250,6 +252,17 @@ function rememberPendingHandoffId(id: string): void {
 function clearPendingHandoffId(): void {
   try {
     sessionStorage.removeItem(PENDING_HANDOFF_ID_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+/** Drop leftover handoff copies so Apply + refresh cannot rehydrate IndexedDB. */
+export function clearPendingStagingHandoff(): void {
+  pendingStagingMemory = null
+  clearPendingHandoffId()
+  try {
+    sessionStorage.removeItem(PENDING_STAGING_KEY)
   } catch {
     // ignore
   }
@@ -316,15 +329,6 @@ export function downloadStagingHandoffJson(payload: StagingHandoffPayload): void
   a.click()
   a.remove()
   URL.revokeObjectURL(url)
-}
-
-function storePendingStaging(payload: StagingHandoffPayload): void {
-  pendingStagingMemory = payload
-  try {
-    sessionStorage.setItem(PENDING_STAGING_KEY, JSON.stringify(payload))
-  } catch {
-    // ignore
-  }
 }
 
 function storeImportMessage(message: string): void {
@@ -418,7 +422,7 @@ export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
   if (payload) {
     try {
       await importHandoffOrThrow(payload, { replaceLocal: true })
-      storePendingStaging(payload)
+      clearPendingStagingHandoff()
       storeOpenUploadPanel()
       storeImportMessage(
         `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from Figma.`,
@@ -439,19 +443,24 @@ export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
 }
 
 export function takePendingStagingHandoff(): StagingHandoffPayload | null {
+  let value: StagingHandoffPayload | null = null
   if (pendingStagingMemory !== undefined) {
-    const value = pendingStagingMemory
+    value = pendingStagingMemory
     pendingStagingMemory = null
-    return value
+  } else {
+    try {
+      const raw = sessionStorage.getItem(PENDING_STAGING_KEY)
+      if (raw) value = parseStagingPayload(JSON.parse(raw) as unknown)
+    } catch {
+      value = null
+    }
   }
   try {
-    const raw = sessionStorage.getItem(PENDING_STAGING_KEY)
-    if (!raw) return null
     sessionStorage.removeItem(PENDING_STAGING_KEY)
-    return parseStagingPayload(JSON.parse(raw) as unknown)
   } catch {
-    return null
+    // ignore
   }
+  return value
 }
 
 export function takeStagingImportMessage(): string | null {
