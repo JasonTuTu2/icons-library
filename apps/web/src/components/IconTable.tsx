@@ -113,7 +113,9 @@ export function IconTable({
                 <div className="icon-table-cell">
                   {formatUsage(icon.usage)}
                 </div>
-                <div className="icon-table-cell note">{cell(icon.note)}</div>
+                <div className="icon-table-cell note">
+                  {icon.note?.trim() ?? ''}
+                </div>
               </button>
             )
           })}
