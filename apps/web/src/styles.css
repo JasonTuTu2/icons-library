@@ -1223,16 +1223,16 @@ pre {
 .note-toggle-btn {
   flex: 0 0 auto;
   font: inherit;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 0.25rem 0.45rem;
+  padding: 0.3rem 0.55rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--bg-elevated);
   color: var(--muted);
   cursor: pointer;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .note-toggle-btn:hover:not(:disabled) {
@@ -1255,8 +1255,9 @@ pre {
 }
 
 .figma-dock-list .note-toggle-btn {
-  font-size: 10px;
-  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 8px;
   border-radius: 2px;
   border-color: var(--plugin-border);
   background: var(--plugin-bg);
@@ -1434,6 +1435,23 @@ pre {
   min-width: 8.5rem;
 }
 
+.figma-dock-list .dropdown-combobox-input {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 400;
+  padding: 3px 20px 3px 6px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+}
+
+.figma-dock-list .dropdown-combobox-chevron {
+  width: 10px;
+  height: 10px;
+  right: 6px;
+}
+
 .upload-list .variant-dropdown,
 .figma-dock-list .variant-dropdown {
   min-width: 6.5rem;
@@ -1484,6 +1502,80 @@ pre {
 .apply-all-note-toggle.is-open {
   flex: 1 1 10rem;
   min-width: 8rem;
+}
+
+/* Plugin: keep Apply to all at the same density as individual rows */
+.figma-dock .apply-all-fields {
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 4px;
+  border: 1px solid var(--plugin-border);
+  border-radius: 6px;
+  background: var(--plugin-bg-secondary);
+}
+
+.figma-dock .apply-all-label {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--plugin-text-secondary);
+}
+
+.figma-dock .apply-all-format,
+.figma-dock .apply-all-color-mode {
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 6px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+}
+
+.figma-dock .apply-all-fields .dropdown-combobox,
+.figma-dock-list .dropdown-combobox {
+  min-width: 6.5rem;
+}
+
+.figma-dock .apply-all-fields .dropdown-combobox-input {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 400;
+  padding: 3px 20px 3px 6px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
+}
+
+.figma-dock .apply-all-fields .dropdown-combobox-chevron {
+  width: 10px;
+  height: 10px;
+  right: 6px;
+}
+
+.figma-dock .apply-all-fields .note-toggle-btn {
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text-secondary);
+}
+
+.figma-dock .apply-all-fields .note-toggle-btn.is-active,
+.figma-dock .apply-all-fields .note-toggle-btn.has-note {
+  color: var(--plugin-text);
+}
+
+.figma-dock .apply-all-fields .asset-note-input {
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 6px;
+  border-radius: 2px;
+  border-color: var(--plugin-border);
+  background: var(--plugin-bg);
+  color: var(--plugin-text);
 }
 
 .sr-only {
