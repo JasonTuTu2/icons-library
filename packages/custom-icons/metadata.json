@@ -1003,6 +1003,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "my-first-upload": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
