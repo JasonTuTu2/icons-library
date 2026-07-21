@@ -329,6 +329,42 @@ authed.post('/publish', async (c) => {
   })
 })
 
+/** Figma plugin: write to packages/custom-icons/staging (Contents API). */
+authed.post('/stage-icons', async (c) => {
+  let body: { icons?: IconUploadPayload[] }
+  try {
+    body = (await c.req.json()) as { icons?: IconUploadPayload[] }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const icons = Array.isArray(body.icons) ? body.icons : []
+  if (icons.length === 0) {
+    return c.json({ error: 'No icons to stage' }, 400)
+  }
+  try {
+    await githubClient(c.env).stageIcons(icons)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+  return c.json({ ok: true, staged: icons.length })
+})
+
+authed.get('/staged-icons', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).listStagedIcons())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.get('/staged-removals', async (c) => {
+  try {
+    return c.json(await githubClient(c.env).listStagedRemovals())
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
 /** Short-lived plugin → browser queue (Workers Cache, ~15 min). */
 authed.post('/staging-handoff', async (c) => {
   let body: unknown

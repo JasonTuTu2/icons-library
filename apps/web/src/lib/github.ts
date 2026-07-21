@@ -239,6 +239,77 @@ export async function stageIcons(icons: IconUploadPayload[]): Promise<void> {
   return stageIconsLocal(icons)
 }
 
+/**
+ * Figma plugin only: stage to shared GitHub staging via Contents API (auth API).
+ */
+export async function stageIconsToGithubStaging(
+  icons: IconUploadPayload[],
+): Promise<void> {
+  if (!isGithubRepoConfigured()) {
+    throw new Error('GitHub repo is not configured.')
+  }
+  if (!isAuthApiConfigured()) {
+    throw new Error('Sign in to stage from the Figma plugin.')
+  }
+  const res = await authApiFetch('/api/stage-icons', {
+    method: 'POST',
+    body: JSON.stringify({ icons }),
+  })
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  if (!res.ok) {
+    throw new Error(body.error || `Stage failed (${res.status})`)
+  }
+}
+
+/**
+ * After opening the full browser from the plugin (`gv-upload=1`), copy remote
+ * staging into this tab's IndexedDB so Upload/Apply behave like the browser.
+ */
+export async function importRemoteGithubStagingToLocal(): Promise<void> {
+  if (!isAuthApiConfigured()) return
+  const [staged, removals] = await Promise.all([
+    authApiJson<StagedIcon[]>('/api/staged-icons'),
+    authApiJson<StagedRemoval[]>('/api/staged-removals'),
+  ])
+  const payloads: IconUploadPayload[] = []
+  for (const icon of staged) {
+    const preview = await getAssetPreview(icon.path)
+    if (!preview) continue
+    if (icon.kind === 'image') {
+      if (preview.kind !== 'image') continue
+      payloads.push({
+        name: icon.name,
+        kind: 'image',
+        format: icon.format ?? 'png',
+        content: preview.base64,
+        category: icon.category,
+        variant: icon.variant,
+        source: icon.source,
+        usage: icon.usage,
+        note: icon.note,
+      })
+    } else {
+      if (preview.kind !== 'svg') continue
+      payloads.push({
+        name: icon.name,
+        kind: 'svg',
+        content: preview.text,
+        colorMode: icon.colorMode ?? 'mono',
+        category: icon.category,
+        variant: icon.variant,
+        source: icon.source,
+        usage: icon.usage,
+        note: icon.note,
+      })
+    }
+  }
+  await clearLocalStaging()
+  if (payloads.length > 0) await stageIconsLocal(payloads)
+  if (removals.length > 0) {
+    await stageRemovalsLocal(removals.map((r) => r.name))
+  }
+}
+
 /** Stage library icon names for removal on next Apply. */
 export async function stageRemovals(names: string[]): Promise<void> {
   if (!isGithubRepoConfigured()) {

@@ -1,9 +1,4 @@
-import {
-  buildStagingHandoffPayload,
-  buildStagingHandoffUrl,
-  createServerStagingHandoff,
-} from './stagingHandoff.js'
-import { buildAuthSessionHandoffHash, isAuthApiConfigured } from './sessionAuth.js'
+import { buildAuthSessionHandoffHash } from './sessionAuth.js'
 
 const FIGMA_PARAM = 'gv-figma'
 /** Must match apps/figma-plugin/manifest.json `id` (required for external UI). */
@@ -134,32 +129,15 @@ export function openExternalUrl(url: string): void {
 }
 
 /**
- * Open the full icon browser with the local staging queue (IndexedDB).
- * With auth API: uploads queue to Worker cache, opens `?gv-staging-id=…`.
+ * Open the full icon browser. Plugin staging lives on GitHub; Upload pulls it
+ * into this tab after `gv-upload=1`.
  */
 export async function openIconBrowserWithStaging(): Promise<{
   url: string
   note?: string
 }> {
-  const payload = await buildStagingHandoffPayload()
   const base = fullIconBrowserUrl()
-
-  let stagingUrl = base
-  if (payload.icons.length > 0 || payload.removals.length > 0) {
-    if (isAuthApiConfigured()) {
-      const id = await createServerStagingHandoff(payload)
-      stagingUrl = `${base}${base.includes('?') ? '&' : '?'}gv-staging-id=${encodeURIComponent(id)}&gv-upload=1`
-    } else {
-      const built = buildStagingHandoffUrl(base, payload)
-      if (built.tooLarge) {
-        throw new Error(
-          'Staging is too large for a URL. Use Sign in (production) or stage from the full browser.',
-        )
-      }
-      stagingUrl = built.url
-    }
-  }
-
+  const stagingUrl = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
   const url = appendUrlHash(stagingUrl, buildAuthSessionHandoffHash())
   openExternalUrl(url)
   return { url }

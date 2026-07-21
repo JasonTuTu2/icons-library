@@ -5,6 +5,7 @@ const HANDOFF_PARAM = 'gv-icons'
 const UPLOAD_PARAM = 'gv-upload'
 const PENDING_STORAGE_KEY = 'gv-pending-figma-uploads'
 const OPEN_UPLOAD_KEY = 'gv-open-upload-panel'
+const SYNC_REMOTE_STAGING_KEY = 'gv-sync-remote-staging'
 const ERROR_STORAGE_KEY = 'gv-figma-handoff-error'
 
 export interface FigmaHandoffIcon {
@@ -174,6 +175,11 @@ export function consumeFigmaHandoffFromUrl(): boolean {
     }
   } else if (openUpload) {
     storeOpenUploadPanel()
+    try {
+      sessionStorage.setItem(SYNC_REMOTE_STAGING_KEY, '1')
+    } catch {
+      // ignore
+    }
     consumed = true
   }
 
@@ -218,6 +224,18 @@ export function takeOpenUploadPanelFlag(): boolean {
     return true
   } catch {
     openUploadMemory = false
+    return false
+  }
+}
+
+/** Plugin opened Upload after staging to GitHub — pull remote queue into IndexedDB. */
+export function takeSyncRemoteStagingFlag(): boolean {
+  try {
+    const value = sessionStorage.getItem(SYNC_REMOTE_STAGING_KEY)
+    if (value !== '1') return false
+    sessionStorage.removeItem(SYNC_REMOTE_STAGING_KEY)
+    return true
+  } catch {
     return false
   }
 }

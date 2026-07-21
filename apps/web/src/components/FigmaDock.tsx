@@ -5,7 +5,7 @@ import {
   findIconNameConflicts,
   isGithubRepoConfigured,
   sanitizeIconName,
-  stageIcons,
+  stageIconsToGithubStaging,
   type IconColorMode,
   type IconSource,
   type IconUsage,
@@ -384,14 +384,14 @@ export function FigmaDock() {
       }))
 
       const count = stagedPayloads.length
-      await stageIcons(stagedPayloads)
+      await stageIconsToGithubStaging(stagedPayloads)
       setPending((prev) => {
         revokeAll(prev)
         return []
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s) locally. Open icon browser to sync for Apply.`,
+        `Staged ${count} asset(s) on GitHub. Open icon browser to Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -429,9 +429,9 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage (saved in this panel via IndexedDB, same as the full
-          browser). Use <strong>Open icon browser</strong> to sync your queue
-          for Apply. Mono/Multi/Gradient only apply to SVG.
+          names, then Stage (writes to GitHub staging via Contents API). Use{' '}
+          <strong>Open icon browser</strong> to Apply / Publish. Mono/Multi/Gradient
+          only apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (
