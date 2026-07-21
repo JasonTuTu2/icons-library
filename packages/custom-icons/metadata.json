@@ -655,13 +655,6 @@
       "usage": "in-use",
       "note": "My first note."
     },
-    "briefcase-regular": {
-      "category": "Users & Team",
-      "variant": "regular",
-      "source": "iconify",
-      "usage": "in-use",
-      "note": ""
-    },
     "checkmark-circle-filled": {
       "category": "Status, Alert & Tips",
       "variant": "filled",
@@ -678,13 +671,6 @@
     },
     "checkmark-regular": {
       "category": "Status, Alert & Tips",
-      "variant": "regular",
-      "source": "iconify",
-      "usage": "in-use",
-      "note": ""
-    },
-    "company-regular": {
-      "category": "Users & Team",
       "variant": "regular",
       "source": "iconify",
       "usage": "in-use",
@@ -809,30 +795,9 @@
       "usage": "in-use",
       "note": ""
     },
-    "person-filled": {
-      "category": "Users & Team",
-      "variant": "filled",
-      "source": "iconify",
-      "usage": "in-use",
-      "note": ""
-    },
-    "person-regular": {
-      "category": "Users & Team",
-      "variant": "regular",
-      "source": "iconify",
-      "usage": "in-use",
-      "note": ""
-    },
     "secure-filled": {
       "category": "Security",
       "variant": "filled",
-      "source": "iconify",
-      "usage": "in-use",
-      "note": ""
-    },
-    "team-regular": {
-      "category": "Users & Team",
-      "variant": "regular",
       "source": "iconify",
       "usage": "in-use",
       "note": ""
