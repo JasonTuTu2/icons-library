@@ -1896,6 +1896,41 @@ html.figma-host code {
   box-sizing: border-box;
 }
 
+.figma-dock-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.figma-dock-header .figma-dock-title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.login-control-plugin {
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.login-control-plugin .login-user {
+  font-size: 0.7rem;
+  text-align: right;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-control-plugin .ghost {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+}
+
 .figma-dock-title {
   margin: 0 0 8px;
   font-size: 11px;

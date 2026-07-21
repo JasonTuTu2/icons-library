@@ -7,7 +7,12 @@ import {
 } from '../lib/sessionAuth'
 
 /** Topbar session control (Sign out). Sign-in UI lives in AuthGate. */
-export function LoginControl() {
+export function LoginControl({
+  variant = 'topbar',
+}: {
+  /** Plugin: only signed-in user + Sign out (login is AuthGate). */
+  variant?: 'topbar' | 'plugin-session'
+}) {
   const configured = isAuthApiConfigured()
   const session = useAuthSession()
   const [open, setOpen] = useState(false)
@@ -20,7 +25,13 @@ export function LoginControl() {
 
   if (session) {
     return (
-      <div className="login-control">
+      <div
+        className={
+          variant === 'plugin-session'
+            ? 'login-control login-control-plugin'
+            : 'login-control'
+        }
+      >
         <span className="login-user" title={`Signed in as ${session.role}`}>
           {session.username}
           <span className="login-role"> · {session.role}</span>
@@ -34,6 +45,10 @@ export function LoginControl() {
         </button>
       </div>
     )
+  }
+
+  if (variant === 'plugin-session') {
+    return null
   }
 
   return (
