@@ -138,6 +138,19 @@ function asConflictItems(icons: PendingIcon[]) {
   }))
 }
 
+function loadedStatusMessage(
+  icons: Array<{ kind: 'svg' | 'image' }>,
+  t: (key: 'loadedPrefix' | 'loadedEdit' | 'imageUnit' | 'noExportable', vars?: Record<string, string | number>) => string,
+): string {
+  if (icons.length === 0) return t('noExportable')
+  const svgCount = icons.filter((i) => i.kind === 'svg').length
+  const imgCount = icons.filter((i) => i.kind === 'image').length
+  const parts: string[] = []
+  if (svgCount) parts.push(`${svgCount} SVG`)
+  if (imgCount) parts.push(`${imgCount} ${t('imageUnit')}`)
+  return `${t('loadedPrefix')} ${parts.join(' + ') || icons.length}. ${t('loadedEdit')}`
+}
+
 /**
  * Figma plugin panel: Load, rename/color/category, Stage, link to full browser.
  * No catalog browse UI.
@@ -230,14 +243,7 @@ export function FigmaDock() {
       } else if (msg.icons.length === 0) {
         setMessage(t('noExportable'))
       } else {
-        const svgCount = msg.icons.filter((i) => i.kind !== 'image').length
-        const imgCount = msg.icons.filter((i) => i.kind === 'image').length
-        const parts: string[] = []
-        if (svgCount) parts.push(`${svgCount} SVG`)
-        if (imgCount) parts.push(`${imgCount} ${t('imageUnit')}`)
-        setMessage(
-          `${t('loadedPrefix')} ${parts.join(' + ') || msg.icons.length}. ${t('loadedEdit')}`,
-        )
+        setMessage(loadedStatusMessage(msg.icons.map(toPending), t))
       }
     })
   }, [t])
@@ -679,7 +685,9 @@ export function FigmaDock() {
                     setPending((prev) => {
                       const target = prev[index]
                       if (target) URL.revokeObjectURL(target.previewUrl)
-                      return prev.filter((_, i) => i !== index)
+                      const next = prev.filter((_, i) => i !== index)
+                      setMessage(loadedStatusMessage(next, t))
+                      return next
                     })
                   }}
                 >
