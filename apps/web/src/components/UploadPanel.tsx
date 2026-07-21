@@ -31,7 +31,7 @@ import {
   takePendingStagingHandoff,
   takeStagingImportMessage,
 } from '../lib/stagingHandoff'
-import { getAuthSession, isAuthApiConfigured } from '../lib/sessionAuth'
+import { getAuthSession, isAuthApiConfigured, useAuthSession } from '../lib/sessionAuth'
 import {
   parseFigmaHandoffFile,
   takeFigmaHandoffError,
@@ -250,6 +250,7 @@ export function UploadPanel({
   localUploadEnabled,
   onUploaded,
 }: UploadPanelProps) {
+  const session = useAuthSession()
   const githubRepoConfigured = isGithubRepoConfigured()
   const canApplyPublish = useGithubDevEnabled()
   const uploadEnabled = localUploadEnabled || githubRepoConfigured
@@ -258,6 +259,10 @@ export function UploadPanel({
     : githubRepoConfigured
       ? 'github'
       : 'none'
+  const uploadBtnClass =
+    session?.role === 'designer'
+      ? 'toolbar-btn toolbar-btn-publish'
+      : 'toolbar-btn toolbar-btn-upload'
 
   const [handoffBoot] = useState(readInitialHandoff)
   const [open, setOpen] = useState(handoffBoot.open)
@@ -721,7 +726,7 @@ export function UploadPanel({
     <div className="upload-wrap">
       <button
         type="button"
-        className="toolbar-btn toolbar-btn-upload"
+        className={uploadBtnClass}
         onClick={() => setOpen(true)}
       >
         <ChromeIcon name="ci:upload-filled" />
