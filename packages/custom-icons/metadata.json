@@ -993,7 +993,7 @@
       "note": ""
     },
     "person-filled": {
-      "category": "Users & Team",
+      "category": "My Second Category",
       "variant": "filled",
       "source": "custom",
       "usage": "in-use",
@@ -1007,7 +1007,7 @@
       "note": ""
     },
     "team-regular": {
-      "category": "Users & Team",
+      "category": "My Second Category",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use",
