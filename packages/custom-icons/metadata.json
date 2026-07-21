@@ -998,6 +998,13 @@
       "source": "iconify",
       "usage": "in-use",
       "note": ""
+    },
+    "test-icon": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
