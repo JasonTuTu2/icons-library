@@ -183,8 +183,18 @@ function isStagingAssetPath(path: string): boolean {
 }
 
 export async function clearLocalStaging(): Promise<void> {
-  const paths = await listAllPaths()
-  await Promise.all(paths.map((p) => deleteRecord(p)))
+  const db = await openDb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    const store = tx.objectStore(STORE)
+    const req = store.clear()
+    req.onerror = () => reject(req.error ?? tx.error)
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => reject(tx.error)
+  })
 }
 
 export async function stageIconsLocal(

@@ -614,6 +614,7 @@ export function UploadPanel({
       if (!ok) return
 
       await dispatchApplyStaged()
+      await refreshStaged()
       const first = current[0]
       if (first) {
         onUploaded(
