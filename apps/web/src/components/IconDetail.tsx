@@ -5,6 +5,8 @@ import {
   isGithubAdminEnabled,
   isGithubRepoConfigured,
   packagesUrl,
+  getCustomMetadata,
+  removeCategory,
   stageRemovals,
   updateIconMetadata,
   type IconSource,
@@ -29,6 +31,8 @@ interface IconDetailProps {
   onClose: () => void
   onRemovalStaged?: (name: string) => void
   onCategoryUpdated?: (category: string) => void
+  /** Fired after a registry category is deleted; affected icons moved to No Category. */
+  onCategoryRemoved?: (category: string, affectedNames: string[]) => void
   onVariantUpdated?: (variant: IconVariant) => void
   onSourceUpdated?: (source: IconSource) => void
   onUsageUpdated?: (usage: IconUsage) => void
@@ -55,6 +59,7 @@ export function IconDetail({
   onClose,
   onRemovalStaged,
   onCategoryUpdated,
+  onCategoryRemoved,
   onVariantUpdated,
   onSourceUpdated,
   onUsageUpdated,
@@ -154,6 +159,43 @@ export function IconDetail({
       setCategoryMessage('Category saved.')
     } catch (err) {
       setCategoryValue(icon.category ?? '')
+      setCategoryMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setCategoryBusy(false)
+    }
+  }
+
+  async function handleRemoveCategory() {
+    const category = categoryValue.trim()
+    if (!category || !canEditMeta) return
+
+    setCategoryMessage(null)
+    try {
+      const meta = await getCustomMetadata()
+      const target = category
+      const affectedCount = Object.values(meta.icons).filter(
+        (entry) => (entry.category ?? '').trim() === target,
+      ).length
+      const noun =
+        affectedCount === 1 ? 'image/SVG' : 'images/SVGs'
+      const ok = window.confirm(
+        `Remove category "${target}"?\n\n${affectedCount} ${noun} in this category will move to No Category.`,
+      )
+      if (!ok) return
+
+      setCategoryBusy(true)
+      const { affectedNames } = await removeCategory(target)
+      setCategoryRegistry((prev) => prev.filter((item) => item !== target))
+      setCategoryValue('')
+      onCategoryRemoved?.(target, affectedNames)
+      const moved = affectedNames.length
+      const movedNoun = moved === 1 ? 'image/SVG' : 'images/SVGs'
+      setCategoryMessage(
+        moved === 0
+          ? `Removed category "${target}".`
+          : `Removed category "${target}". ${moved} ${movedNoun} moved to No Category.`,
+      )
+    } catch (err) {
       setCategoryMessage(err instanceof Error ? err.message : String(err))
     } finally {
       setCategoryBusy(false)
@@ -404,17 +446,29 @@ export function IconDetail({
             <dt>Category</dt>
             <dd>
               {canEditMeta ? (
-                <CategorySelect
-                  value={categoryValue}
-                  onChange={(category) => void handleCategoryChange(category)}
-                  categories={categoryRegistry}
-                  onCreateCategory={(name) =>
-                    setCategoryRegistry((prev) =>
-                      mergeCategoryIntoRegistry(prev, name),
-                    )
-                  }
-                  ariaLabel={`Category for ${icon.id}`}
-                />
+                <div className="category-edit">
+                  <CategorySelect
+                    value={categoryValue}
+                    onChange={(category) => void handleCategoryChange(category)}
+                    categories={categoryRegistry}
+                    onCreateCategory={(name) =>
+                      setCategoryRegistry((prev) =>
+                        mergeCategoryIntoRegistry(prev, name),
+                      )
+                    }
+                    ariaLabel={`Category for ${icon.id}`}
+                  />
+                  {categoryValue.trim() ? (
+                    <button
+                      type="button"
+                      className="ghost danger category-remove-btn"
+                      disabled={categoryBusy}
+                      onClick={() => void handleRemoveCategory()}
+                    >
+                      Remove category
+                    </button>
+                  ) : null}
+                </div>
               ) : (
                 categoryLabel(icon.category)
               )}

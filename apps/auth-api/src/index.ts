@@ -353,6 +353,26 @@ authed.post('/icon-metadata', async (c) => {
   }
 })
 
+/** Remove a category from the registry; icons using it become No Category. */
+authed.post('/remove-category', async (c) => {
+  let body: { category?: string }
+  try {
+    body = (await c.req.json()) as typeof body
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const category = body.category?.trim() ?? ''
+  if (!category) {
+    return c.json({ error: 'category required' }, 400)
+  }
+  try {
+    const result = await githubClient(c.env).removeCategory(category)
+    return c.json({ ok: true, affectedNames: result.affectedNames })
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
 /** Library name collisions for staging checks. */
 authed.post('/library-conflicts', async (c) => {
   let body: { names?: string[] }

@@ -322,6 +322,41 @@ export function removeIconMetadata(
   return next
 }
 
+/**
+ * Drop a registry category and clear it on every icon that used it.
+ * Returns the updated metadata and the icon names that moved to No Category.
+ */
+export function removeCategoryFromRegistry(
+  metadata: CustomIconMetadata,
+  category: string,
+): { metadata: CustomIconMetadata; affectedNames: string[] } {
+  const target = normalizeCategory(category)
+  if (!target) {
+    return { metadata, affectedNames: [] }
+  }
+
+  const affectedNames: string[] = []
+  const icons: Record<string, CustomIconEntryMeta> = {}
+  for (const [name, entry] of Object.entries(metadata.icons)) {
+    if (normalizeCategory(entry.category) === target) {
+      affectedNames.push(name)
+      icons[name] = { ...entry, category: '' }
+    } else {
+      icons[name] = entry
+    }
+  }
+
+  return {
+    metadata: {
+      categories: metadata.categories.filter(
+        (item) => normalizeCategory(item) !== target,
+      ),
+      icons,
+    },
+    affectedNames,
+  }
+}
+
 export function getIconCategory(
   metadata: CustomIconMetadata,
   name: string,

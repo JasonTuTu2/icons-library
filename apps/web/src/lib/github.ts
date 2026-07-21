@@ -656,3 +656,18 @@ export async function updateIconMetadata(
   }
   return withAuthClear(() => getStagingClient().updateIconMetadata(name, patch))
 }
+
+export async function removeCategory(
+  category: string,
+): Promise<{ affectedNames: string[] }> {
+  if (isAuthApiConfigured()) {
+    return authApiJson<{ ok: boolean; affectedNames: string[] }>(
+      '/api/remove-category',
+      {
+        method: 'POST',
+        body: JSON.stringify({ category }),
+      },
+    ).then((res) => ({ affectedNames: res.affectedNames ?? [] }))
+  }
+  return withAuthClear(() => getStagingClient().removeCategory(category))
+}

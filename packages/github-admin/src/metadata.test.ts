@@ -11,6 +11,7 @@ import {
   parseMetadataJson,
   parseStagingMetaFile,
   removeIconMetadata,
+  removeCategoryFromRegistry,
   serializeMetadata,
   setIconCategory,
   setIconMetadata,
@@ -184,5 +185,24 @@ describe('metadata', () => {
     expect(withNote.icons.foo?.note).toBe('keep this asset')
     const cleared = setIconMetadata(withNote, 'foo', { note: '   ' })
     expect(cleared.icons.foo?.note).toBe('')
+  })
+
+  it('removes a category and clears it on affected icons', () => {
+    let meta = setIconMetadata(createEmptyMetadata(), 'alpha', {
+      category: 'Billing',
+    })
+    meta = setIconMetadata(meta, 'beta', { category: 'Billing' })
+    meta = setIconMetadata(meta, 'gamma', { category: 'Action' })
+    expect(meta.categories).toEqual(['Action', 'Billing'])
+
+    const { metadata, affectedNames } = removeCategoryFromRegistry(
+      meta,
+      'Billing',
+    )
+    expect(affectedNames.sort()).toEqual(['alpha', 'beta'])
+    expect(metadata.categories).toEqual(['Action'])
+    expect(metadata.icons.alpha?.category).toBe('')
+    expect(metadata.icons.beta?.category).toBe('')
+    expect(metadata.icons.gamma?.category).toBe('Action')
   })
 })
