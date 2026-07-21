@@ -2,11 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { App } from './App'
-import { consumeFigmaHandoffFromUrl, takeSyncRemoteStagingFlag } from './lib/figmaHandoff'
+import { consumeFigmaHandoffFromUrl } from './lib/figmaHandoff'
 import { consumeStagingHandoffFromUrl } from './lib/stagingHandoff'
 import { consumeGithubTokenFromUrl } from './lib/githubAuth'
 import { consumeAuthSessionFromUrl } from './lib/sessionAuth'
-import { importRemoteGithubStagingToLocal } from './lib/github'
 import './styles.css'
 
 async function bootstrap(): Promise<void> {
@@ -14,9 +13,6 @@ async function bootstrap(): Promise<void> {
   consumeAuthSessionFromUrl()
   consumeFigmaHandoffFromUrl()
   await consumeStagingHandoffFromUrl()
-  if (takeSyncRemoteStagingFlag()) {
-    await importRemoteGithubStagingToLocal()
-  }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

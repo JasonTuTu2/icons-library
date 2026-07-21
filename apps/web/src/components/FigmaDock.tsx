@@ -5,7 +5,6 @@ import {
   findIconNameConflicts,
   isGithubRepoConfigured,
   sanitizeIconName,
-  stageIconsToGithubStaging,
   type IconColorMode,
   type IconSource,
   type IconUsage,
@@ -21,6 +20,7 @@ import {
   isFigmaHost,
   notifyFigmaUiReady,
   openIconBrowserWithStaging,
+  stageIconsInPlugin,
   requestFigmaExport,
   requestFigmaReexport,
   requestFigmaReexportBatch,
@@ -381,7 +381,7 @@ export function FigmaDock() {
       }))
 
       const count = stagedPayloads.length
-      await stageIconsToGithubStaging(stagedPayloads)
+      await stageIconsInPlugin(stagedPayloads)
       setPending((prev) => {
         revokeAll(prev)
         return []
@@ -428,8 +428,8 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage. Use <strong>Open icon browser</strong> to Apply /
-          Publish. Mono/Multi/Gradient
+          names, then Stage (saved in the plugin). Use{' '}
+          <strong>Open icon browser</strong> to Apply / Publish. Mono/Multi/Gradient
           only apply to SVG.
         </p>
       )}

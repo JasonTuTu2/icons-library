@@ -175,11 +175,6 @@ export function consumeFigmaHandoffFromUrl(): boolean {
     }
   } else if (openUpload) {
     storeOpenUploadPanel()
-    try {
-      sessionStorage.setItem(SYNC_REMOTE_STAGING_KEY, '1')
-    } catch {
-      // ignore
-    }
     consumed = true
   }
 

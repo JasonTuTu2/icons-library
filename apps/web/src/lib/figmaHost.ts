@@ -1,4 +1,11 @@
-import { buildAuthSessionHandoffHash } from './sessionAuth.js'
+import { buildAuthSessionHandoffHash, isAuthApiConfigured } from './sessionAuth.js'
+import {
+  createServerStagingHandoff,
+  type StagingHandoffPayload,
+} from './stagingHandoff.js'
+import type { IconUploadPayload } from './github.js'
+
+const PLUGIN_RPC_TIMEOUT_MS = 45_000
 
 const FIGMA_PARAM = 'gv-figma'
 /** Must match apps/figma-plugin/manifest.json `id` (required for external UI). */
@@ -79,6 +86,13 @@ export type FigmaPluginMessage =
       icons: FigmaExportIcon[]
       error?: string
     }
+  | {
+      type: 'staging-result'
+      ok: boolean
+      payload?: unknown
+      error?: string
+    }
+  | { type: 'open-browser-done'; url: string; note?: string }
 
 function postToPlugin(pluginMessage: Record<string, unknown>): void {
   if (typeof window === 'undefined' || window.parent === window) return
@@ -86,6 +100,120 @@ function postToPlugin(pluginMessage: Record<string, unknown>): void {
     { pluginMessage, pluginId: FIGMA_PLUGIN_ID },
     'https://www.figma.com',
   )
+}
+
+function waitForPluginMessage(
+  predicate: (msg: FigmaPluginMessage) => boolean,
+  timeoutMs = PLUGIN_RPC_TIMEOUT_MS,
+): Promise<FigmaPluginMessage> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      unsub()
+      reject(new Error('Plugin did not respond — reload the plugin and try again.'))
+    }, timeoutMs)
+    const unsub = subscribeFigmaPluginMessages((msg) => {
+      if (!predicate(msg)) return
+      window.clearTimeout(timer)
+      unsub()
+      resolve(msg)
+    })
+  })
+}
+
+function parsePluginStagingPayload(raw: unknown): StagingHandoffPayload {
+  if (!raw || typeof raw !== 'object') {
+    return { v: 1, icons: [], removals: [] }
+  }
+  const row = raw as { v?: number; icons?: unknown; removals?: unknown }
+  if (row.v !== 1) return { v: 1, icons: [], removals: [] }
+  const icons: IconUploadPayload[] = []
+  if (Array.isArray(row.icons)) {
+    for (const item of row.icons) {
+      if (!item || typeof item !== 'object') continue
+      const icon = item as Record<string, unknown>
+      const name = typeof icon.name === 'string' ? icon.name.trim() : ''
+      const content = typeof icon.content === 'string' ? icon.content : ''
+      if (!name || !content) continue
+      const kind = icon.kind === 'image' ? 'image' : 'svg'
+      if (kind === 'image') {
+        icons.push({
+          name,
+          content,
+          kind: 'image',
+          format:
+            icon.format === 'jpg' || icon.format === 'jpeg'
+              ? 'jpg'
+              : icon.format === 'png'
+                ? 'png'
+                : 'png',
+          category: typeof icon.category === 'string' ? icon.category : undefined,
+          variant: typeof icon.variant === 'string' ? icon.variant : undefined,
+          source: typeof icon.source === 'string' ? icon.source : undefined,
+          usage: typeof icon.usage === 'string' ? icon.usage : undefined,
+          note: typeof icon.note === 'string' ? icon.note : undefined,
+          replaceLibrary: icon.replaceLibrary === true,
+        } as IconUploadPayload)
+      } else {
+        icons.push({
+          name,
+          content,
+          kind: 'svg',
+          colorMode:
+            icon.colorMode === 'preserved' || icon.colorMode === 'gradient'
+              ? icon.colorMode
+              : 'mono',
+          category: typeof icon.category === 'string' ? icon.category : undefined,
+          variant: typeof icon.variant === 'string' ? icon.variant : undefined,
+          source: typeof icon.source === 'string' ? icon.source : undefined,
+          usage: typeof icon.usage === 'string' ? icon.usage : undefined,
+          note: typeof icon.note === 'string' ? icon.note : undefined,
+          replaceLibrary: icon.replaceLibrary === true,
+        } as IconUploadPayload)
+      }
+    }
+  }
+  const removals = Array.isArray(row.removals)
+    ? row.removals.filter(
+        (name): name is string => typeof name === 'string' && name.trim().length > 0,
+      )
+    : []
+  return { v: 1, icons, removals }
+}
+
+/** Persist staged icons in the plugin (figma.clientStorage), not iframe web storage. */
+export async function stageIconsInPlugin(
+  icons: IconUploadPayload[],
+  removals?: string[],
+): Promise<void> {
+  if (typeof window === 'undefined' || window.parent === window) {
+    throw new Error('Open the Figma plugin to stage.')
+  }
+  postToPlugin({ type: 'stage-icons', icons, removals })
+  const msg = await waitForPluginMessage((m) => m.type === 'staging-result')
+  if (msg.type !== 'staging-result' || !msg.ok) {
+    throw new Error(
+      msg.type === 'staging-result' && msg.error
+        ? msg.error
+        : 'Staging failed in the plugin.',
+    )
+  }
+}
+
+/** Read the plugin staging queue from figma.clientStorage via the main thread. */
+export async function loadPluginStagingHandoff(): Promise<StagingHandoffPayload> {
+  if (typeof window === 'undefined' || window.parent === window) {
+    return { v: 1, icons: [], removals: [] }
+  }
+  postToPlugin({ type: 'load-staging' })
+  const msg = await waitForPluginMessage((m) => m.type === 'staging-result')
+  if (msg.type !== 'staging-result' || !msg.ok) {
+    throw new Error(
+      msg.type === 'staging-result' && msg.error
+        ? msg.error
+        : 'Could not read staging from the plugin.',
+    )
+  }
+  return parsePluginStagingPayload(msg.payload)
 }
 
 function appendUrlHash(url: string, hashPart: string | undefined): string {
@@ -129,18 +257,24 @@ export function openExternalUrl(url: string): void {
 }
 
 /**
- * Open the full icon browser. Plugin staging lives on GitHub; Upload pulls it
- * into this tab after `gv-upload=1`.
+ * Open the full icon browser. Staging lives in figma.clientStorage; non-empty
+ * queues upload via auth API handoff (`gv-staging-id`) into the site tab.
  */
-export async function openIconBrowserWithStaging(): Promise<{
-  url: string
-  note?: string
-}> {
-  const base = fullIconBrowserUrl()
-  const stagingUrl = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
-  const url = appendUrlHash(stagingUrl, buildAuthSessionHandoffHash())
-  openExternalUrl(url)
-  return { url }
+export async function openIconBrowserWithStaging(): Promise<void> {
+  const base = fullIconBrowserUrl().replace(/\/?$/, '/')
+  const sep = base.includes('?') ? '&' : '?'
+  const payload = await loadPluginStagingHandoff()
+  let url = `${base}${sep}gv-upload=1`
+
+  if (payload.icons.length > 0 || payload.removals.length > 0) {
+    if (!isAuthApiConfigured()) {
+      throw new Error('Sign in to hand off staging to the icon browser.')
+    }
+    const id = await createServerStagingHandoff(payload)
+    url = `${base}${sep}gv-staging-id=${encodeURIComponent(id)}&gv-upload=1`
+  }
+
+  openExternalUrl(appendUrlHash(url, buildAuthSessionHandoffHash()))
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */
