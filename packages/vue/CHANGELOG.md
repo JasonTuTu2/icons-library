@@ -1,5 +1,17 @@
 # @JasonTuTu2/icons-vue
 
+## 7.1.0
+
+### Minor Changes
+
+- Publish from icon browser (minor).
+
+### Patch Changes
+
+- Updated dependencies
+  - @JasonTuTu2/icons-core@7.1.0
+  - @JasonTuTu2/icons-custom@7.1.0
+
 ## 7.0.0
 
 ### Major Changes
