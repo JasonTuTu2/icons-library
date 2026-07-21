@@ -25,7 +25,7 @@ export function useIntroducedVersions() {
     let cancelled = false
     setLoading(true)
     void Promise.all([
-      listPublishHistory({ limit: 40 }),
+      listPublishHistory({ limit: 12 }),
       listUnpublishedIcons(),
     ])
       .then(([history, unpublished]) => {

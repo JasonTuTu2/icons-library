@@ -353,7 +353,7 @@ export function UploadPanel({
           const did = await syncAccountStagingToLocal()
           if (did) {
             setMessage(
-              'Loaded staging from your account (plugin or another browser).',
+              'Loaded your account staging queue. Apply when ready — no plugin link needed.',
             )
           }
         }
@@ -623,11 +623,17 @@ export function UploadPanel({
           : ''
       const summary = [addSection, removeSection].filter(Boolean).join('\n\n')
       const ok = window.confirm(
-        `Apply staged changes to the library?\n\n${summary}\n\nThis uploads your local queue to GitHub and runs Apply. Only what you staged in this browser is included.`,
+        `Apply staged changes to the library?\n\n${summary}\n\nThis uploads your queue to GitHub and runs Apply.`,
       )
       if (!ok) return
 
-      await dispatchApplyStaged()
+      await dispatchApplyStaged((progress) => {
+        const step =
+          progress.total > 1
+            ? `${progress.label} (${progress.done}/${progress.total})`
+            : progress.label
+        setMessage(<p className="copy-toast apply-progress-toast">{step}</p>)
+      })
       await refreshStaged()
       const first = current[0]
       if (first) {

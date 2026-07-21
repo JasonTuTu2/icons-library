@@ -443,11 +443,27 @@ function chunkArray<T>(items: T[], size: number): T[][] {
   return out
 }
 
+export type ApplyProgress = {
+  phase: 'clear' | 'stage' | 'removals' | 'dispatch'
+  label: string
+  done: number
+  total: number
+}
+
 async function applyStagedViaAuthApi(
   icons: IconUploadPayload[],
   removals: string[],
+  onProgress?: (progress: ApplyProgress) => void,
 ): Promise<void> {
+  let clearRound = 0
   for (;;) {
+    clearRound += 1
+    onProgress?.({
+      phase: 'clear',
+      label: 'Clearing remote staging…',
+      done: clearRound,
+      total: Math.max(clearRound, 1),
+    })
     const res = await authApiFetch('/api/clear-remote-staging', {
       method: 'POST',
     })
@@ -461,7 +477,15 @@ async function applyStagedViaAuthApi(
     if (body.complete) break
   }
 
-  for (const batch of chunkArray(icons, 3)) {
+  const iconBatches = chunkArray(icons, 3)
+  for (let i = 0; i < iconBatches.length; i++) {
+    const batch = iconBatches[i]!
+    onProgress?.({
+      phase: 'stage',
+      label: `Uploading icons…`,
+      done: i + 1,
+      total: iconBatches.length,
+    })
     const res = await authApiFetch('/api/stage-icons', {
       method: 'POST',
       body: JSON.stringify({ icons: batch }),
@@ -472,7 +496,15 @@ async function applyStagedViaAuthApi(
     }
   }
 
-  for (const batch of chunkArray(removals, 2)) {
+  const removalBatches = chunkArray(removals, 2)
+  for (let i = 0; i < removalBatches.length; i++) {
+    const batch = removalBatches[i]!
+    onProgress?.({
+      phase: 'removals',
+      label: 'Uploading removals…',
+      done: i + 1,
+      total: removalBatches.length,
+    })
     const res = await authApiFetch('/api/stage-removals', {
       method: 'POST',
       body: JSON.stringify({ removals: batch }),
@@ -483,6 +515,12 @@ async function applyStagedViaAuthApi(
     }
   }
 
+  onProgress?.({
+    phase: 'dispatch',
+    label: 'Starting Apply workflow…',
+    done: 1,
+    total: 1,
+  })
   const res = await authApiFetch('/api/dispatch-apply-staged', {
     method: 'POST',
   })
@@ -496,7 +534,9 @@ async function applyStagedViaAuthApi(
  * Upload this browser's staging queue, run Apply, then clear local staging.
  * Uses the auth API when configured; otherwise a session/dev PAT.
  */
-export async function applyLocalStagedToLibrary(): Promise<void> {
+export async function applyLocalStagedToLibrary(
+  onProgress?: (progress: ApplyProgress) => void,
+): Promise<void> {
   const icons = await exportIconUploadPayloads()
   const removals = await exportRemovalNames()
   if (icons.length === 0 && removals.length === 0) {
@@ -504,7 +544,7 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
   }
 
   if (isAuthApiConfigured()) {
-    await applyStagedViaAuthApi(icons, removals)
+    await applyStagedViaAuthApi(icons, removals, onProgress)
     await clearLocalStaging()
     await clearAccountStaging().catch(() => {
       // Local already cleared; server queue TTL will expire if delete fails.
@@ -512,6 +552,12 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
     return
   }
 
+  onProgress?.({
+    phase: 'dispatch',
+    label: 'Applying via GitHub…',
+    done: 1,
+    total: 1,
+  })
   const client = getDevClient()
   await withAuthClear(async () => {
     await client.clearRemoteStaging()
@@ -523,8 +569,10 @@ export async function applyLocalStagedToLibrary(): Promise<void> {
 }
 
 /** Promote remote staging into the library (legacy; prefer applyLocalStagedToLibrary). */
-export async function dispatchApplyStaged(): Promise<void> {
-  return applyLocalStagedToLibrary()
+export async function dispatchApplyStaged(
+  onProgress?: (progress: ApplyProgress) => void,
+): Promise<void> {
+  return applyLocalStagedToLibrary(onProgress)
 }
 
 export async function getPublishedPackageVersion(): Promise<string> {

@@ -1052,27 +1052,37 @@ export function createGithubAdminClient(
   async function collectLibraryChanges(
     baseSha: string,
     headSha: string,
+    options?: { light?: boolean },
   ): Promise<{
     adds: StagedIcon[]
     replacements: StagedIcon[]
     removals: StagedRemoval[]
   }> {
+    const light = options?.light === true
+    // Light mode: compare + metadata only (for publish history / Worker budget).
+    // Full mode also walks apply commits and library trees (unpublished accuracy).
     const [compare, between, libraryMetadata, libraryAtBase] = await Promise.all([
       githubJson<{
         files?: Array<{ filename: string; status?: string }>
       }>(`/compare/${baseSha}...${headSha}`),
-      listCommitsBetween(baseSha, headSha),
+      light
+        ? Promise.resolve([] as RepoCommit[])
+        : listCommitsBetween(baseSha, headSha),
       readMetadataFile(headSha),
-      buildLibraryPathByName(baseSha),
+      light
+        ? Promise.resolve(new Map<string, string>())
+        : buildLibraryPathByName(baseSha),
     ])
 
-    const applyIconNames = [
-      ...new Set(
-        between.flatMap((entry) =>
-          iconNamesFromApplyCommitMessage(entry.commit.message),
-        ),
-      ),
-    ]
+    const applyIconNames = light
+      ? []
+      : [
+          ...new Set(
+            between.flatMap((entry) =>
+              iconNamesFromApplyCommitMessage(entry.commit.message),
+            ),
+          ),
+        ]
 
     const byName = new Map<
       string,
@@ -1558,7 +1568,7 @@ export function createGithubAdminClient(
     async listPublishHistory(options?: {
       limit?: number
     }): Promise<PublishHistoryEntry[]> {
-      const limit = Math.min(Math.max(options?.limit ?? 20, 1), 40)
+      const limit = Math.min(Math.max(options?.limit ?? 12, 1), 20)
       const publishes = await listAllPublishCommits(limit + 1)
       const entries: PublishHistoryEntry[] = []
 
@@ -1568,7 +1578,7 @@ export function createGithubAdminClient(
         const [version, changes] = await Promise.all([
           readPackageVersionAtRef(current.sha),
           previous
-            ? collectLibraryChanges(previous.sha, current.sha)
+            ? collectLibraryChanges(previous.sha, current.sha, { light: true })
             : Promise.resolve({
                 adds: [] as StagedIcon[],
                 replacements: [] as StagedIcon[],

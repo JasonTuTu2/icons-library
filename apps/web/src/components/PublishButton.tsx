@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   actionsWorkflowUrl,
   dispatchPublish,
@@ -8,6 +9,7 @@ import {
   listUnpublishedRemovals,
   packagesUrl,
   usePublishEnabled,
+  type StagedIcon,
   type StagedRemoval,
 } from '../lib/github'
 import { formatVersionBumpLabel } from '../lib/formatVersionBumpLabel'
@@ -18,42 +20,7 @@ import {
   setUnpublishedIcons,
 } from '../lib/unpublishedSelection'
 import { WorkflowQueuedNotice } from './WorkflowQueuedNotice'
-
-function formatPublishIconList(
-  icons: Array<{ name: string; colorMode?: string; kind?: string; format?: string }>,
-): string {
-  return icons
-    .map((icon) => {
-      if (icon.kind === 'image') {
-        return `• img:${icon.name} (${(icon.format ?? 'image').toUpperCase()})`
-      }
-      return `• ci:${icon.name} (${
-        icon.colorMode === 'preserved'
-          ? 'multi-color'
-          : icon.colorMode === 'gradient'
-            ? 'gradient'
-            : 'mono'
-      })`
-    })
-    .join('\n')
-}
-
-function formatRemovalList(removals: StagedRemoval[]): string {
-  return removals.map((icon) => `• ${icon.name}`).join('\n')
-}
-
-function addsNote(
-  icons: Array<{ name: string; colorMode?: string; kind?: string; format?: string }>,
-  label = 'Adds',
-): string {
-  if (icons.length === 0) return ''
-  return `\n\n${label} (${icons.length}):\n${formatPublishIconList(icons)}`
-}
-
-function removalsNote(removals: StagedRemoval[]): string {
-  if (removals.length === 0) return ''
-  return `\n\nRemovals (${removals.length}):\n${formatRemovalList(removals)}`
-}
+import { PublishConfirmDialog } from './PublishConfirmDialog'
 
 function stagedWaitingSummary(addCount: number, removalCount: number): string {
   const parts: string[] = []
@@ -66,10 +33,53 @@ function stagedWaitingSummary(addCount: number, removalCount: number): string {
   return parts.join(' and ')
 }
 
+type ConfirmState = {
+  title: string
+  body: string
+  bumpLabel: string
+  selected: StagedIcon[]
+  deferred: StagedIcon[]
+  removals: StagedRemoval[]
+  deferPaths: string[]
+  versionBump: 'patch' | 'minor' | 'major'
+}
+
 export function PublishButton() {
   const enabled = usePublishEnabled()
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<ReactNode>(null)
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null)
+
+  const runPublish = useCallback(
+    async (state: ConfirmState) => {
+      setBusy(true)
+      setNotice(null)
+      try {
+        await dispatchPublish({
+          deferPaths: state.deferPaths,
+          versionBump: state.versionBump,
+        })
+        setConfirm(null)
+        setNotice(
+          <WorkflowQueuedNotice
+            className="publish-toast"
+            workflowLabel="Publish workflow"
+            workflowUrl={actionsWorkflowUrl('publish-packages.yml')}
+            packagesHref={packagesUrl()}
+          />,
+        )
+      } catch (err) {
+        setNotice(
+          <p className="copy-toast publish-toast" role="status">
+            {err instanceof Error ? err.message : String(err)}
+          </p>,
+        )
+      } finally {
+        setBusy(false)
+      }
+    },
+    [],
+  )
 
   const handlePublish = useCallback(async () => {
     setBusy(true)
@@ -96,56 +106,39 @@ export function PublishButton() {
 
       const currentVersion = await getPublishedPackageVersion()
       const bumpLabel = formatVersionBumpLabel(currentVersion, versionBump)
-      const addSection = addsNote(selected)
-      const deferSection = addsNote(
-        deferred,
-        'Unchecked adds (stay out of this package, then return to the library)',
-      )
-      const removeSection = removalsNote(removals)
+
+      let title = 'Publish package?'
+      let body = 'Ship checked unpublished icons to GitHub Packages.'
 
       if (readiness.stagedCount > 0) {
         const waiting = stagedWaitingSummary(
           readiness.stagedAddCount,
           readiness.stagedRemovalCount,
         )
-        const ok = window.confirm(
-          `${waiting} still waiting and will not be included in this publish.\n\nApply staged changes to the library first if you want them shipped.${addSection}${deferSection}${removeSection}\n\n${bumpLabel}?`,
-        )
-        if (!ok) return
+        title = 'Publish while queue is waiting?'
+        body = `${waiting} still in your staging queue and will not be included. Apply first if you want those shipped.`
       } else if (!readiness.hasNewIcons) {
-        const ok = window.confirm(
-          `No custom SVG adds or removals have been applied to the library since the last publish.\n\nPublishing now will only bump package versions — there are no library changes for consumers.\n\n${bumpLabel}?`,
-        )
-        if (!ok) return
+        title = 'Version bump only?'
+        body =
+          'No custom SVG adds or removals since the last publish. This only bumps package versions.'
       } else if (selected.length === 0 && removals.length === 0) {
-        const ok = window.confirm(
-          `No unpublished adds are checked and there are no applied removals.\n\nUnchecked adds (${deferred.length}) stay out of this package, then return to the library as unpublished.${deferSection}\n\n${bumpLabel}?`,
-        )
-        if (!ok) return
+        title = 'Nothing checked to publish?'
+        body = `No unpublished adds are checked and there are no applied removals. Unchecked adds (${deferred.length}) stay out of this package.`
       } else if (selected.length === 0) {
-        const ok = window.confirm(
-          `No unpublished adds are checked.${removeSection}${deferSection}\n\n${bumpLabel}?`,
-        )
-        if (!ok) return
-      } else {
-        const ok = window.confirm(
-          `Publish these changes?${addSection}${removeSection}${deferSection}\n\n${bumpLabel}?`,
-        )
-        if (!ok) return
+        title = 'Publish removals only?'
+        body = 'No unpublished adds are checked. Removals below will ship; deferred adds stay unpublished.'
       }
 
-      await dispatchPublish({
+      setConfirm({
+        title,
+        body,
+        bumpLabel,
+        selected,
+        deferred,
+        removals,
         deferPaths: deferred.map((icon) => icon.path),
         versionBump,
       })
-      setNotice(
-        <WorkflowQueuedNotice
-          className="publish-toast"
-          workflowLabel="Publish workflow"
-          workflowUrl={actionsWorkflowUrl('publish-packages.yml')}
-          packagesHref={packagesUrl()}
-        />,
-      )
     } catch (err) {
       setNotice(
         <p className="copy-toast publish-toast" role="status">
@@ -157,7 +150,6 @@ export function PublishButton() {
     }
   }, [])
 
-  // Hidden unless a session PAT is present (magic URL) or local .env in DEV.
   if (!enabled) return null
 
   return (
@@ -168,9 +160,26 @@ export function PublishButton() {
         disabled={busy}
         onClick={() => void handlePublish()}
       >
-        {busy ? 'Publishing…' : 'Publish'}
+        {busy && !confirm ? 'Preparing…' : 'Publish'}
       </button>
       {notice}
+      {confirm
+        ? createPortal(
+            <PublishConfirmDialog
+              open
+              title={confirm.title}
+              body={confirm.body}
+              bumpLabel={confirm.bumpLabel}
+              selected={confirm.selected}
+              deferred={confirm.deferred}
+              removals={confirm.removals}
+              busy={busy}
+              onCancel={() => setConfirm(null)}
+              onConfirm={() => void runPublish(confirm)}
+            />,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

@@ -11,7 +11,8 @@ const packageVersion = import.meta.env.VITE_PACKAGE_VERSION
 
 function AppShell() {
   const session = useAuthSession()
-  const showDocs =
+  const showDocs = true
+  const showDevDocs =
     !isAuthApiConfigured() || session?.role === 'dev'
 
   return (
@@ -51,7 +52,13 @@ function AppShell() {
           <Route path="/" element={<BrowserPage />} />
           <Route
             path="/docs"
-            element={showDocs ? <DocsPage /> : <Navigate to="/" replace />}
+            element={
+              showDocs ? (
+                <DocsPage showDevSections={showDevDocs} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
           />
           <Route path="/releases" element={<ReleasesPage />} />
         </Routes>

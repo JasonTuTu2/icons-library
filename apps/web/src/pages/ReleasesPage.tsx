@@ -110,7 +110,7 @@ export function ReleasesPage() {
       setError(null)
       try {
         const [entries, adds, removals] = await Promise.all([
-          listPublishHistory({ limit: 20 }),
+          listPublishHistory({ limit: 12 }),
           listUnpublishedIcons(),
           listUnpublishedRemovals(),
         ])

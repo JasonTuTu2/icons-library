@@ -9,6 +9,7 @@ import { IconTable } from '../components/IconTable'
 import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
+import { BrowserStatusStrip } from '../components/BrowserStatusStrip'
 import {
   isGithubRepoConfigured,
   type IconSource,
@@ -187,6 +188,7 @@ export function BrowserPage() {
   return (
     <div className="browser">
       <section className="browser-toolbar">
+        <div className="browser-toolbar-filters">
         <label className="field grow">
           <span>Search</span>
           <input
@@ -284,6 +286,8 @@ export function BrowserPage() {
         >
           Clear filters
         </button>
+        </div>
+        <div className="browser-toolbar-actions">
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -333,7 +337,9 @@ export function BrowserPage() {
           </div>
         </div>
         <p className="result-count">{icons.length.toLocaleString()} icons</p>
+        </div>
       </section>
+      <BrowserStatusStrip />
 
       <div className="browser-body">
         <div

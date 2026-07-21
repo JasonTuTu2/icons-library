@@ -25,6 +25,7 @@ import {
   requestFigmaReexport,
   requestFigmaReexportBatch,
   subscribeFigmaPluginMessages,
+  fullIconBrowserUrl,
   type FigmaAssetFormat,
   type FigmaExportIcon,
 } from '../lib/figmaHost'
@@ -395,11 +396,11 @@ export function FigmaDock() {
       setMessage(
         count === 1
           ? isAuthApiConfigured() && getAuthSession()
-            ? 'Staged 1 asset to your account. Open the icon browser (signed in) to Apply.'
-            : 'Staged 1 asset. Sign in, then open icon browser to Apply.'
+            ? 'Staged 1 asset to your account. Open the site signed in → Upload to Apply (link optional).'
+            : 'Staged 1 asset locally in the plugin. Sign in, Stage again to sync, then open the site.'
           : isAuthApiConfigured() && getAuthSession()
-            ? `Staged ${count} assets to your account. Open the icon browser (signed in) to Apply.`
-            : `Staged ${count} assets. Sign in, then open icon browser to Apply.`,
+            ? `Staged ${count} assets to your account. Open the site signed in → Upload to Apply (link optional).`
+            : `Staged ${count} assets locally in the plugin. Sign in, Stage again to sync, then open the site.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -432,14 +433,24 @@ export function FigmaDock() {
       {!githubOk ? (
         <p className="figma-dock-hint">
           Open this panel from the Figma plugin (Pages figma.html). Sign in to
-          stage and open the icon browser.
+          stage to your account and apply in the icon browser.
         </p>
       ) : (
         <p className="figma-dock-hint">
-          Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage (saved to your account when signed in). Use{' '}
-          <strong>Open icon browser</strong> to Apply / Publish — or open the
-          site signed in and open Upload. Mono/Multi/Gradient only apply to SVG.
+          Load → set format / properties → <strong>Stage</strong> (syncs to your
+          account when signed in). Then open the site signed in and use Upload →
+          Apply. See{' '}
+          <a
+            className="figma-dock-docs-link"
+            href={`${fullIconBrowserUrl().replace(/\/?$/, '/')}docs#designer-ops`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Designer ops
+          </a>
+          . Optional:{' '}
+          <strong>Open icon browser</strong> below. Mono/Multi/Gradient only
+          apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (
@@ -678,6 +689,9 @@ export function FigmaDock() {
         >
           Open icon browser
         </button>
+        <span className="figma-dock-link-note">
+          Optional — site Upload works if you staged while signed in
+        </span>
       </p>
     </section>
   )
