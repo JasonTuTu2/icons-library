@@ -10,7 +10,6 @@ import { IconDetail } from '../components/IconDetail'
 import { UploadPanel } from '../components/UploadPanel'
 import { PublishButton } from '../components/PublishButton'
 import { BrowserStatusStrip } from '../components/BrowserStatusStrip'
-import { ChromeIcon } from '../components/ChromeIcon'
 import {
   isGithubRepoConfigured,
   type IconSource,
@@ -191,16 +190,13 @@ export function BrowserPage() {
       <section className="browser-toolbar">
         <label className="field grow">
           <span>Search</span>
-          <span className="field-search">
-            <ChromeIcon name="ci:search-regular" />
-            <input
-              type="search"
-              placeholder="Search brand icons by name or tag…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              autoFocus
-            />
-          </span>
+          <input
+            type="search"
+            placeholder="Search brand icons by name or tag…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
+          />
         </label>
         <label className="field category-filter-field">
           <span>Category</span>

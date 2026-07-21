@@ -5,6 +5,7 @@ import {
   loginWithPassword,
   useAuthSession,
 } from '../lib/sessionAuth'
+import { usePluginLocale } from '../lib/pluginI18n'
 
 /** Topbar session control (Sign out). Sign-in UI lives in AuthGate. */
 export function LoginControl({
@@ -15,6 +16,7 @@ export function LoginControl({
 }) {
   const configured = isAuthApiConfigured()
   const session = useAuthSession()
+  const { t } = usePluginLocale()
   const [open, setOpen] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -24,6 +26,10 @@ export function LoginControl({
   if (!configured) return null
 
   if (session) {
+    const signedInTitle =
+      variant === 'plugin-session'
+        ? `${t('signedInAs')} ${session.role}`
+        : `Signed in as ${session.role}`
     return (
       <div
         className={
@@ -32,7 +38,7 @@ export function LoginControl({
             : 'login-control'
         }
       >
-        <span className="login-user" title={`Signed in as ${session.role}`}>
+        <span className="login-user" title={signedInTitle}>
           {session.username}
           <span className="login-role"> · {session.role}</span>
         </span>
@@ -41,7 +47,7 @@ export function LoginControl({
           className="ghost"
           onClick={() => clearAuthSession()}
         >
-          Sign out
+          {variant === 'plugin-session' ? t('signOut') : 'Sign out'}
         </button>
       </div>
     )

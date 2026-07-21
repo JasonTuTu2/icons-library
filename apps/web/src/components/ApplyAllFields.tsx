@@ -28,6 +28,23 @@ interface ApplyAllFieldsProps {
   /** Shown when format is SVG; applies Mono / Multi / Gradient to all. */
   onApplyColorMode?: (colorMode: IconColorMode) => void
   formatDisabled?: boolean
+  /** Optional UI labels (plugin i18n). Defaults stay English. */
+  labels?: {
+    applyToAll?: string
+    formatPlaceholder?: string
+    colorPlaceholder?: string
+    ariaApplyFormat?: string
+    ariaApplyColor?: string
+    ariaApplyCategory?: string
+    ariaApplyVariant?: string
+    ariaApplySource?: string
+    ariaApplyUsage?: string
+    ariaApplyNote?: string
+    note?: string
+    notePlaceholder?: string
+    addNote?: string
+    editNote?: string
+  }
 }
 
 export function ApplyAllFields({
@@ -41,6 +58,7 @@ export function ApplyAllFields({
   onApplyFormat,
   onApplyColorMode,
   formatDisabled = false,
+  labels,
 }: ApplyAllFieldsProps) {
   const [category, setCategory] = useState('')
   const [variant, setVariant] = useState<IconVariant>('none')
@@ -52,19 +70,24 @@ export function ApplyAllFields({
 
   return (
     <div className="apply-all-fields">
-      <span className="apply-all-label">Apply to All</span>
+      <span className="apply-all-label">
+        {labels?.applyToAll ?? 'Apply to All'}
+      </span>
       {onApplyFormat ? (
         <DropdownCombobox
           className="apply-all-format"
-          ariaLabel="Apply export format to all pending assets"
+          ariaLabel={
+            labels?.ariaApplyFormat ??
+            'Apply export format to all pending assets'
+          }
           value={format}
           disabled={formatDisabled}
           searchable
-          placeholder="Format…"
+          placeholder={labels?.formatPlaceholder ?? 'Format…'}
           displayValue={(v) =>
             v === 'svg' || v === 'png' || v === 'jpg'
               ? v.toUpperCase()
-              : 'Format…'
+              : (labels?.formatPlaceholder ?? 'Format…')
           }
           options={[
             { value: 'svg', label: 'SVG' },
@@ -81,11 +104,13 @@ export function ApplyAllFields({
       {onApplyFormat && onApplyColorMode && format === 'svg' ? (
         <DropdownCombobox
           className="apply-all-color-mode"
-          ariaLabel="Apply color mode to all SVG assets"
+          ariaLabel={
+            labels?.ariaApplyColor ?? 'Apply color mode to all SVG assets'
+          }
           value={colorMode}
           disabled={formatDisabled}
           searchable
-          placeholder="Color…"
+          placeholder={labels?.colorPlaceholder ?? 'Color…'}
           displayValue={(v) => {
             if (v === 'preserved') return 'Multi'
             if (v === 'gradient') return 'Gradient'
@@ -120,7 +145,9 @@ export function ApplyAllFields({
           setCategory(name)
           onApplyCategory(name)
         }}
-        ariaLabel="Apply category to all pending assets"
+        ariaLabel={
+          labels?.ariaApplyCategory ?? 'Apply category to all pending assets'
+        }
       />
       <VariantSelect
         value={variant}
@@ -128,7 +155,9 @@ export function ApplyAllFields({
           setVariant(next)
           onApplyVariant(next)
         }}
-        ariaLabel="Apply variant to all pending assets"
+        ariaLabel={
+          labels?.ariaApplyVariant ?? 'Apply variant to all pending assets'
+        }
       />
       <SourceSelect
         value={source}
@@ -136,7 +165,9 @@ export function ApplyAllFields({
           setSource(next)
           onApplySource(next)
         }}
-        ariaLabel="Apply source to all pending assets"
+        ariaLabel={
+          labels?.ariaApplySource ?? 'Apply source to all pending assets'
+        }
       />
       <UsageSelect
         value={usage}
@@ -144,14 +175,28 @@ export function ApplyAllFields({
           setUsage(next)
           onApplyUsage(next)
         }}
-        ariaLabel="Apply usage to all pending assets"
+        ariaLabel={
+          labels?.ariaApplyUsage ?? 'Apply usage to all pending assets'
+        }
       />
       {onApplyNote ? (
         <NoteToggleField
           className="apply-all-note-toggle"
           value={note}
           disabled={formatDisabled}
-          ariaLabel="Apply note to all pending assets"
+          ariaLabel={
+            labels?.ariaApplyNote ?? 'Apply note to all pending assets'
+          }
+          labels={
+            labels
+              ? {
+                  note: labels.note,
+                  placeholder: labels.notePlaceholder,
+                  addTitle: labels.addNote,
+                  editTitle: labels.editNote,
+                }
+              : undefined
+          }
           onChange={setNote}
           onCommit={() => onApplyNote(note)}
         />

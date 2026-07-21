@@ -30,7 +30,11 @@ import {
   type FigmaExportIcon,
 } from '../lib/figmaHost'
 import { putAccountStaging } from '../lib/stagingHandoff'
-import { getAuthSession, isAuthApiConfigured } from '../lib/sessionAuth'
+import { getAuthSession, isAuthApiConfigured, useAuthSession } from '../lib/sessionAuth'
+import {
+  pluginConflictCopy,
+  usePluginLocale,
+} from '../lib/pluginI18n'
 import { ApplyAllFields } from './ApplyAllFields'
 import { CategorySelect } from './CategorySelect'
 import { VariantSelect } from './VariantSelect'
@@ -38,6 +42,7 @@ import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
 import { NoteToggleField } from './NoteToggleField'
 import { DropdownCombobox } from './DropdownCombobox'
+import { PluginLangToggle } from './PluginLangToggle'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -138,6 +143,8 @@ function asConflictItems(icons: PendingIcon[]) {
  * No catalog browse UI.
  */
 export function FigmaDock() {
+  const { t, locale } = usePluginLocale()
+  const conflictCopy = useMemo(() => pluginConflictCopy(t), [t])
   const [pending, setPending] = useState<PendingIcon[]>([])
   const [busy, setBusy] = useState(false)
   const [reexportingId, setReexportingId] = useState<string | null>(null)
@@ -146,7 +153,9 @@ export function FigmaDock() {
   const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
+  const session = useAuthSession()
   const githubOk = isGithubRepoConfigured() && isFigmaHost()
+  const showHeaderToggle = !(isAuthApiConfigured() && session)
   const namesValid = useMemo(
     () =>
       pending.length > 0 &&
@@ -180,8 +189,8 @@ export function FigmaDock() {
         )
         setMessage(
           msg.error
-            ? `Updated formats with some errors: ${msg.error}`
-            : `Applied format to ${msg.icons.length} asset(s).`,
+            ? t('appliedFormatErrors', { error: msg.error })
+            : t('appliedFormat', { count: msg.icons.length }),
         )
         return
       }
@@ -201,8 +210,10 @@ export function FigmaDock() {
         )
         setMessage(
           updated.kind === 'image'
-            ? `Switched to ${updated.format?.toUpperCase() ?? 'PNG'} (img:).`
-            : 'Switched to SVG (ci:).',
+            ? t('switchedImg', {
+                format: updated.format?.toUpperCase() ?? 'PNG',
+              })
+            : t('switchedSvg'),
         )
         return
       }
@@ -217,19 +228,19 @@ export function FigmaDock() {
       if (msg.error) {
         setMessage(msg.error)
       } else if (msg.icons.length === 0) {
-        setMessage('No exportable nodes in selection.')
+        setMessage(t('noExportable'))
       } else {
         const svgCount = msg.icons.filter((i) => i.kind !== 'image').length
         const imgCount = msg.icons.filter((i) => i.kind === 'image').length
         const parts: string[] = []
         if (svgCount) parts.push(`${svgCount} SVG`)
-        if (imgCount) parts.push(`${imgCount} image`)
+        if (imgCount) parts.push(`${imgCount} ${t('imageUnit')}`)
         setMessage(
-          `Loaded ${parts.join(' + ') || msg.icons.length}. Edit format/names, then Stage.`,
+          `${t('loadedPrefix')} ${parts.join(' + ') || msg.icons.length}. ${t('loadedEdit')}`,
         )
       }
     })
-  }, [])
+  }, [t])
 
   useEffect(() => {
     if (!githubOk) return
@@ -264,7 +275,7 @@ export function FigmaDock() {
     }
 
     const items = asConflictItems(pending)
-    const batch = analyzeItemConflicts(items, [])
+    const batch = analyzeItemConflicts(items, [], conflictCopy)
     setNameConflictMsgs(batch.messages)
     setReplaceHintMsgs(batch.replaceHints)
 
@@ -286,7 +297,7 @@ export function FigmaDock() {
       void findIconNameConflicts(names)
         .then((remote) => {
           if (cancelled) return
-          const analysis = analyzeItemConflicts(items, remote)
+          const analysis = analyzeItemConflicts(items, remote, conflictCopy)
           setNameConflictMsgs(analysis.messages)
           setReplaceHintMsgs(analysis.replaceHints)
         })
@@ -303,7 +314,7 @@ export function FigmaDock() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [pending, githubOk])
+  }, [pending, githubOk, conflictCopy, locale])
 
   function handleLoad(): void {
     setMessage(null)
@@ -328,9 +339,7 @@ export function FigmaDock() {
       const payloads = pending.map((icon) => {
         const name = sanitizeIconName(icon.name)
         if (!name) {
-          throw new Error(
-            `Invalid icon name "${icon.name}". Use kebab-case, e.g. billing-alert.`,
-          )
+          throw new Error(t('invalidName', { name: icon.name }))
         }
         if (icon.kind === 'image') {
           return {
@@ -363,16 +372,14 @@ export function FigmaDock() {
         kind: p.kind === 'image' ? ('image' as const) : ('svg' as const),
       }))
       const remote = await findIconNameConflicts(payloads.map((p) => p.name))
-      const analysis = analyzeItemConflicts(conflictItems, remote)
+      const analysis = analyzeItemConflicts(conflictItems, remote, conflictCopy)
       if (analysis.messages.some((msg) => msg.length > 0)) {
         setNameConflictMsgs(analysis.messages)
         setReplaceHintMsgs(analysis.replaceHints)
-        setMessage(
-          'Fix staging conflicts or batch duplicates before staging.',
-        )
+        setMessage(t('fixConflicts'))
         return
       }
-      if (!confirmLibraryReplacements(analysis.replaceKeys)) {
+      if (!confirmLibraryReplacements(analysis.replaceKeys, conflictCopy)) {
         return
       }
       const replaceKeySet = new Set(analysis.replaceKeys)
@@ -396,11 +403,11 @@ export function FigmaDock() {
       setMessage(
         count === 1
           ? isAuthApiConfigured() && getAuthSession()
-            ? 'Staged 1 asset to your account. Open the site signed in → Upload to Apply (link optional).'
-            : 'Staged 1 asset locally in the plugin. Sign in, Stage again to sync, then open the site.'
+            ? t('stagedOneAccount')
+            : t('stagedOneLocal')
           : isAuthApiConfigured() && getAuthSession()
-            ? `Staged ${count} assets to your account. Open the site signed in → Upload to Apply (link optional).`
-            : `Staged ${count} assets locally in the plugin. Sign in, Stage again to sync, then open the site.`,
+            ? t('stagedManyAccount', { count })
+            : t('stagedManyLocal', { count }),
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -410,8 +417,11 @@ export function FigmaDock() {
   }
 
   return (
-    <section className="figma-dock" aria-label="Figma export">
-      <h1 className="figma-dock-title">GenVoice Icons</h1>
+    <section className="figma-dock" aria-label={t('ariaExport')}>
+      <div className="figma-dock-header">
+        <h1 className="figma-dock-title">{t('brandTitle')}</h1>
+        {showHeaderToggle ? <PluginLangToggle /> : null}
+      </div>
       <div className="figma-dock-actions">
         <button
           type="button"
@@ -419,7 +429,7 @@ export function FigmaDock() {
           disabled={busy || Boolean(reexportingId)}
           onClick={handleLoad}
         >
-          {busy ? 'Working…' : 'Load selection'}
+          {busy ? t('working') : t('loadSelection')}
         </button>
         <button
           type="button"
@@ -427,30 +437,27 @@ export function FigmaDock() {
           disabled={!canStage}
           onClick={() => void handleStage()}
         >
-          Stage
+          {t('stage')}
         </button>
       </div>
       {!githubOk ? (
-        <p className="figma-dock-hint">
-          Open this panel from the Figma plugin (Pages figma.html). Sign in to
-          stage to your account and apply in the icon browser.
-        </p>
+        <p className="figma-dock-hint">{t('hintOffline')}</p>
       ) : (
         <p className="figma-dock-hint">
-          Load → set format / properties → <strong>Stage</strong> (syncs to your
-          account when signed in). Then open the site signed in and use Upload →
-          Apply. See{' '}
+          {t('hintOnlineBefore')}
+          <strong>{t('stage')}</strong>
+          {t('hintOnlineAfter')}
           <a
             className="figma-dock-docs-link"
             href={`${fullIconBrowserUrl().replace(/\/?$/, '/')}docs#designer-ops`}
             target="_blank"
             rel="noreferrer"
           >
-            Designer ops
+            {t('designerOps')}
           </a>
-          . Optional:{' '}
-          <strong>Open icon browser</strong> below. Mono/Multi/Gradient only
-          apply to SVG.
+          {t('hintOnlineOptional')}
+          <strong>{t('openIconBrowser')}</strong>
+          {t('hintOnlineSvg')}
         </p>
       )}
       {pending.length > 0 ? (
@@ -458,6 +465,22 @@ export function FigmaDock() {
           <ApplyAllFields
             categories={categoryRegistry}
             formatDisabled={busy || Boolean(reexportingId)}
+            labels={{
+              applyToAll: t('applyToAll'),
+              formatPlaceholder: t('formatPlaceholder'),
+              colorPlaceholder: t('colorPlaceholder'),
+              ariaApplyFormat: t('ariaApplyFormat'),
+              ariaApplyColor: t('ariaApplyColor'),
+              ariaApplyCategory: t('ariaApplyCategory'),
+              ariaApplyVariant: t('ariaApplyVariant'),
+              ariaApplySource: t('ariaApplySource'),
+              ariaApplyUsage: t('ariaApplyUsage'),
+              ariaApplyNote: t('ariaApplyNote'),
+              note: t('note'),
+              notePlaceholder: t('notePlaceholder'),
+              addNote: t('addNote'),
+              editNote: t('editNote'),
+            }}
             onCreateCategory={(name) =>
               setCategoryRegistry((prev) => mergeCategoryIntoRegistry(prev, name))
             }
@@ -498,6 +521,8 @@ export function FigmaDock() {
             const replaceHint = replaceHintMsgs[index] ?? ''
             const prefix = icon.kind === 'image' ? 'img:' : 'ci:'
             const formatBusy = reexportingId === icon.id
+            const nameOrAsset = icon.name || t('assetFallback')
+            const nameOrIcon = icon.name || t('iconFallback')
             return (
               <li
                 key={icon.id}
@@ -529,11 +554,11 @@ export function FigmaDock() {
                 </label>
                 <DropdownCombobox
                   className="figma-dock-format"
-                  ariaLabel={`Export format for ${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaFormat', { name: nameOrAsset })}
                   value={icon.assetFormat}
                   disabled={Boolean(reexportingId) || busy}
                   searchable
-                  placeholder="Format…"
+                  placeholder={t('formatPlaceholder')}
                   options={[
                     { value: 'svg', label: 'SVG' },
                     { value: 'png', label: 'PNG' },
@@ -548,11 +573,11 @@ export function FigmaDock() {
                 />
                 {icon.kind === 'svg' ? (
                   <DropdownCombobox
-                    ariaLabel={`Color mode for ci:${icon.name || 'icon'}`}
+                    ariaLabel={t('ariaColor', { name: nameOrIcon })}
                     value={icon.colorMode}
                     disabled={formatBusy}
                     searchable
-                    placeholder="Color…"
+                    placeholder={t('colorPlaceholder')}
                     displayValue={(v) => {
                       if (v === 'preserved') return 'Multi'
                       if (v === 'gradient') return 'Gradient'
@@ -593,7 +618,7 @@ export function FigmaDock() {
                       mergeCategoryIntoRegistry(prev, name),
                     )
                   }
-                  ariaLabel={`Category for ${prefix}${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaCategory', { id: `${prefix}${nameOrAsset}` })}
                 />
                 <VariantSelect
                   value={icon.variant}
@@ -604,7 +629,7 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Variant for ${prefix}${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaVariant', { id: `${prefix}${nameOrAsset}` })}
                 />
                 <SourceSelect
                   value={icon.source}
@@ -615,7 +640,7 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Source for ${prefix}${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaSource', { id: `${prefix}${nameOrAsset}` })}
                 />
                 <UsageSelect
                   value={icon.usage}
@@ -626,12 +651,18 @@ export function FigmaDock() {
                       ),
                     )
                   }
-                  ariaLabel={`Usage for ${prefix}${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaUsage', { id: `${prefix}${nameOrAsset}` })}
                 />
                 <NoteToggleField
                   value={icon.note}
                   disabled={formatBusy}
-                  ariaLabel={`Note for ${prefix}${icon.name || 'asset'}`}
+                  ariaLabel={t('ariaNote', { id: `${prefix}${nameOrAsset}` })}
+                  labels={{
+                    note: t('note'),
+                    placeholder: t('notePlaceholder'),
+                    addTitle: t('addNote'),
+                    editTitle: t('editNote'),
+                  }}
                   onChange={(note) =>
                     setPending((prev) =>
                       prev.map((row, i) =>
@@ -652,11 +683,11 @@ export function FigmaDock() {
                     })
                   }}
                 >
-                  Remove
+                  {t('remove')}
                 </button>
                 {formatBusy ? (
                   <p className="figma-dock-reexporting" role="status">
-                    Re-exporting…
+                    {t('reexporting')}
                   </p>
                 ) : null}
                 {conflictMsg ? (
@@ -687,11 +718,9 @@ export function FigmaDock() {
             })
           }}
         >
-          Open icon browser
+          {t('openIconBrowser')}
         </button>
-        <span className="figma-dock-link-note">
-          Optional — site Upload works if you staged while signed in
-        </span>
+        <span className="figma-dock-link-note">{t('openBrowserNote')}</span>
       </p>
     </section>
   )

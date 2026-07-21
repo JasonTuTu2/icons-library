@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { LoginControl } from './LoginControl'
+import { PluginLangToggle } from './PluginLangToggle'
 import {
   isAuthApiConfigured,
   loginWithPassword,
   useAuthSession,
 } from '../lib/sessionAuth'
+import { usePluginLocale } from '../lib/pluginI18n'
 
 interface AuthGateProps {
   children: ReactNode
@@ -19,6 +21,7 @@ interface AuthGateProps {
 export function AuthGate({ children, compact = false }: AuthGateProps) {
   const configured = isAuthApiConfigured()
   const session = useAuthSession()
+  const { t } = usePluginLocale()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -29,6 +32,7 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
       return (
         <div className="plugin-auth-shell">
           <div className="plugin-session-bar">
+            <PluginLangToggle />
             <LoginControl variant="plugin-session" />
           </div>
           {children}
@@ -41,11 +45,18 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
   return (
     <div className={compact ? 'auth-gate auth-gate-compact' : 'auth-gate'}>
       <div className="auth-gate-card">
+        {compact ? (
+          <div className="auth-gate-lang">
+            <PluginLangToggle />
+          </div>
+        ) : null}
         <div className="brand">
           <span className="brand-mark" aria-hidden />
           <div>
-            <strong>GenVoice Icons</strong>
-            <p>{compact ? 'Sign in to use the plugin' : 'Sign in to continue'}</p>
+            <strong>{compact ? t('brandTitle') : 'GenVoice Icons'}</strong>
+            <p>
+              {compact ? t('signInPlugin') : 'Sign in to continue'}
+            </p>
           </div>
         </div>
         <form
@@ -65,7 +76,7 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
           }}
         >
           <label>
-            Username
+            {compact ? t('username') : 'Username'}
             <input
               type="text"
               name="username"
@@ -78,7 +89,7 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
             />
           </label>
           <label>
-            Password
+            {compact ? t('password') : 'Password'}
             <input
               type="password"
               name="password"
@@ -90,7 +101,13 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
             />
           </label>
           <button type="submit" className="ghost accent" disabled={busy}>
-            {busy ? 'Signing in…' : 'Sign in'}
+            {busy
+              ? compact
+                ? t('signingIn')
+                : 'Signing in…'
+              : compact
+                ? t('signIn')
+                : 'Sign in'}
           </button>
           {error ? (
             <p className="login-error" role="alert">

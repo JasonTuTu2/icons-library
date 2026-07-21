@@ -5,6 +5,25 @@ import {
 
 export type ConflictAssetKind = 'svg' | 'image'
 
+export type ConflictCopy = {
+  duplicateBatch: string
+  alreadyIn: (id: string, where: string) => string
+  willReplace: (id: string, where: string) => string
+  locationLabel: (location: IconNameConflict['location']) => string
+  replaceConfirm: (label: string) => string
+}
+
+const defaultCopy: ConflictCopy = {
+  duplicateBatch: 'Duplicate name in this batch. Choose a different name.',
+  alreadyIn: (id, where) =>
+    `${id} is already in ${where}. Unstage it first or rename.`,
+  willReplace: (id, where) =>
+    `${id} will replace ${where} when you Stage (Apply overwrites the file, including when color mode changes).`,
+  locationLabel: conflictLocationLabel,
+  replaceConfirm: (label) =>
+    `Replace existing ${label} in the library?\n\nApply will overwrite the current file. Publishing a replacement bumps the minor package version (e.g. 0.3.21 → 0.4.0).`,
+}
+
 export function conflictLocationLabel(
   location: IconNameConflict['location'],
 ): string {
@@ -82,6 +101,7 @@ export interface ItemConflictAnalysis {
 export function analyzeItemConflicts(
   items: Array<{ name: string; kind: ConflictAssetKind }>,
   remote: IconNameConflict[],
+  copy: ConflictCopy = defaultCopy,
 ): ItemConflictAnalysis {
   const messages = items.map(() => '')
   const replaceHints = items.map(() => '')
@@ -100,8 +120,7 @@ export function analyzeItemConflicts(
   for (const indexes of indexesByKey.values()) {
     if (indexes.length < 2) continue
     for (const index of indexes) {
-      messages[index] =
-        'Duplicate name in this batch. Choose a different name.'
+      messages[index] = copy.duplicateBatch
     }
   }
 
@@ -119,11 +138,10 @@ export function analyzeItemConflicts(
 
     if (stagingHits.length > 0) {
       const where = [
-        ...new Set(stagingHits.map((c) => conflictLocationLabel(c.location))),
+        ...new Set(stagingHits.map((c) => copy.locationLabel(c.location))),
       ].join(', ')
       const prefix = item.kind === 'image' ? 'img:' : 'ci:'
-      messages[index] =
-        `${prefix}${name} is already in ${where}. Unstage it first or rename.`
+      messages[index] = copy.alreadyIn(`${prefix}${name}`, where)
       return
     }
 
@@ -131,11 +149,10 @@ export function analyzeItemConflicts(
       const key = itemKey(item.kind, name)
       replaceKeys.push(key)
       const where = [
-        ...new Set(libraryHits.map((c) => conflictLocationLabel(c.location))),
+        ...new Set(libraryHits.map((c) => copy.locationLabel(c.location))),
       ].join(', ')
       const prefix = item.kind === 'image' ? 'img:' : 'ci:'
-      replaceHints[index] =
-        `${prefix}${name} will replace ${where} when you Stage (Apply overwrites the file, including when color mode changes).`
+      replaceHints[index] = copy.willReplace(`${prefix}${name}`, where)
     }
   })
 
@@ -158,13 +175,12 @@ export function formatConflictList(conflicts: IconNameConflict[]): string {
 
 export function confirmLibraryReplacements(
   replaceKeys: string[],
+  copy: ConflictCopy = defaultCopy,
 ): boolean {
   for (const key of replaceKeys) {
     const [kind, name] = key.split(':') as [ConflictAssetKind, string]
     const label = kind === 'image' ? `img:${name}` : `ci:${name}`
-    const ok = window.confirm(
-      `Replace existing ${label} in the library?\n\nApply will overwrite the current file. Publishing a replacement bumps the minor package version (e.g. 0.3.21 → 0.4.0).`,
-    )
+    const ok = window.confirm(copy.replaceConfirm(label))
     if (!ok) return false
   }
   return true

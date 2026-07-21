@@ -191,6 +191,7 @@ pre {
 }
 
 .auth-gate-card {
+  position: relative;
   width: min(22rem, 100%);
   padding: 1.5rem;
   border: 1px solid var(--line);
@@ -361,6 +362,8 @@ pre {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
   padding: 6px 10px;
   border-bottom: 1px solid var(--plugin-border, var(--line));
   background: var(--plugin-bg, var(--bg-elevated));
@@ -582,26 +585,6 @@ pre {
 
 .chrome-icon svg {
   display: block;
-}
-
-.field-search {
-  position: relative;
-  display: block;
-}
-
-.field-search .chrome-icon {
-  position: absolute;
-  left: 0.7rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  pointer-events: none;
-}
-
-.field-search input {
-  width: 100%;
-  box-sizing: border-box;
-  padding-left: 2.65rem;
 }
 
 .ghost.with-chrome-icon {
@@ -2303,6 +2286,38 @@ html.figma-host code {
   margin: 0;
   flex: 1;
   min-width: 0;
+}
+
+.plugin-lang-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--plugin-border, var(--line));
+  border-radius: 8px;
+  background: var(--plugin-bg, var(--bg-elevated));
+  color: var(--plugin-text, var(--ink));
+  cursor: pointer;
+}
+
+.plugin-lang-toggle:hover {
+  border-color: rgba(30, 167, 255, 0.45);
+  color: var(--blue);
+}
+
+.plugin-lang-toggle[aria-pressed='true'] {
+  color: var(--blue);
+  border-color: rgba(30, 167, 255, 0.55);
+  background: var(--blue-soft, #e8f4ff);
+}
+
+.auth-gate-lang {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
 }
 
 .login-control-plugin {

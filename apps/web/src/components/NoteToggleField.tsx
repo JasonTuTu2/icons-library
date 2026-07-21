@@ -10,6 +10,12 @@ interface NoteToggleFieldProps {
   /** Called when the field should persist (blur / Enter). */
   onCommit?: () => void
   className?: string
+  labels?: {
+    note?: string
+    placeholder?: string
+    addTitle?: string
+    editTitle?: string
+  }
 }
 
 /**
@@ -23,11 +29,16 @@ export function NoteToggleField({
   disabled = false,
   onCommit,
   className,
+  labels,
 }: NoteToggleFieldProps) {
   const inputId = useId()
   const hasNote = value.trim().length > 0
   const [open, setOpen] = useState(hasNote)
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const noteLabel = labels?.note ?? 'Note'
+  const placeholder = labels?.placeholder ?? 'Note…'
+  const addTitle = labels?.addTitle ?? 'Add Note'
+  const editTitle = labels?.editTitle ?? 'Edit Note'
 
   useEffect(() => {
     if (hasNote) setOpen(true)
@@ -63,10 +74,11 @@ export function NoteToggleField({
         aria-expanded={open}
         aria-controls={inputId}
         disabled={disabled}
-        title={hasNote ? 'Edit Note' : 'Add Note'}
+        title={hasNote ? editTitle : addTitle}
         onClick={() => setOpen((prev) => !prev)}
       >
-        Note{hasNote ? ' ·' : ''}
+        {noteLabel}
+        {hasNote ? ' ·' : ''}
       </button>
       {open ? (
         <input
@@ -74,7 +86,7 @@ export function NoteToggleField({
           id={inputId}
           type="text"
           className="asset-note-input"
-          placeholder="Note…"
+          placeholder={placeholder}
           maxLength={500}
           value={value}
           disabled={disabled}
