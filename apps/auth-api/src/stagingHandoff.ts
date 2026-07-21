@@ -28,11 +28,21 @@ export async function putStagingHandoff(
   )
 }
 
-/** Read once, then delete. */
-export async function takeStagingHandoff(id: string): Promise<string | null> {
-  const req = cacheRequest(id)
-  const res = await caches.default.match(req)
+/** Read without deleting (allows retry / StrictMode / auth-then-import). */
+export async function readStagingHandoff(id: string): Promise<string | null> {
+  const res = await caches.default.match(cacheRequest(id))
   if (!res) return null
-  await caches.default.delete(req)
   return await res.text()
+}
+
+/** Optional cleanup after successful import in the browser. */
+export async function deleteStagingHandoff(id: string): Promise<void> {
+  await caches.default.delete(cacheRequest(id))
+}
+
+/** @deprecated Prefer readStagingHandoff — delete-on-read breaks retries. */
+export async function takeStagingHandoff(id: string): Promise<string | null> {
+  const raw = await readStagingHandoff(id)
+  if (raw) await deleteStagingHandoff(id)
+  return raw
 }

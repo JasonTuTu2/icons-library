@@ -309,7 +309,11 @@ export function UploadPanel({
     }
   }, [mode, githubRepoConfigured])
 
+  const handoffRetryStarted = useRef(false)
+
   useEffect(() => {
+    if (handoffRetryStarted.current) return
+    handoffRetryStarted.current = true
     void retryPendingStagingHandoffImport().then((did) => {
       if (did) void refreshStaged()
     })

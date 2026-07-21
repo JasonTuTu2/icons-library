@@ -22,6 +22,8 @@ export interface StagingHandoffPayload {
 
 let pendingStagingMemory: StagingHandoffPayload | null | undefined
 let importMessageMemory: string | null | undefined
+const importedHandoffIds = new Set<string>()
+const handoffImportInFlight = new Set<string>()
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = ''
@@ -150,7 +152,7 @@ export async function createServerStagingHandoff(
 
 export async function fetchServerStagingHandoff(
   id: string,
-): Promise<StagingHandoffPayload | null> {
+): Promise<StagingHandoffPayload> {
   if (!getAuthSession()) {
     throw new Error('Sign in to import staging from the plugin.')
   }
@@ -167,11 +169,52 @@ export async function fetchServerStagingHandoff(
     throw new Error(
       body.error ||
         (res.status === 404
-          ? 'Staging handoff expired or was already used.'
+          ? 'Staging handoff expired or not found. Open the icon browser again from the plugin.'
           : `Staging handoff failed (${res.status})`),
     )
   }
-  return parseStagingPayload(body)
+  const parsed = parseStagingPayload(body)
+  if (!parsed) {
+    throw new Error(
+      'Handoff data was invalid or empty. Stage again in the plugin and use Open icon browser.',
+    )
+  }
+  return parsed
+}
+
+async function ackServerHandoff(id: string): Promise<void> {
+  try {
+    await authApiFetch(`/api/staging-handoff/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    })
+  } catch {
+    // TTL will expire the cache entry
+  }
+}
+
+async function importFromHandoffId(id: string): Promise<boolean> {
+  const trimmed = id.trim()
+  if (!trimmed || importedHandoffIds.has(trimmed)) return false
+  if (handoffImportInFlight.has(trimmed)) return false
+  handoffImportInFlight.add(trimmed)
+
+  try {
+    const payload = await fetchServerStagingHandoff(trimmed)
+    await importHandoffOrThrow(payload)
+    importedHandoffIds.add(trimmed)
+    clearPendingHandoffId()
+    void ackServerHandoff(trimmed)
+    storePendingStaging(payload)
+    storeOpenUploadPanel()
+    storeImportMessage(handoffImportedMessage(payload))
+    return true
+  } catch (err) {
+    storeImportMessage(err instanceof Error ? err.message : String(err))
+    storeOpenUploadPanel()
+    return true
+  } finally {
+    handoffImportInFlight.delete(trimmed)
+  }
 }
 
 function rememberPendingHandoffId(id: string): void {
@@ -220,27 +263,7 @@ function handoffImportedMessage(payload: StagingHandoffPayload): string {
 export async function retryPendingStagingHandoffImport(): Promise<boolean> {
   const id = readPendingHandoffId()
   if (!id || !isAuthApiConfigured() || !getAuthSession()) return false
-
-  try {
-    const payload = await fetchServerStagingHandoff(id)
-    clearPendingHandoffId()
-    if (!payload) {
-      storeImportMessage(
-        'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
-      )
-      storeOpenUploadPanel()
-      return true
-    }
-    await importHandoffOrThrow(payload)
-    storePendingStaging(payload)
-    storeOpenUploadPanel()
-    storeImportMessage(handoffImportedMessage(payload))
-    return true
-  } catch (err) {
-    storeImportMessage(err instanceof Error ? err.message : String(err))
-    storeOpenUploadPanel()
-    return true
-  }
+  return importFromHandoffId(id)
 }
 
 export async function importStagingHandoff(
@@ -358,21 +381,7 @@ export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
       )
       return true
     }
-    try {
-      const payload = await fetchServerStagingHandoff(handoffId)
-      clearPendingHandoffId()
-      if (!payload) {
-        storeImportMessage(
-          'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
-        )
-        return true
-      }
-      await importHandoffOrThrow(payload)
-      storePendingStaging(payload)
-      storeImportMessage(handoffImportedMessage(payload))
-    } catch (err) {
-      storeImportMessage(err instanceof Error ? err.message : String(err))
-    }
+    await importFromHandoffId(handoffId)
     return true
   }
 

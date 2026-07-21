@@ -17,9 +17,10 @@ import {
   type Role,
 } from './auth'
 import {
+  deleteStagingHandoff,
   isHandoffId,
   putStagingHandoff,
-  takeStagingHandoff,
+  readStagingHandoff,
 } from './stagingHandoff'
 
 type Variables = {
@@ -399,11 +400,24 @@ authed.get('/staging-handoff/:id', async (c) => {
     return c.json({ error: 'Invalid handoff id' }, 400)
   }
   try {
-    const raw = await takeStagingHandoff(id)
+    const raw = await readStagingHandoff(id)
     if (!raw) {
-      return c.json({ error: 'Handoff expired or already used' }, 404)
+      return c.json({ error: 'Handoff expired or not found' }, 404)
     }
     return c.json(JSON.parse(raw) as unknown)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+})
+
+authed.delete('/staging-handoff/:id', async (c) => {
+  const id = c.req.param('id')?.trim() ?? ''
+  if (!isHandoffId(id)) {
+    return c.json({ error: 'Invalid handoff id' }, 400)
+  }
+  try {
+    await deleteStagingHandoff(id)
+    return c.json({ ok: true })
   } catch (err) {
     return c.json(githubError(err), 502)
   }
