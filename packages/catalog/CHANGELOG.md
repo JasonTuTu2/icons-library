@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-catalog
 
+## 8.0.1
+
+### Patch Changes
+
+- Publish from icon browser (patch).
+
 ## 8.0.0
 
 ### Major Changes
