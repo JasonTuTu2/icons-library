@@ -100,8 +100,36 @@ export async function buildStagingHandoffPayload(): Promise<StagingHandoffPayloa
   return { v: 1, icons, removals }
 }
 
-/** Max encoded param length (keep under typical browser URL limits). */
-export const STAGING_HANDOFF_URL_MAX = 5500
+/** Max encoded `gv-staging` param length (leave room for auth hash + query). */
+export const STAGING_HANDOFF_URL_MAX = 14_000
+
+export function buildStagingHandoffUrl(
+  baseUrl: string,
+  payload: StagingHandoffPayload,
+): {
+  url: string
+  note?: string
+  downloadJson: boolean
+} {
+  const base = baseUrl.replace(/\/?$/, '/')
+  if (payload.icons.length === 0 && payload.removals.length === 0) {
+    return { url: base, downloadJson: false }
+  }
+
+  const encoded = encodeStagingHandoffParam(payload)
+  if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
+    const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
+    return { url, downloadJson: false }
+  }
+
+  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
+  return {
+    url,
+    downloadJson: true,
+    note:
+      'Queue is too large for a link ? downloading gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
+  }
+}
 
 export async function importStagingHandoff(
   payload: StagingHandoffPayload,

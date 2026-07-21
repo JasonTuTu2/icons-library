@@ -5,6 +5,7 @@ import {
   findIconNameConflicts,
   isGithubRepoConfigured,
   sanitizeIconName,
+  stageIcons,
   type IconColorMode,
   type IconSource,
   type IconUsage,
@@ -24,7 +25,6 @@ import {
   requestFigmaExport,
   requestFigmaReexport,
   requestFigmaReexportBatch,
-  stageIconsInPlugin,
   subscribeFigmaPluginMessages,
   type FigmaAssetFormat,
   type FigmaExportIcon,
@@ -384,14 +384,14 @@ export function FigmaDock() {
       }))
 
       const count = stagedPayloads.length
-      await stageIconsInPlugin(stagedPayloads)
+      await stageIcons(stagedPayloads)
       setPending((prev) => {
         revokeAll(prev)
         return []
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s) in the plugin. Open icon browser to sync for Apply.`,
+        `Staged ${count} asset(s) locally. Open icon browser to sync for Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -429,9 +429,9 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage (local to this plugin). Use{' '}
-          <strong>Open icon browser</strong> to sync your queue for Apply.
-          Mono/Multi/Gradient only apply to SVG.
+          names, then Stage (saved in this panel via IndexedDB, same as the full
+          browser). Use <strong>Open icon browser</strong> to sync your queue
+          for Apply. Mono/Multi/Gradient only apply to SVG.
         </p>
       )}
       {pending.length > 0 ? (

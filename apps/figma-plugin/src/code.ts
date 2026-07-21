@@ -175,7 +175,7 @@ async function reexportNodes(
 
 const STAGING_SNAPSHOT_KEY = 'gv-staging-snapshot-v1'
 /** Keep in sync with apps/web stagingHandoff.ts */
-const STAGING_HANDOFF_URL_MAX = 5500
+const STAGING_HANDOFF_URL_MAX = 14_000
 
 type StagingPayload = {
   v: 1

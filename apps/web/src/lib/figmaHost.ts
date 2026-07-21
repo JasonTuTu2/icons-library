@@ -1,21 +1,15 @@
 import {
   buildStagingHandoffPayload,
+  buildStagingHandoffUrl,
   downloadStagingHandoffJson,
-  encodeStagingHandoffParam,
-  STAGING_HANDOFF_URL_MAX,
-  type StagingHandoffPayload,
 } from './stagingHandoff.js'
-import {
-  buildAuthSessionHandoffHash,
-} from './sessionAuth.js'
-import type { IconUploadPayload } from './github.js'
+import { buildAuthSessionHandoffHash } from './sessionAuth.js'
 
 const FIGMA_PARAM = 'gv-figma'
 /** Must match apps/figma-plugin/manifest.json `id` (required for external UI). */
 const FIGMA_PLUGIN_ID = 'genvoice-icons-library'
 
 let figmaHostMemory: boolean | undefined
-let cachedPluginStaging: StagingHandoffPayload | null = null
 
 function stripFigmaParam(): void {
   if (typeof window === 'undefined') return
@@ -90,18 +84,6 @@ export type FigmaPluginMessage =
       icons: FigmaExportIcon[]
       error?: string
     }
-  | {
-      type: 'staging-result'
-      ok: boolean
-      payload?: StagingHandoffPayload
-      error?: string
-    }
-  | {
-      type: 'open-browser-done'
-      url: string
-      note?: string
-      downloadPayload?: StagingHandoffPayload
-    }
 
 function postToPlugin(pluginMessage: Record<string, unknown>): void {
   if (typeof window === 'undefined' || window.parent === window) return
@@ -111,48 +93,9 @@ function postToPlugin(pluginMessage: Record<string, unknown>): void {
   )
 }
 
-function pluginPayloadFromHandoff(
-  payload: StagingHandoffPayload,
-): Array<Record<string, unknown>> {
-  return JSON.parse(JSON.stringify(payload.icons)) as Array<
-    Record<string, unknown>
-  >
-}
-
-function handoffFromPluginPayload(raw: StagingHandoffPayload): StagingHandoffPayload {
-  return {
-    v: 1,
-    icons: raw.icons as IconUploadPayload[],
-    removals: raw.removals,
-  }
-}
-
-function awaitPluginMessage<T extends FigmaPluginMessage['type']>(
-  type: T,
-  timeoutMs = 15000,
-): Promise<Extract<FigmaPluginMessage, { type: T }>> {
-  return new Promise((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      window.removeEventListener('message', onMessage)
-      reject(
-        new Error(
-          type === 'staging-result'
-            ? 'Timed out waiting for Figma plugin staging. Re-import the GenVoice Icons plugin (Development) from apps/figma-plugin/dist.'
-            : 'Timed out waiting for the Figma plugin.',
-        ),
-      )
-    }, timeoutMs)
-
-    function onMessage(event: MessageEvent): void {
-      const msg = event.data?.pluginMessage as FigmaPluginMessage | undefined
-      if (!msg || msg.type !== type) return
-      window.clearTimeout(timer)
-      window.removeEventListener('message', onMessage)
-      resolve(msg as Extract<FigmaPluginMessage, { type: T }>)
-    }
-
-    window.addEventListener('message', onMessage)
-  })
+function appendUrlHash(url: string, hashPart: string | undefined): string {
+  if (!hashPart?.trim()) return url
+  return url.includes('#') ? `${url}&${hashPart}` : `${url}#${hashPart}`
 }
 
 /** Ask the Figma main thread to export the current selection. */
@@ -190,98 +133,27 @@ export function openExternalUrl(url: string): void {
   postToPlugin({ type: 'open-url', url })
 }
 
-/** Stage icons into figma.clientStorage (plugin main thread). */
-export async function stageIconsInPlugin(
-  icons: IconUploadPayload[],
-  removals: string[] = [],
-): Promise<StagingHandoffPayload> {
-  if (!isFigmaHost()) {
-    throw new Error('Not running inside the Figma plugin.')
-  }
-  const wait = awaitPluginMessage('staging-result')
-  postToPlugin({
-    type: 'stage-icons',
-    icons: pluginPayloadFromHandoff({ v: 1, icons, removals }),
-    removals,
-  })
-  const msg = await wait
-  if (!msg.ok) {
-    throw new Error(msg.error || 'Plugin staging failed.')
-  }
-  const payload = handoffFromPluginPayload(
-    msg.payload ?? { v: 1, icons: [], removals: [] },
-  )
-  cachedPluginStaging = payload
-  return payload
-}
-
-/** Load the plugin clientStorage staging queue. */
-export async function loadPluginStaging(): Promise<StagingHandoffPayload> {
-  if (!isFigmaHost()) {
-    return { v: 1, icons: [], removals: [] }
-  }
-  if (cachedPluginStaging) {
-    return cachedPluginStaging
-  }
-  const wait = awaitPluginMessage('staging-result')
-  postToPlugin({ type: 'load-staging' })
-  const msg = await wait
-  if (!msg.ok) {
-    throw new Error(msg.error || 'Plugin staging failed.')
-  }
-  const payload = handoffFromPluginPayload(
-    msg.payload ?? { v: 1, icons: [], removals: [] },
-  )
-  cachedPluginStaging = payload
-  return payload
-}
-
 /**
- * Open the full icon browser with the plugin staging queue.
- * Uses a URL handoff when small enough; otherwise downloads JSON and opens Upload.
- * Always returns the URL that was opened so the plugin UI can display it.
+ * Open the full icon browser with the local staging queue (IndexedDB).
+ * Figma’s iframe uses a separate storage partition — the new tab cannot read
+ * this IndexedDB, so we still pass the queue on the URL when it fits.
  */
 export async function openIconBrowserWithStaging(): Promise<{
   url: string
   note?: string
 }> {
-  if (isFigmaHost()) {
-    const wait = awaitPluginMessage('open-browser-done')
-    postToPlugin({
-      type: 'open-icon-browser',
-      baseUrl: fullIconBrowserUrl(),
-      authHandoff: buildAuthSessionHandoffHash(),
-    })
-    const msg = await wait
-    if (msg.downloadPayload) {
-      downloadStagingHandoffJson(handoffFromPluginPayload(msg.downloadPayload))
-    }
-    return { url: msg.url, note: msg.note }
-  }
-
   const payload = await buildStagingHandoffPayload()
   const base = fullIconBrowserUrl()
-
-  if (payload.icons.length === 0 && payload.removals.length === 0) {
-    openExternalUrl(base)
-    return { url: base }
+  const { url: stagingUrl, note, downloadJson } = buildStagingHandoffUrl(
+    base,
+    payload,
+  )
+  const url = appendUrlHash(stagingUrl, buildAuthSessionHandoffHash())
+  if (downloadJson) {
+    downloadStagingHandoffJson(payload)
   }
-
-  const encoded = encodeStagingHandoffParam(payload)
-
-  if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
-    const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
-    openExternalUrl(url)
-    return { url }
-  }
-
-  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
-  downloadStagingHandoffJson(payload)
   openExternalUrl(url)
-  return {
-    url,
-    note: 'Queue is too large for a link — downloaded gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
-  }
+  return { url, note }
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */
