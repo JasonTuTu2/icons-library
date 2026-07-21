@@ -6,8 +6,10 @@ import {
   exportRemovalNames,
 } from './localStagingStore'
 import { storeOpenUploadPanel } from './figmaHandoff'
+import { authApiFetch, isAuthApiConfigured } from './sessionAuth.js'
 
 const STAGING_PARAM = 'gv-staging'
+const STAGING_ID_PARAM = 'gv-staging-id'
 const PENDING_STAGING_KEY = 'gv-pending-staging-handoff'
 const STAGING_IMPORTED_MSG_KEY = 'gv-staging-import-message'
 
@@ -106,29 +108,51 @@ export const STAGING_HANDOFF_URL_MAX = 14_000
 export function buildStagingHandoffUrl(
   baseUrl: string,
   payload: StagingHandoffPayload,
-): {
-  url: string
-  note?: string
-  downloadJson: boolean
-} {
+): { url: string; tooLarge?: boolean } {
   const base = baseUrl.replace(/\/?$/, '/')
   if (payload.icons.length === 0 && payload.removals.length === 0) {
-    return { url: base, downloadJson: false }
+    return { url: base }
   }
 
   const encoded = encodeStagingHandoffParam(payload)
   if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
     const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
-    return { url, downloadJson: false }
+    return { url }
   }
 
-  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
   return {
-    url,
-    downloadJson: true,
-    note:
-      'Queue is too large for a link ? downloading gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
+    url: `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`,
+    tooLarge: true,
   }
+}
+
+/** Store queue on auth API; returns short id for `?gv-staging-id=`. */
+export async function createServerStagingHandoff(
+  payload: StagingHandoffPayload,
+): Promise<string> {
+  const res = await authApiFetch('/api/staging-handoff', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  const body = (await res.json().catch(() => ({}))) as {
+    id?: string
+    error?: string
+  }
+  if (!res.ok || !body.id) {
+    throw new Error(body.error || `Staging handoff failed (${res.status})`)
+  }
+  return body.id
+}
+
+export async function fetchServerStagingHandoff(
+  id: string,
+): Promise<StagingHandoffPayload | null> {
+  const res = await authApiFetch(
+    `/api/staging-handoff/${encodeURIComponent(id)}`,
+  )
+  const body = (await res.json().catch(() => ({}))) as unknown
+  if (!res.ok) return null
+  return parseStagingPayload(body)
 }
 
 export async function importStagingHandoff(
@@ -187,7 +211,7 @@ function readSearchAndHashParams(): URLSearchParams {
   return params
 }
 
-function stripStagingParam(): void {
+function stripStagingParams(): void {
   if (typeof window === 'undefined') return
   const url = new URL(window.location.href)
   let changed = false
@@ -195,11 +219,23 @@ function stripStagingParam(): void {
     url.searchParams.delete(STAGING_PARAM)
     changed = true
   }
+  if (url.searchParams.has(STAGING_ID_PARAM)) {
+    url.searchParams.delete(STAGING_ID_PARAM)
+    changed = true
+  }
   const hashRaw = url.hash.replace(/^#/, '')
   if (hashRaw) {
     const hashParams = new URLSearchParams(hashRaw)
+    let hashChanged = false
     if (hashParams.has(STAGING_PARAM)) {
       hashParams.delete(STAGING_PARAM)
+      hashChanged = true
+    }
+    if (hashParams.has(STAGING_ID_PARAM)) {
+      hashParams.delete(STAGING_ID_PARAM)
+      hashChanged = true
+    }
+    if (hashChanged) {
       changed = true
       const next = hashParams.toString()
       url.hash = next ? `#${next}` : ''
@@ -211,12 +247,38 @@ function stripStagingParam(): void {
 }
 
 /**
- * Read `?gv-staging=` / `#gv-staging=` from the URL (Figma plugin ? full browser).
+ * Import staging from the URL (`gv-staging-id` via auth API, or legacy `gv-staging`).
  */
-export function consumeStagingHandoffFromUrl(): boolean {
+export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
   if (typeof window === 'undefined') return false
 
   const params = readSearchAndHashParams()
+  const handoffId = params.get(STAGING_ID_PARAM)?.trim() ?? ''
+  if (handoffId) {
+    stripStagingParams()
+    if (!isAuthApiConfigured()) {
+      storeOpenUploadPanel()
+      storeImportMessage(
+        'Staging handoff requires Sign in (auth API). Open the icon browser from the plugin again.',
+      )
+      return true
+    }
+    const payload = await fetchServerStagingHandoff(handoffId)
+    if (payload) {
+      await importStagingHandoff(payload)
+      storeOpenUploadPanel()
+      storeImportMessage(
+        `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from the plugin.`,
+      )
+    } else {
+      storeOpenUploadPanel()
+      storeImportMessage(
+        'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
+      )
+    }
+    return true
+  }
+
   const encoded = params.get(STAGING_PARAM)?.trim() ?? ''
   if (!encoded) return false
 
@@ -234,7 +296,7 @@ export function consumeStagingHandoffFromUrl(): boolean {
     )
   }
 
-  stripStagingParam()
+  stripStagingParams()
   return true
 }
 

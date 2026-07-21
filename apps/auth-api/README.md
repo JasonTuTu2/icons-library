@@ -66,5 +66,7 @@ If every authed call returns `GitHub API 403: Forbidden`, redeploy the Worker af
 - `GET /api/library-asset-path?name=` → `{ path }`
 - `GET /api/asset-preview?path=` → `{ preview }`
 - `POST /api/apply` body `{ icons, removals }` — designer or dev
+- `POST /api/staging-handoff` body `{ v:1, icons, removals }` → `{ id }` (15 min, one-time fetch)
+- `GET /api/staging-handoff/:id` — returns queue, then deletes (designer or dev)
 - `POST /api/publish` body publish options — **dev only**
 - `GET /health`

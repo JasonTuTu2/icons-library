@@ -1,9 +1,9 @@
 import {
   buildStagingHandoffPayload,
   buildStagingHandoffUrl,
-  downloadStagingHandoffJson,
+  createServerStagingHandoff,
 } from './stagingHandoff.js'
-import { buildAuthSessionHandoffHash } from './sessionAuth.js'
+import { buildAuthSessionHandoffHash, isAuthApiConfigured } from './sessionAuth.js'
 
 const FIGMA_PARAM = 'gv-figma'
 /** Must match apps/figma-plugin/manifest.json `id` (required for external UI). */
@@ -135,8 +135,7 @@ export function openExternalUrl(url: string): void {
 
 /**
  * Open the full icon browser with the local staging queue (IndexedDB).
- * Figma’s iframe uses a separate storage partition — the new tab cannot read
- * this IndexedDB, so we still pass the queue on the URL when it fits.
+ * With auth API: uploads queue to Worker cache, opens `?gv-staging-id=…`.
  */
 export async function openIconBrowserWithStaging(): Promise<{
   url: string
@@ -144,16 +143,26 @@ export async function openIconBrowserWithStaging(): Promise<{
 }> {
   const payload = await buildStagingHandoffPayload()
   const base = fullIconBrowserUrl()
-  const { url: stagingUrl, note, downloadJson } = buildStagingHandoffUrl(
-    base,
-    payload,
-  )
-  const url = appendUrlHash(stagingUrl, buildAuthSessionHandoffHash())
-  if (downloadJson) {
-    downloadStagingHandoffJson(payload)
+
+  let stagingUrl = base
+  if (payload.icons.length > 0 || payload.removals.length > 0) {
+    if (isAuthApiConfigured()) {
+      const id = await createServerStagingHandoff(payload)
+      stagingUrl = `${base}${base.includes('?') ? '&' : '?'}gv-staging-id=${encodeURIComponent(id)}&gv-upload=1`
+    } else {
+      const built = buildStagingHandoffUrl(base, payload)
+      if (built.tooLarge) {
+        throw new Error(
+          'Staging is too large for a URL. Use Sign in (production) or stage from the full browser.',
+        )
+      }
+      stagingUrl = built.url
+    }
   }
+
+  const url = appendUrlHash(stagingUrl, buildAuthSessionHandoffHash())
   openExternalUrl(url)
-  return { url, note }
+  return { url }
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

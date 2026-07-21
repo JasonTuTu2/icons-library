@@ -16,6 +16,11 @@ import {
   type Env,
   type Role,
 } from './auth'
+import {
+  isHandoffId,
+  putStagingHandoff,
+  takeStagingHandoff,
+} from './stagingHandoff'
 
 type Variables = {
   username: string
@@ -322,6 +327,50 @@ authed.post('/publish', async (c) => {
     ok: true,
     username: c.get('username'),
   })
+})
+
+/** Short-lived plugin → browser queue (Workers Cache, ~15 min). */
+authed.post('/staging-handoff', async (c) => {
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  if (!body || typeof body !== 'object') {
+    return c.json({ error: 'Invalid body' }, 400)
+  }
+  const row = body as { v?: number; icons?: unknown; removals?: unknown }
+  if (row.v !== 1 || !Array.isArray(row.icons) || !Array.isArray(row.removals)) {
+    return c.json({ error: 'Expected { v: 1, icons, removals }' }, 400)
+  }
+  if (row.icons.length === 0 && row.removals.length === 0) {
+    return c.json({ error: 'Nothing to hand off' }, 400)
+  }
+
+  const id = crypto.randomUUID()
+  try {
+    await putStagingHandoff(id, JSON.stringify(body))
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
+  return c.json({ id })
+})
+
+authed.get('/staging-handoff/:id', async (c) => {
+  const id = c.req.param('id')?.trim() ?? ''
+  if (!isHandoffId(id)) {
+    return c.json({ error: 'Invalid handoff id' }, 400)
+  }
+  try {
+    const raw = await takeStagingHandoff(id)
+    if (!raw) {
+      return c.json({ error: 'Handoff expired or already used' }, 404)
+    }
+    return c.json(JSON.parse(raw) as unknown)
+  } catch (err) {
+    return c.json(githubError(err), 502)
+  }
 })
 
 app.route('/api', authed)
