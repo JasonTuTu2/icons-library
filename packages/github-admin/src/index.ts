@@ -463,6 +463,8 @@ export function createGithubAdminClient(
         Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28',
         'Content-Type': 'application/json',
+        // Required by GitHub REST; Workers fetch omits a browser User-Agent → 403.
+        'User-Agent': 'JasonTuTu2-icons-library-github-admin',
         ...(init.headers ?? {}),
       },
     })

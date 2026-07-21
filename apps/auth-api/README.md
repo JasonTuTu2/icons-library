@@ -50,6 +50,8 @@ Authenticated API so designers/devs sign in with username + password. The browse
 
 Until step 7–8, the local browser can still use `VITE_GITHUB_TOKEN` / `#gv-github-token=` when `VITE_AUTH_API_URL` is unset.
 
+If every authed call returns `GitHub API 403: Forbidden`, redeploy the Worker after updating `@JasonTuTu2/github-admin` (GitHub requires a `User-Agent` on API requests; the Worker bundle must include that fix).
+
 ## Endpoints
 
 - `POST /api/login` `{ username, password }` → `{ token, username, role }`
