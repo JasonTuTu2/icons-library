@@ -18,7 +18,6 @@ import {
   confirmLibraryReplacements,
 } from '../lib/nameConflicts'
 import {
-  fullIconBrowserUrl,
   isFigmaHost,
   notifyFigmaUiReady,
   openIconBrowserWithStaging,
@@ -145,8 +144,6 @@ export function FigmaDock() {
   const [conflictsChecking, setConflictsChecking] = useState(false)
   const [categoryRegistry, setCategoryRegistry] = useState<string[]>([])
   const githubOk = isGithubRepoConfigured() && isFigmaHost()
-  const browserUrl = fullIconBrowserUrl()
-
   const namesValid = useMemo(
     () =>
       pending.length > 0 &&
@@ -391,7 +388,9 @@ export function FigmaDock() {
       })
       setNameConflictMsgs([])
       setMessage(
-        `Staged ${count} asset(s) on GitHub. Open icon browser to Apply.`,
+        count === 1
+          ? 'Staged 1 asset. Open icon browser to Apply.'
+          : `Staged ${count} assets. Open icon browser to Apply.`,
       )
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err))
@@ -429,8 +428,8 @@ export function FigmaDock() {
       ) : (
         <p className="figma-dock-hint">
           Load from the canvas, set format (SVG / PNG / JPG), properties, and
-          names, then Stage (writes to GitHub staging via Contents API). Use{' '}
-          <strong>Open icon browser</strong> to Apply / Publish. Mono/Multi/Gradient
+          names, then Stage. Use <strong>Open icon browser</strong> to Apply /
+          Publish. Mono/Multi/Gradient
           only apply to SVG.
         </p>
       )}
@@ -659,30 +658,17 @@ export function FigmaDock() {
         </p>
       ) : null}
       <p className="figma-dock-link">
-        <a
-          href={browserUrl}
-          onClick={(e) => {
-            e.preventDefault()
-            void openIconBrowserWithStaging()
-              .then((result) => {
-                const lines = [
-                  result.note,
-                  `Opened URL:`,
-                  result.url,
-                ].filter(Boolean)
-                setMessage(lines.join('\n'))
-              })
-              .catch((err) => {
-                setMessage(err instanceof Error ? err.message : String(err))
-              })
+        <button
+          type="button"
+          className="figma-dock-link-btn"
+          onClick={() => {
+            void openIconBrowserWithStaging().catch((err) => {
+              setMessage(err instanceof Error ? err.message : String(err))
+            })
           }}
         >
           Open icon browser
-        </a>
-        <span className="figma-dock-link-note">
-          {' '}
-          — syncs staging, then Apply / Publish
-        </span>
+        </button>
       </p>
     </section>
   )
