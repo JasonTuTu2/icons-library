@@ -216,11 +216,6 @@ export async function loadPluginStagingHandoff(): Promise<StagingHandoffPayload>
   return parsePluginStagingPayload(msg.payload)
 }
 
-function appendUrlHash(url: string, hashPart: string | undefined): string {
-  if (!hashPart?.trim()) return url
-  return url.includes('#') ? `${url}&${hashPart}` : `${url}#${hashPart}`
-}
-
 /** Ask the Figma main thread to export the current selection. */
 export function requestFigmaExport(): void {
   postToPlugin({ type: 'export-selection' })
@@ -271,10 +266,18 @@ export async function openIconBrowserWithStaging(): Promise<void> {
       throw new Error('Sign in to hand off staging to the icon browser.')
     }
     const id = await createServerStagingHandoff(payload)
-    url = `${base}${sep}gv-staging-id=${encodeURIComponent(id)}&gv-upload=1`
+    const authHash = buildAuthSessionHandoffHash()
+    const stagingHash = `gv-staging-id=${encodeURIComponent(id)}`
+    const hash = authHash ? `${authHash}&${stagingHash}` : stagingHash
+    url = `${base}${sep}gv-upload=1#${hash}`
+  } else {
+    const authHash = buildAuthSessionHandoffHash()
+    if (authHash) {
+      url = `${base}${sep}gv-upload=1#${authHash}`
+    }
   }
 
-  openExternalUrl(appendUrlHash(url, buildAuthSessionHandoffHash()))
+  openExternalUrl(url)
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

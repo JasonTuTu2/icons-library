@@ -24,6 +24,7 @@ import {
 import {
   importStagingHandoff,
   parseStagingHandoffFile,
+  retryPendingStagingHandoffImport,
   takePendingStagingHandoff,
   takeStagingImportMessage,
 } from '../lib/stagingHandoff'
@@ -307,6 +308,12 @@ export function UploadPanel({
       setStagedLoading(false)
     }
   }, [mode, githubRepoConfigured])
+
+  useEffect(() => {
+    void retryPendingStagingHandoffImport().then((did) => {
+      if (did) void refreshStaged()
+    })
+  }, [refreshStaged])
 
   useEffect(() => {
     if (stagingImportStarted.current) return

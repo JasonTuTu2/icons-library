@@ -6,11 +6,12 @@ import {
   exportRemovalNames,
 } from './localStagingStore'
 import { storeOpenUploadPanel } from './figmaHandoff'
-import { authApiFetch, isAuthApiConfigured } from './sessionAuth.js'
+import { authApiFetch, getAuthSession, isAuthApiConfigured } from './sessionAuth.js'
 
 const STAGING_PARAM = 'gv-staging'
 const STAGING_ID_PARAM = 'gv-staging-id'
 const PENDING_STAGING_KEY = 'gv-pending-staging-handoff'
+const PENDING_HANDOFF_ID_KEY = 'gv-pending-staging-handoff-id'
 const STAGING_IMPORTED_MSG_KEY = 'gv-staging-import-message'
 
 export interface StagingHandoffPayload {
@@ -50,12 +51,15 @@ function parseStagingPayload(raw: unknown): StagingHandoffPayload | null {
   if (!Array.isArray(envelope.icons) || !Array.isArray(envelope.removals)) {
     return null
   }
-  const icons = envelope.icons.filter(
-    (item): item is IconUploadPayload =>
-      Boolean(item) &&
-      typeof item === 'object' &&
-      typeof (item as { name?: unknown }).name === 'string',
-  )
+  const icons = envelope.icons.filter((item): item is IconUploadPayload => {
+    if (!item || typeof item !== 'object') return false
+    const row = item as IconUploadPayload
+    if (typeof row.name !== 'string' || !row.name.trim()) return false
+    const content = typeof row.content === 'string' ? row.content : ''
+    if (!content.trim()) return false
+    if (row.kind === 'image') return true
+    return /<svg[\s>]/i.test(content)
+  })
   const removals = envelope.removals.filter(
     (name): name is string => typeof name === 'string' && name.trim().length > 0,
   )
@@ -147,12 +151,96 @@ export async function createServerStagingHandoff(
 export async function fetchServerStagingHandoff(
   id: string,
 ): Promise<StagingHandoffPayload | null> {
+  if (!getAuthSession()) {
+    throw new Error('Sign in to import staging from the plugin.')
+  }
   const res = await authApiFetch(
     `/api/staging-handoff/${encodeURIComponent(id)}`,
   )
-  const body = (await res.json().catch(() => ({}))) as unknown
-  if (!res.ok) return null
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string
+  } & StagingHandoffPayload
+  if (res.status === 401) {
+    throw new Error('Sign in to import staging from the plugin.')
+  }
+  if (!res.ok) {
+    throw new Error(
+      body.error ||
+        (res.status === 404
+          ? 'Staging handoff expired or was already used.'
+          : `Staging handoff failed (${res.status})`),
+    )
+  }
   return parseStagingPayload(body)
+}
+
+function rememberPendingHandoffId(id: string): void {
+  try {
+    sessionStorage.setItem(PENDING_HANDOFF_ID_KEY, id)
+  } catch {
+    // ignore
+  }
+}
+
+function clearPendingHandoffId(): void {
+  try {
+    sessionStorage.removeItem(PENDING_HANDOFF_ID_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+function readPendingHandoffId(): string {
+  try {
+    return sessionStorage.getItem(PENDING_HANDOFF_ID_KEY)?.trim() ?? ''
+  } catch {
+    return ''
+  }
+}
+
+async function importHandoffOrThrow(
+  payload: StagingHandoffPayload,
+): Promise<void> {
+  try {
+    await importStagingHandoff(payload)
+  } catch (err) {
+    throw new Error(
+      err instanceof Error
+        ? err.message
+        : 'Could not save staged icons in this browser.',
+    )
+  }
+}
+
+function handoffImportedMessage(payload: StagingHandoffPayload): string {
+  return `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from the plugin.`
+}
+
+/** Retry import when auth was missing on first load (plugin ? browser tab). */
+export async function retryPendingStagingHandoffImport(): Promise<boolean> {
+  const id = readPendingHandoffId()
+  if (!id || !isAuthApiConfigured() || !getAuthSession()) return false
+
+  try {
+    const payload = await fetchServerStagingHandoff(id)
+    clearPendingHandoffId()
+    if (!payload) {
+      storeImportMessage(
+        'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
+      )
+      storeOpenUploadPanel()
+      return true
+    }
+    await importHandoffOrThrow(payload)
+    storePendingStaging(payload)
+    storeOpenUploadPanel()
+    storeImportMessage(handoffImportedMessage(payload))
+    return true
+  } catch (err) {
+    storeImportMessage(err instanceof Error ? err.message : String(err))
+    storeOpenUploadPanel()
+    return true
+  }
 }
 
 export async function importStagingHandoff(
@@ -255,26 +343,35 @@ export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
   const params = readSearchAndHashParams()
   const handoffId = params.get(STAGING_ID_PARAM)?.trim() ?? ''
   if (handoffId) {
+    rememberPendingHandoffId(handoffId)
     stripStagingParams()
+    storeOpenUploadPanel()
     if (!isAuthApiConfigured()) {
-      storeOpenUploadPanel()
       storeImportMessage(
-        'Staging handoff requires Sign in (auth API). Open the icon browser from the plugin again.',
+        'Staging handoff requires Sign in (auth API). Sign in, then open Upload again or reload this page.',
       )
       return true
     }
-    const payload = await fetchServerStagingHandoff(handoffId)
-    if (payload) {
-      await importStagingHandoff(payload)
-      storeOpenUploadPanel()
+    if (!getAuthSession()) {
       storeImportMessage(
-        `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from the plugin.`,
+        'Sign in to import staged icons from the plugin (your handoff link is saved for this tab).',
       )
-    } else {
-      storeOpenUploadPanel()
-      storeImportMessage(
-        'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
-      )
+      return true
+    }
+    try {
+      const payload = await fetchServerStagingHandoff(handoffId)
+      clearPendingHandoffId()
+      if (!payload) {
+        storeImportMessage(
+          'Staging handoff expired or was already used. Stage again in the plugin and open the icon browser.',
+        )
+        return true
+      }
+      await importHandoffOrThrow(payload)
+      storePendingStaging(payload)
+      storeImportMessage(handoffImportedMessage(payload))
+    } catch (err) {
+      storeImportMessage(err instanceof Error ? err.message : String(err))
     }
     return true
   }
