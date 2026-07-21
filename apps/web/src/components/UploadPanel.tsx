@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   actionsWorkflowUrl,
   dispatchApplyStaged,
@@ -700,21 +701,22 @@ export function UploadPanel({
         Upload
       </button>
 
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="panel-backdrop"
-            aria-label="Close upload dialog"
-            onClick={close}
-          />
-          <div
-            ref={panelRef}
-            className="upload-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="upload-panel-title"
-          >
+      {open
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                className="panel-backdrop"
+                aria-label="Close upload dialog"
+                onClick={close}
+              />
+              <div
+                ref={panelRef}
+                className="upload-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="upload-panel-title"
+              >
             <div className="upload-panel-header">
               <strong id="upload-panel-title">Upload SVG / PNG / JPG</strong>
               <button
@@ -1197,16 +1199,18 @@ export function UploadPanel({
                 )}
               </>
             )}
-            {message ? (
-              typeof message === 'string' ? (
-                <p className="copy-toast">{message}</p>
-              ) : (
-                message
-              )
-            ) : null}
-          </div>
-        </>
-      ) : null}
+                {message ? (
+                  typeof message === 'string' ? (
+                    <p className="copy-toast">{message}</p>
+                  ) : (
+                    message
+                  )
+                ) : null}
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
