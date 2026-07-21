@@ -39,9 +39,11 @@ async function fetchLiveMetadata(): Promise<CustomIconMetadata | null> {
   }
 
   try {
-    const local = await fetch('/__gv/icons/metadata')
-    if (local.ok) {
-      return (await local.json()) as CustomIconMetadata
+    if (import.meta.env.DEV) {
+      const local = await fetch('/__gv/icons/metadata')
+      if (local.ok) {
+        return (await local.json()) as CustomIconMetadata
+      }
     }
   } catch {
     // ignore

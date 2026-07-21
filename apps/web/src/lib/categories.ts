@@ -13,6 +13,7 @@ export async function loadCategoryRegistry(): Promise<{
   }
 
   try {
+    if (!import.meta.env.DEV) return { categories: [] }
     const res = await fetch('/__gv/icons/metadata')
     if (!res.ok) return { categories: [] }
     const data = (await res.json()) as CustomIconMetadata

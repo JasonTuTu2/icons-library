@@ -71,6 +71,11 @@ export function BrowserPage() {
   }, [])
 
   useEffect(() => {
+    // Local Vite middleware only — skip on Pages (avoids console 404).
+    if (!import.meta.env.DEV) {
+      setLocalUploadEnabled(false)
+      return
+    }
     let cancelled = false
     fetch('/__gv/icons/status')
       .then((res) => (res.ok ? res.json() : null))
