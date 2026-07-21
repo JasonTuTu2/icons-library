@@ -243,25 +243,19 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'stage-icons': {
       try {
-        const current = await readStaging()
         const byName = new Map<string, Record<string, unknown>>()
-        for (const icon of current.icons) {
-          const name = typeof icon.name === 'string' ? icon.name : ''
-          if (name) byName.set(name, icon)
-        }
         for (const icon of msg.icons) {
-          const name = typeof icon.name === 'string' ? icon.name : ''
+          const name = typeof icon.name === 'string' ? icon.name.trim() : ''
           if (name) byName.set(name, icon)
         }
-        const removals = new Set(current.removals)
-        for (const name of msg.removals ?? []) {
-          if (typeof name === 'string' && name.trim()) removals.add(name.trim())
-        }
-        for (const name of byName.keys()) removals.delete(name)
+        const stagedNames = new Set(byName.keys())
+        const removals = (msg.removals ?? [])
+          .map((n) => (typeof n === 'string' ? n.trim() : ''))
+          .filter((n) => n.length > 0 && !stagedNames.has(n))
         const next: StagingPayload = {
           v: 1,
           icons: [...byName.values()],
-          removals: [...removals],
+          removals,
         }
         await writeStaging(next)
         post({ type: 'staging-result', ok: true, payload: next })

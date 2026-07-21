@@ -13,7 +13,7 @@ export type FigmaExportIcon = {
   format?: FigmaImageFormat
 }
 
-/** Staging queue persisted in figma.clientStorage (plugin main thread). */
+/** Latest Stage snapshot in figma.clientStorage (replaced on each Stage). */
 export type PluginStagingPayload = {
   v: 1
   icons: Array<Record<string, unknown>>

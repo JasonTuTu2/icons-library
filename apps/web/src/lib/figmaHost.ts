@@ -200,7 +200,7 @@ export async function stageIconsInPlugin(
   }
 }
 
-/** Read the plugin staging queue from figma.clientStorage via the main thread. */
+/** Read the plugin staging snapshot from figma.clientStorage via the main thread. */
 export async function loadPluginStagingHandoff(): Promise<StagingHandoffPayload> {
   if (typeof window === 'undefined' || window.parent === window) {
     return { v: 1, icons: [], removals: [] }
@@ -217,7 +217,7 @@ export async function loadPluginStagingHandoff(): Promise<StagingHandoffPayload>
   return parsePluginStagingPayload(msg.payload)
 }
 
-/** Empty the plugin queue after a successful handoff to the icon browser. */
+/** Clear plugin staging after a successful handoff to the icon browser. */
 export async function clearPluginStaging(): Promise<void> {
   if (typeof window === 'undefined' || window.parent === window) return
   postToPlugin({ type: 'clear-staging' })
