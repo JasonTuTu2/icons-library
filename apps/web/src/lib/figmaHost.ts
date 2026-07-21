@@ -217,6 +217,20 @@ export async function loadPluginStagingHandoff(): Promise<StagingHandoffPayload>
   return parsePluginStagingPayload(msg.payload)
 }
 
+/** Empty the plugin queue after a successful handoff to the icon browser. */
+export async function clearPluginStaging(): Promise<void> {
+  if (typeof window === 'undefined' || window.parent === window) return
+  postToPlugin({ type: 'clear-staging' })
+  const msg = await waitForPluginMessage((m) => m.type === 'staging-result')
+  if (msg.type !== 'staging-result' || !msg.ok) {
+    throw new Error(
+      msg.type === 'staging-result' && msg.error
+        ? msg.error
+        : 'Could not clear plugin staging.',
+    )
+  }
+}
+
 /** Ask the Figma main thread to export the current selection. */
 export function requestFigmaExport(): void {
   postToPlugin({ type: 'export-selection' })
@@ -262,6 +276,8 @@ export async function openIconBrowserWithStaging(): Promise<void> {
   const payload = await loadPluginStagingHandoff()
   let url = `${base}${sep}gv-upload=1`
 
+  let handoffToBrowser = false
+
   if (payload.icons.length > 0 || payload.removals.length > 0) {
     if (!isAuthApiConfigured()) {
       throw new Error('Sign in to hand off staging to the icon browser.')
@@ -273,6 +289,7 @@ export async function openIconBrowserWithStaging(): Promise<void> {
     if (authHash) {
       url = `${url}#${authHash}`
     }
+    handoffToBrowser = true
   } else {
     const authHash = buildAuthSessionHandoffHash()
     if (authHash) {
@@ -281,6 +298,9 @@ export async function openIconBrowserWithStaging(): Promise<void> {
   }
 
   openExternalUrl(url)
+  if (handoffToBrowser) {
+    await clearPluginStaging()
+  }
 }
 
 /** Full icon browser URL (main Pages app, not figma.html). */

@@ -4,6 +4,7 @@ import {
   stageRemovalsLocal,
   exportIconUploadPayloads,
   exportRemovalNames,
+  clearLocalStaging,
 } from './localStagingStore'
 import { storeOpenUploadPanel } from './figmaHandoff'
 import { authApiFetch, getAuthSession, isAuthApiConfigured } from './sessionAuth.js'
@@ -221,7 +222,7 @@ async function importFromHandoffId(id: string): Promise<boolean> {
 
   try {
     const payload = await fetchServerStagingHandoff(trimmed)
-    await importHandoffOrThrow(payload)
+    await importHandoffOrThrow(payload, { replaceLocal: true })
     importedHandoffIds.add(trimmed)
     clearPendingHandoffId()
     void ackServerHandoff(trimmed)
@@ -264,8 +265,12 @@ function readPendingHandoffId(): string {
 
 async function importHandoffOrThrow(
   payload: StagingHandoffPayload,
+  options?: { replaceLocal?: boolean },
 ): Promise<void> {
   try {
+    if (options?.replaceLocal) {
+      await clearLocalStaging()
+    }
     await importStagingHandoff(payload)
   } catch (err) {
     throw new Error(
@@ -411,11 +416,17 @@ export async function consumeStagingHandoffFromUrl(): Promise<boolean> {
 
   const payload = decodeStagingHandoffParam(encoded)
   if (payload) {
-    storePendingStaging(payload)
-    storeOpenUploadPanel()
-    storeImportMessage(
-      `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from Figma.`,
-    )
+    try {
+      await importHandoffOrThrow(payload, { replaceLocal: true })
+      storePendingStaging(payload)
+      storeOpenUploadPanel()
+      storeImportMessage(
+        `Imported ${payload.icons.length} staged add(s) and ${payload.removals.length} removal(s) from Figma.`,
+      )
+    } catch (err) {
+      storeOpenUploadPanel()
+      storeImportMessage(err instanceof Error ? err.message : String(err))
+    }
   } else {
     storeOpenUploadPanel()
     storeImportMessage(
