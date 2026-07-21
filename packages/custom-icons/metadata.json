@@ -1101,6 +1101,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "here-we-go": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
