@@ -156,7 +156,7 @@ export function PublishButton() {
     <div className="upload-wrap">
       <button
         type="button"
-        className="ghost accent"
+        className="toolbar-btn toolbar-btn-publish"
         disabled={busy}
         onClick={() => void handlePublish()}
       >

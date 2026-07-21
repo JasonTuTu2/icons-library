@@ -718,7 +718,11 @@ export function UploadPanel({
 
   return (
     <div className="upload-wrap">
-      <button type="button" className="ghost" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="toolbar-btn toolbar-btn-upload"
+        onClick={() => setOpen(true)}
+      >
         Upload
       </button>
 

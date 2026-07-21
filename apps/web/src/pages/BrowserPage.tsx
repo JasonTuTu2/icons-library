@@ -188,7 +188,6 @@ export function BrowserPage() {
   return (
     <div className="browser">
       <section className="browser-toolbar">
-        <div className="browser-toolbar-filters">
         <label className="field grow">
           <span>Search</span>
           <input
@@ -280,14 +279,57 @@ export function BrowserPage() {
         </label>
         <button
           type="button"
-          className="ghost clear-filters-btn"
+          className="clear-filters-btn"
           disabled={!hasActiveFilters}
           onClick={clearAllFilters}
         >
           Clear Filters
         </button>
+        <div className="field browser-toolbar-view">
+          <span className="browser-toolbar-view-label" aria-hidden>
+            View
+          </span>
+          <div className="browser-display-controls">
+            <div className="view-toggle" role="group" aria-label="Display mode">
+              <button
+                type="button"
+                className={displayMode === 'grid' ? 'active' : undefined}
+                onClick={() => setDisplayMode('grid')}
+              >
+                Grid
+              </button>
+              <button
+                type="button"
+                className={displayMode === 'table' ? 'active' : undefined}
+                onClick={() => setDisplayMode('table')}
+              >
+                Table
+              </button>
+            </div>
+            <div className="zoom-controls" role="group" aria-label="Zoom">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                disabled={browseZoom <= BROWSE_ZOOM_MIN}
+                onClick={() => setBrowseZoom((z) => zoomOut(z))}
+              >
+                −
+              </button>
+              <span className="zoom-label" aria-live="polite">
+                {Math.round(browseZoom * 100)}%
+              </span>
+              <button
+                type="button"
+                aria-label="Zoom in"
+                disabled={browseZoom >= BROWSE_ZOOM_MAX}
+                onClick={() => setBrowseZoom((z) => zoomIn(z))}
+              >
+                +
+              </button>
+            </div>
+            <p className="result-count">{icons.length.toLocaleString()} icons</p>
+          </div>
         </div>
-        <div className="browser-toolbar-actions">
         <UploadPanel
           localUploadEnabled={localUploadEnabled}
           onUploaded={(id) => {
@@ -297,47 +339,6 @@ export function BrowserPage() {
           }}
         />
         <PublishButton />
-        <div className="browser-display-controls">
-          <div className="view-toggle" role="group" aria-label="Display mode">
-            <button
-              type="button"
-              className={displayMode === 'grid' ? 'active' : undefined}
-              onClick={() => setDisplayMode('grid')}
-            >
-              Grid
-            </button>
-            <button
-              type="button"
-              className={displayMode === 'table' ? 'active' : undefined}
-              onClick={() => setDisplayMode('table')}
-            >
-              Table
-            </button>
-          </div>
-          <div className="zoom-controls" role="group" aria-label="Zoom">
-            <button
-              type="button"
-              aria-label="Zoom out"
-              disabled={browseZoom <= BROWSE_ZOOM_MIN}
-              onClick={() => setBrowseZoom((z) => zoomOut(z))}
-            >
-              −
-            </button>
-            <span className="zoom-label" aria-live="polite">
-              {Math.round(browseZoom * 100)}%
-            </span>
-            <button
-              type="button"
-              aria-label="Zoom in"
-              disabled={browseZoom >= BROWSE_ZOOM_MAX}
-              onClick={() => setBrowseZoom((z) => zoomIn(z))}
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <p className="result-count">{icons.length.toLocaleString()} icons</p>
-        </div>
       </section>
       <BrowserStatusStrip />
 

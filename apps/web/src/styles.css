@@ -333,32 +333,13 @@ pre {
 .browser-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem 1rem;
-  align-items: end;
-  justify-content: space-between;
+  gap: 0.85rem;
+  align-items: flex-end;
   padding: 1rem 1.15rem;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: none;
-}
-
-.browser-toolbar-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem;
-  align-items: end;
-  flex: 1 1 28rem;
-  min-width: 0;
-}
-
-.browser-toolbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  align-items: end;
-  flex: 0 0 auto;
-  margin-left: auto;
 }
 
 .browser-status-strip {
@@ -382,8 +363,97 @@ pre {
 }
 
 .clear-filters-btn {
-  align-self: end;
+  flex: 0 0 auto;
+  align-self: flex-end;
   white-space: nowrap;
+  height: 2.75rem;
+  padding: 0 0.35rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #3398ff;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.clear-filters-btn:hover:not(:disabled) {
+  color: #1e7ad9;
+  text-decoration: underline;
+}
+
+.clear-filters-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.browser-toolbar-view {
+  min-width: auto;
+}
+
+.browser-toolbar-view-label {
+  visibility: hidden;
+}
+
+.browser-display-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.toolbar-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 2.75rem;
+  min-width: 7.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #3398ff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 1px 0.5px rgba(29, 41, 61, 0.05);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Upload: white version of the designer blue pill */
+.toolbar-btn-upload {
+  background: #fff;
+  color: #3398ff;
+}
+
+.toolbar-btn-upload:hover:not(:disabled) {
+  background: #f3f8ff;
+}
+
+/* Publish: solid blue like Figma Upload */
+.toolbar-btn-publish {
+  background: #3398ff;
+  color: #fff;
+}
+
+.toolbar-btn-publish:hover:not(:disabled) {
+  background: #1e7ad9;
+  border-color: #1e7ad9;
 }
 
 .field {
@@ -543,14 +613,6 @@ pre {
   background: var(--accent-soft);
   border-color: rgba(30, 167, 255, 0.4);
   box-shadow: 0 0 0 1px rgba(30, 167, 255, 0.15);
-}
-
-.browser-display-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
 }
 
 .zoom-controls {
@@ -924,7 +986,7 @@ pre {
   flex-direction: column;
   gap: 0.5rem;
   align-items: stretch;
-  min-width: 11rem;
+  min-width: 0;
   position: relative;
 }
 
@@ -2006,19 +2068,6 @@ pre {
   .topbar {
     flex-wrap: wrap;
     padding: 1rem;
-  }
-
-  .browser-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .browser-toolbar-actions {
-    margin-left: 0;
-    width: 100%;
-    justify-content: flex-start;
-    padding-top: 0.35rem;
-    border-top: 1px solid var(--line);
   }
 }
 
