@@ -970,6 +970,34 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "briefcase-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "person-filled": {
+      "category": "Users & Team",
+      "variant": "filled",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "person-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
+    },
+    "team-regular": {
+      "category": "Users & Team",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
