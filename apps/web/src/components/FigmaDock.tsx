@@ -162,6 +162,8 @@ export function FigmaDock() {
   const [busy, setBusy] = useState(false)
   const [reexportingId, setReexportingId] = useState<string | null>(null)
   const [message, setMessage] = useState<ReactNode>(null)
+  /** When true, status is derived from pending + locale (re-translates on toggle). */
+  const [showLoadedStatus, setShowLoadedStatus] = useState(false)
   const [nameConflictMsgs, setNameConflictMsgs] = useState<string[]>([])
   const [replaceHintMsgs, setReplaceHintMsgs] = useState<string[]>([])
   const [conflictsChecking, setConflictsChecking] = useState(false)
@@ -184,13 +186,32 @@ export function FigmaDock() {
     !busy &&
     !reexportingId
 
+  const statusMessage = showLoadedStatus
+    ? loadedStatusMessage(pending, t)
+    : message
+
+  function clearStatus(): void {
+    setShowLoadedStatus(false)
+    setMessage(null)
+  }
+
+  function setStatus(node: ReactNode): void {
+    setShowLoadedStatus(false)
+    setMessage(node)
+  }
+
+  function markLoadedStatus(): void {
+    setShowLoadedStatus(true)
+    setMessage(null)
+  }
+
   useEffect(() => {
     notifyFigmaUiReady()
     return subscribeFigmaPluginMessages((msg) => {
       if (msg.type === 'reexport-batch-result') {
         setReexportingId(null)
         if (msg.error && msg.icons.length === 0) {
-          setMessage(msg.error)
+          setStatus(msg.error)
           return
         }
         const byId = new Map(msg.icons.map((icon) => [icon.id, icon]))
@@ -200,7 +221,7 @@ export function FigmaDock() {
             return updated ? applyReexport(row, updated) : row
           }),
         )
-        setMessage(
+        setStatus(
           msg.error
             ? t('appliedFormatErrors', { error: msg.error })
             : t('appliedFormat', { count: msg.icons.length }),
@@ -211,7 +232,7 @@ export function FigmaDock() {
       if (msg.type === 'reexport-result') {
         setReexportingId(null)
         if (msg.error) {
-          setMessage(msg.error)
+          setStatus(msg.error)
           return
         }
         if (!msg.icon) return
@@ -221,7 +242,7 @@ export function FigmaDock() {
             row.id === updated.id ? applyReexport(row, updated) : row,
           ),
         )
-        setMessage(
+        setStatus(
           updated.kind === 'image'
             ? t('switchedImg', {
                 format: updated.format?.toUpperCase() ?? 'PNG',
@@ -239,11 +260,11 @@ export function FigmaDock() {
         return msg.icons.map(toPending)
       })
       if (msg.error) {
-        setMessage(msg.error)
+        setStatus(msg.error)
       } else if (msg.icons.length === 0) {
-        setMessage(t('noExportable'))
+        setStatus(t('noExportable'))
       } else {
-        setMessage(loadedStatusMessage(msg.icons.map(toPending), t))
+        markLoadedStatus()
       }
     })
   }, [t])
@@ -309,7 +330,7 @@ export function FigmaDock() {
         })
         .catch((err) => {
           if (cancelled) return
-          setMessage(err instanceof Error ? err.message : String(err))
+          setStatus(err instanceof Error ? err.message : String(err))
         })
         .finally(() => {
           if (!cancelled) setConflictsChecking(false)
@@ -323,7 +344,7 @@ export function FigmaDock() {
   }, [pending, githubOk, conflictCopy, locale])
 
   function handleLoad(): void {
-    setMessage(null)
+    clearStatus()
     setBusy(true)
     setReexportingId(null)
     requestFigmaExport()
@@ -332,7 +353,7 @@ export function FigmaDock() {
   function handleFormatChange(index: number, format: FigmaAssetFormat): void {
     const row = pending[index]
     if (!row || row.assetFormat === format || reexportingId || busy) return
-    setMessage(null)
+    clearStatus()
     setReexportingId(row.id)
     requestFigmaReexport(row.id, format)
   }
@@ -340,7 +361,7 @@ export function FigmaDock() {
   async function handleStage(): Promise<void> {
     if (!canStage || pending.length === 0) return
     setBusy(true)
-    setMessage(null)
+    clearStatus()
     try {
       const payloads = pending.map((icon) => {
         const name = sanitizeIconName(icon.name)
@@ -382,7 +403,7 @@ export function FigmaDock() {
       if (analysis.messages.some((msg) => msg.length > 0)) {
         setNameConflictMsgs(analysis.messages)
         setReplaceHintMsgs(analysis.replaceHints)
-        setMessage(t('fixConflicts'))
+        setStatus(t('fixConflicts'))
         return
       }
       if (!confirmLibraryReplacements(analysis.replaceKeys, conflictCopy)) {
@@ -406,7 +427,7 @@ export function FigmaDock() {
         return []
       })
       setNameConflictMsgs([])
-      setMessage(
+      setStatus(
         count === 1
           ? isAuthApiConfigured() && getAuthSession()
             ? t('stagedOneAccount')
@@ -416,7 +437,7 @@ export function FigmaDock() {
             : t('stagedManyLocal', { count }),
       )
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : String(err))
+      setStatus(err instanceof Error ? err.message : String(err))
     } finally {
       setBusy(false)
     }
@@ -507,7 +528,7 @@ export function FigmaDock() {
             }
             onApplyFormat={(format) => {
               if (pending.length === 0 || reexportingId || busy) return
-              setMessage(null)
+              clearStatus()
               setReexportingId('__all__')
               requestFigmaReexportBatch(
                 pending.map((row) => ({ nodeId: row.id, format })),
@@ -686,7 +707,7 @@ export function FigmaDock() {
                       const target = prev[index]
                       if (target) URL.revokeObjectURL(target.previewUrl)
                       const next = prev.filter((_, i) => i !== index)
-                      setMessage(loadedStatusMessage(next, t))
+                      markLoadedStatus()
                       return next
                     })
                   }}
@@ -711,9 +732,9 @@ export function FigmaDock() {
           </ul>
         </>
       ) : null}
-      {message ? (
+      {statusMessage ? (
         <p className="figma-dock-message" role="status">
-          {message}
+          {statusMessage}
         </p>
       ) : null}
       <p className="figma-dock-link">
@@ -722,7 +743,7 @@ export function FigmaDock() {
           className="figma-dock-link-btn"
           onClick={() => {
             void openIconBrowserWithStaging().catch((err) => {
-              setMessage(err instanceof Error ? err.message : String(err))
+              setStatus(err instanceof Error ? err.message : String(err))
             })
           }}
         >
