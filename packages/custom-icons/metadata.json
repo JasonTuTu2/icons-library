@@ -498,7 +498,7 @@
       "variant": "regular",
       "source": "iconify",
       "usage": "in-use",
-      "note": ""
+      "note": "hello world"
     },
     "switch-regular": {
       "category": "Action",
