@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { LoginControl } from './LoginControl'
 import {
   isAuthApiConfigured,
   loginWithPassword,
@@ -24,6 +25,16 @@ export function AuthGate({ children, compact = false }: AuthGateProps) {
   const [error, setError] = useState<string | null>(null)
 
   if (!configured || session) {
+    if (configured && session && compact) {
+      return (
+        <div className="plugin-auth-shell">
+          <div className="plugin-session-bar">
+            <LoginControl variant="plugin-session" />
+          </div>
+          {children}
+        </div>
+      )
+    }
     return children
   }
 

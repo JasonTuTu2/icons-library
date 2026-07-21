@@ -5,6 +5,9 @@ import {
   STAGING_HANDOFF_URL_MAX,
   type StagingHandoffPayload,
 } from './stagingHandoff.js'
+import {
+  buildAuthSessionHandoffHash,
+} from './sessionAuth.js'
 import type { IconUploadPayload } from './github.js'
 
 const FIGMA_PARAM = 'gv-figma'
@@ -247,6 +250,7 @@ export async function openIconBrowserWithStaging(): Promise<{
     postToPlugin({
       type: 'open-icon-browser',
       baseUrl: fullIconBrowserUrl(),
+      authHandoff: buildAuthSessionHandoffHash(),
     })
     const msg = await wait
     if (msg.downloadPayload) {

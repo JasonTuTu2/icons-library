@@ -40,7 +40,7 @@ export type UiToPluginMessage =
     }
   | { type: 'load-staging' }
   | { type: 'clear-staging' }
-  | { type: 'open-icon-browser'; baseUrl: string }
+  | { type: 'open-icon-browser'; baseUrl: string; authHandoff?: string }
   | { type: 'close' }
 
 export type PluginToUiMessage =

@@ -5,9 +5,11 @@ import { App } from './App'
 import { consumeFigmaHandoffFromUrl } from './lib/figmaHandoff'
 import { consumeStagingHandoffFromUrl } from './lib/stagingHandoff'
 import { consumeGithubTokenFromUrl } from './lib/githubAuth'
+import { consumeAuthSessionFromUrl } from './lib/sessionAuth'
 import './styles.css'
 
 consumeGithubTokenFromUrl()
+consumeAuthSessionFromUrl()
 consumeFigmaHandoffFromUrl()
 consumeStagingHandoffFromUrl()
 

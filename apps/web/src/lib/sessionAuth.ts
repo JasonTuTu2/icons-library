@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 const STORAGE_KEY = 'gv-icons-auth-session'
+/** Hash handoff from Figma plugin → full browser (storage is partitioned in the iframe). */
+const HASH_AUTH_KEY = 'gv-auth-session'
 
 export type AuthRole = 'designer' | 'dev'
 
@@ -31,9 +33,45 @@ export function isAuthApiConfigured(): boolean {
   return Boolean(getAuthApiBaseUrl())
 }
 
+function readStoredSessionRaw(): string | null {
+  try {
+    return (
+      sessionStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(STORAGE_KEY)
+    )
+  } catch {
+    return null
+  }
+}
+
+function persistSessionRaw(raw: string): void {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, raw)
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, raw)
+  } catch {
+    // ignore
+  }
+}
+
+function clearStoredSession(): void {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 export function getAuthSession(): AuthSession | null {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
+    const raw = readStoredSessionRaw()
     if (raw === cachedRaw && cachedSession !== undefined) {
       return cachedSession
     }
@@ -65,20 +103,12 @@ export function getAuthSession(): AuthSession | null {
 }
 
 export function setAuthSession(session: AuthSession): void {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session))
-  } catch {
-    // ignore
-  }
+  persistSessionRaw(JSON.stringify(session))
   emit()
 }
 
 export function clearAuthSession(): void {
-  try {
-    sessionStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // ignore
-  }
+  clearStoredSession()
   emit()
 }
 
@@ -157,4 +187,70 @@ export async function authApiFetch(
     clearAuthSession()
   }
   return res
+}
+
+function sessionFromHandoffEncoded(encoded: string): AuthSession | null {
+  const trimmed = encoded.trim()
+  if (!trimmed) return null
+  try {
+    const padded = trimmed.replace(/-/g, '+').replace(/_/g, '/')
+    const padLen = (4 - (padded.length % 4)) % 4
+    const json = atob(padded + '='.repeat(padLen))
+    const parsed = JSON.parse(json) as Partial<AuthSession>
+    if (
+      typeof parsed.token !== 'string' ||
+      typeof parsed.username !== 'string' ||
+      (parsed.role !== 'designer' && parsed.role !== 'dev')
+    ) {
+      return null
+    }
+    return {
+      token: parsed.token,
+      username: parsed.username,
+      role: parsed.role,
+    }
+  } catch {
+    return null
+  }
+}
+
+/** Hash fragment for handing auth to the full browser tab opened from the plugin. */
+export function buildAuthSessionHandoffHash(): string | undefined {
+  const session = getAuthSession()
+  if (!session) return undefined
+  const json = JSON.stringify(session)
+  const bytes = new TextEncoder().encode(json)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  const encoded = btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+  return `${HASH_AUTH_KEY}=${encodeURIComponent(encoded)}`
+}
+
+/**
+ * Apply `#gv-auth-session=…` from the URL (plugin → browser), then strip it.
+ */
+export function consumeAuthSessionFromUrl(): boolean {
+  if (typeof window === 'undefined') return false
+  const raw = window.location.hash.replace(/^#/, '')
+  if (!raw) return false
+
+  const params = new URLSearchParams(raw)
+  const encoded = params.get(HASH_AUTH_KEY)?.trim() ?? ''
+  if (!encoded) return false
+
+  const session = sessionFromHandoffEncoded(encoded)
+  if (!session) return false
+
+  setAuthSession(session)
+  params.delete(HASH_AUTH_KEY)
+  const next = params.toString()
+  const clean =
+    window.location.pathname +
+    window.location.search +
+    (next ? `#${next}` : '')
+  window.history.replaceState(null, '', clean)
+  return true
 }

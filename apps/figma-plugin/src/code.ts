@@ -219,6 +219,11 @@ function buildIconBrowserUrl(baseUrl: string, payload: StagingPayload): {
   }
 }
 
+function appendUrlHash(url: string, hashPart: string | undefined): string {
+  if (!hashPart?.trim()) return url
+  return url.includes('#') ? `${url}&${hashPart}` : `${url}#${hashPart}`
+}
+
 function emptyStaging(): StagingPayload {
   return { v: 1, icons: [], removals: [] }
 }
@@ -272,10 +277,14 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
           msg.baseUrl,
           payload,
         )
-        figma.openExternal(url)
-        post({ type: 'open-browser-done', url, note, downloadPayload })
+        const withAuth = appendUrlHash(url, msg.authHandoff)
+        figma.openExternal(withAuth)
+        post({ type: 'open-browser-done', url: withAuth, note, downloadPayload })
       } catch (err) {
-        const base = msg.baseUrl.replace(/\/?$/, '/')
+        const base = appendUrlHash(
+          msg.baseUrl.replace(/\/?$/, '/'),
+          msg.authHandoff,
+        )
         figma.openExternal(base)
         post({
           type: 'open-browser-done',

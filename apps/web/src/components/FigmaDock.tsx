@@ -36,7 +36,6 @@ import { SourceSelect } from './SourceSelect'
 import { UsageSelect } from './UsageSelect'
 import { NoteToggleField } from './NoteToggleField'
 import { DropdownCombobox } from './DropdownCombobox'
-import { LoginControl } from './LoginControl'
 import {
   loadCategoryRegistry,
   mergeCategoryIntoRegistry,
@@ -403,10 +402,7 @@ export function FigmaDock() {
 
   return (
     <section className="figma-dock" aria-label="Figma export">
-      <header className="figma-dock-header">
-        <h1 className="figma-dock-title">GenVoice Icons</h1>
-        <LoginControl variant="plugin-session" />
-      </header>
+      <h1 className="figma-dock-title">GenVoice Icons</h1>
       <div className="figma-dock-actions">
         <button
           type="button"
