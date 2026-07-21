@@ -40,6 +40,7 @@ export type UiToPluginMessage =
     }
   | { type: 'load-staging' }
   | { type: 'clear-staging' }
+  | { type: 'open-icon-browser'; baseUrl: string }
   | { type: 'close' }
 
 export type PluginToUiMessage =
@@ -64,6 +65,13 @@ export type PluginToUiMessage =
       ok: boolean
       payload?: PluginStagingPayload
       error?: string
+    }
+  | {
+      type: 'open-browser-done'
+      url: string
+      note?: string
+      /** When the queue is too large for a URL, UI should download this JSON. */
+      downloadPayload?: PluginStagingPayload
     }
 
 /** Manifest `id` — required when the UI is a non-null origin (Pages). */

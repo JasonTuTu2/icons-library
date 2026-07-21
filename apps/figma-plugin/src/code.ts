@@ -174,11 +174,49 @@ async function reexportNodes(
 }
 
 const STAGING_SNAPSHOT_KEY = 'gv-staging-snapshot-v1'
+/** Keep in sync with apps/web stagingHandoff.ts */
+const STAGING_HANDOFF_URL_MAX = 5500
 
 type StagingPayload = {
   v: 1
   icons: Array<Record<string, unknown>>
   removals: string[]
+}
+
+function encodeStagingHandoffParam(payload: StagingPayload): string {
+  const json = JSON.stringify(payload)
+  const bytes = new Uint8Array(json.length)
+  for (let i = 0; i < json.length; i++) {
+    bytes[i] = json.charCodeAt(i)
+  }
+  const b64 = figma.base64Encode(bytes)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+  return `r.${b64}`
+}
+
+function buildIconBrowserUrl(baseUrl: string, payload: StagingPayload): {
+  url: string
+  note?: string
+  downloadPayload?: StagingPayload
+} {
+  const base = baseUrl.replace(/\/?$/, '/')
+  if (payload.icons.length === 0 && payload.removals.length === 0) {
+    return { url: base }
+  }
+  const encoded = encodeStagingHandoffParam(payload)
+  if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
+    const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
+    return { url }
+  }
+  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
+  return {
+    url,
+    note:
+      'Queue is too large for a link — downloading gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
+    downloadPayload: payload,
+  }
 }
 
 function emptyStaging(): StagingPayload {
@@ -225,6 +263,26 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
     }
     case 'open-url': {
       figma.openExternal(msg.url)
+      break
+    }
+    case 'open-icon-browser': {
+      try {
+        const payload = await readStaging()
+        const { url, note, downloadPayload } = buildIconBrowserUrl(
+          msg.baseUrl,
+          payload,
+        )
+        figma.openExternal(url)
+        post({ type: 'open-browser-done', url, note, downloadPayload })
+      } catch (err) {
+        const base = msg.baseUrl.replace(/\/?$/, '/')
+        figma.openExternal(base)
+        post({
+          type: 'open-browser-done',
+          url: base,
+          note: err instanceof Error ? err.message : String(err),
+        })
+      }
       break
     }
     case 'stage-icons': {

@@ -8,10 +8,11 @@ import {
 import type { IconUploadPayload } from './github.js'
 
 const FIGMA_PARAM = 'gv-figma'
-/** Allow any plugin id so Development imports receive messages from Pages. */
-const FIGMA_PLUGIN_ID = '*'
+/** Must match apps/figma-plugin/manifest.json `id` (required for external UI). */
+const FIGMA_PLUGIN_ID = 'genvoice-icons-library'
 
 let figmaHostMemory: boolean | undefined
+let cachedPluginStaging: StagingHandoffPayload | null = null
 
 function stripFigmaParam(): void {
   if (typeof window === 'undefined') return
@@ -92,6 +93,12 @@ export type FigmaPluginMessage =
       payload?: StagingHandoffPayload
       error?: string
     }
+  | {
+      type: 'open-browser-done'
+      url: string
+      note?: string
+      downloadPayload?: StagingHandoffPayload
+    }
 
 function postToPlugin(pluginMessage: Record<string, unknown>): void {
   if (typeof window === 'undefined' || window.parent === window) return
@@ -101,25 +108,44 @@ function postToPlugin(pluginMessage: Record<string, unknown>): void {
   )
 }
 
-function awaitStagingResult(
-  timeoutMs = 8000,
-): Promise<StagingHandoffPayload> {
+function pluginPayloadFromHandoff(
+  payload: StagingHandoffPayload,
+): Array<Record<string, unknown>> {
+  return JSON.parse(JSON.stringify(payload.icons)) as Array<
+    Record<string, unknown>
+  >
+}
+
+function handoffFromPluginPayload(raw: StagingHandoffPayload): StagingHandoffPayload {
+  return {
+    v: 1,
+    icons: raw.icons as IconUploadPayload[],
+    removals: raw.removals,
+  }
+}
+
+function awaitPluginMessage<T extends FigmaPluginMessage['type']>(
+  type: T,
+  timeoutMs = 15000,
+): Promise<Extract<FigmaPluginMessage, { type: T }>> {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => {
       window.removeEventListener('message', onMessage)
-      reject(new Error('Timed out waiting for Figma plugin staging.'))
+      reject(
+        new Error(
+          type === 'staging-result'
+            ? 'Timed out waiting for Figma plugin staging. Re-import the GenVoice Icons plugin (Development) from apps/figma-plugin/dist.'
+            : 'Timed out waiting for the Figma plugin.',
+        ),
+      )
     }, timeoutMs)
 
     function onMessage(event: MessageEvent): void {
       const msg = event.data?.pluginMessage as FigmaPluginMessage | undefined
-      if (!msg || msg.type !== 'staging-result') return
+      if (!msg || msg.type !== type) return
       window.clearTimeout(timer)
       window.removeEventListener('message', onMessage)
-      if (!msg.ok) {
-        reject(new Error(msg.error || 'Plugin staging failed.'))
-        return
-      }
-      resolve(msg.payload ?? { v: 1, icons: [], removals: [] })
+      resolve(msg as Extract<FigmaPluginMessage, { type: T }>)
     }
 
     window.addEventListener('message', onMessage)
@@ -169,9 +195,21 @@ export async function stageIconsInPlugin(
   if (!isFigmaHost()) {
     throw new Error('Not running inside the Figma plugin.')
   }
-  const wait = awaitStagingResult()
-  postToPlugin({ type: 'stage-icons', icons, removals })
-  return wait
+  const wait = awaitPluginMessage('staging-result')
+  postToPlugin({
+    type: 'stage-icons',
+    icons: pluginPayloadFromHandoff({ v: 1, icons, removals }),
+    removals,
+  })
+  const msg = await wait
+  if (!msg.ok) {
+    throw new Error(msg.error || 'Plugin staging failed.')
+  }
+  const payload = handoffFromPluginPayload(
+    msg.payload ?? { v: 1, icons: [], removals: [] },
+  )
+  cachedPluginStaging = payload
+  return payload
 }
 
 /** Load the plugin clientStorage staging queue. */
@@ -179,9 +217,20 @@ export async function loadPluginStaging(): Promise<StagingHandoffPayload> {
   if (!isFigmaHost()) {
     return { v: 1, icons: [], removals: [] }
   }
-  const wait = awaitStagingResult()
+  if (cachedPluginStaging) {
+    return cachedPluginStaging
+  }
+  const wait = awaitPluginMessage('staging-result')
   postToPlugin({ type: 'load-staging' })
-  return wait
+  const msg = await wait
+  if (!msg.ok) {
+    throw new Error(msg.error || 'Plugin staging failed.')
+  }
+  const payload = handoffFromPluginPayload(
+    msg.payload ?? { v: 1, icons: [], removals: [] },
+  )
+  cachedPluginStaging = payload
+  return payload
 }
 
 /**
@@ -193,10 +242,20 @@ export async function openIconBrowserWithStaging(): Promise<{
   url: string
   note?: string
 }> {
-  const payload = isFigmaHost()
-    ? await loadPluginStaging()
-    : await buildStagingHandoffPayload()
+  if (isFigmaHost()) {
+    const wait = awaitPluginMessage('open-browser-done')
+    postToPlugin({
+      type: 'open-icon-browser',
+      baseUrl: fullIconBrowserUrl(),
+    })
+    const msg = await wait
+    if (msg.downloadPayload) {
+      downloadStagingHandoffJson(handoffFromPluginPayload(msg.downloadPayload))
+    }
+    return { url: msg.url, note: msg.note }
+  }
 
+  const payload = await buildStagingHandoffPayload()
   const base = fullIconBrowserUrl()
 
   if (payload.icons.length === 0 && payload.removals.length === 0) {
