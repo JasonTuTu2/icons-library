@@ -1011,6 +1011,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "is-it-gonna-work": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
