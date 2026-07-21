@@ -964,20 +964,6 @@
       "usage": "in-use",
       "note": ""
     },
-    "jason-zihe-zhang": {
-      "category": "",
-      "variant": "regular",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "my-first-upload": {
-      "category": "",
-      "variant": "regular",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
     "briefcase-regular": {
       "category": "My Second Category",
       "variant": "regular",
@@ -1008,13 +994,6 @@
     },
     "team-regular": {
       "category": "My Second Category",
-      "variant": "regular",
-      "source": "custom",
-      "usage": "in-use",
-      "note": ""
-    },
-    "is-it-gonna-work": {
-      "category": "",
       "variant": "regular",
       "source": "custom",
       "usage": "in-use",
