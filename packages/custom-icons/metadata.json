@@ -1108,6 +1108,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "did-we-do-it": {
+      "category": "",
+      "variant": "regular",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
