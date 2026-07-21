@@ -988,7 +988,7 @@
     "person-regular": {
       "category": "Users & Team",
       "variant": "regular",
-      "source": "custom",
+      "source": "iconify",
       "usage": "in-use",
       "note": ""
     },
