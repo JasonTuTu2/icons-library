@@ -1,5 +1,11 @@
 # @JasonTuTu2/icons-custom
 
+## 5.3.0
+
+### Minor Changes
+
+- Publish from icon browser (minor).
+
 ## 5.2.0
 
 ### Minor Changes
