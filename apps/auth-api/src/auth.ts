@@ -18,6 +18,7 @@ export interface Env {
   SESSION_SECRET: string
   AUTH_USERS: string
   CORS_ORIGINS?: string
+  STAGING_HANDOFF: KVNamespace
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

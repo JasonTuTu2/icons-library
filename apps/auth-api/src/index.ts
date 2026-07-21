@@ -61,7 +61,7 @@ app.use('*', async (c, next) => {
       return ''
     },
     allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   })(c, next)
 })
 
@@ -387,7 +387,7 @@ authed.post('/staging-handoff', async (c) => {
 
   const id = crypto.randomUUID()
   try {
-    await putStagingHandoff(id, JSON.stringify(body))
+    await putStagingHandoff(c.env.STAGING_HANDOFF, id, JSON.stringify(body))
   } catch (err) {
     return c.json(githubError(err), 502)
   }
@@ -400,7 +400,7 @@ authed.get('/staging-handoff/:id', async (c) => {
     return c.json({ error: 'Invalid handoff id' }, 400)
   }
   try {
-    const raw = await readStagingHandoff(id)
+    const raw = await readStagingHandoff(c.env.STAGING_HANDOFF, id)
     if (!raw) {
       return c.json({ error: 'Handoff expired or not found' }, 404)
     }
@@ -416,7 +416,7 @@ authed.delete('/staging-handoff/:id', async (c) => {
     return c.json({ error: 'Invalid handoff id' }, 400)
   }
   try {
-    await deleteStagingHandoff(id)
+    await deleteStagingHandoff(c.env.STAGING_HANDOFF, id)
     return c.json({ ok: true })
   } catch (err) {
     return c.json(githubError(err), 502)

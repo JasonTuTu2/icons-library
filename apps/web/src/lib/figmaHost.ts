@@ -2,6 +2,7 @@ import { buildAuthSessionHandoffHash, isAuthApiConfigured } from './sessionAuth.
 import {
   createServerStagingHandoff,
   type StagingHandoffPayload,
+  verifyServerStagingHandoff,
 } from './stagingHandoff.js'
 import type { IconUploadPayload } from './github.js'
 
@@ -266,10 +267,12 @@ export async function openIconBrowserWithStaging(): Promise<void> {
       throw new Error('Sign in to hand off staging to the icon browser.')
     }
     const id = await createServerStagingHandoff(payload)
+    await verifyServerStagingHandoff(id)
     const authHash = buildAuthSessionHandoffHash()
-    const stagingHash = `gv-staging-id=${encodeURIComponent(id)}`
-    const hash = authHash ? `${authHash}&${stagingHash}` : stagingHash
-    url = `${base}${sep}gv-upload=1#${hash}`
+    url = `${base}?gv-staging-id=${encodeURIComponent(id)}&gv-upload=1`
+    if (authHash) {
+      url = `${url}#${authHash}`
+    }
   } else {
     const authHash = buildAuthSessionHandoffHash()
     if (authHash) {

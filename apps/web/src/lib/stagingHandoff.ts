@@ -150,6 +150,20 @@ export async function createServerStagingHandoff(
   return body.id
 }
 
+/** Confirm POST handoff is readable before opening the browser tab. */
+export async function verifyServerStagingHandoff(id: string): Promise<void> {
+  const res = await authApiFetch(
+    `/api/staging-handoff/${encodeURIComponent(id)}`,
+    { method: 'GET' },
+  )
+  if (res.ok) return
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  throw new Error(
+    body.error ||
+      `Staging handoff was not saved on the server (${res.status}). Try Stage again.`,
+  )
+}
+
 export async function fetchServerStagingHandoff(
   id: string,
 ): Promise<StagingHandoffPayload> {
@@ -164,6 +178,13 @@ export async function fetchServerStagingHandoff(
   } & StagingHandoffPayload
   if (res.status === 401) {
     throw new Error('Sign in to import staging from the plugin.')
+  }
+  if (res.status === 404) {
+    clearPendingHandoffId()
+    throw new Error(
+      body.error ||
+        'Staging handoff expired or not found. Stage again and use Open icon browser.',
+    )
   }
   if (!res.ok) {
     throw new Error(

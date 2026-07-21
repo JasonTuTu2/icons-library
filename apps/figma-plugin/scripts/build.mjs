@@ -12,7 +12,7 @@ const iconBrowserUrl =
 const panelVersion =
   process.env.GITHUB_SHA?.slice(0, 7)?.trim() ||
   process.env.PANEL_CACHE_VERSION?.trim() ||
-  '4'
+  '5'
 const figmaPanelQuery = `gv-figma=1&v=${panelVersion}`
 
 mkdirSync(join(root, 'dist'), { recursive: true })

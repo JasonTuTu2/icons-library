@@ -8,3 +8,7 @@ compatibility_date = "2024-12-01"
 [vars]
 # Public CORS origins (comma-separated). Override per env if needed.
 CORS_ORIGINS = "https://jasontutu2.github.io,http://localhost:5173,http://127.0.0.1:5173"
+
+[[kv_namespaces]]
+binding = "STAGING_HANDOFF"
+id = "c5ce36d791aa43a1addecf48ff2a6fda"
