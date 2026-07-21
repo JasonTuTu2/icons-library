@@ -981,7 +981,7 @@
     "person-filled": {
       "category": "Users & Team",
       "variant": "filled",
-      "source": "custom",
+      "source": "iconify",
       "usage": "in-use",
       "note": ""
     },
