@@ -6,10 +6,11 @@ import type {
 } from './messages'
 
 declare const __ICON_BROWSER_URL__: string
+declare const __FIGMA_PANEL_QUERY__: string
 
 const browserBase = __ICON_BROWSER_URL__.replace(/\/?$/, '/')
-// Dedicated minimal panel page — not the full icon browser.
-const uiUrl = `${browserBase}figma.html`
+const panelQuery = String(__FIGMA_PANEL_QUERY__).replace(/^\?/, '')
+const uiUrl = `${browserBase}figma.html${panelQuery ? `?${panelQuery}` : ''}`
 
 // Navigate the plugin iframe to the Figma-only Pages entry.
 figma.showUI(
@@ -173,79 +174,9 @@ async function reexportNodes(
   })
 }
 
-const STAGING_SNAPSHOT_KEY = 'gv-staging-snapshot-v1'
-/** Keep in sync with apps/web stagingHandoff.ts */
-const STAGING_HANDOFF_URL_MAX = 14_000
-
-type StagingPayload = {
-  v: 1
-  icons: Array<Record<string, unknown>>
-  removals: string[]
-}
-
-function encodeStagingHandoffParam(payload: StagingPayload): string {
-  const json = JSON.stringify(payload)
-  const bytes = new Uint8Array(json.length)
-  for (let i = 0; i < json.length; i++) {
-    bytes[i] = json.charCodeAt(i)
-  }
-  const b64 = figma.base64Encode(bytes)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '')
-  return `r.${b64}`
-}
-
-function buildIconBrowserUrl(baseUrl: string, payload: StagingPayload): {
-  url: string
-  note?: string
-  downloadPayload?: StagingPayload
-} {
-  const base = baseUrl.replace(/\/?$/, '/')
-  if (payload.icons.length === 0 && payload.removals.length === 0) {
-    return { url: base }
-  }
-  const encoded = encodeStagingHandoffParam(payload)
-  if (encoded.length <= STAGING_HANDOFF_URL_MAX) {
-    const url = `${base}${base.includes('?') ? '&' : '?'}gv-staging=${encodeURIComponent(encoded)}&gv-upload=1`
-    return { url }
-  }
-  const url = `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`
-  return {
-    url,
-    note:
-      'Queue is too large for a link — downloading gv-staging-handoff.json. Drop that file into Upload to import your staged icons.',
-    downloadPayload: payload,
-  }
-}
-
 function appendUrlHash(url: string, hashPart: string | undefined): string {
   if (!hashPart?.trim()) return url
   return url.includes('#') ? `${url}&${hashPart}` : `${url}#${hashPart}`
-}
-
-function emptyStaging(): StagingPayload {
-  return { v: 1, icons: [], removals: [] }
-}
-
-async function readStaging(): Promise<StagingPayload> {
-  try {
-    const raw = await figma.clientStorage.getAsync(STAGING_SNAPSHOT_KEY)
-    if (typeof raw !== 'string' || !raw.trim()) return emptyStaging()
-    const parsed = JSON.parse(raw) as Partial<StagingPayload>
-    if (parsed.v !== 1) return emptyStaging()
-    const icons = Array.isArray(parsed.icons) ? parsed.icons : []
-    const removals = Array.isArray(parsed.removals)
-      ? parsed.removals.filter((n): n is string => typeof n === 'string')
-      : []
-    return { v: 1, icons, removals }
-  } catch {
-    return emptyStaging()
-  }
-}
-
-async function writeStaging(payload: StagingPayload): Promise<void> {
-  await figma.clientStorage.setAsync(STAGING_SNAPSHOT_KEY, JSON.stringify(payload))
 }
 
 figma.ui.onmessage = async (msg: UiToPluginMessage) => {
@@ -271,87 +202,13 @@ figma.ui.onmessage = async (msg: UiToPluginMessage) => {
       break
     }
     case 'open-icon-browser': {
-      try {
-        const payload = await readStaging()
-        const { url, note, downloadPayload } = buildIconBrowserUrl(
-          msg.baseUrl,
-          payload,
-        )
-        const withAuth = appendUrlHash(url, msg.authHandoff)
-        figma.openExternal(withAuth)
-        post({ type: 'open-browser-done', url: withAuth, note, downloadPayload })
-      } catch (err) {
-        const base = appendUrlHash(
-          msg.baseUrl.replace(/\/?$/, '/'),
-          msg.authHandoff,
-        )
-        figma.openExternal(base)
-        post({
-          type: 'open-browser-done',
-          url: base,
-          note: err instanceof Error ? err.message : String(err),
-        })
-      }
-      break
-    }
-    case 'stage-icons': {
-      try {
-        const current = await readStaging()
-        const byName = new Map<string, Record<string, unknown>>()
-        for (const icon of current.icons) {
-          const name = typeof icon.name === 'string' ? icon.name : ''
-          if (name) byName.set(name, icon)
-        }
-        for (const icon of msg.icons) {
-          const name = typeof icon.name === 'string' ? icon.name : ''
-          if (name) byName.set(name, icon)
-        }
-        const removals = new Set(current.removals)
-        for (const name of msg.removals ?? []) {
-          if (typeof name === 'string' && name.trim()) removals.add(name.trim())
-        }
-        // Staging an add cancels a pending removal of the same name.
-        for (const name of byName.keys()) removals.delete(name)
-        const next: StagingPayload = {
-          v: 1,
-          icons: [...byName.values()],
-          removals: [...removals],
-        }
-        await writeStaging(next)
-        post({ type: 'staging-result', ok: true, payload: next })
-      } catch (err) {
-        post({
-          type: 'staging-result',
-          ok: false,
-          error: err instanceof Error ? err.message : String(err),
-        })
-      }
-      break
-    }
-    case 'load-staging': {
-      try {
-        const payload = await readStaging()
-        post({ type: 'staging-result', ok: true, payload })
-      } catch (err) {
-        post({
-          type: 'staging-result',
-          ok: false,
-          error: err instanceof Error ? err.message : String(err),
-        })
-      }
-      break
-    }
-    case 'clear-staging': {
-      try {
-        await writeStaging(emptyStaging())
-        post({ type: 'staging-result', ok: true, payload: emptyStaging() })
-      } catch (err) {
-        post({
-          type: 'staging-result',
-          ok: false,
-          error: err instanceof Error ? err.message : String(err),
-        })
-      }
+      const base = msg.baseUrl.replace(/\/?$/, '/')
+      const url = appendUrlHash(
+        `${base}${base.includes('?') ? '&' : '?'}gv-upload=1`,
+        msg.authHandoff,
+      )
+      figma.openExternal(url)
+      post({ type: 'open-browser-done', url })
       break
     }
     case 'close': {

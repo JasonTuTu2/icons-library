@@ -2,10 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AuthGate } from './components/AuthGate'
 import { FigmaDock } from './components/FigmaDock'
+import { consumeFigmaHostFlag } from './lib/figmaHost'
 import { consumeAuthSessionFromUrl } from './lib/sessionAuth'
 import './styles.css'
 
 consumeAuthSessionFromUrl()
+consumeFigmaHostFlag()
 
 /**
  * Dedicated Figma plugin panel entry — Load + Stage only.

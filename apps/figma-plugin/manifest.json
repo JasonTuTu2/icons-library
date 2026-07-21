@@ -12,7 +12,7 @@
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com"
     ],
-    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Sign-in and Apply go through the Cloudflare auth Worker; staging is local to the plugin/browser."
+    "reasoning": "Loads the Figma-only panel (figma.html) from GitHub Pages for Load/Stage. Sign-in, staging (GitHub Contents API), and Apply go through the Cloudflare auth Worker."
   },
   "documentAccess": "dynamic-page"
 }

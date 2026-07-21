@@ -423,8 +423,8 @@ export function FigmaDock() {
       </div>
       {!githubOk ? (
         <p className="figma-dock-hint">
-          Open this panel from the Figma plugin (Pages figma.html). Staging is
-          saved in the plugin until you open the icon browser.
+          Open this panel from the Figma plugin (Pages figma.html). Sign in to
+          stage and open the icon browser.
         </p>
       ) : (
         <p className="figma-dock-hint">

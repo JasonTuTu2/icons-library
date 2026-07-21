@@ -13,13 +13,6 @@ export type FigmaExportIcon = {
   format?: FigmaImageFormat
 }
 
-/** Staging queue persisted in figma.clientStorage (plugin main thread). */
-export type PluginStagingPayload = {
-  v: 1
-  icons: Array<Record<string, unknown>>
-  removals: string[]
-}
-
 export type UiToPluginMessage =
   | { type: 'ui-ready' }
   | { type: 'export-selection' }
@@ -33,13 +26,6 @@ export type UiToPluginMessage =
       exports: Array<{ nodeId: string; format: FigmaAssetFormat }>
     }
   | { type: 'open-url'; url: string }
-  | {
-      type: 'stage-icons'
-      icons: Array<Record<string, unknown>>
-      removals?: string[]
-    }
-  | { type: 'load-staging' }
-  | { type: 'clear-staging' }
   | { type: 'open-icon-browser'; baseUrl: string; authHandoff?: string }
   | { type: 'close' }
 
@@ -61,17 +47,9 @@ export type PluginToUiMessage =
       error?: string
     }
   | {
-      type: 'staging-result'
-      ok: boolean
-      payload?: PluginStagingPayload
-      error?: string
-    }
-  | {
       type: 'open-browser-done'
       url: string
       note?: string
-      /** When the queue is too large for a URL, UI should download this JSON. */
-      downloadPayload?: PluginStagingPayload
     }
 
 /** Manifest `id` — required when the UI is a non-null origin (Pages). */

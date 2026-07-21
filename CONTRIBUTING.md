@@ -27,7 +27,7 @@ Preferred for designers: the **GenVoice Icons Figma plugin** (export from the ca
 3. The plugin panel loads the live icon browser. Select icon frame(s)/component(s) → **Load selection** → edit kebab names / Mono·Multi → **Stage**.
 4. Open the full icon browser with a magic-URL PAT (see below) → **Apply staged to library** → **Publish** when releasing packages.
 
-The plugin never talks to GitHub — it only exports SVGs/images into the embedded browser panel. Staging is local (`figma.clientStorage`); Sign in + Apply happen via the auth API. **Re-import the Development plugin** from `apps/figma-plugin/dist` after pulling plugin changes (Figma → Plugins → Development → Import manifest from `dist/manifest.json`). Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173` for local).
+The plugin exports SVGs/images into the embedded Pages panel (`figma.html`). **Stage** writes GitHub staging via the auth API; **Open icon browser** syncs into Upload. **Re-import the Development plugin** from `apps/figma-plugin/dist` after pulling plugin changes (Figma → Plugins → Development → Import manifest from `dist/manifest.json`). Override the browser URL at build time with `ICON_BROWSER_URL=…` (e.g. `http://localhost:5173/` for local); set `PANEL_CACHE_VERSION` if you need to bust Figma’s cached panel without a new git SHA.
 
 ### Dev: Apply & Publish
 

@@ -9,6 +9,11 @@ const watch = process.argv.includes('--watch')
 const iconBrowserUrl =
   process.env.ICON_BROWSER_URL?.trim() ||
   'https://JasonTuTu2.github.io/icons-library/'
+const panelVersion =
+  process.env.GITHUB_SHA?.slice(0, 7)?.trim() ||
+  process.env.PANEL_CACHE_VERSION?.trim() ||
+  '2'
+const figmaPanelQuery = `gv-figma=1&v=${panelVersion}`
 
 mkdirSync(join(root, 'dist'), { recursive: true })
 
@@ -19,6 +24,7 @@ const codeOptions = {
   logLevel: 'info',
   define: {
     __ICON_BROWSER_URL__: JSON.stringify(iconBrowserUrl),
+    __FIGMA_PANEL_QUERY__: JSON.stringify(figmaPanelQuery),
   },
   entryPoints: [join(root, 'src/code.ts')],
   outfile: join(root, 'dist/code.js'),
