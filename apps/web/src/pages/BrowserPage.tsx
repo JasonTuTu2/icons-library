@@ -290,6 +290,15 @@ export function BrowserPage() {
         >
           Clear Filters
         </button>
+        <UploadPanel
+          localUploadEnabled={localUploadEnabled}
+          onUploaded={(id) => {
+            const icon = getById(id)
+            if (icon) setSelected(icon)
+            setQuery(id.replace(/^(ci|img):/, ''))
+          }}
+        />
+        <PublishButton />
         <div className="field browser-toolbar-view">
           <span className="browser-toolbar-view-label" aria-hidden>
             View
@@ -335,15 +344,6 @@ export function BrowserPage() {
             <p className="result-count">{icons.length.toLocaleString()} icons</p>
           </div>
         </div>
-        <UploadPanel
-          localUploadEnabled={localUploadEnabled}
-          onUploaded={(id) => {
-            const icon = getById(id)
-            if (icon) setSelected(icon)
-            setQuery(id.replace(/^(ci|img):/, ''))
-          }}
-        />
-        <PublishButton />
       </section>
       <BrowserStatusStrip />
 
