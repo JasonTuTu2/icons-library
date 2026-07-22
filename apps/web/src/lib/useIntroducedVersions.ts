@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react'
 import {
   isGithubRepoConfigured,
-  listPublishHistory,
   listUnpublishedIcons,
   useGithubAdminEnabled,
 } from './github'
-import { buildIntroducedVersionByName } from './releaseSummary'
+
+function introducedVersionsUrl(): string {
+  const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+  return `${base}introduced-versions.json`
+}
+
+async function loadIntroducedMap(): Promise<Map<string, string>> {
+  const map = new Map<string, string>()
+  try {
+    const res = await fetch(introducedVersionsUrl(), { cache: 'no-store' })
+    if (!res.ok) return map
+    const data = (await res.json()) as Record<string, unknown>
+    for (const [name, version] of Object.entries(data)) {
+      if (typeof version === 'string' && version.trim()) {
+        map.set(name.toLowerCase(), version.trim())
+      }
+    }
+  } catch {
+    // ignore — detail shows em dash until the file is available
+  }
+  return map
+}
 
 export function useIntroducedVersions() {
   const adminEnabled = useGithubAdminEnabled()
@@ -25,12 +45,12 @@ export function useIntroducedVersions() {
     let cancelled = false
     setLoading(true)
     void Promise.all([
-      listPublishHistory({ limit: 12 }),
-      listUnpublishedIcons(),
+      loadIntroducedMap(),
+      listUnpublishedIcons().catch(() => [] as { name: string }[]),
     ])
-      .then(([history, unpublished]) => {
+      .then(([introduced, unpublished]) => {
         if (cancelled) return
-        setByName(buildIntroducedVersionByName(history))
+        setByName(introduced)
         setPendingNames(new Set(unpublished.map((icon) => icon.name)))
       })
       .catch(() => {
@@ -49,7 +69,7 @@ export function useIntroducedVersions() {
   }, [enabled])
 
   function packageVersionForIcon(name: string): string | null {
-    return byName?.get(name) ?? null
+    return byName?.get(name.toLowerCase()) ?? null
   }
 
   function isPendingPublish(name: string): boolean {

@@ -389,12 +389,12 @@ export function IconDetail({
             <dd>
               {introducedVersionLoading ? (
                 <span className="meta-note">Loading…</span>
+              ) : introducedVersionPending ? (
+                'Not published yet'
               ) : introducedPackageVersion ? (
                 <a href={packagesUrl()} target="_blank" rel="noreferrer">
                   v{introducedPackageVersion}
                 </a>
-              ) : introducedVersionPending ? (
-                'Not published yet'
               ) : (
                 '—'
               )}

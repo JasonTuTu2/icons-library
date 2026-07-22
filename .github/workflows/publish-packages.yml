@@ -133,6 +133,9 @@ jobs:
       - name: Version packages
         run: pnpm version-packages
 
+      - name: Refresh introduced-versions map
+        run: pnpm introduced:gen
+
       - name: Commit version bumps
         run: |
           git config user.name "github-actions[bot]"

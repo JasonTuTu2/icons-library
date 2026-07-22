@@ -51,6 +51,13 @@ export function copyCustomIconsPlugin(): Plugin {
     copySvgFiles(srcDir, destDir)
     copySvgFiles(join(srcDir, 'color'), join(destDir, 'color'))
     copySvgFiles(join(srcDir, 'gradient'), join(destDir, 'gradient'))
+    const introducedSrc = join(
+      repoRoot,
+      'packages/custom-icons/introduced-versions.json',
+    )
+    if (existsSync(introducedSrc)) {
+      cpSync(introducedSrc, join(pluginDir, 'public/introduced-versions.json'))
+    }
   }
 
   return {

@@ -15,6 +15,7 @@
     "typecheck": "turbo run typecheck",
     "catalog:gen": "pnpm --filter @JasonTuTu2/catalog-gen start && pnpm --filter @JasonTuTu2/icons-custom build && pnpm --filter @JasonTuTu2/icons-catalog build",
     "catalog:gen:src": "pnpm --filter @JasonTuTu2/catalog-gen start",
+    "introduced:gen": "node scripts/build-introduced-versions.mjs",
     "bundle:smoke": "node tooling/bundle-smoke/run.mjs",
     "clean": "turbo run clean",
     "changeset": "changeset",
