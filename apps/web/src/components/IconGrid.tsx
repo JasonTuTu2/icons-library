@@ -1,11 +1,32 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { IconMeta } from '@JasonTuTu2/icons-catalog'
 import { IconPreview } from './IconPreview'
 
-const COLS = 8
+const COLS_WIDE = 8
+const COLS_NARROW = 4
+/** Keep in sync with `@media (max-width: 960px)` in styles.css */
+const NARROW_MQ = '(max-width: 960px)'
 const BASE_ROW_HEIGHT = 112
 const BASE_ICON_SIZE = 28
+
+function useGridCols(): number {
+  const [cols, setCols] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia(NARROW_MQ).matches
+      ? COLS_NARROW
+      : COLS_WIDE,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia(NARROW_MQ)
+    const sync = () => setCols(mq.matches ? COLS_NARROW : COLS_WIDE)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  return cols
+}
 
 interface IconGridProps {
   icons: IconMeta[]
@@ -21,7 +42,8 @@ export function IconGrid({
   zoom = 1,
 }: IconGridProps) {
   const parentRef = useRef<HTMLDivElement>(null)
-  const rowCount = Math.ceil(icons.length / COLS) || 0
+  const cols = useGridCols()
+  const rowCount = Math.ceil(icons.length / cols) || 0
   const rowHeight = BASE_ROW_HEIGHT * zoom
   const iconSize = Math.max(16, Math.round(BASE_ICON_SIZE * zoom))
 
@@ -34,7 +56,7 @@ export function IconGrid({
 
   useEffect(() => {
     virtualizer.measure()
-  }, [zoom, virtualizer])
+  }, [zoom, cols, rowCount, virtualizer])
 
   return (
     <div className="grid-wrap" ref={parentRef}>
@@ -43,15 +65,16 @@ export function IconGrid({
         style={{ height: `${virtualizer.getTotalSize()}px` }}
       >
         {virtualizer.getVirtualItems().map((row) => {
-          const start = row.index * COLS
-          const slice = icons.slice(start, start + COLS)
+          const start = row.index * cols
+          const slice = icons.slice(start, start + cols)
           return (
             <div
-              key={row.key}
+              key={`${cols}-${row.key}`}
               className="grid-row"
               style={{
                 transform: `translateY(${row.start}px)`,
                 height: `${row.size}px`,
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
               }}
             >
               {slice.map((icon, col) => {
