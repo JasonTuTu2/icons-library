@@ -340,6 +340,15 @@ pre {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  align-items: center;
+}
+
+.users-role-field {
+  margin: 0;
+}
+
+.users-role-field select {
+  min-width: 7.5rem;
 }
 
 .users-hint {

@@ -268,6 +268,37 @@ export async function listAuthUsers(): Promise<AuthUserRow[]> {
   return Array.isArray(body.users) ? body.users : []
 }
 
+export async function updateAuthUserRole(
+  username: string,
+  role: AuthRole,
+): Promise<AuthUserRow> {
+  const res = await authApiFetch(
+    `/api/users/${encodeURIComponent(username.trim())}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    },
+  )
+  const body = (await res.json().catch(() => ({}))) as AuthUserRow & {
+    error?: string
+  }
+  if (!res.ok) {
+    throw new Error(body.error || `Update role failed (${res.status})`)
+  }
+  if (
+    typeof body.username !== 'string' ||
+    (body.role !== 'designer' && body.role !== 'dev') ||
+    typeof body.createdAt !== 'string'
+  ) {
+    throw new Error('Update role response was incomplete')
+  }
+  return {
+    username: body.username,
+    role: body.role,
+    createdAt: body.createdAt,
+  }
+}
+
 export async function listAuthInvites(): Promise<AuthInvite[]> {
   const res = await authApiFetch('/api/invites')
   const body = (await res.json().catch(() => ({}))) as {

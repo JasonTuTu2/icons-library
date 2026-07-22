@@ -7,6 +7,7 @@ import {
   listAuthInvites,
   listAuthUsers,
   revokeAuthInvite,
+  updateAuthUserRole,
   type AuthInvite,
   type AuthRole,
   type AuthUserRow,
@@ -32,6 +33,7 @@ export function UsersPage() {
   const [invites, setInvites] = useState<AuthInvite[]>([])
   const [role, setRole] = useState<AuthRole>('designer')
   const [busy, setBusy] = useState(false)
+  const [roleBusy, setRoleBusy] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastLink, setLastLink] = useState<string | null>(null)
@@ -204,13 +206,15 @@ export function UsersPage() {
       <section>
         <h2>Accounts</h2>
         <p className="muted users-hint">
-          Accounts created via invite (and secret users after their first sign-in)
-          appear here.
+          Change access with the role control. The person must sign out and back
+          in for their session to pick up the new role.
         </p>
         {loading ? (
           <p className="muted">Loading…</p>
         ) : users.length === 0 ? (
-          <p className="muted">No KV accounts yet — sign in once to migrate, or invite someone.</p>
+          <p className="muted">
+            No KV accounts yet — sign in once to migrate, or invite someone.
+          </p>
         ) : (
           <ul className="users-list">
             {users.map((user) => (
@@ -219,8 +223,34 @@ export function UsersPage() {
                   <strong>{user.username}</strong>
                   <span className="muted">
                     {' '}
-                    · {user.role} · since {formatWhen(user.createdAt)}
+                    · since {formatWhen(user.createdAt)}
                   </span>
+                </div>
+                <div className="users-list-actions">
+                  <label className="users-role-field">
+                    <span className="sr-only">Role for {user.username}</span>
+                    <select
+                      value={user.role}
+                      disabled={busy || roleBusy === user.username}
+                      onChange={(e) => {
+                        const next = e.target.value as AuthRole
+                        if (next === user.role) return
+                        setRoleBusy(user.username)
+                        setError(null)
+                        void updateAuthUserRole(user.username, next)
+                          .then(() => refresh())
+                          .catch((err) => {
+                            setError(
+                              err instanceof Error ? err.message : String(err),
+                            )
+                          })
+                          .finally(() => setRoleBusy(null))
+                      }}
+                    >
+                      <option value="designer">designer</option>
+                      <option value="dev">dev</option>
+                    </select>
+                  </label>
                 </div>
               </li>
             ))}

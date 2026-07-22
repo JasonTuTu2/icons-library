@@ -160,6 +160,43 @@ export async function listUsers(kv: KVNamespace): Promise<PublicUser[]> {
   return users
 }
 
+/** Change an account's role. Refuses demoting the last remaining `dev`. */
+export async function updateUserRole(
+  kv: KVNamespace,
+  username: string,
+  role: Role,
+): Promise<PublicUser> {
+  const user = await getStoredUser(kv, username)
+  if (!user) {
+    throw new Error('User not found')
+  }
+  if (user.role === role) {
+    return {
+      username: user.username,
+      role: user.role,
+      createdAt: user.createdAt,
+    }
+  }
+  if (user.role === 'dev' && role === 'designer') {
+    const users = await listUsers(kv)
+    const otherDevs = users.filter(
+      (u) =>
+        u.role === 'dev' &&
+        u.username.toLowerCase() !== user.username.toLowerCase(),
+    )
+    if (otherDevs.length === 0) {
+      throw new Error('Cannot demote the last developer account')
+    }
+  }
+  const next: StoredUser = { ...user, role }
+  await putStoredUser(kv, next)
+  return {
+    username: next.username,
+    role: next.role,
+    createdAt: next.createdAt,
+  }
+}
+
 export async function createInvite(
   kv: KVNamespace,
   opts: { role: Role; createdBy: string },

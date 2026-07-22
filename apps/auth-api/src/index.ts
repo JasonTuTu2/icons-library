@@ -30,6 +30,7 @@ import {
   getStoredUser,
   listInvites,
   listUsers,
+  updateUserRole,
   upsertMigratedUser,
   validatePassword,
   validateUsername,
@@ -246,6 +247,40 @@ authed.get('/users', async (c) => {
     return c.json({ users: await listUsers(c.env.STAGING_HANDOFF) })
   } catch (err) {
     return c.json(githubError(err), 502)
+  }
+})
+
+/** Change an account's role (dev only). */
+authed.patch('/users/:username', async (c) => {
+  if (c.get('role') !== 'dev') {
+    return c.json({ error: 'Changing roles requires a developer account' }, 403)
+  }
+  const username = c.req.param('username')?.trim() ?? ''
+  if (!username) {
+    return c.json({ error: 'Missing username' }, 400)
+  }
+  let body: { role?: string }
+  try {
+    body = (await c.req.json()) as { role?: string }
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400)
+  }
+  const role = body.role === 'dev' || body.role === 'designer' ? body.role : null
+  if (!role) {
+    return c.json({ error: 'role must be designer or dev' }, 400)
+  }
+  try {
+    const user = await updateUserRole(c.env.STAGING_HANDOFF, username, role)
+    return c.json(user)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message === 'User not found') {
+      return c.json({ error: message }, 404)
+    }
+    if (message === 'Cannot demote the last developer account') {
+      return c.json({ error: message }, 400)
+    }
+    return c.json({ error: message }, 502)
   }
 })
 

@@ -60,12 +60,14 @@ If every authed call returns `GitHub API 403: Forbidden`, redeploy the Worker af
 2. Open **Accounts** → choose role → **Create invite link** → copy the URL.
 3. Designer opens the link → sets username + password → signed in.
 4. Invites expire in 7 days; revoke unused ones from the same page.
+5. To change access later: **Accounts** → pick `designer` / `dev` on that row. They must sign out and back in for the new role to apply.
 
 ## Endpoints
 
 - `POST /api/login` `{ username, password }` → `{ token, username, role }`
 - `GET /api/me` `Authorization: Bearer …`
 - `GET /api/users` — list KV accounts (**dev**)
+- `PATCH /api/users/:username` `{ role }` — change access level (**dev**)
 - `POST /api/invites` `{ role }` → invite (**dev**)
 - `GET /api/invites` — pending invites (**dev**)
 - `DELETE /api/invites/:token` — revoke (**dev**)
