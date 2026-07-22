@@ -1,0 +1,41 @@
+# Auth API for docker compose / local Node
+FROM node:20-bookworm AS build
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/auth-api/package.json apps/auth-api/
+COPY packages/github-admin/package.json packages/github-admin/
+COPY packages/core/package.json packages/core/
+COPY packages/catalog/package.json packages/catalog/
+COPY packages/custom-icons/package.json packages/custom-icons/
+COPY packages/react/package.json packages/react/
+COPY packages/vue/package.json packages/vue/
+COPY apps/web/package.json apps/web/
+COPY apps/figma-plugin/package.json apps/figma-plugin/
+COPY tooling/catalog-gen/package.json tooling/catalog-gen/
+
+RUN pnpm install --frozen-lockfile
+
+COPY packages/github-admin packages/github-admin
+COPY apps/auth-api apps/auth-api
+
+RUN pnpm --filter @JasonTuTu2/github-admin build
+
+FROM node:20-bookworm-slim
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=8787
+ENV AUTH_KV_PATH=/data/kv.json
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+  && apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /app /app
+
+RUN mkdir -p /data
+VOLUME ["/data"]
+EXPOSE 8787
+
+WORKDIR /app/apps/auth-api
+CMD ["pnpm", "exec", "tsx", "src/node.ts"]

@@ -16,9 +16,19 @@ const packageVersion = (
 
 export default defineConfig(({ command }) => {
   const rootDir = dirname(fileURLToPath(import.meta.url))
+  // Docker / self-host: set VITE_BASE_PATH=/  (Pages keeps /icons-library/)
+  const baseFromEnv = process.env.VITE_BASE_PATH?.trim()
+  const base =
+    baseFromEnv && baseFromEnv.length > 0
+      ? baseFromEnv.endsWith('/')
+        ? baseFromEnv
+        : `${baseFromEnv}/`
+      : command === 'build'
+        ? '/icons-library/'
+        : '/'
   return {
     // GitHub Pages serves at https://JasonTuTu2.github.io/icons-library/
-    base: command === 'build' ? '/icons-library/' : '/',
+    base,
     plugins: [
       react(),
       customIconUploadPlugin(),

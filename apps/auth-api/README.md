@@ -9,6 +9,10 @@ Authenticated API so designers/devs sign in with username + password. The browse
 
 Accounts live in Workers KV (hashed passwords). `AUTH_USERS` is bootstrap only: first successful secret login migrates that user into KV. Day-to-day adds use **invite links** from the site’s Accounts page (dev).
 
+## Docker / local Node
+
+See [DOCKER.md](../../DOCKER.md) for `docker compose up` (browser + this API with file-backed KV). Production remains this Worker on Cloudflare.
+
 ## What you need to do (one-time)
 
 1. **Cloudflare account** (free) + install nothing beyond this repo.

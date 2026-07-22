@@ -18,6 +18,8 @@
     "introduced:gen": "node scripts/build-introduced-versions.mjs",
     "publish-history:gen": "node scripts/build-publish-history.mjs",
     "release-meta:gen": "pnpm introduced:gen && pnpm publish-history:gen",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
     "bundle:smoke": "node tooling/bundle-smoke/run.mjs",
     "clean": "turbo run clean",
     "changeset": "changeset",

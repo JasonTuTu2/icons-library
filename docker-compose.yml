@@ -1,0 +1,39 @@
+# Local full stack: icon browser + auth API (file-backed KV).
+# Production Pages + Cloudflare Worker on main are unchanged.
+#
+#   cp .env.example .env   # fill secrets
+#   docker compose up --build
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    ports:
+      - "${AUTH_PORT:-8787}:8787"
+    env_file:
+      - .env
+    environment:
+      PORT: "8787"
+      AUTH_KV_PATH: /data/kv.json
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    volumes:
+      - auth-kv:/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_AUTH_API_URL: ${VITE_AUTH_API_URL:-http://localhost:8787}
+        VITE_GITHUB_REPO: ${GITHUB_REPO:-JasonTuTu2/icons-library}
+        VITE_BASE_PATH: /
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - auth
+    restart: unless-stopped
+
+volumes:
+  auth-kv:
