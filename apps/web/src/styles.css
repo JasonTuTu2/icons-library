@@ -519,9 +519,18 @@ pre {
 .browser-display-controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.5rem;
   min-height: 2.75rem;
+}
+
+.result-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  padding-bottom: 0.15rem;
 }
 
 .toolbar-btn {
@@ -651,7 +660,7 @@ pre {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1;
-  align-self: center;
+  padding-bottom: 0.15rem;
 }
 
 .browser-body {
