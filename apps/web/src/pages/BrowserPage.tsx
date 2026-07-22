@@ -196,6 +196,8 @@ export function BrowserPage() {
         <label className="field grow">
           <span>Search</span>
           <input
+            id="icon-search"
+            name="icon-search"
             type="search"
             placeholder="Search brand icons by name or tag…"
             value={query}
