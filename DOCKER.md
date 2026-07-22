@@ -47,6 +47,35 @@ pnpm --filter @JasonTuTu2/icons-auth-api start:node
 
 Figma plugin: point it at http://localhost:8080/figma.html (or keep Pages).
 
+## Port already allocated (`Bind for 0.0.0.0:8080 failed`)
+
+Something else on the machine is using that port. Either free it or pick another:
+
+```bash
+# See who owns 8080
+docker ps
+ss -tlnp | grep -E '8080|8787|6379' || true
+
+# Easiest: use different host ports in `.env`
+WEB_PORT=18080
+AUTH_PORT=18787
+# if Redis host port conflicts too:
+# REDIS_PORT=16379
+
+# Match browser URLs (same host you open in the browser)
+VITE_AUTH_API_URL=http://localhost:18787
+CORS_ORIGINS=http://localhost:18080,http://127.0.0.1:18080
+```
+
+Then:
+
+```bash
+docker compose down
+docker compose up --build
+```
+
+Open http://localhost:18080 (or `http://<spark-hostname>:18080` from another PC — then put that host in `VITE_AUTH_API_URL` / `CORS_ORIGINS` and rebuild).
+
 ## Stop / reset
 
 ```bash
