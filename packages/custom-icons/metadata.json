@@ -1005,6 +1005,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "test-docker": {
+      "category": "",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
