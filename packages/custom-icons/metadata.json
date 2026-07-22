@@ -1012,6 +1012,13 @@
       "source": "custom",
       "usage": "in-use",
       "note": ""
+    },
+    "test-another-docker": {
+      "category": "",
+      "variant": "none",
+      "source": "custom",
+      "usage": "in-use",
+      "note": ""
     }
   }
 }
