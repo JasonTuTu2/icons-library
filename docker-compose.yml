@@ -1,10 +1,24 @@
-# Local full stack: icon browser + auth API (file-backed KV).
+# Local full stack: icon browser + auth API + Redis.
 # Production Pages + Cloudflare Worker on main are unchanged.
 #
 #   cp .env.example .env   # fill secrets
 #   docker compose up --build
 
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - auth-redis:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   auth:
     build:
       context: .
@@ -15,10 +29,11 @@ services:
       - .env
     environment:
       PORT: "8787"
-      AUTH_KV_PATH: /data/kv.json
+      REDIS_URL: redis://redis:6379
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
-    volumes:
-      - auth-kv:/data
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -36,4 +51,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  auth-kv:
+  auth-redis:

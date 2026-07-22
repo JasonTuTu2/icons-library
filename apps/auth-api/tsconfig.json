@@ -12,5 +12,5 @@
     "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/node.ts", "src/fileKv.ts"]
+  "exclude": ["src/node.ts", "src/fileKv.ts", "src/redisKv.ts"]
 }

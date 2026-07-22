@@ -11,7 +11,7 @@ Accounts live in Workers KV (hashed passwords). `AUTH_USERS` is bootstrap only: 
 
 ## Docker / local Node
 
-See [DOCKER.md](../../DOCKER.md) for `docker compose up` (browser + this API with file-backed KV). Production remains this Worker on Cloudflare.
+See [DOCKER.md](../../DOCKER.md) for `docker compose up` (browser + this API + Redis). Production remains this Worker on Cloudflare.
 
 ## What you need to do (one-time)
 
