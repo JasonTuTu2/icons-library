@@ -13,7 +13,7 @@ function introducedVersionsUrl(): string {
 async function loadIntroducedMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>()
   try {
-    const res = await fetch(introducedVersionsUrl(), { cache: 'no-store' })
+    const res = await fetch(introducedVersionsUrl())
     if (!res.ok) return map
     const data = (await res.json()) as Record<string, unknown>
     for (const [name, version] of Object.entries(data)) {
@@ -44,23 +44,27 @@ export function useIntroducedVersions() {
 
     let cancelled = false
     setLoading(true)
-    void Promise.all([
-      loadIntroducedMap(),
-      listUnpublishedIcons().catch(() => [] as { name: string }[]),
-    ])
-      .then(([introduced, unpublished]) => {
+    setPendingNames(null)
+
+    void loadIntroducedMap()
+      .then((introduced) => {
         if (cancelled) return
         setByName(introduced)
-        setPendingNames(new Set(unpublished.map((icon) => icon.name)))
       })
       .catch(() => {
-        if (!cancelled) {
-          setByName(new Map())
-          setPendingNames(new Set())
-        }
+        if (!cancelled) setByName(new Map())
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
+      })
+
+    // Pending check is live GitHub — load in the background so the version
+    // map from static JSON is not blocked.
+    void listUnpublishedIcons()
+      .catch(() => [] as { name: string }[])
+      .then((unpublished) => {
+        if (cancelled) return
+        setPendingNames(new Set(unpublished.map((icon) => icon.name)))
       })
 
     return () => {

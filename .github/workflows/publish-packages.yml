@@ -133,8 +133,8 @@ jobs:
       - name: Version packages
         run: pnpm version-packages
 
-      - name: Refresh introduced-versions map
-        run: pnpm introduced:gen
+      - name: Refresh introduced-versions and publish-history maps
+        run: pnpm release-meta:gen
 
       - name: Commit version bumps
         run: |

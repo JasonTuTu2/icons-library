@@ -58,6 +58,13 @@ export function copyCustomIconsPlugin(): Plugin {
     if (existsSync(introducedSrc)) {
       cpSync(introducedSrc, join(pluginDir, 'public/introduced-versions.json'))
     }
+    const publishHistorySrc = join(
+      repoRoot,
+      'packages/custom-icons/publish-history.json',
+    )
+    if (existsSync(publishHistorySrc)) {
+      cpSync(publishHistorySrc, join(pluginDir, 'public/publish-history.json'))
+    }
   }
 
   return {

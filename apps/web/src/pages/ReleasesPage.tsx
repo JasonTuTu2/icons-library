@@ -4,11 +4,11 @@ import {
   commitUrl,
   isGithubAdminEnabled,
   isGithubRepoConfigured,
-  listPublishHistory,
   listUnpublishedIcons,
   listUnpublishedRemovals,
   packagesUrl,
 } from '../lib/github'
+import { loadPublishHistory } from '../lib/loadPublishHistory'
 import {
   formatPublishedDate,
   iconListLabel,
@@ -96,28 +96,19 @@ export function ReleasesPage() {
   const [history, setHistory] = useState<PublishHistoryEntry[] | null>(null)
   const [pendingAdds, setPendingAdds] = useState<StagedIcon[]>([])
   const [pendingRemovals, setPendingRemovals] = useState<StagedRemoval[]>([])
+  const [pendingLoading, setPendingLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    async function load() {
-      if (!isGithubAdminEnabled()) {
-        setLoading(false)
-        return
-      }
+    async function loadHistory() {
       setLoading(true)
       setError(null)
       try {
-        const [entries, adds, removals] = await Promise.all([
-          listPublishHistory({ limit: 12 }),
-          listUnpublishedIcons(),
-          listUnpublishedRemovals(),
-        ])
+        const entries = await loadPublishHistory()
         if (cancelled) return
         setHistory(entries)
-        setPendingAdds(adds)
-        setPendingRemovals(removals)
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : String(err))
@@ -126,7 +117,28 @@ export function ReleasesPage() {
         if (!cancelled) setLoading(false)
       }
     }
-    void load()
+    void loadHistory()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isGithubRepoConfigured() || !isGithubAdminEnabled()) return
+    let cancelled = false
+    setPendingLoading(true)
+    void Promise.all([listUnpublishedIcons(), listUnpublishedRemovals()])
+      .then(([adds, removals]) => {
+        if (cancelled) return
+        setPendingAdds(adds)
+        setPendingRemovals(removals)
+      })
+      .catch(() => {
+        // Pending section is optional; static history still works.
+      })
+      .finally(() => {
+        if (!cancelled) setPendingLoading(false)
+      })
     return () => {
       cancelled = true
     }
@@ -155,17 +167,7 @@ export function ReleasesPage() {
         after each release.
       </p>
 
-      {!isGithubRepoConfigured() ? (
-        <p className="release-muted" role="status">
-          Release history is not available (GitHub repo is not configured for
-          this deployment).
-        </p>
-      ) : !isGithubAdminEnabled() ? (
-        <p className="release-muted" role="status">
-          Release history could not be loaded (GitHub API access is not
-          configured).
-        </p>
-      ) : loading ? (
+      {loading ? (
         <p className="release-muted" role="status">
           Loading release history…
         </p>
@@ -188,6 +190,10 @@ export function ReleasesPage() {
                 appear in the next version below.
               </p>
             </section>
+          ) : pendingLoading ? (
+            <p className="release-muted" role="status">
+              Checking for unpublished library changes…
+            </p>
           ) : null}
 
           {history && history.length > 0 ? (

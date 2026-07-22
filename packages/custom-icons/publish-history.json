@@ -1,0 +1,4040 @@
+[
+  {
+    "version": "8.0.2",
+    "publishedAt": "2026-07-21T20:33:05Z",
+    "commitSha": "85f72879fd38d418f6904d60ef3200e77deb6ed7",
+    "adds": [
+      {
+        "name": "test-icon",
+        "path": "packages/custom-icons/svg/test-icon.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "8.0.1",
+    "publishedAt": "2026-07-21T19:19:01Z",
+    "commitSha": "1df6da426cf3ae2b20a808c2e918a5108d6a9e05",
+    "adds": [
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/svg/briefcase-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/svg/color/person-filled.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/svg/person-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/svg/team-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "8.0.0",
+    "publishedAt": "2026-07-21T19:15:34Z",
+    "commitSha": "923800985ff0e93c17e688e39dcc42b6f4664d6b",
+    "adds": [],
+    "removals": [
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/images/briefcase-regular.png"
+      },
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/svg/briefcase-regular.svg"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/images/person-filled.png"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/svg/color/person-filled.svg"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/images/person-regular.png"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/svg/person-regular.svg"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/images/team-regular.png"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/svg/team-regular.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "7.1.0",
+    "publishedAt": "2026-07-21T19:10:04Z",
+    "commitSha": "7ab00d51d8f5f0d9fdcdd74c47d9f4fca5a7948d",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "7.0.0",
+    "publishedAt": "2026-07-21T19:02:44Z",
+    "commitSha": "54dfb649e7a6f770e780864d7367ecec1c34a561",
+    "adds": [],
+    "removals": [
+      {
+        "name": "is-it-gonna-work",
+        "path": "packages/custom-icons/svg/is-it-gonna-work.svg"
+      },
+      {
+        "name": "jason-zihe-zhang",
+        "path": "packages/custom-icons/svg/jason-zihe-zhang.svg"
+      },
+      {
+        "name": "my-first-upload",
+        "path": "packages/custom-icons/svg/my-first-upload.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "6.3.2",
+    "publishedAt": "2026-07-21T18:23:48Z",
+    "commitSha": "db70bd753633418c1fb02e20a947680398885791",
+    "adds": [
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/images/briefcase-regular.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/images/person-filled.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/images/person-regular.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/images/team-regular.png",
+        "kind": "image",
+        "format": "png"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "6.3.1",
+    "publishedAt": "2026-07-21T17:29:02Z",
+    "commitSha": "3daacfa946a03b0eb4b1b2665778c82db793d68a",
+    "adds": [
+      {
+        "name": "is-it-gonna-work",
+        "path": "packages/custom-icons/svg/is-it-gonna-work.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "6.3.0",
+    "publishedAt": "2026-07-21T17:22:44Z",
+    "commitSha": "c24ff7341602139c691fe4837222888e0be24de9",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "6.2.0",
+    "publishedAt": "2026-07-21T17:10:37Z",
+    "commitSha": "b56e07dc5dc5b2c2fdedebf2ac3afca67ac34fcd",
+    "adds": [
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/svg/briefcase-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "company-regular",
+        "path": "packages/custom-icons/svg/company-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/svg/color/person-filled.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/svg/person-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/svg/team-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "6.1.0",
+    "publishedAt": "2026-07-21T15:51:34Z",
+    "commitSha": "8ce5c74e041e8dedbef60876142cf8ac8c180cb2",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "6.0.0",
+    "publishedAt": "2026-07-21T15:43:05Z",
+    "commitSha": "a0ad5b14952ce5a046e76cb63b6c969796848263",
+    "adds": [],
+    "removals": [
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/svg/briefcase-regular.svg"
+      },
+      {
+        "name": "company-regular",
+        "path": "packages/custom-icons/svg/company-regular.svg"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/svg/color/person-filled.svg"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/svg/person-regular.svg"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/svg/team-regular.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "5.3.0",
+    "publishedAt": "2026-07-21T15:34:11Z",
+    "commitSha": "49dea3b175e03e5fd68c21df699b7f2e5e2b1c39",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "5.2.0",
+    "publishedAt": "2026-07-21T15:18:51Z",
+    "commitSha": "f6528a01dd584a3677762a04089ed736ddc7f19d",
+    "adds": [
+      {
+        "name": "jason-zihe-zhang",
+        "path": "packages/custom-icons/svg/jason-zihe-zhang.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "my-first-upload",
+        "path": "packages/custom-icons/svg/my-first-upload.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "5.1.0",
+    "publishedAt": "2026-07-20T19:12:17Z",
+    "commitSha": "9924ea54e56c4900bd68430d3705892674c684a4",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/gradient/alipay.svg"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/gradient/crypto-pay.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "5.0.1",
+    "publishedAt": "2026-07-20T19:02:24Z",
+    "commitSha": "20142f3f6331ab6145d9d3a6c5f28b0cfcb05f72",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/gradient/alipay.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/gradient/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/color/wechat-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "5.0.0",
+    "publishedAt": "2026-07-20T18:55:16Z",
+    "commitSha": "d2a33d78cd4ce1175f8dbf5b8fa3cf17c2c03694",
+    "adds": [],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg"
+      },
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/gradient/alipay.svg"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/gradient/crypto-pay.svg"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/color/wechat-pay.svg"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "4.0.1",
+    "publishedAt": "2026-07-20T18:35:23Z",
+    "commitSha": "9cec3cf78c000b07edaaa44d8514dfca53172569",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/gradient/alipay.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/gradient/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/color/wechat-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "4.0.0",
+    "publishedAt": "2026-07-20T18:27:39Z",
+    "commitSha": "ebf8d600c8e765d33e338062e3d403ea4f779379",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/svg/apple.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/svg/gradient/coins-go-gold.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-go-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-pingme-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/svg/gradient/crypto-com.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/svg/color/google.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "logo-go",
+        "path": "packages/custom-icons/svg/gradient/logo-go.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/svg/gradient/logo-pingme.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/svg/gradient/logo-team.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/svg/gradient/logo-wephone.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/svg/color/logo-wetalk.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/svg/color/paypal.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/svg/color/unionpay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/svg/color/visa.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/images/alipay.png"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/images/apple.png"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/images/coins-go-gold.png"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/images/coins-go-grey.png"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/images/coins-pingme-grey.png"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/images/crypto-com.png"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/images/crypto-pay.png"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/images/google.png"
+      },
+      {
+        "name": "logo-go",
+        "path": "packages/custom-icons/images/logo-go.png"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/images/logo-pingme.png"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/images/logo-team.png"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/images/logo-wephone.png"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/images/logo-wetalk.png"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/images/paypal.png"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/images/unionpay.png"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/images/visa.png"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/images/wechat-pay.png"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "3.0.0",
+    "publishedAt": "2026-07-20T18:00:05Z",
+    "commitSha": "536362471b529950f7e6f568d9284190175020c4",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/images/alipay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/images/apple.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/images/coins-go-gold.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/images/coins-go-grey.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/images/coins-pingme-grey.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/images/crypto-com.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/images/crypto-pay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/images/google.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/images/logo-pingme.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/images/logo-team.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/images/logo-wephone.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/images/logo-wetalk.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/images/paypal.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/images/unionpay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/images/visa.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/images/wechat-pay.png",
+        "kind": "image",
+        "format": "png"
+      }
+    ],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/svg/apple.svg"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/svg/gradient/coins-go-gold.svg"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-go-grey.svg"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-pingme-grey.svg"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/svg/gradient/crypto-com.svg"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/svg/color/google.svg"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/svg/gradient/logo-pingme.svg"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/svg/gradient/logo-team.svg"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/svg/gradient/logo-wephone.svg"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/svg/color/logo-wetalk.svg"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/svg/color/paypal.svg"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/svg/color/unionpay.svg"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/svg/color/visa.svg"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "2.0.0",
+    "publishedAt": "2026-07-20T17:45:57Z",
+    "commitSha": "675e217b963495cd34f22f2d9feced8acd8ca845",
+    "adds": [
+      {
+        "name": "add-filled",
+        "path": "packages/custom-icons/svg/add-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "add-regular",
+        "path": "packages/custom-icons/svg/add-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "ai-translate-filled",
+        "path": "packages/custom-icons/svg/ai-translate-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/svg/apple.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "arrow-left-regular",
+        "path": "packages/custom-icons/svg/arrow-left-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "arrow-right-regular",
+        "path": "packages/custom-icons/svg/arrow-right-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "briefcase-regular",
+        "path": "packages/custom-icons/svg/briefcase-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "calendar-regular",
+        "path": "packages/custom-icons/svg/calendar-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-answered-filled",
+        "path": "packages/custom-icons/svg/call-answered-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-connecting-filled",
+        "path": "packages/custom-icons/svg/call-connecting-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-end-filled",
+        "path": "packages/custom-icons/svg/call-end-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-filled",
+        "path": "packages/custom-icons/svg/call-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-hold-filled",
+        "path": "packages/custom-icons/svg/call-hold-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-hold-regular",
+        "path": "packages/custom-icons/svg/call-hold-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-inbound-filled",
+        "path": "packages/custom-icons/svg/call-inbound-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-missed-filled",
+        "path": "packages/custom-icons/svg/call-missed-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-outbound-filled",
+        "path": "packages/custom-icons/svg/call-outbound-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-outbound-regular",
+        "path": "packages/custom-icons/svg/call-outbound-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "call-regular",
+        "path": "packages/custom-icons/svg/call-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "campaign-filled",
+        "path": "packages/custom-icons/svg/campaign-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "campaign-regular",
+        "path": "packages/custom-icons/svg/campaign-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "checkmark-circle-filled",
+        "path": "packages/custom-icons/svg/checkmark-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "checkmark-circle-regular",
+        "path": "packages/custom-icons/svg/checkmark-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "checkmark-regular",
+        "path": "packages/custom-icons/svg/checkmark-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "chevron-down-regular",
+        "path": "packages/custom-icons/svg/chevron-down-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "chevron-left-regular",
+        "path": "packages/custom-icons/svg/chevron-left-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "chevron-right-regular",
+        "path": "packages/custom-icons/svg/chevron-right-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "chevron-up-regular",
+        "path": "packages/custom-icons/svg/chevron-up-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "clipboard-edit-regular",
+        "path": "packages/custom-icons/svg/clipboard-edit-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "coin-regular",
+        "path": "packages/custom-icons/svg/coin-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/svg/gradient/coins-go-gold.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-go-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-pingme-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "collapse-regular",
+        "path": "packages/custom-icons/svg/collapse-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "company-regular",
+        "path": "packages/custom-icons/svg/company-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "contact-filled",
+        "path": "packages/custom-icons/svg/contact-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "contact-regular",
+        "path": "packages/custom-icons/svg/contact-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "copy-regular",
+        "path": "packages/custom-icons/svg/copy-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "cross-circle-filled",
+        "path": "packages/custom-icons/svg/cross-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "cross-circle-regular",
+        "path": "packages/custom-icons/svg/cross-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "cross-filled",
+        "path": "packages/custom-icons/svg/cross-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/svg/gradient/crypto-com.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "delete-filled",
+        "path": "packages/custom-icons/svg/delete-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "delete-regular",
+        "path": "packages/custom-icons/svg/delete-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "dialpad-filled",
+        "path": "packages/custom-icons/svg/dialpad-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "dialpad-regular",
+        "path": "packages/custom-icons/svg/dialpad-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "document-regular",
+        "path": "packages/custom-icons/svg/document-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "edit-filled",
+        "path": "packages/custom-icons/svg/edit-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "edit-regular",
+        "path": "packages/custom-icons/svg/edit-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "email-edit-filled",
+        "path": "packages/custom-icons/svg/email-edit-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "email-filled",
+        "path": "packages/custom-icons/svg/email-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "email-read-filled",
+        "path": "packages/custom-icons/svg/email-read-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "email-regular",
+        "path": "packages/custom-icons/svg/email-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "emoji-filled",
+        "path": "packages/custom-icons/svg/emoji-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "emoji-regular",
+        "path": "packages/custom-icons/svg/emoji-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "error-filled",
+        "path": "packages/custom-icons/svg/error-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "error-regular",
+        "path": "packages/custom-icons/svg/error-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "expand-regular",
+        "path": "packages/custom-icons/svg/expand-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "export-regular",
+        "path": "packages/custom-icons/svg/export-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "eye-off-regular",
+        "path": "packages/custom-icons/svg/eye-off-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "eye-regular",
+        "path": "packages/custom-icons/svg/eye-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "feedback-regular",
+        "path": "packages/custom-icons/svg/feedback-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "file-download-filled",
+        "path": "packages/custom-icons/svg/file-download-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "file-download-regular",
+        "path": "packages/custom-icons/svg/file-download-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "fire-filled",
+        "path": "packages/custom-icons/svg/fire-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "fire-regular",
+        "path": "packages/custom-icons/svg/fire-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "globe-filled",
+        "path": "packages/custom-icons/svg/globe-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "globe-regular",
+        "path": "packages/custom-icons/svg/globe-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/svg/color/google.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "help-filled",
+        "path": "packages/custom-icons/svg/help-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "help-regular",
+        "path": "packages/custom-icons/svg/help-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-filled",
+        "path": "packages/custom-icons/svg/image-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-regular",
+        "path": "packages/custom-icons/svg/image-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "import-regular",
+        "path": "packages/custom-icons/svg/import-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "info-filled",
+        "path": "packages/custom-icons/svg/info-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "info-regular",
+        "path": "packages/custom-icons/svg/info-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "locked-filled",
+        "path": "packages/custom-icons/svg/locked-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "locked-regular",
+        "path": "packages/custom-icons/svg/locked-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/svg/gradient/logo-pingme.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/svg/gradient/logo-team.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/svg/gradient/logo-wephone.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/svg/color/logo-wetalk.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "message-add-filled",
+        "path": "packages/custom-icons/svg/message-add-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "message-add-regular",
+        "path": "packages/custom-icons/svg/message-add-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "message-filled",
+        "path": "packages/custom-icons/svg/message-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "message-regular",
+        "path": "packages/custom-icons/svg/message-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "mic-off-filled",
+        "path": "packages/custom-icons/svg/mic-off-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "mic-off-regular",
+        "path": "packages/custom-icons/svg/mic-off-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "more-regular",
+        "path": "packages/custom-icons/svg/more-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "note-filled",
+        "path": "packages/custom-icons/svg/note-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "note-regular",
+        "path": "packages/custom-icons/svg/note-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "number-filled",
+        "path": "packages/custom-icons/svg/number-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "number-regular",
+        "path": "packages/custom-icons/svg/number-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "open-new-tab-regular",
+        "path": "packages/custom-icons/svg/open-new-tab-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "pause-filled",
+        "path": "packages/custom-icons/svg/pause-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/svg/color/paypal.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "person-filled",
+        "path": "packages/custom-icons/svg/color/person-filled.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "person-regular",
+        "path": "packages/custom-icons/svg/person-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "play-circle-filled",
+        "path": "packages/custom-icons/svg/play-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "play-circle-regular",
+        "path": "packages/custom-icons/svg/play-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "play-filled",
+        "path": "packages/custom-icons/svg/play-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "plus-regular",
+        "path": "packages/custom-icons/svg/plus-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "porting-regular",
+        "path": "packages/custom-icons/svg/porting-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "record-regular",
+        "path": "packages/custom-icons/svg/record-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "record-stop-filled",
+        "path": "packages/custom-icons/svg/record-stop-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "refresh-filled",
+        "path": "packages/custom-icons/svg/refresh-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "remove-filled",
+        "path": "packages/custom-icons/svg/remove-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "remove-regular",
+        "path": "packages/custom-icons/svg/remove-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "search-regular",
+        "path": "packages/custom-icons/svg/search-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "secure-filled",
+        "path": "packages/custom-icons/svg/secure-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "send-filled",
+        "path": "packages/custom-icons/svg/send-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "settings-filled",
+        "path": "packages/custom-icons/svg/settings-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "settings-regular",
+        "path": "packages/custom-icons/svg/settings-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "slider-regular",
+        "path": "packages/custom-icons/svg/slider-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "speaker-filled",
+        "path": "packages/custom-icons/svg/speaker-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "speaker-mute-filled",
+        "path": "packages/custom-icons/svg/speaker-mute-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "speaker-mute-regular",
+        "path": "packages/custom-icons/svg/speaker-mute-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "speaker-regular",
+        "path": "packages/custom-icons/svg/speaker-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "speed-1x-regular",
+        "path": "packages/custom-icons/svg/speed-1x-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "switch-regular",
+        "path": "packages/custom-icons/svg/switch-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "tag-filled",
+        "path": "packages/custom-icons/svg/tag-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "tag-regular",
+        "path": "packages/custom-icons/svg/tag-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "team-regular",
+        "path": "packages/custom-icons/svg/team-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "template-filled",
+        "path": "packages/custom-icons/svg/template-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "template-regular",
+        "path": "packages/custom-icons/svg/template-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "tip-filled",
+        "path": "packages/custom-icons/svg/tip-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "tip-regular",
+        "path": "packages/custom-icons/svg/tip-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "translate-filled",
+        "path": "packages/custom-icons/svg/translate-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "translate-regular",
+        "path": "packages/custom-icons/svg/translate-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/svg/color/unionpay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "unlocked-filled",
+        "path": "packages/custom-icons/svg/unlocked-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "upload-filled",
+        "path": "packages/custom-icons/svg/upload-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "user-visibility-filled",
+        "path": "packages/custom-icons/svg/user-visibility-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/svg/color/visa.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "voicemail-regular",
+        "path": "packages/custom-icons/svg/voicemail-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "wallet-regular",
+        "path": "packages/custom-icons/svg/wallet-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/images/alipay.png"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/images/apple.png"
+      },
+      {
+        "name": "box",
+        "path": "packages/custom-icons/svg/box.svg"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/images/coins-go-gold.png"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/images/coins-go-grey.png"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/images/coins-pingme-grey.png"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/images/crypto-com.png"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/images/crypto-pay.png"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/images/google.png"
+      },
+      {
+        "name": "headphones",
+        "path": "packages/custom-icons/svg/headphones.svg"
+      },
+      {
+        "name": "indeterminate-check-box",
+        "path": "packages/custom-icons/svg/indeterminate-check-box.svg"
+      },
+      {
+        "name": "jason",
+        "path": "packages/custom-icons/svg/jason.svg"
+      },
+      {
+        "name": "judy-png",
+        "path": "packages/custom-icons/images/judy-png.png"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/images/logo-pingme.png"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/images/logo-team.png"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/images/logo-wephone.png"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/images/logo-wetalk.png"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/images/paypal.png"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/images/unionpay.png"
+      },
+      {
+        "name": "v1-add-filled",
+        "path": "packages/custom-icons/svg/v1-add-filled.svg"
+      },
+      {
+        "name": "v1-add-regular",
+        "path": "packages/custom-icons/svg/v1-add-regular.svg"
+      },
+      {
+        "name": "v1-ai-translate-filled",
+        "path": "packages/custom-icons/svg/v1-ai-translate-filled.svg"
+      },
+      {
+        "name": "v1-arrow-left-regular",
+        "path": "packages/custom-icons/svg/v1-arrow-left-regular.svg"
+      },
+      {
+        "name": "v1-arrow-right-regular",
+        "path": "packages/custom-icons/svg/v1-arrow-right-regular.svg"
+      },
+      {
+        "name": "v1-briefcase-regular",
+        "path": "packages/custom-icons/svg/v1-briefcase-regular.svg"
+      },
+      {
+        "name": "v1-calendar-regular",
+        "path": "packages/custom-icons/svg/v1-calendar-regular.svg"
+      },
+      {
+        "name": "v1-call-answered-filled",
+        "path": "packages/custom-icons/svg/v1-call-answered-filled.svg"
+      },
+      {
+        "name": "v1-call-connecting-filled",
+        "path": "packages/custom-icons/svg/v1-call-connecting-filled.svg"
+      },
+      {
+        "name": "v1-call-end-filled",
+        "path": "packages/custom-icons/svg/v1-call-end-filled.svg"
+      },
+      {
+        "name": "v1-call-filled",
+        "path": "packages/custom-icons/svg/v1-call-filled.svg"
+      },
+      {
+        "name": "v1-call-hold-filled",
+        "path": "packages/custom-icons/svg/v1-call-hold-filled.svg"
+      },
+      {
+        "name": "v1-call-hold-regular",
+        "path": "packages/custom-icons/svg/v1-call-hold-regular.svg"
+      },
+      {
+        "name": "v1-call-inbound-filled",
+        "path": "packages/custom-icons/svg/v1-call-inbound-filled.svg"
+      },
+      {
+        "name": "v1-call-missed-filled",
+        "path": "packages/custom-icons/svg/v1-call-missed-filled.svg"
+      },
+      {
+        "name": "v1-call-outbound-filled",
+        "path": "packages/custom-icons/svg/v1-call-outbound-filled.svg"
+      },
+      {
+        "name": "v1-call-outbound-regular",
+        "path": "packages/custom-icons/svg/v1-call-outbound-regular.svg"
+      },
+      {
+        "name": "v1-call-regular",
+        "path": "packages/custom-icons/svg/v1-call-regular.svg"
+      },
+      {
+        "name": "v1-campaign-filled",
+        "path": "packages/custom-icons/svg/v1-campaign-filled.svg"
+      },
+      {
+        "name": "v1-campaign-regular",
+        "path": "packages/custom-icons/svg/v1-campaign-regular.svg"
+      },
+      {
+        "name": "v1-checkmark-circle-filled",
+        "path": "packages/custom-icons/svg/v1-checkmark-circle-filled.svg"
+      },
+      {
+        "name": "v1-checkmark-circle-regular",
+        "path": "packages/custom-icons/svg/v1-checkmark-circle-regular.svg"
+      },
+      {
+        "name": "v1-checkmark-regular",
+        "path": "packages/custom-icons/svg/v1-checkmark-regular.svg"
+      },
+      {
+        "name": "v1-chevron-down-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-down-regular.svg"
+      },
+      {
+        "name": "v1-chevron-left-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-left-regular.svg"
+      },
+      {
+        "name": "v1-chevron-right-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-right-regular.svg"
+      },
+      {
+        "name": "v1-chevron-up-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-up-regular.svg"
+      },
+      {
+        "name": "v1-clipboard-edit-regular",
+        "path": "packages/custom-icons/svg/v1-clipboard-edit-regular.svg"
+      },
+      {
+        "name": "v1-coin-regular",
+        "path": "packages/custom-icons/svg/v1-coin-regular.svg"
+      },
+      {
+        "name": "v1-collapse-regular",
+        "path": "packages/custom-icons/svg/v1-collapse-regular.svg"
+      },
+      {
+        "name": "v1-company-regular",
+        "path": "packages/custom-icons/svg/v1-company-regular.svg"
+      },
+      {
+        "name": "v1-contact-filled",
+        "path": "packages/custom-icons/svg/v1-contact-filled.svg"
+      },
+      {
+        "name": "v1-contact-regular",
+        "path": "packages/custom-icons/svg/v1-contact-regular.svg"
+      },
+      {
+        "name": "v1-copy-regular",
+        "path": "packages/custom-icons/svg/v1-copy-regular.svg"
+      },
+      {
+        "name": "v1-cross-circle-filled",
+        "path": "packages/custom-icons/svg/v1-cross-circle-filled.svg"
+      },
+      {
+        "name": "v1-cross-circle-regular",
+        "path": "packages/custom-icons/svg/v1-cross-circle-regular.svg"
+      },
+      {
+        "name": "v1-cross-filled",
+        "path": "packages/custom-icons/svg/v1-cross-filled.svg"
+      },
+      {
+        "name": "v1-delete-filled",
+        "path": "packages/custom-icons/svg/v1-delete-filled.svg"
+      },
+      {
+        "name": "v1-delete-regular",
+        "path": "packages/custom-icons/svg/v1-delete-regular.svg"
+      },
+      {
+        "name": "v1-dialpad-filled",
+        "path": "packages/custom-icons/svg/v1-dialpad-filled.svg"
+      },
+      {
+        "name": "v1-dialpad-regular",
+        "path": "packages/custom-icons/svg/v1-dialpad-regular.svg"
+      },
+      {
+        "name": "v1-document-regular",
+        "path": "packages/custom-icons/svg/v1-document-regular.svg"
+      },
+      {
+        "name": "v1-edit-filled",
+        "path": "packages/custom-icons/svg/v1-edit-filled.svg"
+      },
+      {
+        "name": "v1-edit-regular",
+        "path": "packages/custom-icons/svg/v1-edit-regular.svg"
+      },
+      {
+        "name": "v1-email-edit-filled",
+        "path": "packages/custom-icons/svg/v1-email-edit-filled.svg"
+      },
+      {
+        "name": "v1-email-filled",
+        "path": "packages/custom-icons/svg/v1-email-filled.svg"
+      },
+      {
+        "name": "v1-email-read-filled",
+        "path": "packages/custom-icons/svg/v1-email-read-filled.svg"
+      },
+      {
+        "name": "v1-email-regular",
+        "path": "packages/custom-icons/svg/v1-email-regular.svg"
+      },
+      {
+        "name": "v1-emoji-filled",
+        "path": "packages/custom-icons/svg/v1-emoji-filled.svg"
+      },
+      {
+        "name": "v1-emoji-regular",
+        "path": "packages/custom-icons/svg/v1-emoji-regular.svg"
+      },
+      {
+        "name": "v1-error-filled",
+        "path": "packages/custom-icons/svg/v1-error-filled.svg"
+      },
+      {
+        "name": "v1-error-regular",
+        "path": "packages/custom-icons/svg/v1-error-regular.svg"
+      },
+      {
+        "name": "v1-expand-regular",
+        "path": "packages/custom-icons/svg/v1-expand-regular.svg"
+      },
+      {
+        "name": "v1-export-regular",
+        "path": "packages/custom-icons/svg/v1-export-regular.svg"
+      },
+      {
+        "name": "v1-eye-off-regular",
+        "path": "packages/custom-icons/svg/v1-eye-off-regular.svg"
+      },
+      {
+        "name": "v1-eye-regular",
+        "path": "packages/custom-icons/svg/v1-eye-regular.svg"
+      },
+      {
+        "name": "v1-feedback-regular",
+        "path": "packages/custom-icons/svg/v1-feedback-regular.svg"
+      },
+      {
+        "name": "v1-file-download-filled",
+        "path": "packages/custom-icons/svg/v1-file-download-filled.svg"
+      },
+      {
+        "name": "v1-file-download-regular",
+        "path": "packages/custom-icons/svg/v1-file-download-regular.svg"
+      },
+      {
+        "name": "v1-fire-filled",
+        "path": "packages/custom-icons/svg/v1-fire-filled.svg"
+      },
+      {
+        "name": "v1-fire-regular",
+        "path": "packages/custom-icons/svg/v1-fire-regular.svg"
+      },
+      {
+        "name": "v1-globe-filled",
+        "path": "packages/custom-icons/svg/v1-globe-filled.svg"
+      },
+      {
+        "name": "v1-globe-regular",
+        "path": "packages/custom-icons/svg/v1-globe-regular.svg"
+      },
+      {
+        "name": "v1-help-filled",
+        "path": "packages/custom-icons/svg/v1-help-filled.svg"
+      },
+      {
+        "name": "v1-help-regular",
+        "path": "packages/custom-icons/svg/v1-help-regular.svg"
+      },
+      {
+        "name": "v1-image-filled",
+        "path": "packages/custom-icons/svg/v1-image-filled.svg"
+      },
+      {
+        "name": "v1-image-regular",
+        "path": "packages/custom-icons/svg/v1-image-regular.svg"
+      },
+      {
+        "name": "v1-import-regular",
+        "path": "packages/custom-icons/svg/v1-import-regular.svg"
+      },
+      {
+        "name": "v1-info-filled",
+        "path": "packages/custom-icons/svg/v1-info-filled.svg"
+      },
+      {
+        "name": "v1-info-regular",
+        "path": "packages/custom-icons/svg/v1-info-regular.svg"
+      },
+      {
+        "name": "v1-locked-filled",
+        "path": "packages/custom-icons/svg/v1-locked-filled.svg"
+      },
+      {
+        "name": "v1-locked-regular",
+        "path": "packages/custom-icons/svg/v1-locked-regular.svg"
+      },
+      {
+        "name": "v1-message-add-filled",
+        "path": "packages/custom-icons/svg/v1-message-add-filled.svg"
+      },
+      {
+        "name": "v1-message-add-regular",
+        "path": "packages/custom-icons/svg/v1-message-add-regular.svg"
+      },
+      {
+        "name": "v1-message-filled",
+        "path": "packages/custom-icons/svg/v1-message-filled.svg"
+      },
+      {
+        "name": "v1-message-regular",
+        "path": "packages/custom-icons/svg/v1-message-regular.svg"
+      },
+      {
+        "name": "v1-mic-off-filled",
+        "path": "packages/custom-icons/svg/v1-mic-off-filled.svg"
+      },
+      {
+        "name": "v1-mic-off-regular",
+        "path": "packages/custom-icons/svg/v1-mic-off-regular.svg"
+      },
+      {
+        "name": "v1-more-regular",
+        "path": "packages/custom-icons/svg/v1-more-regular.svg"
+      },
+      {
+        "name": "v1-note-filled",
+        "path": "packages/custom-icons/svg/v1-note-filled.svg"
+      },
+      {
+        "name": "v1-note-regular",
+        "path": "packages/custom-icons/svg/v1-note-regular.svg"
+      },
+      {
+        "name": "v1-number-filled",
+        "path": "packages/custom-icons/svg/v1-number-filled.svg"
+      },
+      {
+        "name": "v1-number-regular",
+        "path": "packages/custom-icons/svg/v1-number-regular.svg"
+      },
+      {
+        "name": "v1-open-new-tab-regular",
+        "path": "packages/custom-icons/svg/v1-open-new-tab-regular.svg"
+      },
+      {
+        "name": "v1-pause-filled",
+        "path": "packages/custom-icons/svg/v1-pause-filled.svg"
+      },
+      {
+        "name": "v1-person-filled",
+        "path": "packages/custom-icons/svg/color/v1-person-filled.svg"
+      },
+      {
+        "name": "v1-person-regular",
+        "path": "packages/custom-icons/svg/v1-person-regular.svg"
+      },
+      {
+        "name": "v1-play-circle-filled",
+        "path": "packages/custom-icons/svg/v1-play-circle-filled.svg"
+      },
+      {
+        "name": "v1-play-circle-regular",
+        "path": "packages/custom-icons/svg/v1-play-circle-regular.svg"
+      },
+      {
+        "name": "v1-play-filled",
+        "path": "packages/custom-icons/svg/v1-play-filled.svg"
+      },
+      {
+        "name": "v1-plus-regular",
+        "path": "packages/custom-icons/svg/v1-plus-regular.svg"
+      },
+      {
+        "name": "v1-porting-regular",
+        "path": "packages/custom-icons/svg/v1-porting-regular.svg"
+      },
+      {
+        "name": "v1-record-regular",
+        "path": "packages/custom-icons/svg/v1-record-regular.svg"
+      },
+      {
+        "name": "v1-record-stop-filled",
+        "path": "packages/custom-icons/svg/v1-record-stop-filled.svg"
+      },
+      {
+        "name": "v1-refresh-filled",
+        "path": "packages/custom-icons/svg/v1-refresh-filled.svg"
+      },
+      {
+        "name": "v1-remove-filled",
+        "path": "packages/custom-icons/svg/v1-remove-filled.svg"
+      },
+      {
+        "name": "v1-remove-regular",
+        "path": "packages/custom-icons/svg/v1-remove-regular.svg"
+      },
+      {
+        "name": "v1-search-regular",
+        "path": "packages/custom-icons/svg/v1-search-regular.svg"
+      },
+      {
+        "name": "v1-secure-filled",
+        "path": "packages/custom-icons/svg/v1-secure-filled.svg"
+      },
+      {
+        "name": "v1-send-filled",
+        "path": "packages/custom-icons/svg/v1-send-filled.svg"
+      },
+      {
+        "name": "v1-settings-filled",
+        "path": "packages/custom-icons/svg/v1-settings-filled.svg"
+      },
+      {
+        "name": "v1-settings-regular",
+        "path": "packages/custom-icons/svg/v1-settings-regular.svg"
+      },
+      {
+        "name": "v1-slider-regular",
+        "path": "packages/custom-icons/svg/v1-slider-regular.svg"
+      },
+      {
+        "name": "v1-speaker-filled",
+        "path": "packages/custom-icons/svg/v1-speaker-filled.svg"
+      },
+      {
+        "name": "v1-speaker-mute-filled",
+        "path": "packages/custom-icons/svg/v1-speaker-mute-filled.svg"
+      },
+      {
+        "name": "v1-speaker-mute-regular",
+        "path": "packages/custom-icons/svg/v1-speaker-mute-regular.svg"
+      },
+      {
+        "name": "v1-speaker-regular",
+        "path": "packages/custom-icons/svg/v1-speaker-regular.svg"
+      },
+      {
+        "name": "v1-speed-1x-regular",
+        "path": "packages/custom-icons/svg/v1-speed-1x-regular.svg"
+      },
+      {
+        "name": "v1-switch-regular",
+        "path": "packages/custom-icons/svg/v1-switch-regular.svg"
+      },
+      {
+        "name": "v1-tag-filled",
+        "path": "packages/custom-icons/svg/v1-tag-filled.svg"
+      },
+      {
+        "name": "v1-tag-regular",
+        "path": "packages/custom-icons/svg/v1-tag-regular.svg"
+      },
+      {
+        "name": "v1-team-regular",
+        "path": "packages/custom-icons/svg/v1-team-regular.svg"
+      },
+      {
+        "name": "v1-template-filled",
+        "path": "packages/custom-icons/svg/v1-template-filled.svg"
+      },
+      {
+        "name": "v1-template-regular",
+        "path": "packages/custom-icons/svg/v1-template-regular.svg"
+      },
+      {
+        "name": "v1-tip-filled",
+        "path": "packages/custom-icons/svg/v1-tip-filled.svg"
+      },
+      {
+        "name": "v1-tip-regular",
+        "path": "packages/custom-icons/svg/v1-tip-regular.svg"
+      },
+      {
+        "name": "v1-translate-filled",
+        "path": "packages/custom-icons/svg/v1-translate-filled.svg"
+      },
+      {
+        "name": "v1-translate-regular",
+        "path": "packages/custom-icons/svg/v1-translate-regular.svg"
+      },
+      {
+        "name": "v1-unlocked-filled",
+        "path": "packages/custom-icons/svg/v1-unlocked-filled.svg"
+      },
+      {
+        "name": "v1-upload-filled",
+        "path": "packages/custom-icons/svg/v1-upload-filled.svg"
+      },
+      {
+        "name": "v1-user-visibility-filled",
+        "path": "packages/custom-icons/svg/v1-user-visibility-filled.svg"
+      },
+      {
+        "name": "v1-voicemail-regular",
+        "path": "packages/custom-icons/svg/v1-voicemail-regular.svg"
+      },
+      {
+        "name": "v1-wallet-regular",
+        "path": "packages/custom-icons/svg/v1-wallet-regular.svg"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/images/visa.png"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/images/wechat-pay.png"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "1.1.0",
+    "publishedAt": "2026-07-20T15:05:15Z",
+    "commitSha": "bfaf0877861654f40b5d909544ced6eec0b25b38",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "1.0.0",
+    "publishedAt": "2026-07-20T14:58:30Z",
+    "commitSha": "ca07aaa6dff692aae18f9c6a96c984a253a34c60",
+    "adds": [],
+    "removals": [
+      {
+        "name": "gfhgfh",
+        "path": "packages/custom-icons/svg/gfhgfh.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.4.0",
+    "publishedAt": "2026-07-20T14:45:23Z",
+    "commitSha": "ede72e67a3055fc50796143668675f8b96a287cd",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "0.3.22",
+    "publishedAt": "2026-07-20T14:42:01Z",
+    "commitSha": "55fd871747ca8831da53d5087ce11eb65153a547",
+    "adds": [
+      {
+        "name": "gfhgfh",
+        "path": "packages/custom-icons/svg/gfhgfh.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "jason",
+        "path": "packages/custom-icons/svg/jason.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.21",
+    "publishedAt": "2026-07-18T23:05:41Z",
+    "commitSha": "0f9ac21e222438faafd274a4c145dd5ece98b8b3",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/images/alipay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/images/apple.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/images/coins-go-gold.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/images/coins-go-grey.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/images/coins-pingme-grey.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/images/crypto-com.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/images/crypto-pay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/images/google.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/images/logo-pingme.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/images/logo-team.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/images/logo-wephone.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/images/logo-wetalk.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/images/paypal.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/images/unionpay.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/images/visa.png",
+        "kind": "image",
+        "format": "png"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/images/wechat-pay.png",
+        "kind": "image",
+        "format": "png"
+      }
+    ],
+    "removals": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/svg/apple.svg"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/svg/gradient/coins-go-gold.svg"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-go-grey.svg"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-pingme-grey.svg"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/svg/gradient/crypto-com.svg"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/svg/color/google.svg"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/svg/gradient/logo-pingme.svg"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/svg/gradient/logo-team.svg"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/svg/gradient/logo-wephone.svg"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/svg/color/logo-wetalk.svg"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/svg/color/paypal.svg"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/svg/color/unionpay.svg"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/svg/color/visa.svg"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.20",
+    "publishedAt": "2026-07-18T22:52:39Z",
+    "commitSha": "55a3a190512ad26185d599f94f408517bb67d440",
+    "adds": [
+      {
+        "name": "logo-go",
+        "path": "packages/custom-icons/images/logo-go.png",
+        "kind": "image",
+        "format": "png"
+      }
+    ],
+    "removals": [
+      {
+        "name": "logo-go",
+        "path": "packages/custom-icons/svg/gradient/logo-go.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.19",
+    "publishedAt": "2026-07-18T22:31:03Z",
+    "commitSha": "802f24869155af42c43ee1c1b41589dbce897b95",
+    "adds": [
+      {
+        "name": "alipay",
+        "path": "packages/custom-icons/svg/color/alipay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "apple",
+        "path": "packages/custom-icons/svg/apple.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "coins-go-gold",
+        "path": "packages/custom-icons/svg/gradient/coins-go-gold.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-go-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-go-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "coins-pingme-grey",
+        "path": "packages/custom-icons/svg/gradient/coins-pingme-grey.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-com",
+        "path": "packages/custom-icons/svg/gradient/crypto-com.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "crypto-pay",
+        "path": "packages/custom-icons/svg/color/crypto-pay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "google",
+        "path": "packages/custom-icons/svg/color/google.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "logo-go",
+        "path": "packages/custom-icons/svg/gradient/logo-go.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-pingme",
+        "path": "packages/custom-icons/svg/gradient/logo-pingme.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-team",
+        "path": "packages/custom-icons/svg/gradient/logo-team.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wephone",
+        "path": "packages/custom-icons/svg/gradient/logo-wephone.svg",
+        "kind": "svg",
+        "colorMode": "gradient"
+      },
+      {
+        "name": "logo-wetalk",
+        "path": "packages/custom-icons/svg/color/logo-wetalk.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "paypal",
+        "path": "packages/custom-icons/svg/color/paypal.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "unionpay",
+        "path": "packages/custom-icons/svg/color/unionpay.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "v1-add-filled",
+        "path": "packages/custom-icons/svg/v1-add-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-add-regular",
+        "path": "packages/custom-icons/svg/v1-add-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-ai-translate-filled",
+        "path": "packages/custom-icons/svg/v1-ai-translate-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-arrow-left-regular",
+        "path": "packages/custom-icons/svg/v1-arrow-left-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-arrow-right-regular",
+        "path": "packages/custom-icons/svg/v1-arrow-right-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-briefcase-regular",
+        "path": "packages/custom-icons/svg/v1-briefcase-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-calendar-regular",
+        "path": "packages/custom-icons/svg/v1-calendar-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-checkmark-circle-filled",
+        "path": "packages/custom-icons/svg/v1-checkmark-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-checkmark-circle-regular",
+        "path": "packages/custom-icons/svg/v1-checkmark-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-checkmark-regular",
+        "path": "packages/custom-icons/svg/v1-checkmark-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-chevron-down-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-down-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-chevron-left-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-left-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-chevron-right-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-right-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-chevron-up-regular",
+        "path": "packages/custom-icons/svg/v1-chevron-up-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-coin-regular",
+        "path": "packages/custom-icons/svg/v1-coin-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-collapse-regular",
+        "path": "packages/custom-icons/svg/v1-collapse-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-company-regular",
+        "path": "packages/custom-icons/svg/v1-company-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-copy-regular",
+        "path": "packages/custom-icons/svg/v1-copy-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-cross-circle-filled",
+        "path": "packages/custom-icons/svg/v1-cross-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-cross-circle-regular",
+        "path": "packages/custom-icons/svg/v1-cross-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-cross-filled",
+        "path": "packages/custom-icons/svg/v1-cross-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-delete-filled",
+        "path": "packages/custom-icons/svg/v1-delete-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-delete-regular",
+        "path": "packages/custom-icons/svg/v1-delete-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-edit-filled",
+        "path": "packages/custom-icons/svg/v1-edit-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-edit-regular",
+        "path": "packages/custom-icons/svg/v1-edit-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-email-edit-filled",
+        "path": "packages/custom-icons/svg/v1-email-edit-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-error-filled",
+        "path": "packages/custom-icons/svg/v1-error-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-error-regular",
+        "path": "packages/custom-icons/svg/v1-error-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-expand-regular",
+        "path": "packages/custom-icons/svg/v1-expand-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-export-regular",
+        "path": "packages/custom-icons/svg/v1-export-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-eye-off-regular",
+        "path": "packages/custom-icons/svg/v1-eye-off-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-eye-regular",
+        "path": "packages/custom-icons/svg/v1-eye-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-file-download-filled",
+        "path": "packages/custom-icons/svg/v1-file-download-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-file-download-regular",
+        "path": "packages/custom-icons/svg/v1-file-download-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-fire-filled",
+        "path": "packages/custom-icons/svg/v1-fire-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-fire-regular",
+        "path": "packages/custom-icons/svg/v1-fire-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-globe-filled",
+        "path": "packages/custom-icons/svg/v1-globe-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-globe-regular",
+        "path": "packages/custom-icons/svg/v1-globe-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-help-filled",
+        "path": "packages/custom-icons/svg/v1-help-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-help-regular",
+        "path": "packages/custom-icons/svg/v1-help-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-import-regular",
+        "path": "packages/custom-icons/svg/v1-import-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-info-filled",
+        "path": "packages/custom-icons/svg/v1-info-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-info-regular",
+        "path": "packages/custom-icons/svg/v1-info-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-locked-filled",
+        "path": "packages/custom-icons/svg/v1-locked-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-locked-regular",
+        "path": "packages/custom-icons/svg/v1-locked-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-more-regular",
+        "path": "packages/custom-icons/svg/v1-more-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-open-new-tab-regular",
+        "path": "packages/custom-icons/svg/v1-open-new-tab-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-person-filled",
+        "path": "packages/custom-icons/svg/color/v1-person-filled.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "v1-person-regular",
+        "path": "packages/custom-icons/svg/v1-person-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-plus-regular",
+        "path": "packages/custom-icons/svg/v1-plus-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-refresh-filled",
+        "path": "packages/custom-icons/svg/v1-refresh-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-remove-filled",
+        "path": "packages/custom-icons/svg/v1-remove-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-remove-regular",
+        "path": "packages/custom-icons/svg/v1-remove-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-search-regular",
+        "path": "packages/custom-icons/svg/v1-search-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-secure-filled",
+        "path": "packages/custom-icons/svg/v1-secure-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-settings-filled",
+        "path": "packages/custom-icons/svg/v1-settings-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-settings-regular",
+        "path": "packages/custom-icons/svg/v1-settings-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-slider-regular",
+        "path": "packages/custom-icons/svg/v1-slider-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-switch-regular",
+        "path": "packages/custom-icons/svg/v1-switch-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-tag-filled",
+        "path": "packages/custom-icons/svg/v1-tag-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-tag-regular",
+        "path": "packages/custom-icons/svg/v1-tag-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-team-regular",
+        "path": "packages/custom-icons/svg/v1-team-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-tip-filled",
+        "path": "packages/custom-icons/svg/v1-tip-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-tip-regular",
+        "path": "packages/custom-icons/svg/v1-tip-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-translate-filled",
+        "path": "packages/custom-icons/svg/v1-translate-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-translate-regular",
+        "path": "packages/custom-icons/svg/v1-translate-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-unlocked-filled",
+        "path": "packages/custom-icons/svg/v1-unlocked-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-upload-filled",
+        "path": "packages/custom-icons/svg/v1-upload-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-user-visibility-filled",
+        "path": "packages/custom-icons/svg/v1-user-visibility-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-wallet-regular",
+        "path": "packages/custom-icons/svg/v1-wallet-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "visa",
+        "path": "packages/custom-icons/svg/color/visa.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "wechat-pay",
+        "path": "packages/custom-icons/svg/wechat-pay.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.18",
+    "publishedAt": "2026-07-18T22:14:20Z",
+    "commitSha": "fe01feb85be0d525e3439e5e4422b186a461ff5c",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "0.3.17",
+    "publishedAt": "2026-07-17T20:00:48Z",
+    "commitSha": "09007b9fcc6b4f0b3fd0e3296f0929cbbf1d5bdd",
+    "adds": [
+      {
+        "name": "v1-clipboard-edit-regular",
+        "path": "packages/custom-icons/svg/v1-clipboard-edit-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-contact-filled",
+        "path": "packages/custom-icons/svg/v1-contact-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-contact-regular",
+        "path": "packages/custom-icons/svg/v1-contact-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-document-regular",
+        "path": "packages/custom-icons/svg/v1-document-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-feedback-regular",
+        "path": "packages/custom-icons/svg/v1-feedback-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-image-filled",
+        "path": "packages/custom-icons/svg/v1-image-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-image-regular",
+        "path": "packages/custom-icons/svg/v1-image-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-note-filled",
+        "path": "packages/custom-icons/svg/v1-note-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-note-regular",
+        "path": "packages/custom-icons/svg/v1-note-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-porting-regular",
+        "path": "packages/custom-icons/svg/v1-porting-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-template-filled",
+        "path": "packages/custom-icons/svg/v1-template-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-template-regular",
+        "path": "packages/custom-icons/svg/v1-template-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.16",
+    "publishedAt": "2026-07-17T19:56:16Z",
+    "commitSha": "afb65d3ebfecb7d42212ed9b7bcef9c6995edc7c",
+    "adds": [
+      {
+        "name": "v1-pause-filled",
+        "path": "packages/custom-icons/svg/v1-pause-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-play-circle-filled",
+        "path": "packages/custom-icons/svg/v1-play-circle-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-play-circle-regular",
+        "path": "packages/custom-icons/svg/v1-play-circle-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-play-filled",
+        "path": "packages/custom-icons/svg/v1-play-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-record-regular",
+        "path": "packages/custom-icons/svg/v1-record-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-record-stop-filled",
+        "path": "packages/custom-icons/svg/v1-record-stop-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-speaker-filled",
+        "path": "packages/custom-icons/svg/v1-speaker-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-speaker-mute-filled",
+        "path": "packages/custom-icons/svg/v1-speaker-mute-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-speaker-mute-regular",
+        "path": "packages/custom-icons/svg/v1-speaker-mute-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-speaker-regular",
+        "path": "packages/custom-icons/svg/v1-speaker-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-speed-1x-regular",
+        "path": "packages/custom-icons/svg/v1-speed-1x-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-voicemail-regular",
+        "path": "packages/custom-icons/svg/v1-voicemail-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.15",
+    "publishedAt": "2026-07-17T18:42:21Z",
+    "commitSha": "d85a3958d2f235f9315470c6d8d67222e4d326a0",
+    "adds": [
+      {
+        "name": "v1-call-answered-filled",
+        "path": "packages/custom-icons/svg/v1-call-answered-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-connecting-filled",
+        "path": "packages/custom-icons/svg/v1-call-connecting-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-end-filled",
+        "path": "packages/custom-icons/svg/v1-call-end-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-filled",
+        "path": "packages/custom-icons/svg/v1-call-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-hold-filled",
+        "path": "packages/custom-icons/svg/v1-call-hold-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-hold-regular",
+        "path": "packages/custom-icons/svg/v1-call-hold-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-inbound-filled",
+        "path": "packages/custom-icons/svg/v1-call-inbound-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-missed-filled",
+        "path": "packages/custom-icons/svg/v1-call-missed-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-outbound-filled",
+        "path": "packages/custom-icons/svg/v1-call-outbound-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-outbound-regular",
+        "path": "packages/custom-icons/svg/v1-call-outbound-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-call-regular",
+        "path": "packages/custom-icons/svg/v1-call-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-campaign-filled",
+        "path": "packages/custom-icons/svg/v1-campaign-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-campaign-regular",
+        "path": "packages/custom-icons/svg/v1-campaign-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-dialpad-filled",
+        "path": "packages/custom-icons/svg/v1-dialpad-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-dialpad-regular",
+        "path": "packages/custom-icons/svg/v1-dialpad-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-email-filled",
+        "path": "packages/custom-icons/svg/v1-email-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-email-read-filled",
+        "path": "packages/custom-icons/svg/v1-email-read-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-email-regular",
+        "path": "packages/custom-icons/svg/v1-email-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-emoji-filled",
+        "path": "packages/custom-icons/svg/v1-emoji-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-emoji-regular",
+        "path": "packages/custom-icons/svg/v1-emoji-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-message-add-filled",
+        "path": "packages/custom-icons/svg/v1-message-add-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-message-add-regular",
+        "path": "packages/custom-icons/svg/v1-message-add-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-message-filled",
+        "path": "packages/custom-icons/svg/v1-message-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-message-regular",
+        "path": "packages/custom-icons/svg/v1-message-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-mic-off-filled",
+        "path": "packages/custom-icons/svg/v1-mic-off-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-mic-off-regular",
+        "path": "packages/custom-icons/svg/v1-mic-off-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-number-filled",
+        "path": "packages/custom-icons/svg/v1-number-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-number-regular",
+        "path": "packages/custom-icons/svg/v1-number-regular.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "v1-send-filled",
+        "path": "packages/custom-icons/svg/v1-send-filled.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [
+      {
+        "name": "asdasda",
+        "path": "packages/custom-icons/svg/asdasda.svg"
+      },
+      {
+        "name": "asdasdas",
+        "path": "packages/custom-icons/svg/asdasdas.svg"
+      },
+      {
+        "name": "asdsad",
+        "path": "packages/custom-icons/svg/asdsad.svg"
+      },
+      {
+        "name": "billing-alert",
+        "path": "packages/custom-icons/svg/billing-alert.svg"
+      },
+      {
+        "name": "box-the-builder",
+        "path": "packages/custom-icons/svg/box-the-builder.svg"
+      },
+      {
+        "name": "brand-mark",
+        "path": "packages/custom-icons/svg/color/brand-mark.svg"
+      },
+      {
+        "name": "cart",
+        "path": "packages/custom-icons/svg/cart.svg"
+      },
+      {
+        "name": "create-color",
+        "path": "packages/custom-icons/svg/color/create-color.svg"
+      },
+      {
+        "name": "demo",
+        "path": "packages/custom-icons/svg/demo.svg"
+      },
+      {
+        "name": "earphones-infinity",
+        "path": "packages/custom-icons/svg/earphones-infinity.svg"
+      },
+      {
+        "name": "headphones-yay",
+        "path": "packages/custom-icons/svg/headphones-yay.svg"
+      },
+      {
+        "name": "hello",
+        "path": "packages/custom-icons/svg/hello.svg"
+      },
+      {
+        "name": "new-svg",
+        "path": "packages/custom-icons/svg/new-svg.svg"
+      },
+      {
+        "name": "qweqe",
+        "path": "packages/custom-icons/svg/qweqe.svg"
+      },
+      {
+        "name": "qweqwe",
+        "path": "packages/custom-icons/svg/qweqwe.svg"
+      },
+      {
+        "name": "sfsfasda",
+        "path": "packages/custom-icons/svg/sfsfasda.svg"
+      },
+      {
+        "name": "shopping-cart",
+        "path": "packages/custom-icons/svg/color/shopping-cart.svg"
+      },
+      {
+        "name": "shopping-cart",
+        "path": "packages/custom-icons/svg/shopping-cart.svg"
+      },
+      {
+        "name": "smoke-test-color",
+        "path": "packages/custom-icons/svg/color/smoke-test-color.svg"
+      },
+      {
+        "name": "tab-bar-item",
+        "path": "packages/custom-icons/svg/tab-bar-item.svg"
+      },
+      {
+        "name": "tab-bar-two",
+        "path": "packages/custom-icons/svg/tab-bar-two.svg"
+      },
+      {
+        "name": "table",
+        "path": "packages/custom-icons/svg/table.svg"
+      },
+      {
+        "name": "world-world",
+        "path": "packages/custom-icons/svg/world-world.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.14",
+    "publishedAt": "2026-07-17T18:09:35Z",
+    "commitSha": "52e3a7b6bd2e39d94953bb194b771f6a508640dc",
+    "adds": [],
+    "removals": [
+      {
+        "name": "b4a7118094e08a155b1e92b1a2a7f482",
+        "path": "packages/custom-icons/images/b4a7118094e08a155b1e92b1a2a7f482.jpg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.13",
+    "publishedAt": "2026-07-17T17:56:10Z",
+    "commitSha": "d683440806d4e3573227ce64d32487d1c312b9af",
+    "adds": [
+      {
+        "name": "b4a7118094e08a155b1e92b1a2a7f482",
+        "path": "packages/custom-icons/images/b4a7118094e08a155b1e92b1a2a7f482.jpg",
+        "kind": "image",
+        "format": "jpg"
+      },
+      {
+        "name": "judy-png",
+        "path": "packages/custom-icons/images/judy-png.png",
+        "kind": "image",
+        "format": "png"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.12",
+    "publishedAt": "2026-07-17T17:16:43Z",
+    "commitSha": "b523be933aba26e00ce03175aa454ec312ace211",
+    "adds": [
+      {
+        "name": "asdasda",
+        "path": "packages/custom-icons/svg/asdasda.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "asdasdas",
+        "path": "packages/custom-icons/svg/asdasdas.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "asdsad",
+        "path": "packages/custom-icons/svg/asdsad.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "qweqe",
+        "path": "packages/custom-icons/svg/qweqe.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "qweqwe",
+        "path": "packages/custom-icons/svg/qweqwe.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "sfsfasda",
+        "path": "packages/custom-icons/svg/sfsfasda.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.11",
+    "publishedAt": "2026-07-17T14:45:19Z",
+    "commitSha": "3cbd4c52df4d483d1a35da2821c2b2ca383db421",
+    "adds": [
+      {
+        "name": "box-the-builder",
+        "path": "packages/custom-icons/svg/box-the-builder.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "earphones-infinity",
+        "path": "packages/custom-icons/svg/earphones-infinity.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "headphones-yay",
+        "path": "packages/custom-icons/svg/headphones-yay.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.10",
+    "publishedAt": "2026-07-16T18:30:15Z",
+    "commitSha": "88e069b7f99333ffaeac641d7951ce2031728b2f",
+    "adds": [
+      {
+        "name": "new-svg",
+        "path": "packages/custom-icons/svg/new-svg.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.9",
+    "publishedAt": "2026-07-16T18:08:56Z",
+    "commitSha": "5881edc6a99cd2cb62abcc97178da198a90ca0c1",
+    "adds": [
+      {
+        "name": "world-world",
+        "path": "packages/custom-icons/svg/world-world.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.8",
+    "publishedAt": "2026-07-16T17:56:17Z",
+    "commitSha": "027ec868eced63f3fe89cd87b71c101321d83075",
+    "adds": [],
+    "removals": [
+      {
+        "name": "hello-two",
+        "path": "packages/custom-icons/svg/hello-two.svg"
+      },
+      {
+        "name": "world-world",
+        "path": "packages/custom-icons/svg/world-world.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.7",
+    "publishedAt": "2026-07-16T17:36:55Z",
+    "commitSha": "a5d6958ff5f3770f674283ab6a9ad2a717940c20",
+    "adds": [
+      {
+        "name": "world-world",
+        "path": "packages/custom-icons/svg/world-world.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [
+      {
+        "name": "create",
+        "path": "packages/custom-icons/svg/create.svg"
+      },
+      {
+        "name": "hello-three",
+        "path": "packages/custom-icons/svg/hello-three.svg"
+      },
+      {
+        "name": "image-1",
+        "path": "packages/custom-icons/svg/image-1.svg"
+      },
+      {
+        "name": "image-2",
+        "path": "packages/custom-icons/svg/image-2.svg"
+      },
+      {
+        "name": "image-3",
+        "path": "packages/custom-icons/svg/image-3.svg"
+      },
+      {
+        "name": "image-one",
+        "path": "packages/custom-icons/svg/image-one.svg"
+      },
+      {
+        "name": "image-ones",
+        "path": "packages/custom-icons/svg/image-ones.svg"
+      },
+      {
+        "name": "image-three",
+        "path": "packages/custom-icons/svg/image-three.svg"
+      },
+      {
+        "name": "image-two",
+        "path": "packages/custom-icons/svg/image-two.svg"
+      },
+      {
+        "name": "shopping-cart-two",
+        "path": "packages/custom-icons/svg/color/shopping-cart-two.svg"
+      },
+      {
+        "name": "smoke-test",
+        "path": "packages/custom-icons/svg/color/smoke-test.svg"
+      },
+      {
+        "name": "smoke-test",
+        "path": "packages/custom-icons/svg/smoke-test.svg"
+      },
+      {
+        "name": "staging-1",
+        "path": "packages/custom-icons/svg/staging-1.svg"
+      },
+      {
+        "name": "staging-2",
+        "path": "packages/custom-icons/svg/staging-2.svg"
+      },
+      {
+        "name": "staging-3",
+        "path": "packages/custom-icons/svg/staging-3.svg"
+      },
+      {
+        "name": "staging-test",
+        "path": "packages/custom-icons/svg/staging-test.svg"
+      },
+      {
+        "name": "staging-test-2",
+        "path": "packages/custom-icons/svg/staging-test-2.svg"
+      },
+      {
+        "name": "staging-test-3",
+        "path": "packages/custom-icons/svg/staging-test-3.svg"
+      },
+      {
+        "name": "table-three",
+        "path": "packages/custom-icons/svg/table-three.svg"
+      },
+      {
+        "name": "table-two",
+        "path": "packages/custom-icons/svg/table-two.svg"
+      },
+      {
+        "name": "test-1",
+        "path": "packages/custom-icons/svg/test-1.svg"
+      },
+      {
+        "name": "test-2",
+        "path": "packages/custom-icons/svg/test-2.svg"
+      },
+      {
+        "name": "test-3",
+        "path": "packages/custom-icons/svg/test-3.svg"
+      },
+      {
+        "name": "world-1",
+        "path": "packages/custom-icons/svg/world-1.svg"
+      },
+      {
+        "name": "world-1",
+        "path": "packages/custom-icons/svg/color/world-1.svg"
+      },
+      {
+        "name": "world-2",
+        "path": "packages/custom-icons/svg/world-2.svg"
+      },
+      {
+        "name": "world-3",
+        "path": "packages/custom-icons/svg/world-3.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.6",
+    "publishedAt": "2026-07-15T19:48:38Z",
+    "commitSha": "ec08b590c1f3b68053baa601a67eddf4fc20f5b5",
+    "adds": [
+      {
+        "name": "world-1",
+        "path": "packages/custom-icons/svg/world-1.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.5",
+    "publishedAt": "2026-07-15T19:27:24Z",
+    "commitSha": "dbaf1c58a52a7f5405ea0a6f5580c48cc1acb56c",
+    "adds": [
+      {
+        "name": "table-three",
+        "path": "packages/custom-icons/svg/table-three.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "table-two",
+        "path": "packages/custom-icons/svg/table-two.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "world-1",
+        "path": "packages/custom-icons/svg/color/world-1.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "world-2",
+        "path": "packages/custom-icons/svg/world-2.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "world-3",
+        "path": "packages/custom-icons/svg/world-3.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.4",
+    "publishedAt": "2026-07-15T17:03:46Z",
+    "commitSha": "fa78513152a5668e8c505a86127653d09295560b",
+    "adds": [
+      {
+        "name": "headphones",
+        "path": "packages/custom-icons/svg/headphones.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "hello-three",
+        "path": "packages/custom-icons/svg/hello-three.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "table",
+        "path": "packages/custom-icons/svg/table.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.3",
+    "publishedAt": "2026-07-15T16:10:49Z",
+    "commitSha": "bb07e11c7a6df65e63faea87d5dadc34aa9c24ea",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "0.3.2",
+    "publishedAt": "2026-07-15T15:59:07Z",
+    "commitSha": "b23d39daa6a8915afccb7d3fa06f6e86e73224b7",
+    "adds": [
+      {
+        "name": "box",
+        "path": "packages/custom-icons/svg/box.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "indeterminate-check-box",
+        "path": "packages/custom-icons/svg/indeterminate-check-box.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "shopping-cart",
+        "path": "packages/custom-icons/svg/color/shopping-cart.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      },
+      {
+        "name": "shopping-cart-two",
+        "path": "packages/custom-icons/svg/color/shopping-cart-two.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.1",
+    "publishedAt": "2026-07-15T15:37:55Z",
+    "commitSha": "dd1be6fd562e3061e1c35f424bef8bc880cec7a8",
+    "adds": [
+      {
+        "name": "hello",
+        "path": "packages/custom-icons/svg/hello.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "hello-two",
+        "path": "packages/custom-icons/svg/hello-two.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-one",
+        "path": "packages/custom-icons/svg/image-one.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-ones",
+        "path": "packages/custom-icons/svg/image-ones.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-three",
+        "path": "packages/custom-icons/svg/image-three.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-two",
+        "path": "packages/custom-icons/svg/image-two.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "shopping-cart",
+        "path": "packages/custom-icons/svg/shopping-cart.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.3.0",
+    "publishedAt": "2026-07-14T20:27:04Z",
+    "commitSha": "abda33f890abc766bcc6488ba39e43194540a1fd",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  },
+  {
+    "version": "0.2.8",
+    "publishedAt": "2026-07-14T20:10:25Z",
+    "commitSha": "8e0c289e4f09569762e24d7d648b28167865bddf",
+    "adds": [
+      {
+        "name": "image-1",
+        "path": "packages/custom-icons/svg/image-1.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-2",
+        "path": "packages/custom-icons/svg/image-2.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "image-3",
+        "path": "packages/custom-icons/svg/image-3.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "staging-1",
+        "path": "packages/custom-icons/svg/staging-1.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "staging-2",
+        "path": "packages/custom-icons/svg/staging-2.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "staging-3",
+        "path": "packages/custom-icons/svg/staging-3.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.7",
+    "publishedAt": "2026-07-14T19:50:40Z",
+    "commitSha": "a909f2ac150a6df8166fdfa199145269231144c3",
+    "adds": [
+      {
+        "name": "staging-test",
+        "path": "packages/custom-icons/svg/staging-test.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "staging-test-2",
+        "path": "packages/custom-icons/svg/staging-test-2.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "staging-test-3",
+        "path": "packages/custom-icons/svg/staging-test-3.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.6",
+    "publishedAt": "2026-07-14T18:52:38Z",
+    "commitSha": "3fe9a53682cb58dfff4f410413d785e134ab1007",
+    "adds": [
+      {
+        "name": "test-1",
+        "path": "packages/custom-icons/svg/test-1.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "test-2",
+        "path": "packages/custom-icons/svg/test-2.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "test-3",
+        "path": "packages/custom-icons/svg/test-3.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.5",
+    "publishedAt": "2026-07-14T18:29:23Z",
+    "commitSha": "aa6f540388997b5462f4419da75e1fcbb7593fc4",
+    "adds": [
+      {
+        "name": "demo",
+        "path": "packages/custom-icons/svg/demo.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.4",
+    "publishedAt": "2026-07-14T18:00:14Z",
+    "commitSha": "d1eaa5f09f1db14828ff04c1dbf78a8906bd20c1",
+    "adds": [
+      {
+        "name": "smoke-test",
+        "path": "packages/custom-icons/svg/smoke-test.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "smoke-test-color",
+        "path": "packages/custom-icons/svg/color/smoke-test-color.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.3",
+    "publishedAt": "2026-07-14T17:26:54Z",
+    "commitSha": "3c54dae5a50ed9263219a252cd6a48ce95277195",
+    "adds": [
+      {
+        "name": "create",
+        "path": "packages/custom-icons/svg/create.svg",
+        "kind": "svg",
+        "colorMode": "currentColor"
+      },
+      {
+        "name": "create-color",
+        "path": "packages/custom-icons/svg/color/create-color.svg",
+        "kind": "svg",
+        "colorMode": "preserved"
+      }
+    ],
+    "removals": [
+      {
+        "name": "five",
+        "path": "packages/custom-icons/svg/five.svg"
+      },
+      {
+        "name": "four",
+        "path": "packages/custom-icons/svg/four.svg"
+      },
+      {
+        "name": "item",
+        "path": "packages/custom-icons/svg/item.svg"
+      },
+      {
+        "name": "item-two",
+        "path": "packages/custom-icons/svg/color/item-two.svg"
+      },
+      {
+        "name": "jason",
+        "path": "packages/custom-icons/svg/jason.svg"
+      },
+      {
+        "name": "smile",
+        "path": "packages/custom-icons/svg/smile.svg"
+      },
+      {
+        "name": "star",
+        "path": "packages/custom-icons/svg/star.svg"
+      },
+      {
+        "name": "three",
+        "path": "packages/custom-icons/svg/three.svg"
+      }
+    ],
+    "versionOnly": false
+  },
+  {
+    "version": "0.2.1",
+    "publishedAt": "2026-07-13T16:54:09-04:00",
+    "commitSha": "5156335ae8087632b650e15f16e8fb3accc9747b",
+    "adds": [],
+    "removals": [],
+    "versionOnly": true
+  }
+]
